@@ -34,7 +34,7 @@ export const InventoryManager = {
     // 2. Salvar log
     const { error } = await supabase.from('inventory_logs').insert({
       company_id: params.companyId,
-      project_id: params.projectId,
+      project_id: params.projectId ?? null,
       material_name: params.materialName,
       type: params.type,
       quantity: params.quantity,
