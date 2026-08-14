@@ -94,14 +94,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error: profileError } = await supabase
       .from("profiles")
       .upsert({ id: userId, company_id: company.id, full_name: name });
+    
     if (profileError) {
-      console.error("Profile Error:", profileError);
+      console.error("Profile Upsert Error:", profileError);
       throw profileError;
     }
 
-    const { error: roleError } = await supabase.from("user_roles").upsert({ user_id: userId, role: r as any });
+    const { error: roleError } = await supabase
+      .from("user_roles")
+      .upsert({ user_id: userId, role: r as any });
+    
     if (roleError) {
-      console.error("Role Error:", roleError);
+      console.error("Role Upsert Error:", roleError);
       throw roleError;
     }
 

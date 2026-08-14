@@ -14,11 +14,14 @@ export const Route = createFileRoute('/_authenticated')({
       });
     }
     
-    const { data: roleData } = await supabase
+    const { data: roleData, error: roleError } = await supabase
       .from('user_roles')
       .select('role, companies(id, name)')
       .eq('user_id', session.user.id)
       .maybeSingle();
+
+    if (roleError) console.error("RBAC Fetch Error:", roleError);
+
 
     return {
       session,
