@@ -1,15 +1,13 @@
-require 'net/http'
-require 'uri'
+# encoding: UTF-8
+# O API Client está desativado até que a autenticação real seja configurada.
+# Uso atual: Apenas logs em console Ruby do SketchUp.
 
 module MontaAI
   module Bridge
     class APIClient
       def self.send_package(manifest, company_token)
-        # Placeholder para envio HTTPS
-        # O Ruby do SketchUp exige cuidados com SSL em versões antigas
-        puts "Enviando pacote para Monta AI..."
-        puts "Empresa Token: #{company_token}"
-        # Lógica real de post via Net::HTTP
+        # FUNCIONALIDADE DESATIVADA - MODO PILOTO LOCAL
+        puts "[Monta AI] Modo local ativo. Manifesto gerado."
       end
     end
   end
