@@ -149,7 +149,7 @@ function AssemblyContent() {
                         <div className="flex justify-between items-center mb-2">
                           <Badge className="bg-primary/10 text-primary border-primary/20">G1 - Estruturas Base</Badge>
                           <span className="text-[10px] text-muted-foreground">
-                            {project.parts?.filter(p => p.kind === 'peca' && (p.name.toLowerCase().includes('base') || p.name.toLowerCase().includes('lateral'))).length} itens
+                            {(project.parts || []).filter(p => p.kind === 'peca' && (p.name.toLowerCase().includes('base') || p.name.toLowerCase().includes('lateral'))).length} itens
                           </span>
                         </div>
                         <div className="space-y-2">
@@ -173,7 +173,7 @@ function AssemblyContent() {
                         <div className="flex justify-between items-center mb-2">
                           <Badge variant="secondary">G2 - Internos e Travas</Badge>
                           <span className="text-[10px] text-muted-foreground">
-                            {project.parts?.filter(p => p.kind === 'peca' && (p.name.toLowerCase().includes('prateleira') || p.name.toLowerCase().includes('fundo') || p.name.toLowerCase().includes('travessa'))).length} itens
+                            {(project.parts || []).filter(p => p.kind === 'peca' && (p.name.toLowerCase().includes('prateleira') || p.name.toLowerCase().includes('fundo') || p.name.toLowerCase().includes('travessa'))).length} itens
                           </span>
                         </div>
                         <div className="space-y-2">
