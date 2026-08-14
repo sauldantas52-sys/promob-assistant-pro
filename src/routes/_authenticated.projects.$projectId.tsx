@@ -427,7 +427,7 @@ function ProjectDetail() {
 
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold md:text-3xl">{project.data?.name}<span>⁣</span></h1>
+          <h1 className="text-2xl font-bold md:text-3xl">{project.data?.name}</h1>
           <p className="text-sm text-muted-foreground">
             {project.data?.client_name || "Sem cliente"} · {project.data?.environment || "Ambiente não informado"}
           </p>
