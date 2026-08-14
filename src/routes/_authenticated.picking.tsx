@@ -152,13 +152,28 @@ function PickingPage() {
                     )}
                   </div>
                 </CardContent>
-                {progress === 100 && (
-                  <div className="p-4 bg-primary/5 border-t">
-                    <Button className="w-full" variant="outline">
-                      <Wrench className="mr-2 h-4 w-4" /> Liberar para Montagem
-                    </Button>
+                <div className="p-16 bg-slate-50/30 flex flex-wrap justify-between items-center gap-10">
+                  <div className="flex items-center gap-3">
+                    <div className="h-2 w-8 bg-blue-600 rounded-full" />
+                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-600">Protocolo de Picking Finalizado</p>
                   </div>
-                )}
+                  <div className="flex gap-6">
+                    <Button 
+                      asChild 
+                      className="h-20 px-12 rounded-[2rem] bg-slate-900 hover:bg-black text-white font-black uppercase tracking-[0.3em] text-[12px] shadow-2xl shadow-slate-900/40 gap-6 transition-all duration-500 active:scale-95 group"
+                    >
+                      <Link to="/projects/$projectId" params={{ projectId: project.id }}>
+                        <ClipboardList className="h-7 w-7 text-blue-400" />
+                        Acessar Dossiê Completo
+                      </Link>
+                    </Button>
+                    {progress === 100 && (
+                      <Button className="h-20 px-12 rounded-[2rem] bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-[0.3em] text-[12px] shadow-2xl shadow-emerald-600/40 gap-6 transition-all duration-500 active:scale-95 group">
+                        <CheckCircle2 className="h-7 w-7 text-white" /> Liberar para Montagem
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </Card>
             );
           })}
