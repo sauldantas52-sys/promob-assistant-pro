@@ -12,7 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AssemblyRouteImport } from './routes/assembly'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as FactoryWallboardRouteImport } from './routes/factory-wallboard'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as PickingRouteImport } from './routes/picking'
 import { Route as ProductionRouteImport } from './routes/production'
 import { Route as ProjectsIndexRouteImport } from './routes/projects.index'
 import { Route as ProjectsProjectIdRouteImport } from './routes/projects.$projectId'
@@ -32,9 +34,19 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FactoryWallboardRoute = FactoryWallboardRouteImport.update({
+  id: '/factory-wallboard',
+  path: '/factory-wallboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PickingRoute = PickingRouteImport.update({
+  id: '/picking',
+  path: '/picking',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProductionRoute = ProductionRouteImport.update({
@@ -57,7 +69,9 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/assembly': typeof AssemblyRoute
   '/dashboard': typeof DashboardRoute
+  '/factory-wallboard': typeof FactoryWallboardRoute
   '/login': typeof LoginRoute
+  '/picking': typeof PickingRoute
   '/production': typeof ProductionRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/projects/': typeof ProjectsIndexRoute
@@ -66,7 +80,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/assembly': typeof AssemblyRoute
   '/dashboard': typeof DashboardRoute
+  '/factory-wallboard': typeof FactoryWallboardRoute
   '/login': typeof LoginRoute
+  '/picking': typeof PickingRoute
   '/production': typeof ProductionRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/projects': typeof ProjectsIndexRoute
@@ -76,7 +92,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/assembly': typeof AssemblyRoute
   '/dashboard': typeof DashboardRoute
+  '/factory-wallboard': typeof FactoryWallboardRoute
   '/login': typeof LoginRoute
+  '/picking': typeof PickingRoute
   '/production': typeof ProductionRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/projects/': typeof ProjectsIndexRoute
@@ -87,7 +105,9 @@ export interface FileRouteTypes {
     | '/'
     | '/assembly'
     | '/dashboard'
+    | '/factory-wallboard'
     | '/login'
+    | '/picking'
     | '/production'
     | '/projects/$projectId'
     | '/projects/'
@@ -96,7 +116,9 @@ export interface FileRouteTypes {
     | '/'
     | '/assembly'
     | '/dashboard'
+    | '/factory-wallboard'
     | '/login'
+    | '/picking'
     | '/production'
     | '/projects/$projectId'
     | '/projects'
@@ -105,7 +127,9 @@ export interface FileRouteTypes {
     | '/'
     | '/assembly'
     | '/dashboard'
+    | '/factory-wallboard'
     | '/login'
+    | '/picking'
     | '/production'
     | '/projects/$projectId'
     | '/projects/'
@@ -115,7 +139,9 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AssemblyRoute: typeof AssemblyRoute
   DashboardRoute: typeof DashboardRoute
+  FactoryWallboardRoute: typeof FactoryWallboardRoute
   LoginRoute: typeof LoginRoute
+  PickingRoute: typeof PickingRoute
   ProductionRoute: typeof ProductionRoute
   ProjectsProjectIdRoute: typeof ProjectsProjectIdRoute
   ProjectsIndexRoute: typeof ProjectsIndexRoute
@@ -144,11 +170,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/factory-wallboard': {
+      id: '/factory-wallboard'
+      path: '/factory-wallboard'
+      fullPath: '/factory-wallboard'
+      preLoaderRoute: typeof FactoryWallboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/picking': {
+      id: '/picking'
+      path: '/picking'
+      fullPath: '/picking'
+      preLoaderRoute: typeof PickingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/production': {
@@ -179,7 +219,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AssemblyRoute: AssemblyRoute,
   DashboardRoute: DashboardRoute,
+  FactoryWallboardRoute: FactoryWallboardRoute,
   LoginRoute: LoginRoute,
+  PickingRoute: PickingRoute,
   ProductionRoute: ProductionRoute,
   ProjectsProjectIdRoute: ProjectsProjectIdRoute,
   ProjectsIndexRoute: ProjectsIndexRoute,
