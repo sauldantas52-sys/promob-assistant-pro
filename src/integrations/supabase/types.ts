@@ -32,6 +32,80 @@ export type Database = {
         }
         Relationships: []
       }
+      maintenance_requests: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          created_by: string
+          description: string
+          id: string
+          module_id: string | null
+          part_id: string | null
+          photos: string[] | null
+          project_id: string
+          status: Database["public"]["Enums"]["maintenance_status"]
+          type: Database["public"]["Enums"]["maintenance_type"]
+          urgency: Database["public"]["Enums"]["maintenance_urgency"]
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          created_by: string
+          description: string
+          id?: string
+          module_id?: string | null
+          part_id?: string | null
+          photos?: string[] | null
+          project_id: string
+          status?: Database["public"]["Enums"]["maintenance_status"]
+          type?: Database["public"]["Enums"]["maintenance_type"]
+          urgency?: Database["public"]["Enums"]["maintenance_urgency"]
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          created_by?: string
+          description?: string
+          id?: string
+          module_id?: string | null
+          part_id?: string | null
+          photos?: string[] | null
+          project_id?: string
+          status?: Database["public"]["Enums"]["maintenance_status"]
+          type?: Database["public"]["Enums"]["maintenance_type"]
+          urgency?: Database["public"]["Enums"]["maintenance_urgency"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_part_id_fkey"
+            columns: ["part_id"]
+            isOneToOne: false
+            referencedRelation: "parts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       modules: {
         Row: {
           created_at: string
@@ -290,6 +364,19 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "escritorio" | "fabrica" | "montador"
+      maintenance_status:
+        | "aberto"
+        | "em_analise"
+        | "producao"
+        | "enviado"
+        | "concluido"
+      maintenance_type:
+        | "defeito"
+        | "dano_transporte"
+        | "erro_projeto"
+        | "erro_montagem"
+        | "outros"
+      maintenance_urgency: "baixa" | "media" | "alta" | "critica"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -418,6 +505,21 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "escritorio", "fabrica", "montador"],
+      maintenance_status: [
+        "aberto",
+        "em_analise",
+        "producao",
+        "enviado",
+        "concluido",
+      ],
+      maintenance_type: [
+        "defeito",
+        "dano_transporte",
+        "erro_projeto",
+        "erro_montagem",
+        "outros",
+      ],
+      maintenance_urgency: ["baixa", "media", "alta", "critica"],
     },
   },
 } as const
