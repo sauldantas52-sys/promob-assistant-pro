@@ -16,7 +16,7 @@ import { AppShell } from "@/components/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/picking")({
+export const Route = createFileRoute("/_authenticated/picking")({
   head: () => ({
     meta: [
       { title: "Separação e Conferência | Monta AI" },

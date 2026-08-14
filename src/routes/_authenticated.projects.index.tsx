@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/select";
 import { statusLabel, statusTone } from "@/lib/project-status";
 
-export const Route = createFileRoute("/projects/")({
+export const Route = createFileRoute("/_authenticated/projects/")({
   head: () => ({
     meta: [
       { title: "Projetos | Monta AI — Promob Assistant Pro" },

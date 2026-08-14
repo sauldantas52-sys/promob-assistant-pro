@@ -44,7 +44,7 @@ import { AssemblyLabel } from "@/components/AssemblyLabel";
 import { ConferenceDialog } from "@/components/ConferenceDialog";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/assembly")({
+export const Route = createFileRoute("/_authenticated/assembly")({
   head: () => ({
     meta: [
       { title: "Montagem | Monta AI — Promob Assistant Pro" },
