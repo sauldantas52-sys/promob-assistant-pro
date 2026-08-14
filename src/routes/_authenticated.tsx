@@ -25,9 +25,17 @@ export const Route = createFileRoute('/_authenticated')({
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('full_name')
+      .select('full_name, must_change_password')
       .eq('id', session.user.id)
       .maybeSingle();
+
+    // Bloqueio operacional se troca de senha for obrigatória
+    if (profile?.must_change_password && location.pathname !== '/force-password-change') {
+      throw redirect({
+        to: '/force-password-change',
+      });
+    }
+
 
     return {
       session,

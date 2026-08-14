@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AppShell } from "@/components/AppShell";
-import { useAuth, roleLabels } from "@/lib/auth";
+import { useAuth, roleLabels, type AppRole } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { statusLabel, statusTone } from "@/lib/project-status";
 import { cn } from "@/lib/utils";
@@ -77,7 +77,7 @@ function DashboardContent() {
           </h1>
           <div className="flex items-center gap-4 mt-6">
             <Badge className="px-6 py-2 text-[11px] font-black shadow-xl uppercase tracking-[0.2em] border-none rounded-2xl bg-slate-900 text-white">
-              {role ? roleLabels[role] : "Operador Geral"}
+              {role ? roleLabels[role as AppRole] : "Operador Geral"}
             </Badge>
             <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />

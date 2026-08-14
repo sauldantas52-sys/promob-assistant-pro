@@ -35,13 +35,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loadProfile = async (userId: string) => {
     const [{ data: profile }, { data: roles }] = await Promise.all([
-      supabase.from("profiles").select("company_id, full_name").eq("id", userId).maybeSingle(),
+      supabase.from("profiles").select("company_id, full_name, must_change_password").eq("id", userId).maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", userId),
     ]);
     setCompanyId(profile?.company_id ?? null);
     setFullName(profile?.full_name ?? null);
     setRole((roles?.[0]?.role as AppRole) ?? null);
+    
+    // Se logado e precisa trocar senha, mas não está na página de troca, redirecionar via router
+    // (A lógica principal de redirecionamento está em _authenticated.tsx)
   };
+
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, nextSession) => {

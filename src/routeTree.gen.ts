@@ -15,11 +15,13 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedAssemblyRouteImport } from './routes/_authenticated.assembly'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedFactoryWallboardRouteImport } from './routes/_authenticated.factory-wallboard'
+import { Route as AuthenticatedForcePasswordChangeRouteImport } from './routes/_authenticated.force-password-change'
 import { Route as AuthenticatedPickingRouteImport } from './routes/_authenticated.picking'
 import { Route as AuthenticatedProductionRouteImport } from './routes/_authenticated.production'
 import { Route as AuthenticatedShippingRouteImport } from './routes/_authenticated.shipping'
 import { Route as AuthenticatedProjectsIndexRouteImport } from './routes/_authenticated.projects.index'
 import { Route as AuthenticatedProjectsProjectIdRouteImport } from './routes/_authenticated.projects.$projectId'
+import { Route as AuthenticatedSettingsUsersRouteImport } from './routes/_authenticated.settings.users'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -51,6 +53,12 @@ const AuthenticatedFactoryWallboardRoute =
     path: '/factory-wallboard',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedForcePasswordChangeRoute =
+  AuthenticatedForcePasswordChangeRouteImport.update({
+    id: '/force-password-change',
+    path: '/force-password-change',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedPickingRoute = AuthenticatedPickingRouteImport.update({
   id: '/picking',
   path: '/picking',
@@ -78,6 +86,12 @@ const AuthenticatedProjectsProjectIdRoute =
     path: '/projects/$projectId',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedSettingsUsersRoute =
+  AuthenticatedSettingsUsersRouteImport.update({
+    id: '/settings/users',
+    path: '/settings/users',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -85,10 +99,12 @@ export interface FileRoutesByFullPath {
   '/assembly': typeof AuthenticatedAssemblyRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/factory-wallboard': typeof AuthenticatedFactoryWallboardRoute
+  '/force-password-change': typeof AuthenticatedForcePasswordChangeRoute
   '/picking': typeof AuthenticatedPickingRoute
   '/production': typeof AuthenticatedProductionRoute
   '/shipping': typeof AuthenticatedShippingRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
+  '/settings/users': typeof AuthenticatedSettingsUsersRoute
   '/projects/': typeof AuthenticatedProjectsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -97,10 +113,12 @@ export interface FileRoutesByTo {
   '/assembly': typeof AuthenticatedAssemblyRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/factory-wallboard': typeof AuthenticatedFactoryWallboardRoute
+  '/force-password-change': typeof AuthenticatedForcePasswordChangeRoute
   '/picking': typeof AuthenticatedPickingRoute
   '/production': typeof AuthenticatedProductionRoute
   '/shipping': typeof AuthenticatedShippingRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
+  '/settings/users': typeof AuthenticatedSettingsUsersRoute
   '/projects': typeof AuthenticatedProjectsIndexRoute
 }
 export interface FileRoutesById {
@@ -111,10 +129,12 @@ export interface FileRoutesById {
   '/_authenticated/assembly': typeof AuthenticatedAssemblyRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/factory-wallboard': typeof AuthenticatedFactoryWallboardRoute
+  '/_authenticated/force-password-change': typeof AuthenticatedForcePasswordChangeRoute
   '/_authenticated/picking': typeof AuthenticatedPickingRoute
   '/_authenticated/production': typeof AuthenticatedProductionRoute
   '/_authenticated/shipping': typeof AuthenticatedShippingRoute
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
+  '/_authenticated/settings/users': typeof AuthenticatedSettingsUsersRoute
   '/_authenticated/projects/': typeof AuthenticatedProjectsIndexRoute
 }
 export interface FileRouteTypes {
@@ -125,10 +145,12 @@ export interface FileRouteTypes {
     | '/assembly'
     | '/dashboard'
     | '/factory-wallboard'
+    | '/force-password-change'
     | '/picking'
     | '/production'
     | '/shipping'
     | '/projects/$projectId'
+    | '/settings/users'
     | '/projects/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -137,10 +159,12 @@ export interface FileRouteTypes {
     | '/assembly'
     | '/dashboard'
     | '/factory-wallboard'
+    | '/force-password-change'
     | '/picking'
     | '/production'
     | '/shipping'
     | '/projects/$projectId'
+    | '/settings/users'
     | '/projects'
   id:
     | '__root__'
@@ -150,10 +174,12 @@ export interface FileRouteTypes {
     | '/_authenticated/assembly'
     | '/_authenticated/dashboard'
     | '/_authenticated/factory-wallboard'
+    | '/_authenticated/force-password-change'
     | '/_authenticated/picking'
     | '/_authenticated/production'
     | '/_authenticated/shipping'
     | '/_authenticated/projects/$projectId'
+    | '/_authenticated/settings/users'
     | '/_authenticated/projects/'
   fileRoutesById: FileRoutesById
 }
@@ -207,6 +233,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFactoryWallboardRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/force-password-change': {
+      id: '/_authenticated/force-password-change'
+      path: '/force-password-change'
+      fullPath: '/force-password-change'
+      preLoaderRoute: typeof AuthenticatedForcePasswordChangeRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/picking': {
       id: '/_authenticated/picking'
       path: '/picking'
@@ -242,6 +275,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProjectsProjectIdRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/settings/users': {
+      id: '/_authenticated/settings/users'
+      path: '/settings/users'
+      fullPath: '/settings/users'
+      preLoaderRoute: typeof AuthenticatedSettingsUsersRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
@@ -249,10 +289,12 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAssemblyRoute: typeof AuthenticatedAssemblyRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedFactoryWallboardRoute: typeof AuthenticatedFactoryWallboardRoute
+  AuthenticatedForcePasswordChangeRoute: typeof AuthenticatedForcePasswordChangeRoute
   AuthenticatedPickingRoute: typeof AuthenticatedPickingRoute
   AuthenticatedProductionRoute: typeof AuthenticatedProductionRoute
   AuthenticatedShippingRoute: typeof AuthenticatedShippingRoute
   AuthenticatedProjectsProjectIdRoute: typeof AuthenticatedProjectsProjectIdRoute
+  AuthenticatedSettingsUsersRoute: typeof AuthenticatedSettingsUsersRoute
   AuthenticatedProjectsIndexRoute: typeof AuthenticatedProjectsIndexRoute
 }
 
@@ -260,10 +302,12 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAssemblyRoute: AuthenticatedAssemblyRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedFactoryWallboardRoute: AuthenticatedFactoryWallboardRoute,
+  AuthenticatedForcePasswordChangeRoute: AuthenticatedForcePasswordChangeRoute,
   AuthenticatedPickingRoute: AuthenticatedPickingRoute,
   AuthenticatedProductionRoute: AuthenticatedProductionRoute,
   AuthenticatedShippingRoute: AuthenticatedShippingRoute,
   AuthenticatedProjectsProjectIdRoute: AuthenticatedProjectsProjectIdRoute,
+  AuthenticatedSettingsUsersRoute: AuthenticatedSettingsUsersRoute,
   AuthenticatedProjectsIndexRoute: AuthenticatedProjectsIndexRoute,
 }
 
