@@ -31,11 +31,9 @@ export const Route = createFileRoute("/_authenticated/factory-wallboard")({
 
 function FactoryWallboardPage() {
   return (
-    <AppShell>
-      <div className="bg-background min-h-screen">
-        <WallboardContent />
-      </div>
-    </AppShell>
+    <div className="bg-[#0F172A] min-h-screen">
+      <WallboardContent />
+    </div>
   );
 }
 
@@ -115,41 +113,48 @@ function WallboardContent() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <header className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <Tv className="h-8 w-8 text-primary" /> Painel de Produção (TV)
-          </h1>
-          <p className="text-muted-foreground">Monitoramento em tempo real do fluxo da fábrica.</p>
+    <div className="p-8 space-y-8 bg-[#0F172A] min-h-screen text-white">
+      <header className="flex items-center justify-between border-b border-slate-800 pb-6">
+        <div className="flex items-center gap-6">
+          <div className="bg-blue-600 p-3 rounded-2xl shadow-lg shadow-blue-900/40">
+            <Tv className="h-10 w-10 text-white" />
+          </div>
+          <div>
+            <h1 className="text-4xl font-black tracking-tighter uppercase leading-tight">
+              Monitor de Produção Digital
+            </h1>
+            <p className="text-slate-400 font-bold uppercase tracking-widest text-sm mt-1 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              Real-time Factory Floor · Monta AI Traceability 4.0
+            </p>
+          </div>
         </div>
-        <div className="flex gap-4">
-          <Badge variant="outline" className="px-3 py-1 text-sm flex gap-2">
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            Sistema Online
-          </Badge>
+        <div className="text-right">
+          <p className="text-5xl font-black font-mono tracking-tighter">{new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
+          <p className="text-slate-500 font-bold uppercase tracking-widest text-xs mt-1">{new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
         </div>
       </header>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {list.map((project) => (
-          <Card key={project.id} className="border-2 overflow-hidden">
-            <CardHeader className="bg-muted/50 pb-3">
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-lg font-bold truncate max-w-[200px]">{project.name}</CardTitle>
-                  <p className="text-xs text-muted-foreground truncate">{project.client_name}</p>
+          <Card key={project.id} className="bg-slate-900 border-none shadow-2xl rounded-3xl overflow-hidden ring-1 ring-slate-800">
+            <CardHeader className="bg-slate-800/50 py-5 px-6 border-b border-slate-700/50">
+              <div className="flex justify-between items-center gap-4">
+                <div className="min-w-0">
+                  <CardTitle className="text-2xl font-black text-white tracking-tight truncate leading-tight">{project.name}</CardTitle>
+                  <p className="text-sm font-bold text-slate-400 uppercase tracking-widest truncate mt-0.5">{project.client_name}</p>
                 </div>
-                <Badge className={
-                  project.status === 'conferencia' ? 'bg-blue-500' : 
-                  project.status === 'expedicao' ? 'bg-purple-600' : 
-                  'bg-orange-500'
-                }>
-                  {(project.status || 'pendente').toUpperCase()}
+                <Badge className={cn(
+                  "px-4 py-1.5 text-xs font-black uppercase tracking-widest border shadow-lg",
+                  project.status === 'conferencia' ? 'bg-blue-600 text-white border-blue-500' : 
+                  project.status === 'expedicao' ? 'bg-purple-600 text-white border-purple-500' : 
+                  'bg-orange-600 text-white border-orange-500'
+                )}>
+                  {project.status}
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent className="p-4 space-y-4">
+            <CardContent className="p-6 space-y-6">
               <div className="grid grid-cols-2 gap-2">
                 <StepMetric 
                   icon={Scissors} 
