@@ -880,6 +880,10 @@ function ProjectDetail() {
           <EngineeringTab projectId={projectId} parts={allParts} />
         </TabsContent>
 
+        <TabsContent value="sketchup" className="mt-6">
+          <SketchUpBridgeTab projectId={projectId} />
+        </TabsContent>
+
         <TabsContent value="production" className="mt-6">
           <div className="grid gap-6">
             <Card>
