@@ -834,6 +834,250 @@ export type Database = {
           },
         ]
       }
+      project_package_validations: {
+        Row: {
+          company_id: string
+          error_code: string | null
+          id: string
+          item_id: string | null
+          message: string | null
+          status: string | null
+          version_id: string
+        }
+        Insert: {
+          company_id: string
+          error_code?: string | null
+          id?: string
+          item_id?: string | null
+          message?: string | null
+          status?: string | null
+          version_id: string
+        }
+        Update: {
+          company_id?: string
+          error_code?: string | null
+          id?: string
+          item_id?: string | null
+          message?: string | null
+          status?: string | null
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_package_validations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_package_validations_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "project_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_version_files: {
+        Row: {
+          company_id: string
+          file_name: string | null
+          file_type: string | null
+          file_url: string | null
+          id: string
+          version_id: string
+        }
+        Insert: {
+          company_id: string
+          file_name?: string | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          version_id: string
+        }
+        Update: {
+          company_id?: string
+          file_name?: string | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_version_files_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_version_files_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "project_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_version_items: {
+        Row: {
+          color: string | null
+          company_id: string
+          depth_mm: number | null
+          engineering_status: string | null
+          environment_id: string | null
+          group_code: string | null
+          height_mm: number | null
+          id: string
+          material: string | null
+          module_id: string
+          module_name: string | null
+          plugin_version: string | null
+          position_x: number | null
+          position_y: number | null
+          position_z: number | null
+          project_id: string
+          tags: string[] | null
+          thickness_mm: number | null
+          validation_notes: string | null
+          version_id: string
+          width_mm: number | null
+        }
+        Insert: {
+          color?: string | null
+          company_id: string
+          depth_mm?: number | null
+          engineering_status?: string | null
+          environment_id?: string | null
+          group_code?: string | null
+          height_mm?: number | null
+          id?: string
+          material?: string | null
+          module_id: string
+          module_name?: string | null
+          plugin_version?: string | null
+          position_x?: number | null
+          position_y?: number | null
+          position_z?: number | null
+          project_id: string
+          tags?: string[] | null
+          thickness_mm?: number | null
+          validation_notes?: string | null
+          version_id: string
+          width_mm?: number | null
+        }
+        Update: {
+          color?: string | null
+          company_id?: string
+          depth_mm?: number | null
+          engineering_status?: string | null
+          environment_id?: string | null
+          group_code?: string | null
+          height_mm?: number | null
+          id?: string
+          material?: string | null
+          module_id?: string
+          module_name?: string | null
+          plugin_version?: string | null
+          position_x?: number | null
+          position_y?: number | null
+          position_z?: number | null
+          project_id?: string
+          tags?: string[] | null
+          thickness_mm?: number | null
+          validation_notes?: string | null
+          version_id?: string
+          width_mm?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_version_items_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_version_items_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_version_items_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "project_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_versions: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          pdf_file_url: string | null
+          project_id: string
+          skp_file_url: string | null
+          status: string | null
+          thumbnail_url: string | null
+          version_number: number
+          xml_file_url: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          pdf_file_url?: string | null
+          project_id: string
+          skp_file_url?: string | null
+          status?: string | null
+          thumbnail_url?: string | null
+          version_number: number
+          xml_file_url?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          pdf_file_url?: string | null
+          project_id?: string
+          skp_file_url?: string | null
+          status?: string | null
+          thumbnail_url?: string | null
+          version_number?: number
+          xml_file_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_versions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_versions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           assembly_notes: string | null
