@@ -1090,6 +1090,7 @@ export type Database = {
           id: string
           is_cutting_edge_released: boolean | null
           is_machining_assembly_blocked: boolean | null
+          machining_blocked: boolean | null
           machining_status: string | null
           name: string
           notes: string | null
@@ -1107,6 +1108,7 @@ export type Database = {
           id?: string
           is_cutting_edge_released?: boolean | null
           is_machining_assembly_blocked?: boolean | null
+          machining_blocked?: boolean | null
           machining_status?: string | null
           name: string
           notes?: string | null
@@ -1124,6 +1126,7 @@ export type Database = {
           id?: string
           is_cutting_edge_released?: boolean | null
           is_machining_assembly_blocked?: boolean | null
+          machining_blocked?: boolean | null
           machining_status?: string | null
           name?: string
           notes?: string | null

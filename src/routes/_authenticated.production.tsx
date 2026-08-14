@@ -76,7 +76,7 @@ function ProductionContent() {
         .from("projects")
         .select(`
           id, name, client_name, status, environment, 
-          is_machining_assembly_blocked,
+          machining_blocked,
           parts(id, is_completed, kind)
         `)
         .in("status", ["corte", "borda", "usinagem", "separacao", "conferencia", "expedicao"])
@@ -177,7 +177,7 @@ function ProductionContent() {
                     })}
                   </div>
 
-                  {project.is_machining_assembly_blocked && (
+                  {project.machining_blocked && (
                     <div className="p-6 bg-red-50 rounded-[2rem] border border-red-100 flex items-center gap-4 animate-pulse">
                       <AlertOctagon className="h-8 w-8 text-red-600" />
                       <div>
@@ -187,20 +187,22 @@ function ProductionContent() {
                     </div>
                   )}
 
+
                   <div className="flex flex-col gap-3 pt-6 border-t border-slate-50">
                     {step && hasPermission(role, "production", "edit") && (
                       <Button
                         size="lg"
                         className={cn(
                           "h-16 w-full rounded-[1.25rem] text-white font-black uppercase tracking-[0.2em] text-[11px] border-none shadow-xl transition-all duration-300 active:scale-[0.98]",
-                          project.is_machining_assembly_blocked && step.next === 'usinagem' ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 shadow-blue-600/20"
+                          project.machining_blocked && step.next === 'usinagem' ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 shadow-blue-600/20"
                         )}
-                        disabled={advance.isPending || (!!project.is_machining_assembly_blocked && step.next === 'usinagem')}
+                        disabled={advance.isPending || (!!project.machining_blocked && step.next === 'usinagem')}
                         onClick={() => advance.mutate({ id: project.id, status: step.next })}
                       >
-                        {!!project.is_machining_assembly_blocked && step.next === 'usinagem' ? (
+                        {!!project.machining_blocked && step.next === 'usinagem' ? (
                           <span className="flex items-center gap-2"><Lock className="h-4 w-4" /> Bloqueado</span>
                         ) : step.action}
+
                       </Button>
                     )}
                     <Button asChild size="lg" variant="outline" className="h-16 w-full rounded-[1.25rem] border-2 border-slate-100 font-black uppercase tracking-[0.2em] text-[11px] hover:bg-slate-50 transition-all duration-300">

@@ -89,7 +89,7 @@ O sistema registra automaticamente em `project_package_validations`:
 ## 6. Regras de Negócio e Segurança
 - **Isolamento**: Filtro obrigatório por `company_id`.
 - **Status**: Versões novas entram como "Não confirmado" (análise de engenharia).
-- **Trava Industrial**: `is_machining_assembly_blocked = true`. O SketchUp fornece geometria e layout; a autoridade de furação e CNC permanece no Promob.
+- **Trava Industrial**: `machining_blocked = true`. O SketchUp fornece geometria e layout; a autoridade de furação e CNC permanece no Promob.
 
 ---
 
