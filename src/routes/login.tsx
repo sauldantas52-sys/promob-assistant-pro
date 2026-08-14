@@ -170,7 +170,10 @@ function LoginPage() {
                     <Field id="companyName" label="Empresa" value={companyName} onChange={setCompanyName} />
                     <div className="space-y-2">
                       <Label>Perfil de acesso</Label>
-                      <Select value={role} onValueChange={(v) => setRole(v as AppRole)}>
+                      <Select value={role} onValueChange={(v) => {
+                        console.log("Selected role:", v);
+                        setRole(v as AppRole);
+                      }}>
                         <SelectTrigger className="h-12">
                           <SelectValue />
                         </SelectTrigger>
