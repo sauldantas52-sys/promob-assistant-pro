@@ -81,11 +81,7 @@ export const Route = createFileRoute("/_authenticated/projects/$projectId")({
 });
 
 function ProjectDetailPage() {
-  return (
-    <AppShell>
-      <ProjectDetail />
-    </AppShell>
-  );
+  return <ProjectDetail />;
 }
 
 function ProjectDetail() {
