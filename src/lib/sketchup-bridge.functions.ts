@@ -75,8 +75,23 @@ export const processSkpPackage = createServerFn({ method: "POST" })
       let status: "confirmado" | "não_confirmado" | "divergente" = "confirmado";
       const notes: string[] = [];
 
+      // Industrial Tag Validation (00-18)
+      const hasIndustrialTag = item.tags?.some(tag => /^\d{2}_/.test(tag));
+      if (!hasIndustrialTag) {
+        validations.push({
+          version_id: version.id,
+          status: "aviso",
+          error_code: "TAG_NON_INDUSTRIAL",
+          message: `Objeto ${item.module_id} não possui tag industrial padronizada.`,
+          item_id: item.module_id,
+          company_id: companyId
+        });
+        status = "não_confirmado";
+        notes.push("Tag não industrial");
+      }
+
       // Validations
-      if (!item.module_name || item.module_name === "") {
+      if (!item.module_name || item.module_name === "" || item.module_name === "Item Sem Nome") {
         validations.push({
           version_id: version.id,
           status: "aviso",
@@ -116,6 +131,7 @@ export const processSkpPackage = createServerFn({ method: "POST" })
         notes.push("Sem ambiente");
       }
 
+
       // Organize groups
       let groupCode = item.group_code || "AV";
 
@@ -146,10 +162,28 @@ export const processSkpPackage = createServerFn({ method: "POST" })
     // 4. Batch Inserts
     if (processedItems.length > 0) {
       await admin.from("project_version_items").insert(processedItems);
+      
+      // Also insert into regular 'parts' table with machining_blocked: true
+      const partsToInsert = processedItems.map(item => ({
+        project_id: projectId,
+        name: item.module_name,
+        kind: 'peca', // Default to 'peca' for SKP imports
+        material: item.material,
+        thickness_mm: item.thickness_mm,
+        width_mm: item.width_mm,
+        length_mm: item.height_mm,
+        quantity: 1,
+        data_source: 'SKP_BRIDGE',
+        machining_blocked: true,
+        company_id: companyId,
+        metadata: { skp_guid: item.module_id, environment: item.environment_id }
+      }));
+      await admin.from("parts").insert(partsToInsert);
     }
     if (validations.length > 0) {
       await admin.from("project_package_validations").insert(validations);
     }
+
     if (files && files.length > 0) {
       const versionFiles = files.map(f => ({
         version_id: version.id,
