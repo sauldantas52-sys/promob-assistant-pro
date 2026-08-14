@@ -583,10 +583,11 @@ function ProjectDetail() {
             <TabTrigger value="parts" icon={ClipboardList} label="Lista Técnica" />
             <TabTrigger value="engineering" icon={Settings} label="Usinagem" />
             <TabTrigger value="sketchup" icon={ArrowRightLeft} label="Ponte SKP" />
-
             <TabTrigger value="shipping" icon={Truck} label="Logística" />
+            <TabTrigger value="maintenance" icon={HardHat} label="Assistência" />
             <TabTrigger value="audit" icon={History} label="Auditoria" />
             <TabTrigger value="files" icon={FileUp} label="Arquivos" />
+
           </TabsList>
 
           <TabsContent value="modules" className="mt-6">
