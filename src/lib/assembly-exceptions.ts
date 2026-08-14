@@ -126,7 +126,12 @@ async function persist(event: ExceptionEvent): Promise<void> {
  * localmente para sincronizar depois — nunca descarta o evento.
  */
 export async function logException(event: ExceptionEvent): Promise<"registrado" | "pendente"> {
-  const stamped: ExceptionEvent = { ...event, occurredAt: event.occurredAt ?? new Date().toISOString() };
+  const stamped: ExceptionEvent = { 
+    ...event, 
+    id: event.id ?? crypto.randomUUID(),
+    occurredAt: event.occurredAt ?? new Date().toISOString() 
+  };
+  
   if (typeof navigator !== "undefined" && navigator.onLine === false) {
     enqueue(stamped);
     return "pendente";
@@ -134,7 +139,8 @@ export async function logException(event: ExceptionEvent): Promise<"registrado" 
   try {
     await persist(stamped);
     return "registrado";
-  } catch {
+  } catch (error) {
+    console.error("Erro ao persistir evento, enfileirando:", error);
     enqueue(stamped);
     return "pendente";
   }
