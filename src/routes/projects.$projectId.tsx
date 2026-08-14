@@ -89,7 +89,7 @@ function ProjectDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
-        .select("id, name, client_name, environment, status, notes, created_at, company_id")
+        .select("id, name, client_name, environment, status, notes, created_at, company_id, cutting_status, machining_status, is_cutting_edge_released, is_machining_assembly_blocked")
         .eq("id", projectId)
         .maybeSingle();
       if (error) throw error;
@@ -115,7 +115,7 @@ function ProjectDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("parts")
-        .select("id, module_id, kind, name, material, thickness_mm, width_mm, length_mm, quantity, unit, edge_banding, is_completed, data_source, visibility_type")
+        .select("id, module_id, kind, name, material, thickness_mm, width_mm, length_mm, quantity, unit, edge_banding, is_completed, data_source, visibility_type, cutting_edge_released, machining_blocked")
         .eq("project_id", projectId)
         .order("created_at");
       if (error) throw error;
@@ -205,6 +205,8 @@ function ProjectDetail() {
               edge_banding: part.edge_banding ?? null,
               data_source: part.data_source || 'XML',
               visibility_type: part.visibility_type || 'visivel',
+              cutting_edge_released: false,
+              machining_blocked: true,
             })),
           ).select("id, module_id, kind");
           if (partsError) throw partsError;
@@ -228,6 +230,8 @@ function ProjectDetail() {
             edge_banding: part.edge_banding ?? null,
             data_source: part.data_source || 'XML',
             visibility_type: part.visibility_type || 'visivel',
+            cutting_edge_released: false,
+            machining_blocked: true,
           })),
         ).select("id, module_id, kind");
         if (looseError) throw looseError;
@@ -355,6 +359,7 @@ function ProjectDetail() {
             value={project.data?.status ?? "novo"} 
             onValueChange={async (v) => {
               if (v === "producao") {
+                // Bloqueio rigoroso: nada entra em produção se não houver dados técnicos básicos
                 const unconfirmedParts = allParts.filter(p => 
                   (!p.width_mm || !p.length_mm || !p.thickness_mm || !p.material) && 
                   p.kind !== 'ferragem' && 
@@ -813,13 +818,69 @@ function ProjectDetail() {
 
                 <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
                   <h4 className="text-xs font-bold text-amber-800 uppercase flex items-center gap-2">
-                    <AlertTriangle className="h-3.5 w-3.5" /> Pontos de Atenção (Bloqueios)
+                    <AlertTriangle className="h-3.5 w-3.5" /> Controle de Liberação Parcial (Rastreabilidade 4.0)
                   </h4>
-                  <ul className="mt-2 space-y-1 text-[11px] text-amber-700">
-                    <li>• Itens sem furação confirmada dependem de conferência visual nos anexos (PDF/DXF).</li>
-                    <li>• Conferir cota de rodapé e tamponamento in loco antes da montagem final.</li>
-                    <li>• Peças marcadas como "Não confirmado" estão bloqueadas para liberação automática.</li>
-                  </ul>
+                  <div className="mt-4 grid gap-4 md:grid-cols-2">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs font-bold">1. CORTE E BORDA</Label>
+                        <Badge className={project.data?.is_cutting_edge_released ? "bg-green-500" : "bg-amber-500"}>
+                          {project.data?.is_cutting_edge_released ? "LIBERADO" : "PENDENTE"}
+                        </Badge>
+                      </div>
+                      <p className="text-[10px] text-amber-700 leading-tight">
+                        “Corte e borda aprovados com base no XML, ListaCorte, PreviewCorte e DXF de nesting.”
+                      </p>
+                      <Button 
+                        size="sm" 
+                        variant={project.data?.is_cutting_edge_released ? "outline" : "default"}
+                        className="w-full h-8 text-[10px]"
+                        disabled={!!project.data?.is_cutting_edge_released}
+                        onClick={async () => {
+                          const { error } = await supabase
+                            .from("projects")
+                            .update({ 
+                              is_cutting_edge_released: true,
+                              cutting_status: 'liberado',
+                              updated_at: new Date().toISOString()
+                            } as any)
+                            .eq("id", projectId);
+                          
+                          if (error) toast.error(error.message);
+                          else {
+                            toast.success("Corte e Borda liberados com sucesso.");
+                            const { data: { user } } = await supabase.auth.getUser();
+                            if (user) {
+                              await (supabase.from('production_logs') as any).insert({
+                                project_id: projectId,
+                                user_id: user.id,
+                                action: "LIBERAÇÃO PARCIAL: Corte e Borda",
+                                notes: "Aprovado via painel de OP com base em XML/ListaCorte/DXF Nesting"
+                              });
+                            }
+                            void queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+                          }
+                        }}
+                      >
+                        {project.data?.is_cutting_edge_released ? "Corte/Borda já Liberados" : "Liberar Corte e Borda"}
+                      </Button>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs font-bold">2. USINAGEM E MONTAGEM</Label>
+                        <Badge variant="destructive" className="animate-pulse">
+                          BLOQUEADO
+                        </Badge>
+                      </div>
+                      <p className="text-[10px] text-destructive leading-tight font-medium">
+                        “Furação e usinagem não confirmadas — DXF técnico individual ou arquivo CNC necessário.”
+                      </p>
+                      <div className="rounded border border-destructive/20 bg-destructive/5 p-2 text-[9px] text-destructive italic">
+                        Usinagem automatizada suspensa. Não deduzir posições de furos. Liberação final de montagem bloqueada até validação técnica.
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="text-[10px] text-muted-foreground pt-2 border-t flex flex-col gap-1">
