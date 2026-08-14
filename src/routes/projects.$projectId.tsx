@@ -87,7 +87,7 @@ function ProjectDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
-        .select("id, name, client_name, environment, status, notes, created_at")
+        .select("id, name, client_name, environment, status, notes, created_at, company_id")
         .eq("id", projectId)
         .maybeSingle();
       if (error) throw error;
