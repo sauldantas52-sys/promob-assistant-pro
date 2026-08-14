@@ -1036,6 +1036,11 @@ function ProjectDetail() {
           <MaintenanceTab projectId={projectId} companyId={project.data?.company_id} allModules={modules.data || []} allParts={allParts} />
         </TabsContent>
 
+        <TabsContent value="sketchup" className="mt-6">
+          <SketchUpBridgeTab projectId={projectId} />
+        </TabsContent>
+
+
         <TabsContent value="files">
           <Card>
             <CardContent className="divide-y p-0">
