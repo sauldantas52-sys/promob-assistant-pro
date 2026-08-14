@@ -12,6 +12,10 @@ import {
   FileText,
   Download,
   Factory,
+  MessageSquare,
+  Clock,
+  Camera,
+  CheckCircle2,
 } from "lucide-react";
 import { Parser } from "@json2csv/plainjs";
 import { Button } from "@/components/ui/button";
@@ -29,6 +33,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { supabase } from "@/integrations/supabase/client";
@@ -387,6 +401,7 @@ function ProjectDetail() {
           <TabsTrigger value="loose" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Itens sem Módulo</TabsTrigger>
           <TabsTrigger value="audit" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Auditoria Técnica</TabsTrigger>
           <TabsTrigger value="production" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Produção / Fábrica</TabsTrigger>
+          <TabsTrigger value="maintenance" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Assistência</TabsTrigger>
           <TabsTrigger value="files" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Arquivos</TabsTrigger>
         </TabsList>
 
@@ -756,6 +771,10 @@ function ProjectDetail() {
           </div>
         </TabsContent>
 
+        <TabsContent value="maintenance" className="mt-6">
+          <MaintenanceTab projectId={projectId} companyId={project.data?.company_id} allModules={modules.data || []} allParts={allParts} />
+        </TabsContent>
+
         <TabsContent value="files">
           <Card>
             <CardContent className="divide-y p-0">
@@ -777,6 +796,255 @@ function ProjectDetail() {
           </Card>
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+function MaintenanceTab({ 
+  projectId, 
+  companyId, 
+  allModules, 
+  allParts 
+}: { 
+  projectId: string; 
+  companyId?: string; 
+  allModules: any[]; 
+  allParts: any[] 
+}) {
+  const queryClient = useQueryClient();
+  const [isAdding, setIsAdding] = useState(false);
+  const [description, setDescription] = useState("");
+  const [type, setType] = useState("defeito");
+  const [urgency, setUrgency] = useState("baixa");
+  const [selectedModule, setSelectedModule] = useState<string>("none");
+  const [selectedPart, setSelectedPart] = useState<string>("none");
+  const [uploading, setUploading] = useState(false);
+
+  const { data: requests, isLoading } = useQuery({
+    queryKey: ["maintenance_requests", projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("maintenance_requests")
+        .select("*")
+        .eq("project_id", projectId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const createRequest = useMutation({
+    mutationFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || !companyId) throw new Error("Não autorizado.");
+
+      const { error } = await supabase
+        .from("maintenance_requests")
+        .insert({
+          project_id: projectId,
+          company_id: companyId,
+          created_by: user.id,
+          description,
+          type: type as any,
+          urgency: urgency as any,
+          module_id: selectedModule === "none" ? null : selectedModule,
+          part_id: selectedPart === "none" ? null : selectedPart,
+          status: "aberto"
+        });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Chamado de assistência aberto.");
+      setIsAdding(false);
+      setDescription("");
+      void queryClient.invalidateQueries({ queryKey: ["maintenance_requests", projectId] });
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
+  const updateStatus = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const { error } = await supabase
+        .from("maintenance_requests")
+        .update({ status: status as any })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Status da assistência atualizado.");
+      void queryClient.invalidateQueries({ queryKey: ["maintenance_requests", projectId] });
+    },
+  });
+
+  if (isLoading) return <div className="p-8 text-center text-sm text-muted-foreground">Carregando assistências...</div>;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold">Chamados de Assistência</h2>
+          <p className="text-sm text-muted-foreground">Gerencie problemas técnicos e reposições.</p>
+        </div>
+        <Sheet open={isAdding} onOpenChange={setIsAdding}>
+          <SheetTrigger asChild>
+            <Button className="h-10">
+              <MessageSquare className="mr-2 h-4 w-4" /> Novo Chamado
+            </Button>
+          </SheetTrigger>
+          <SheetContent className="sm:max-w-md">
+            <SheetHeader>
+              <SheetTitle>Abrir Assistência Técnica</SheetTitle>
+              <SheetDescription>Descreva o problema encontrado no projeto.</SheetDescription>
+            </SheetHeader>
+            <div className="mt-6 space-y-4">
+              <div className="space-y-2">
+                <Label>Tipo de Ocorrência</Label>
+                <Select value={type} onValueChange={setType}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="defeito">Defeito de Fábrica</SelectItem>
+                    <SelectItem value="dano_transporte">Dano no Transporte</SelectItem>
+                    <SelectItem value="erro_projeto">Erro de Projeto</SelectItem>
+                    <SelectItem value="erro_montagem">Erro de Montagem</SelectItem>
+                    <SelectItem value="outros">Outros</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Urgência</Label>
+                <Select value={urgency} onValueChange={setUrgency}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="baixa">Baixa</SelectItem>
+                    <SelectItem value="media">Média</SelectItem>
+                    <SelectItem value="alta">Alta</SelectItem>
+                    <SelectItem value="critica">Crítica</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Vincular Módulo (Opcional)</Label>
+                <Select value={selectedModule} onValueChange={(val) => {
+                  setSelectedModule(val);
+                  setSelectedPart("none");
+                }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o módulo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Nenhum</SelectItem>
+                    {allModules.map(m => (
+                      <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {selectedModule !== "none" && (
+                <div className="space-y-2">
+                  <Label>Vincular Peça (Opcional)</Label>
+                  <Select value={selectedPart} onValueChange={setSelectedPart}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a peça" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Nenhuma</SelectItem>
+                      {allParts.filter(p => p.module_id === selectedModule).map(p => (
+                        <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label>Descrição do Problema</Label>
+                <Textarea 
+                  placeholder="Explique detalhadamente o que aconteceu..." 
+                  className="min-h-[100px]"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Fotos / Evidências</Label>
+                <div className="flex aspect-video w-full flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50 text-muted-foreground">
+                  <Camera className="mb-2 h-8 w-8" />
+                  <p className="text-xs">Clique para anexar fotos (Em breve)</p>
+                </div>
+              </div>
+
+              <Button 
+                className="w-full h-11" 
+                disabled={!description || createRequest.isPending}
+                onClick={() => createRequest.mutate()}
+              >
+                {createRequest.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Abrir Chamado"}
+              </Button>
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      <div className="grid gap-4">
+        {(requests ?? []).map((req) => (
+          <Card key={req.id} className="overflow-hidden border-l-4" style={{ borderLeftColor: req.urgency === 'critica' ? '#ef4444' : req.urgency === 'alta' ? '#f97316' : '#3b82f6' }}>
+            <CardContent className="p-5">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-[10px] uppercase font-bold">{req.type.replace('_', ' ')}</Badge>
+                    <Badge className={
+                      req.status === 'concluido' ? 'bg-green-500' : 
+                      req.status === 'producao' ? 'bg-orange-500' : 
+                      'bg-blue-500'
+                    }>
+                      {req.status.replace('_', ' ')}
+                    </Badge>
+                  </div>
+                  <h3 className="font-semibold">{req.description}</h3>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {new Date(req.created_at || '').toLocaleDateString('pt-BR')}</span>
+                    {req.module_id && (
+                      <span>Módulo: {allModules.find(m => m.id === req.module_id)?.name}</span>
+                    )}
+                    {req.part_id && (
+                      <span>Peça: {allParts.find(p => p.id === req.part_id)?.name}</span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2 min-w-[140px]">
+                  <Select value={req.status} onValueChange={(val) => updateStatus.mutate({ id: req.id, status: val })}>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="aberto">Aberto</SelectItem>
+                      <SelectItem value="em_analise">Em Análise</SelectItem>
+                      <SelectItem value="producao">Em Produção</SelectItem>
+                      <SelectItem value="enviado">Enviado</SelectItem>
+                      <SelectItem value="concluido">Concluído</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+
+        {(requests ?? []).length === 0 && (
+          <div className="rounded-xl border-2 border-dashed py-12 text-center text-sm text-muted-foreground">
+            Nenhuma assistência registrada para este projeto.
+          </div>
+        )}
+      </div>
     </div>
   );
 }
