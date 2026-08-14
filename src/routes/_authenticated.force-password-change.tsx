@@ -8,8 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { AUTH_CONFIG, isValidPasswordLength, isPasswordStrong } from "@/lib/auth-config";
-import { ShieldAlert } from "lucide-react";
+import { AUTH_CONFIG, isValidPasswordLength, isPasswordStrong, isNumeric } from "@/lib/auth-config";
+import { ShieldAlert, InfoIcon } from "lucide-react";
 
 
 export const Route = createFileRoute("/_authenticated/force-password-change")({
@@ -25,13 +25,17 @@ function ForcePasswordChangePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isNumeric(password)) {
+      toast.error("O PIN deve conter apenas números.");
+      return;
+    }
     if (password !== confirmPassword) {
-      toast.error("As senhas não coincidem.");
+      toast.error("Os PINs informados não coincidem.");
       return;
     }
 
     if (!isValidPasswordLength(password)) {
-      toast.error(`A senha deve ter entre ${AUTH_CONFIG.MIN_PASSWORD_LENGTH} e ${AUTH_CONFIG.MAX_PASSWORD_LENGTH} caracteres.`);
+      toast.error(`Use de ${AUTH_CONFIG.MIN_PASSWORD_LENGTH} a ${AUTH_CONFIG.MAX_PASSWORD_LENGTH} números para o seu PIN.`);
       return;
     }
 
@@ -61,7 +65,7 @@ function ForcePasswordChangePage() {
       await supabase.from("production_logs").insert({
         project_id: null, 
         step: "acesso_seguro",
-        notes: `Troca de senha concluída para ${user?.email ?? 'usuário'}.${isWeak ? ' [Aviso: Senha abaixo de 12 caracteres]' : ''}`,
+        notes: `Troca de PIN concluída para ${user?.email ?? 'usuário'}.${isWeak ? ' [Nota: PIN com menos de 12 dígitos]' : ''}`,
         status: "concluido"
       } as any); 
 
@@ -87,56 +91,72 @@ function ForcePasswordChangePage() {
           <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-amber-500 text-white shadow-xl shadow-amber-500/20">
             <Lock className="h-10 w-10" />
           </div>
-          <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-2">Segurança Obrigatória</h1>
-          <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Troca de Senha de Primeiro Acesso</p>
+          <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-2">Segurança do PIN</h1>
+          <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Troca de PIN Obrigatória</p>
         </div>
 
         <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden">
           <CardHeader className="pb-6 pt-10 px-10 border-b border-slate-50">
-            <CardTitle className="text-xl font-black text-slate-900 uppercase tracking-tight">Definir Nova Senha</CardTitle>
-            <CardDescription>Para sua segurança, você deve escolher uma senha forte antes de acessar o sistema.</CardDescription>
+            <CardTitle className="text-xl font-black text-slate-900 uppercase tracking-tight">Definir Novo PIN</CardTitle>
+            <CardDescription>Para sua segurança, você deve escolher um PIN numérico forte antes de acessar o sistema.</CardDescription>
           </CardHeader>
           <CardContent className="px-10 pb-10 pt-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="password">Nova Senha</Label>
+                <Label htmlFor="password">Novo PIN Numérico</Label>
                 <Input
                   id="password"
                   type="password"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (v === "" || isNumeric(v)) setPassword(v);
+                  }}
                   required
-                  className="h-12 rounded-xl"
-                  placeholder={`Mínimo ${AUTH_CONFIG.MIN_PASSWORD_LENGTH} caracteres`}
+                  className="h-12 rounded-xl text-center text-2xl tracking-[0.5em] font-black"
+                  placeholder="00000000"
                 />
                 {password.length > 0 && !isValidPasswordLength(password) && (
                   <div className="flex items-center gap-2 rounded-lg bg-red-50 p-2 border border-red-100">
                     <ShieldAlert className="h-4 w-4 text-red-600" />
                     <span className="text-[10px] font-bold text-red-700 uppercase tracking-wider">
-                      Mínimo 8 e máximo 20 caracteres.
+                      PIN Inválido: Use de 8 a 20 números.
                     </span>
                   </div>
                 )}
-                {password.length >= 8 && !isPasswordStrong(password) && (
-                  <div className="flex items-center gap-2 rounded-lg bg-amber-50 p-2 border border-amber-100">
-                    <ShieldAlert className="h-4 w-4 text-amber-600" />
-                    <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">
-                      Dica: Use letras, números e símbolos.
+                {password.length > 0 && !isNumeric(password) && (
+                  <div className="flex items-center gap-2 rounded-lg bg-red-50 p-2 border border-red-100">
+                    <ShieldAlert className="h-4 w-4 text-red-600" />
+                    <span className="text-[10px] font-bold text-red-700 uppercase tracking-wider">
+                      Use apenas números (0-9).
                     </span>
                   </div>
                 )}
+                <div className="flex items-center gap-2 rounded-lg bg-blue-50 p-2 border border-blue-100">
+                  <InfoIcon className="h-4 w-4 text-blue-600" />
+                  <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider">
+                    Dica: Use um PIN de 12 dígitos para máxima segurança.
+                  </span>
+                </div>
 
 
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
+                <Label htmlFor="confirmPassword">Confirmar Novo PIN</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (v === "" || isNumeric(v)) setConfirmPassword(v);
+                  }}
                   required
-                  className="h-12 rounded-xl"
+                  className="h-12 rounded-xl text-center text-2xl tracking-[0.5em] font-black"
                 />
               </div>
 
@@ -146,13 +166,13 @@ function ForcePasswordChangePage() {
                 </h4>
                 <ul className="text-[11px] text-blue-700 space-y-1 font-medium">
                   <li>• Acesso bloqueado até a alteração</li>
-                  <li>• E-mail de confirmação obrigatório</li>
-                  <li>• Senha individual e intransferível</li>
+                  <li>• Confirmação obrigatória</li>
+                  <li>• PIN individual e intransferível</li>
                 </ul>
               </div>
 
               <Button type="submit" className="h-14 w-full text-base font-black uppercase tracking-widest rounded-2xl bg-slate-900 hover:bg-black" disabled={busy}>
-                {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Atualizar e Acessar
+                {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Atualizar PIN e Acessar
               </Button>
             </form>
           </CardContent>
