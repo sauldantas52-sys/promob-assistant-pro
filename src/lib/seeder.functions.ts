@@ -18,16 +18,16 @@ export const seedIntegrationTestData = createServerFn({ method: "POST" })
     
     if (cErr) return { error: cErr.message };
 
-    // 2. Create Profile
+    // 2. Upsert Profile (no role column)
     const { error: pErr } = await admin
       .from("profiles")
-      .insert({
+      .upsert({
         id: data.userId,
         company_id: company.id,
         full_name: "Operador de Teste"
       });
     
-    if (pErr) console.warn("Profile might already exist:", pErr.message);
+    if (pErr) console.warn("Profile error:", pErr.message);
 
     // 3. Create Project
     const { data: project, error: projErr } = await admin
@@ -36,8 +36,7 @@ export const seedIntegrationTestData = createServerFn({ method: "POST" })
         company_id: company.id,
         name: "PROJETO TESTE INTEGRAÇÃO SKP",
         status: "pilot",
-        machining_blocked: true,
-        data: { is_test: true }
+        machining_blocked: true
       })
       .select()
       .single();
