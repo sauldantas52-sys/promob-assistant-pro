@@ -92,9 +92,10 @@ function AssemblyContent() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <Tabs defaultValue="modules">
-                  <TabsList className="grid w-full grid-cols-2">
+                  <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="modules">Módulos</TabsTrigger>
-                    <TabsTrigger value="groups">Grupos de Montagem</TabsTrigger>
+                    <TabsTrigger value="groups">Grupos G1/G2</TabsTrigger>
+                    <TabsTrigger value="hardware">Caderno</TabsTrigger>
                   </TabsList>
                   
                   <TabsContent value="modules" className="space-y-3 mt-4">
@@ -139,26 +140,98 @@ function AssemblyContent() {
                   <TabsContent value="groups" className="space-y-4 mt-4">
                     <div className="bg-muted/30 p-3 rounded-lg border border-dashed text-center">
                       <p className="text-xs text-muted-foreground">
-                        Peças agrupadas por ordem lógica de montagem (G1, G2...).
+                        Sequência lógica para facilitar a montagem na casa do cliente.
                       </p>
                     </div>
-                    {/* Placeholder para Grupos - Será expandido com a lógica de G1/G2 */}
                     <div className="space-y-3">
+                      {/* Grupo G1: Estruturas, Bases e Laterais */}
+                      <div className="p-3 border rounded-lg bg-card border-primary/20">
+                        <div className="flex justify-between items-center mb-2">
+                          <Badge className="bg-primary/10 text-primary border-primary/20">G1 - Estruturas Base</Badge>
+                          <span className="text-[10px] text-muted-foreground">
+                            {project.parts?.filter(p => p.kind === 'peca' && (p.name.toLowerCase().includes('base') || p.name.toLowerCase().includes('lateral'))).length} itens
+                          </span>
+                        </div>
+                        <div className="space-y-2">
+                          {project.parts?.filter(p => p.kind === 'peca' && (p.name.toLowerCase().includes('base') || p.name.toLowerCase().includes('lateral'))).map(p => (
+                            <div key={p.id} className="text-xs flex flex-col gap-0.5 border-b border-muted last:border-0 pb-1">
+                              <div className="flex justify-between font-medium">
+                                <span>{p.name}</span>
+                                <span className="text-primary">{p.width_mm}x{p.length_mm} mm</span>
+                              </div>
+                              <div className="flex justify-between text-[10px] text-muted-foreground">
+                                <span>ID: {p.id.split('-')[0].toUpperCase()}</span>
+                                <span>{p.material} {p.thickness_mm}mm</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Grupo G2: Prateleiras, Fundos e Travessas */}
                       <div className="p-3 border rounded-lg bg-card">
                         <div className="flex justify-between items-center mb-2">
-                          <Badge variant="secondary">G1 - Estruturas</Badge>
-                          <span className="text-[10px] text-muted-foreground">3 peças</span>
+                          <Badge variant="secondary">G2 - Internos e Travas</Badge>
+                          <span className="text-[10px] text-muted-foreground">
+                            {project.parts?.filter(p => p.kind === 'peca' && (p.name.toLowerCase().includes('prateleira') || p.name.toLowerCase().includes('fundo') || p.name.toLowerCase().includes('travessa'))).length} itens
+                          </span>
                         </div>
-                        <div className="space-y-1">
-                          {project.parts?.filter(p => p.kind === 'peca').slice(0, 3).map(p => (
-                            <div key={p.id} className="text-xs flex justify-between">
-                              <span>{p.name}</span>
-                              <span className="text-muted-foreground">{p.width_mm}x{p.length_mm}</span>
+                        <div className="space-y-2">
+                          {project.parts?.filter(p => p.kind === 'peca' && (p.name.toLowerCase().includes('prateleira') || p.name.toLowerCase().includes('fundo') || p.name.toLowerCase().includes('travessa'))).map(p => (
+                            <div key={p.id} className="text-xs flex flex-col gap-0.5 border-b border-muted last:border-0 pb-1">
+                              <div className="flex justify-between">
+                                <span>{p.name}</span>
+                                <span>{p.width_mm}x{p.length_mm} mm</span>
+                              </div>
                             </div>
                           ))}
                         </div>
                       </div>
                     </div>
+                  </TabsContent>
+
+                  <TabsContent value="hardware" className="space-y-4 mt-4">
+                    <Card className="bg-muted/10">
+                      <CardHeader className="py-3">
+                        <CardTitle className="text-sm">Caderno de Montagem Exaustivo</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4 px-3 pb-4">
+                        <div className="space-y-2">
+                          <h4 className="text-[10px] font-bold uppercase text-muted-foreground flex items-center gap-2">
+                            <Wrench className="h-3 w-3" /> Ferragens e Fixadores
+                          </h4>
+                          <div className="grid gap-2">
+                            {project.parts?.filter(p => p.kind === 'ferragem').map(p => (
+                              <div key={p.id} className="text-xs flex justify-between bg-card p-2 rounded border">
+                                <span>{p.name}</span>
+                                <Badge variant="secondary" className="h-5">{p.quantity} {p.unit}</Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <h4 className="text-[10px] font-bold uppercase text-muted-foreground flex items-center gap-2">
+                            <Boxes className="h-3 w-3" /> Acessórios e Componentes
+                          </h4>
+                          <div className="grid gap-2">
+                            {project.parts?.filter(p => p.kind === 'acessorio').map(p => (
+                              <div key={p.id} className="text-xs flex justify-between bg-card p-2 rounded border">
+                                <span>{p.name}</span>
+                                <Badge variant="outline" className="h-5">{p.quantity} {p.unit}</Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="bg-primary/5 p-3 rounded-lg border border-primary/20">
+                          <h4 className="text-[10px] font-bold uppercase text-primary mb-2">Ferramental Necessário</h4>
+                          <p className="text-[10px] text-muted-foreground leading-relaxed">
+                            Para este projeto, certifique-se de ter: Furadeira/Parafusadeira, Brocas (5mm, 8mm, 35mm), Nível Laser, Trena, Martelo de Borracha, Chave Philips e Allen.
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
                   </TabsContent>
                 </Tabs>
                 <Button asChild className="h-12 w-full sm:w-auto">
