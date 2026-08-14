@@ -151,7 +151,7 @@ export function PilotValidationChecklist({ projectId, isMachiningBlocked }: Pilo
                     </div>
                   </div>
                   <Checkbox 
-                    checked={isDone} 
+                    checked={isDone || false} 
                     className={cn(
                       "h-6 w-6 rounded-lg transition-all",
                       isDone ? "bg-emerald-600 border-emerald-600 text-white" : "border-slate-200"
