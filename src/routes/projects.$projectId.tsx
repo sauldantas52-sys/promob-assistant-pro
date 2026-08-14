@@ -16,6 +16,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -78,7 +80,7 @@ function ProjectDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("modules")
-        .select("id, name, environment, width_mm, height_mm, depth_mm, quantity")
+        .select("id, name, environment, width_mm, height_mm, depth_mm, quantity, is_completed")
         .eq("project_id", projectId)
         .order("created_at");
       if (error) throw error;
@@ -91,7 +93,7 @@ function ProjectDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("parts")
-        .select("id, module_id, kind, name, material, thickness_mm, width_mm, length_mm, quantity, unit, edge_banding")
+        .select("id, module_id, kind, name, material, thickness_mm, width_mm, length_mm, quantity, unit, edge_banding, is_completed")
         .eq("project_id", projectId)
         .order("created_at");
       if (error) throw error;
@@ -303,32 +305,100 @@ function ProjectDetail() {
 
         <TabsContent value="modules">
           <Card>
-            <CardContent className="overflow-x-auto p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Módulo</TableHead>
-                    <TableHead>Ambiente</TableHead>
-                    <TableHead>L × A × P (mm)</TableHead>
-                    <TableHead className="text-right">Qtd</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {(modules.data ?? []).map((m) => (
-                    <TableRow key={m.id}>
-                      <TableCell className="font-medium">{m.name}</TableCell>
-                      <TableCell>{m.environment || "—"}</TableCell>
-                      <TableCell>
-                        {[m.width_mm, m.height_mm, m.depth_mm].every((v) => v == null)
-                          ? "—"
-                          : `${m.width_mm ?? "?"} × ${m.height_mm ?? "?"} × ${m.depth_mm ?? "?"}`}
-                      </TableCell>
-                      <TableCell className="text-right">{m.quantity}</TableCell>
-                    </TableRow>
-                  ))}
-                  {(modules.data?.length ?? 0) === 0 && <EmptyRow colSpan={4} />}
-                </TableBody>
-              </Table>
+            <CardContent className="p-0">
+              <Accordion type="multiple" className="w-full">
+                {(modules.data ?? []).map((m) => (
+                  <AccordionItem key={m.id} value={m.id} className="border-b px-4 py-1 last:border-0">
+                    <div className="flex items-center gap-3">
+                      <Checkbox
+                        checked={m.is_completed ?? false}
+                        onCheckedChange={async (checked) => {
+                          const { error } = await supabase
+                            .from("modules")
+                            .update({ is_completed: !!checked })
+                            .eq("id", m.id);
+                          if (error) toast.error(error.message);
+                          else void queryClient.invalidateQueries({ queryKey: ["modules", projectId] });
+                        }}
+                      />
+                      <AccordionTrigger className="flex-1 py-3 hover:no-underline">
+                        <div className="flex flex-1 items-center justify-between pr-4 text-left">
+                          <div>
+                            <p className={`font-medium ${m.is_completed ? "text-muted-foreground line-through" : ""}`}>
+                              {m.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {m.environment || "Ambiente não informado"} · {m.width_mm ?? "?"} × {m.height_mm ?? "?"} ×{" "}
+                              {m.depth_mm ?? "?"} mm
+                            </p>
+                          </div>
+                          <Badge variant="outline" className="ml-auto">
+                            {m.quantity} un
+                          </Badge>
+                        </div>
+                      </AccordionTrigger>
+                    </div>
+                    <AccordionContent className="pb-4 pt-0">
+                      <div className="rounded-lg border bg-muted/30">
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="hover:bg-transparent">
+                              <TableHead className="h-9 text-xs">Peça</TableHead>
+                              <TableHead className="h-9 text-xs text-right">Dimensões</TableHead>
+                              <TableHead className="h-9 text-xs text-right">Qtd</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {allParts
+                              .filter((p) => p.module_id === m.id)
+                              .map((p) => (
+                                <TableRow key={p.id} className="hover:bg-transparent">
+                                  <TableCell className="py-2 text-xs font-medium">
+                                    <div className="flex items-center gap-2">
+                                      <Checkbox
+                                        checked={p.is_completed ?? false}
+                                        className="h-3.5 w-3.5"
+                                        onCheckedChange={async (checked) => {
+                                          const { error } = await supabase
+                                            .from("parts")
+                                            .update({ is_completed: !!checked })
+                                            .eq("id", p.id);
+                                          if (error) toast.error(error.message);
+                                          else void queryClient.invalidateQueries({ queryKey: ["parts", projectId] });
+                                        }}
+                                      />
+                                      <span className={p.is_completed ? "text-muted-foreground line-through" : ""}>
+                                        {p.name}
+                                      </span>
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className="py-2 text-right text-xs text-muted-foreground">
+                                    {p.width_mm ?? "?"} × {p.length_mm ?? "?"}
+                                  </TableCell>
+                                  <TableCell className="py-2 text-right text-xs">
+                                    {p.quantity} {p.unit}
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            {allParts.filter((p) => p.module_id === m.id).length === 0 && (
+                              <TableRow>
+                                <TableCell colSpan={3} className="py-4 text-center text-xs text-muted-foreground">
+                                  Nenhuma peça vinculada.
+                                </TableCell>
+                              </TableRow>
+                            )}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+                {(modules.data?.length ?? 0) === 0 && (
+                  <div className="py-12 text-center text-sm text-muted-foreground">
+                    Nada por aqui ainda. Importe um arquivo do Promob.
+                  </div>
+                )}
+              </Accordion>
             </CardContent>
           </Card>
         </TabsContent>

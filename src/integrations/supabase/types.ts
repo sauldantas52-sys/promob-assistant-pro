@@ -39,6 +39,7 @@ export type Database = {
           environment: string | null
           height_mm: number | null
           id: string
+          is_completed: boolean | null
           name: string
           project_id: string
           quantity: number
@@ -50,6 +51,7 @@ export type Database = {
           environment?: string | null
           height_mm?: number | null
           id?: string
+          is_completed?: boolean | null
           name: string
           project_id: string
           quantity?: number
@@ -61,6 +63,7 @@ export type Database = {
           environment?: string | null
           height_mm?: number | null
           id?: string
+          is_completed?: boolean | null
           name?: string
           project_id?: string
           quantity?: number
@@ -81,6 +84,7 @@ export type Database = {
           created_at: string
           edge_banding: string | null
           id: string
+          is_completed: boolean | null
           kind: string
           length_mm: number | null
           material: string | null
@@ -96,6 +100,7 @@ export type Database = {
           created_at?: string
           edge_banding?: string | null
           id?: string
+          is_completed?: boolean | null
           kind?: string
           length_mm?: number | null
           material?: string | null
@@ -111,6 +116,7 @@ export type Database = {
           created_at?: string
           edge_banding?: string | null
           id?: string
+          is_completed?: boolean | null
           kind?: string
           length_mm?: number | null
           material?: string | null
