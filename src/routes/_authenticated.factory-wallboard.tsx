@@ -61,7 +61,7 @@ function WallboardContent({ time }: { time: Date }) {
           production_steps(*),
           shipping_volumes(*)
         `)
-        .in("status", ["producao", "conferencia", "expedicao"])
+        .in("status", ["corte", "borda", "usinagem", "separacao", "montagem"])
         .order("updated_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -139,9 +139,11 @@ function ProjectCard({ project }: { project: any }) {
   };
 
   const statusMap: Record<string, { label: string, color: string }> = {
-    producao: { label: "PRODUÇÃO", color: "bg-orange-600 shadow-orange-600/40" },
-    conferencia: { label: "CONFERÊNCIA", color: "bg-blue-600 shadow-blue-600/40" },
-    expedicao: { label: "EXPEDIÇÃO", color: "bg-indigo-600 shadow-indigo-600/40" },
+    corte: { label: "CORTE", color: "bg-red-600 shadow-red-600/40" },
+    borda: { label: "BORDA", color: "bg-orange-600 shadow-orange-600/40" },
+    usinagem: { label: "USINAGEM", color: "bg-purple-600 shadow-purple-600/40" },
+    separacao: { label: "SEPARAÇÃO", color: "bg-indigo-600 shadow-indigo-600/40" },
+    montagem: { label: "MONTAGEM", color: "bg-emerald-600 shadow-emerald-600/40" },
   };
 
   const current = statusMap[project.status] || { label: project.status, color: "bg-slate-700 shadow-slate-700/40" };
