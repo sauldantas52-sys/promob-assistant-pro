@@ -25,16 +25,16 @@ export const seedIntegrationTestData = createServerFn({ method: "POST" })
       full_name: "Operador de Teste"
     });
 
-    // 3. Create Project - Use exact columns from types.ts
-    // is_machining_assembly_blocked is the correct column name from types.ts:848
+    // 3. Create Project - Use standardized machining_blocked
     const { data: project, error: projErr } = await admin
       .from("projects")
       .insert({
         company_id: company.id,
         name: "PROJETO TESTE INTEGRAÇÃO SKP",
         status: "pilot",
-        is_machining_assembly_blocked: true
+        machining_blocked: true
       })
+
       .select()
       .single();
 
