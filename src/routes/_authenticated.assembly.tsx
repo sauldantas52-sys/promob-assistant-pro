@@ -15,7 +15,9 @@ import {
   CheckCircle,
   PackageCheck,
   History,
-  ClipboardList
+  ClipboardList,
+  Camera,
+  Image as ImageIcon
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -77,10 +79,10 @@ function AssemblyContent() {
         .select(`
           id, name, client_name, environment, status, 
           modules(id, name, environment, width_mm, height_mm, depth_mm, quantity, is_completed, data_source),
-          parts(id, name, kind, quantity, unit, is_completed, material, thickness_mm, width_mm, length_mm, assembly_group_id, visibility_type, data_source),
+          parts(id, name, kind, quantity, unit, is_completed, material, thickness_mm, width_mm, length_mm, edge_banding, storage_location, assembly_group_id, visibility_type, data_source),
           assembly_groups(id, module_id, code, name, color, is_locked, lock_reason, conference_status, sealed_at)
         `)
-        .in("status", ["montagem", "conferencia", "assistencia"])
+        .in("status", ["separacao", "montagem", "assistencia"])
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -130,6 +132,7 @@ function AssemblyContent() {
                     <TabsTrigger value="modules" className="rounded-[2rem] data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-2xl font-black text-[11px] uppercase tracking-[0.3em]">Módulos</TabsTrigger>
                     <TabsTrigger value="groups" className="rounded-[2rem] data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-2xl font-black text-[11px] uppercase tracking-[0.3em]">Grupos G1/G2</TabsTrigger>
                     <TabsTrigger value="hardware" className="rounded-[2rem] data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-2xl font-black text-[11px] uppercase tracking-[0.3em]">Instruções</TabsTrigger>
+                    <TabsTrigger value="evidence" className="rounded-[2rem] data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-2xl font-black text-[11px] uppercase tracking-[0.3em]">Evidências</TabsTrigger>
                   </TabsList>
                   
                   <TabsContent value="modules" className="space-y-8 mt-10">
@@ -255,12 +258,16 @@ function AssemblyContent() {
                                           key={p.id}
                                           moduleCode={group?.code ?? "???"}
                                           moduleName={m.name}
-                                          color={group?.color ?? "#000"}
-                                          partName={p.name}
-                                          dimensions={`${p.width_mm}x${p.length_mm}mm`}
-                                          qrValue={`montaai://${project.id}/${p.id}`}
-                                          projectId={project.id}
-                                        />
+                                            color={group?.color ?? "#000"}
+                                            partName={p.name}
+                                            dimensions={`${p.width_mm}x${p.length_mm}mm`}
+                                            material={p.material ?? null}
+                                            thickness={p.thickness_mm ?? null}
+                                            edgeBanding={p.edge_banding ?? null}
+                                            storageLocation={p.storage_location ?? null}
+                                            qrValue={`montaai://${project.id}/${p.id}`}
+                                            projectId={project.id}
+                                          />
                                       ))}
                                     </div>
                                   </DialogContent>
@@ -315,6 +322,32 @@ function AssemblyContent() {
                         </div>
                       </CardContent>
                     </Card>
+                  </TabsContent>
+                  <TabsContent value="evidence" className="space-y-6 mt-6">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <Button variant="outline" className="h-32 rounded-[2rem] border-dashed flex flex-col gap-3">
+                        <Camera className="h-8 w-8 text-blue-600" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Foto Antes</span>
+                      </Button>
+                      <Button variant="outline" className="h-32 rounded-[2rem] border-dashed flex flex-col gap-3">
+                        <Camera className="h-8 w-8 text-emerald-600" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Foto Depois</span>
+                      </Button>
+                      <div className="col-span-2 bg-slate-50 rounded-[2rem] p-6 border-2 border-slate-100 border-dashed flex flex-col justify-center items-center text-slate-400">
+                        <ImageIcon className="h-10 w-10 opacity-20 mb-2" />
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em]">Galeria de Montagem Vazia</p>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Notas de Instalação / Ocorrências</Label>
+                      <Textarea 
+                        placeholder="Descreva aqui qualquer detalhe relevante ou ocorrência durante a montagem..." 
+                        className="rounded-[1.5rem] border-slate-200 min-h-[120px]"
+                      />
+                      <Button className="w-full h-14 rounded-[1rem] bg-slate-900 text-white font-black uppercase tracking-widest text-xs">
+                        Salvar Relatório de Campo
+                      </Button>
+                    </div>
                   </TabsContent>
                 </Tabs>
                 <Button asChild className="h-20 w-full px-12 rounded-[2rem] bg-slate-900 hover:bg-black text-white font-black uppercase tracking-[0.3em] text-[12px] shadow-2xl shadow-slate-900/40 gap-6 transition-all duration-500 active:scale-95 group mt-10">

@@ -10,6 +10,10 @@ interface AssemblyLabelProps {
   dimensions: string;
   qrValue: string;
   projectId: string;
+  material?: string | null;
+  thickness?: number | null;
+  edgeBanding?: string | null;
+  storageLocation?: string | null;
 }
 
 export function AssemblyLabel({
@@ -19,7 +23,11 @@ export function AssemblyLabel({
   partName,
   dimensions,
   qrValue,
-  projectId
+  projectId,
+  material,
+  thickness,
+  edgeBanding,
+  storageLocation
 }: AssemblyLabelProps) {
   return (
     <Card className="w-[300px] h-[180px] bg-white text-slate-950 border-2 border-slate-900 overflow-hidden print:break-inside-avoid shadow-sm">
@@ -42,9 +50,20 @@ export function AssemblyLabel({
         </div>
 
         {/* Middle: Part Info */}
-        <div className="flex-1 flex flex-col justify-center">
+        <div className="flex-1 flex flex-col justify-center gap-0.5">
           <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight truncate">{partName}</h3>
-          <p className="text-xs font-black font-mono text-slate-500 mt-0.5">{dimensions}</p>
+          <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+            <p className="text-[10px] font-black font-mono text-slate-600">{dimensions}</p>
+            {material && <p className="text-[10px] font-black text-blue-600 uppercase tracking-tighter">{material} {thickness}mm</p>}
+          </div>
+          <div className="flex justify-between items-center">
+            {edgeBanding && <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Borda: {edgeBanding}</p>}
+            {storageLocation && (
+              <Badge variant="outline" className="text-[7px] px-1.5 py-0 border-slate-200 bg-slate-50 font-black uppercase tracking-tighter">
+                LOC: {storageLocation}
+              </Badge>
+            )}
+          </div>
         </div>
 
         {/* Bottom: QR Code & Brand */}

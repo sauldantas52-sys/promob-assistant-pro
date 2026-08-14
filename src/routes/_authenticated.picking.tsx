@@ -37,9 +37,9 @@ function PickingPage() {
         .from("projects")
         .select(`
           id, name, client_name, environment, status,
-          parts(id, name, kind, quantity, unit, is_completed)
+          parts(id, name, kind, quantity, unit, is_completed, storage_location, assembly_group_id)
         `)
-        .in("status", ["producao", "conferencia"])
+        .in("status", ["usinagem", "separacao"])
         .order("updated_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -82,9 +82,17 @@ function PickingPage() {
 
         <div className="grid gap-6">
           {list.map((project) => {
-            const pickingItems = project.parts.filter(p => 
+            const parts = project.parts || [];
+            const pickingItems = parts.filter(p => 
               p.kind === 'ferragem' || p.kind === 'acessorio'
             );
+            
+            // Grupos G1, G2, G3, AV
+            const g1 = pickingItems.filter(p => p.assembly_group_id === 'G1' || (typeof p.assembly_group_id === 'string' && p.assembly_group_id.includes('G1')));
+            const g2 = pickingItems.filter(p => p.assembly_group_id === 'G2' || (typeof p.assembly_group_id === 'string' && p.assembly_group_id.includes('G2')));
+            const g3 = pickingItems.filter(p => p.assembly_group_id === 'G3' || (typeof p.assembly_group_id === 'string' && p.assembly_group_id.includes('G3')));
+            const av = pickingItems.filter(p => !g1.includes(p) && !g2.includes(p) && !g3.includes(p));
+
             const total = pickingItems.length;
             const done = pickingItems.filter(i => i.is_completed).length;
             const progress = total > 0 ? (done / total) * 100 : 0;
@@ -112,43 +120,64 @@ function PickingPage() {
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="divide-y">
-                    {pickingItems.map(item => (
-                      <div key={item.id} className="px-16 py-10 flex items-center justify-between gap-8 transition-all hover:bg-slate-50 border-b border-slate-50 last:border-b-0">
-                        <div className="flex items-center gap-8">
-                          <Button 
-                            variant={item.is_completed ? "default" : "outline"}
-                            size="icon"
-                            className={cn(
-                              "h-16 w-16 shrink-0 rounded-[1.5rem] transition-all duration-300 border-2",
-                              item.is_completed ? "bg-emerald-600 border-emerald-600 shadow-xl shadow-emerald-600/20" : "bg-white border-slate-200 shadow-sm"
-                            )}
-                            onClick={() => updatePart.mutate({ id: item.id, is_completed: !item.is_completed })}
-                          >
-                            {item.is_completed ? <CheckCircle2 className="h-8 w-8 text-white" /> : <div className="h-8 w-8 rounded-full border-4 border-slate-100" />}
-                          </Button>
-                          <div>
-                            <p className={cn(
-                              "text-xl font-black tracking-tighter uppercase leading-none mb-2 transition-all",
-                              item.is_completed ? "text-slate-400 line-through" : "text-slate-900"
-                            )}>
-                              {item.name}
-                            </p>
-                            <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em]">Quantidade: {item.quantity} {item.unit}</p>
+                    {[
+                      { label: "G1 - Módulos Base", items: g1, color: "bg-teal-600" },
+                      { label: "G2 - Complementares", items: g2, color: "bg-slate-600" },
+                      { label: "G3 - Acabamentos", items: g3, color: "bg-indigo-600" },
+                      { label: "AV - Avulsos / Ferragens", items: av, color: "bg-orange-600" }
+                    ].map(group => group.items.length > 0 && (
+                      <div key={group.label} className="bg-white">
+                        <div className="px-16 py-6 bg-slate-50 flex items-center gap-4 border-y border-slate-100">
+                          <div className={cn("h-4 w-4 rounded-full", group.color)} />
+                          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">{group.label}</p>
+                        </div>
+                        {group.items.map(item => (
+                          <div key={item.id} className="px-16 py-10 flex items-center justify-between gap-8 transition-all hover:bg-slate-50 border-b border-slate-50 last:border-b-0">
+                            <div className="flex items-center gap-8">
+                              <Button 
+                                variant={item.is_completed ? "default" : "outline"}
+                                size="icon"
+                                className={cn(
+                                  "h-16 w-16 shrink-0 rounded-[1.5rem] transition-all duration-300 border-2",
+                                  item.is_completed ? "bg-emerald-600 border-emerald-600 shadow-xl shadow-emerald-600/20" : "bg-white border-slate-200 shadow-sm"
+                                )}
+                                onClick={() => updatePart.mutate({ id: item.id, is_completed: !item.is_completed })}
+                              >
+                                {item.is_completed ? <CheckCircle2 className="h-8 w-8 text-white" /> : <div className="h-8 w-8 rounded-full border-4 border-slate-100" />}
+                              </Button>
+                              <div>
+                                <p className={cn(
+                                  "text-xl font-black tracking-tighter uppercase leading-none mb-2 transition-all",
+                                  item.is_completed ? "text-slate-400 line-through" : "text-slate-900"
+                                )}>
+                                  {item.name}
+                                </p>
+                                <div className="flex items-center gap-6">
+                                  <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em]">Quantidade: {item.quantity} {item.unit}</p>
+                                  {item.storage_location && (
+                                    <Badge variant="outline" className="text-[10px] font-black text-blue-600 border-blue-200 uppercase tracking-widest bg-blue-50">
+                                      {item.storage_location}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button variant="ghost" size="icon" className="h-10 w-10 text-orange-500 hover:bg-orange-50 rounded-full" title="Marcar falta">
+                                <AlertTriangle className="h-5 w-5" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-10 w-10 text-destructive hover:bg-red-50 rounded-full" title="Danificado">
+                                <XCircle className="h-5 w-5" />
+                              </Button>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-orange-500" title="Marcar falta">
-                            <AlertTriangle className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" title="Danificado">
-                            <XCircle className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        ))}
                       </div>
                     ))}
                     {total === 0 && (
-                      <div className="p-8 text-center text-sm text-muted-foreground">
-                        Nenhuma ferragem ou acessório identificado para este projeto.
+                      <div className="p-32 text-center text-sm text-muted-foreground flex flex-col items-center gap-6">
+                        <Boxes className="h-16 w-16 opacity-20" />
+                        <p className="font-black uppercase tracking-[0.4em]">Nenhum item para separação</p>
                       </div>
                     )}
                   </div>

@@ -1,6 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Factory, Tv } from "lucide-react";
+import { 
+  Factory, 
+  Tv, 
+  ClipboardList, 
+  Scissors, 
+  Square, 
+  Drill, 
+  Boxes, 
+  PackageCheck, 
+  CheckCircle2,
+  AlertOctagon,
+  Lock
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -32,12 +44,14 @@ export const Route = createFileRoute("/_authenticated/production")({
   ),
 });
 
-const flow: Record<string, { next: string; action: string }> = {
-  novo: { next: "orcamento", action: "Enviar para orçamento" },
-  orcamento: { next: "producao", action: "Liberar para produção" },
-  producao: { next: "conferencia", action: "Enviar para conferência" },
-  conferencia: { next: "montagem", action: "Liberar para montagem" },
-  montagem: { next: "concluido", action: "Concluir projeto" },
+const flow: Record<string, { next: string; action: string; color: string; icon: any }> = {
+  novo: { next: "orcamento", action: "Enviar para orçamento", color: "bg-slate-200", icon: ClipboardList },
+  orcamento: { next: "corte", action: "Liberar para corte", color: "bg-blue-200", icon: Scissors },
+  corte: { next: "borda", action: "Enviar para borda", color: "bg-red-200", icon: Square },
+  borda: { next: "usinagem", action: "Liberar usinagem", color: "bg-amber-200", icon: Drill },
+  usinagem: { next: "separacao", action: "Enviar para separação", color: "bg-purple-200", icon: Boxes },
+  separacao: { next: "montagem", action: "Liberar para montagem", color: "bg-indigo-200", icon: PackageCheck },
+  montagem: { next: "concluido", action: "Concluir entrega", color: "bg-emerald-200", icon: CheckCircle2 },
 };
 
 function ProductionContent() {
@@ -50,7 +64,12 @@ function ProductionContent() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
-        .select("id, name, client_name, status, environment")
+        .select(`
+          id, name, client_name, status, environment, 
+          is_machining_assembly_blocked,
+          parts(id, is_completed, kind)
+        `)
+        .in("status", ["corte", "borda", "usinagem"])
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -72,7 +91,7 @@ function ProductionContent() {
     onError: (error: Error) => toast.error(error.message),
   });
 
-  const queue = (projects.data ?? []).filter((p) => p.status !== "concluido");
+  const queue = projects.data ?? [];
 
   return (
     <div className="space-y-16 p-8 md:p-16 max-w-[1800px] mx-auto animate-in fade-in duration-700">
@@ -102,7 +121,7 @@ function ProductionContent() {
       ) : (
         <div className="grid gap-12 md:grid-cols-2 xl:grid-cols-3">
           {queue.map((project) => {
-            const step = flow[project.status ?? "novo"];
+            const step = flow[project.status ?? "corte"];
             return (
               <Card key={project.id} className="border-none shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] hover:shadow-[0_60px_100px_-20px_rgba(0,0,0,0.15)] transition-all duration-700 rounded-[4rem] overflow-hidden group bg-white">
                 <CardHeader className="pb-8 pt-12 px-12 bg-slate-50/30 border-b border-slate-100">
@@ -120,15 +139,50 @@ function ProductionContent() {
                       {project.client_name || "Sem cliente"} · {project.environment || "Ambiente geral"}
                     </p>
                   </div>
+
+                  {/* Pipeline Visual */}
+                  <div className="flex items-center justify-between gap-1 py-4">
+                    {Object.entries(flow).map(([key, value]) => {
+                      const isActive = project.status === key;
+                      const Icon = value.icon;
+                      return (
+                        <div key={key} className="flex flex-col items-center gap-2 flex-1">
+                          <div className={cn(
+                            "h-12 w-12 rounded-2xl flex items-center justify-center transition-all duration-500",
+                            isActive ? "bg-blue-600 text-white scale-110 shadow-lg shadow-blue-600/30" : "bg-slate-50 text-slate-300"
+                          )}>
+                            <Icon className="h-5 w-5" />
+                          </div>
+                          <div className={cn("h-1 w-full rounded-full", isActive ? "bg-blue-600" : "bg-slate-100")} />
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {project.is_machining_assembly_blocked && (
+                    <div className="p-6 bg-red-50 rounded-[2rem] border border-red-100 flex items-center gap-4 animate-pulse">
+                      <AlertOctagon className="h-8 w-8 text-red-600" />
+                      <div>
+                        <p className="text-[10px] font-black text-red-600 uppercase tracking-widest">Bloqueio de Engenharia</p>
+                        <p className="text-xs font-bold text-red-900 uppercase">Usinagem suspensa para este projeto.</p>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex flex-col gap-3 pt-6 border-t border-slate-50">
                     {step && hasPermission(role, "production", "edit") && (
                       <Button
                         size="lg"
-                        className="h-16 w-full rounded-[1.25rem] bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-[0.2em] text-[11px] border-none shadow-xl shadow-blue-600/20 transition-all duration-300 active:scale-[0.98]"
-                        disabled={advance.isPending}
+                        className={cn(
+                          "h-16 w-full rounded-[1.25rem] text-white font-black uppercase tracking-[0.2em] text-[11px] border-none shadow-xl transition-all duration-300 active:scale-[0.98]",
+                          project.is_machining_assembly_blocked && step.next === 'usinagem' ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 shadow-blue-600/20"
+                        )}
+                        disabled={advance.isPending || (!!project.is_machining_assembly_blocked && step.next === 'usinagem')}
                         onClick={() => advance.mutate({ id: project.id, status: step.next })}
                       >
-                        {step.action}
+                        {!!project.is_machining_assembly_blocked && step.next === 'usinagem' ? (
+                          <span className="flex items-center gap-2"><Lock className="h-4 w-4" /> Bloqueado</span>
+                        ) : step.action}
                       </Button>
                     )}
                     <Button asChild size="lg" variant="outline" className="h-16 w-full rounded-[1.25rem] border-2 border-slate-100 font-black uppercase tracking-[0.2em] text-[11px] hover:bg-slate-50 transition-all duration-300">
