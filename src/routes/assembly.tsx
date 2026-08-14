@@ -1,16 +1,47 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Wrench, Boxes, Ruler, CheckCircle2, Factory } from "lucide-react";
+import { 
+  Wrench, 
+  Boxes, 
+  Ruler, 
+  CheckCircle2, 
+  Factory, 
+  Scan, 
+  AlertTriangle, 
+  Lock, 
+  Unlock, 
+  ChevronRight,
+  Info,
+  CheckCircle,
+  PackageCheck,
+  History,
+  ClipboardList
+} from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger,
+  DialogDescription,
+  DialogFooter
+} from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { statusLabel, statusTone } from "@/lib/project-status";
 import { toast } from "sonner";
+import { useState } from "react";
+import { AssemblyLabel } from "@/components/AssemblyLabel";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/assembly")({
   head: () => ({
