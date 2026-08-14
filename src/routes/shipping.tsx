@@ -40,6 +40,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useState, useMemo } from "react";
 import { useAuth } from "@/lib/auth";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/shipping")({
   head: () => ({
@@ -265,10 +266,10 @@ function VolumeRow({ volume, project }: { volume: any, project: any }) {
       // Log activity
       await supabase.from('production_logs').insert({
         project_id: project.id,
-        user_id: user?.id,
+        user_id: user?.id || null,
         action: `expedicao:${newStatus}`,
         notes: `Volume ${volume.code} alterado para ${newStatus}`,
-        metadata: { volume_id: volume.id, ...metadata }
+        metadata: { volume_id: volume.id, ...metadata } as any
       });
 
       toast.success(`Status do volume atualizado: ${newStatus}`);
