@@ -925,7 +925,7 @@ function ProjectDetail() {
         </TabsContent>
 
         <TabsContent value="integration_audit" className="mt-6">
-          <AuditIntegrationTab />
+          <AuditIntegrationTab projectId={projectId} />
         </TabsContent>
 
         <TabsContent value="production" className="mt-6">

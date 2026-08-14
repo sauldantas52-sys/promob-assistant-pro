@@ -7,6 +7,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { generateAuditReport } from "@/lib/audit-report.functions";
 import { toast } from "sonner";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
+
 
 const INTEGRATION_MAP = [
   { module: "CutPlanService", status: "conectado", description: "Integração oficial Cut Pro ativa." },
