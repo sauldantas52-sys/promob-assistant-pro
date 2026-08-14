@@ -90,11 +90,11 @@ function AssemblyContent() {
   const list = projects.data ?? [];
 
   return (
-    <div className="space-y-6 p-4 md:p-8">
-      <header>
-        <h1 className="text-2xl font-bold md:text-3xl">Montagem</h1>
-        <p className="text-sm text-muted-foreground">
-          Projetos liberados para montagem, com módulos e medidas em mãos.
+    <div className="space-y-6 p-4 md:p-8 max-w-7xl mx-auto">
+      <header className="flex flex-col gap-1">
+        <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Montagem</h1>
+        <p className="text-base text-slate-500 font-medium">
+          Roteiro técnico e conferência de módulos para montadores.
         </p>
       </header>
 

@@ -10,6 +10,7 @@ import { useAuth } from "@/lib/auth";
 import { hasPermission } from "@/lib/permissions";
 import { supabase } from "@/integrations/supabase/client";
 import { statusLabel, statusTone } from "@/lib/project-status";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/production")({
   head: () => ({
@@ -74,10 +75,10 @@ function ProductionContent() {
   const queue = (projects.data ?? []).filter((p) => p.status !== "concluido");
 
   return (
-    <div className="space-y-6 p-4 md:p-8">
-      <header>
-        <h1 className="text-2xl font-bold md:text-3xl">Produção</h1>
-        <p className="text-sm text-muted-foreground">Fila da fábrica, corte, conferência e liberação.</p>
+    <div className="space-y-6 p-4 md:p-8 max-w-7xl mx-auto">
+      <header className="flex flex-col gap-1">
+        <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Fila de Produção</h1>
+        <p className="text-base text-slate-500 font-medium">Controle de fábrica, corte, usinagem e borda.</p>
       </header>
 
       {queue.length === 0 ? (
@@ -93,16 +94,18 @@ function ProductionContent() {
           {queue.map((project) => {
             const step = flow[project.status ?? "novo"];
             return (
-              <Card key={project.id}>
-                <CardHeader className="pb-2">
+              <Card key={project.id} className="border-none shadow-sm hover:shadow-md transition-all rounded-2xl overflow-hidden">
+                <CardHeader className="pb-3 pt-6 px-6">
                   <div className="flex items-start justify-between gap-2">
-                    <CardTitle className="text-base">{project.name}</CardTitle>
-                    <Badge className={statusTone(project.status)}>{statusLabel(project.status)}</Badge>
+                    <CardTitle className="text-lg font-black text-slate-900 tracking-tight leading-tight">{project.name}</CardTitle>
+                    <Badge className={cn("px-3 py-1 text-[10px] font-bold uppercase tracking-wider border", statusTone(project.status))}>
+                      {statusLabel(project.status)}
+                    </Badge>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-3 text-sm text-muted-foreground">
-                  <p>
-                    {project.client_name || "Sem cliente"} · {project.environment || "—"}
+                <CardContent className="space-y-4 px-6 pb-6">
+                  <p className="text-sm font-medium text-slate-500">
+                    {project.client_name || "Sem cliente"} · {project.environment || "Ambiente geral"}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {step && hasPermission(role, "production", "edit") && (
