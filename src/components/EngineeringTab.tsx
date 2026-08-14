@@ -236,10 +236,11 @@ export function EngineeringTab({ projectId, parts }: EngineeringTabProps) {
                     {parts.filter(p => p.kind === 'peca').map(part => (
                       <button 
                         key={part.id}
-                        className="w-full text-left p-2 text-xs rounded hover:bg-muted flex items-center justify-between group"
+                        onClick={() => setSelectedPartId(part.id)}
+                        className={`w-full text-left p-2 text-xs rounded hover:bg-muted flex items-center justify-between group transition-colors ${selectedPartId === part.id ? 'bg-primary/10 border-l-2 border-primary' : ''}`}
                       >
-                        <span>{part.name}</span>
-                        <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <span className={selectedPartId === part.id ? 'font-bold' : ''}>{part.name}</span>
+                        <ChevronRight className={`h-3 w-3 transition-opacity ${selectedPartId === part.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
                       </button>
                     ))}
                   </div>
@@ -247,25 +248,31 @@ export function EngineeringTab({ projectId, parts }: EngineeringTabProps) {
               </div>
 
               <div className="md:col-span-2 space-y-4">
-                <div className="aspect-square bg-muted/50 rounded-lg flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
-                  <div className="text-center">
-                    <Database className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground font-medium">Selecione uma peça para ver o mapa de furação</p>
-                    <p className="text-xs text-muted-foreground/60 mt-1">Origem DXF e Confirmação Técnica exigida</p>
+                {selectedPart ? (
+                  <div className="space-y-6">
+                    <DrillingInspector drillings={[]} />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-3 border rounded-lg bg-amber-50/50">
+                        <p className="text-[10px] uppercase font-bold text-amber-600 mb-1">Grau de Confirmação</p>
+                        <p className="text-lg font-bold">0%</p>
+                        <p className="text-[10px] text-amber-600 mt-1">Aguardando validação técnica</p>
+                      </div>
+                      <div className="p-3 border rounded-lg bg-blue-50/50">
+                        <p className="text-[10px] uppercase font-bold text-blue-600 mb-1">Peça Selecionada</p>
+                        <p className="text-sm font-bold">{selectedPart.name}</p>
+                        <p className="text-[10px] text-blue-600 mt-1">{selectedPart.width_mm}x{selectedPart.length_mm}x{selectedPart.thickness_mm}mm</p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-3 border rounded-lg bg-amber-50/50">
-                    <p className="text-[10px] uppercase font-bold text-amber-600 mb-1">Grau de Confirmação</p>
-                    <p className="text-lg font-bold">0%</p>
-                    <p className="text-[10px] text-amber-600 mt-1">Aguardando validação DXF</p>
+                ) : (
+                  <div className="aspect-square bg-muted/50 rounded-lg flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
+                    <div className="text-center">
+                      <Database className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground font-medium">Selecione uma peça para ver o mapa de furação</p>
+                      <p className="text-xs text-muted-foreground/60 mt-1">Origem DXF e Confirmação Técnica exigida</p>
+                    </div>
                   </div>
-                  <div className="p-3 border rounded-lg bg-blue-50/50">
-                    <p className="text-[10px] uppercase font-bold text-blue-600 mb-1">Origem do Dado</p>
-                    <p className="text-sm font-bold italic">Nenhum arquivo</p>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </CardContent>
