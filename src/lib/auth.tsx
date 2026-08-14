@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
   };
 
-  const signUp: AuthState["signUp"] = async ({ email, password, fullName: name, companyName, role: r }) => {
+  const signUp: AuthState["signUp"] = async ({ email, password, fullName: name, companyName, role: r as any }) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -96,7 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .insert({ id: userId, company_id: company.id, full_name: name });
     if (profileError) throw profileError;
 
-    await supabase.from("user_roles").insert({ user_id: userId, role: r });
+    await supabase.from("user_roles").insert({ user_id: userId, role: r as any });
     
     if (data.session) {
       await loadProfile(userId);

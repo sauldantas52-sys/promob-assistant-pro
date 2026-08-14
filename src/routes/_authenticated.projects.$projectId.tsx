@@ -52,7 +52,7 @@ import { ProjectShippingTab } from "@/components/ProjectShippingTab";
 import { parseProjectFile } from "@/lib/promob-import";
 import { projectStatuses, statusLabel, statusTone } from "@/lib/project-status";
 
-export const Route = createFileRoute("/projects/$projectId")({
+export const Route = createFileRoute("/_authenticated/projects/$projectId")({
   head: () => ({
     meta: [
       { title: "Detalhes do projeto | Monta AI" },
