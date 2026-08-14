@@ -13,3 +13,13 @@ Este plugin conecta o SketchUp ao ecossistema Monta AI, permitindo que projetos 
 ## Requisitos
 - SketchUp 2021 ou superior.
 - Codificação UTF-8 ativa.
+- Test::Unit para execução de testes automatizados.
+
+## Testes
+O plugin inclui uma suíte de testes em `tests/test_bridge.rb`. Para rodar no console do SketchUp:
+```ruby
+load 'monta-ai-sketchup-bridge/tests/test_bridge.rb'
+```
+
+## Licença
+Propriedade da Monta AI. Uso restrito a parceiros autorizados.
