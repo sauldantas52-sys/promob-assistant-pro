@@ -68,6 +68,9 @@ const CHECK_ITEMS = GATES.flatMap(g => g.items);
 
 export function PilotValidationChecklist({ projectId, isMachiningBlocked }: PilotValidationChecklistProps) {
   const queryClient = useQueryClient();
+  const [partialReleaseReason, setPartialReleaseReason] = useState("");
+  const [showPartialRelease, setShowPartialRelease] = useState(false);
+  const [isSubmittingLog, setIsSubmittingLog] = useState(false);
 
   const { data: checks, isLoading } = useQuery({
     queryKey: ["validation-checks", projectId],
@@ -251,6 +254,73 @@ export function PilotValidationChecklist({ projectId, isMachiningBlocked }: Pilo
                 Validação técnica finalizada. O administrador agora pode liberar a usinagem individual na aba Engenharia e avançar o projeto para Corte.
               </p>
             </div>
+          </div>
+        )}
+
+        {gate1Completed && !isGate2Done && (
+          <div className="space-y-4 p-6 rounded-[2rem] bg-slate-50 border-2 border-slate-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4 text-slate-900">
+                <History className="h-6 w-6 text-slate-400" />
+                <div className="space-y-1">
+                  <p className="text-[11px] font-black uppercase tracking-[0.2em]">Liberação Parcial: Corte e Borda</p>
+                  <p className="text-xs font-medium leading-relaxed text-slate-500">
+                    O Gate 1 está concluído. Você pode liberar o corte mesmo sem a furação técnica.
+                  </p>
+                </div>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="rounded-full font-black text-[9px] uppercase tracking-widest px-6"
+                onClick={() => setShowPartialRelease(!showPartialRelease)}
+              >
+                {showPartialRelease ? 'Cancelar' : 'Registrar Liberação'}
+              </Button>
+            </div>
+            
+            {showPartialRelease && (
+              <div className="space-y-4 animate-in slide-in-from-top-2 duration-300">
+                <textarea 
+                  className="w-full h-24 p-4 rounded-xl border-2 border-slate-200 text-sm focus:border-blue-500 focus:ring-0 transition-colors"
+                  placeholder="Descreva o motivo da liberação parcial (ex: Nesting validado, furação será manual)..."
+                  value={partialReleaseReason}
+                  onChange={(e) => setPartialReleaseReason(e.target.value)}
+                />
+                <Button 
+                  className="w-full h-12 rounded-xl bg-slate-900 text-white font-black uppercase tracking-widest text-[10px] hover:bg-slate-800"
+                  disabled={partialReleaseReason.length < 10 || isSubmittingLog}
+                  onClick={async () => {
+                    setIsSubmittingLog(true);
+                    try {
+                      const { data: { user } } = await supabase.auth.getUser();
+                      if (!user) throw new Error("Não autenticado");
+                      
+                      const { error } = await (supabase.from('production_logs') as any).insert({
+                        project_id: projectId,
+                        user_id: user.id,
+                        action: 'liberacao_parcial_corte',
+                        status_to: 'corte',
+                        notes: `LIBERAÇÃO PARCIAL (GATE 1 OK): ${partialReleaseReason}`,
+                        metadata: { gate: 'corte_borda', partial: true }
+                      });
+                      
+                      if (error) throw error;
+                      toast.success("Liberação parcial registrada com sucesso.");
+                      setPartialReleaseReason("");
+                      setShowPartialRelease(false);
+                      void queryClient.invalidateQueries({ queryKey: ["production-logs", projectId] });
+                    } catch (err: any) {
+                      toast.error(err.message);
+                    } finally {
+                      setIsSubmittingLog(false);
+                    }
+                  }}
+                >
+                  {isSubmittingLog ? 'Processando...' : 'Confirmar Liberação Parcial'}
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </CardContent>
