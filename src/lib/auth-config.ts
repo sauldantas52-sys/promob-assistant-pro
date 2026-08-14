@@ -6,6 +6,7 @@ export const AUTH_CONFIG = {
 };
 
 
+
 export const isPasswordStrong = (password: string) => {
   return password.length >= AUTH_CONFIG.RECOMMENDED_PASSWORD_LENGTH;
 };

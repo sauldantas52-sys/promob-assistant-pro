@@ -69,6 +69,7 @@ function ForcePasswordChangePage() {
 
 
 
+
       toast.success("Senha atualizada com sucesso!");
       await refreshProfile();
       navigate({ to: "/dashboard" });
