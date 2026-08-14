@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      assembly_groups: {
+        Row: {
+          code: string
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string | null
+          project_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string | null
+          project_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string | null
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assembly_groups_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           created_at: string | null
@@ -199,6 +234,7 @@ export type Database = {
       }
       parts: {
         Row: {
+          assembly_group_id: string | null
           created_at: string
           edge_banding: string | null
           id: string
@@ -215,6 +251,7 @@ export type Database = {
           width_mm: number | null
         }
         Insert: {
+          assembly_group_id?: string | null
           created_at?: string
           edge_banding?: string | null
           id?: string
@@ -231,6 +268,7 @@ export type Database = {
           width_mm?: number | null
         }
         Update: {
+          assembly_group_id?: string | null
           created_at?: string
           edge_banding?: string | null
           id?: string
@@ -248,6 +286,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "parts_assembly_group_id_fkey"
+            columns: ["assembly_group_id"]
+            isOneToOne: false
+            referencedRelation: "assembly_groups"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "parts_module_id_fkey"
             columns: ["module_id"]
             isOneToOne: false
@@ -256,6 +301,105 @@ export type Database = {
           },
           {
             foreignKeyName: "parts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          project_id: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          project_id: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          project_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_logs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_steps: {
+        Row: {
+          completed_at: string | null
+          id: string
+          module_id: string | null
+          notes: string | null
+          operator_id: string | null
+          part_id: string | null
+          project_id: string
+          started_at: string | null
+          status: string
+          step_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          id?: string
+          module_id?: string | null
+          notes?: string | null
+          operator_id?: string | null
+          part_id?: string | null
+          project_id: string
+          started_at?: string | null
+          status?: string
+          step_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          id?: string
+          module_id?: string | null
+          notes?: string | null
+          operator_id?: string | null
+          part_id?: string | null
+          project_id?: string
+          started_at?: string | null
+          status?: string
+          step_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_steps_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_steps_part_id_fkey"
+            columns: ["part_id"]
+            isOneToOne: false
+            referencedRelation: "parts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_steps_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
@@ -370,6 +514,80 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shipping_volume_items: {
+        Row: {
+          id: string
+          module_id: string
+          volume_id: string
+        }
+        Insert: {
+          id?: string
+          module_id: string
+          volume_id: string
+        }
+        Update: {
+          id?: string
+          module_id?: string
+          volume_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipping_volume_items_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipping_volume_items_volume_id_fkey"
+            columns: ["volume_id"]
+            isOneToOne: false
+            referencedRelation: "shipping_volumes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shipping_volumes: {
+        Row: {
+          created_at: string | null
+          delivered_at: string | null
+          description: string
+          driver_name: string | null
+          id: string
+          project_id: string
+          shipped_at: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string | null
+          delivered_at?: string | null
+          description: string
+          driver_name?: string | null
+          id?: string
+          project_id: string
+          shipped_at?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string | null
+          delivered_at?: string | null
+          description?: string
+          driver_name?: string | null
+          id?: string
+          project_id?: string
+          shipped_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipping_volumes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
