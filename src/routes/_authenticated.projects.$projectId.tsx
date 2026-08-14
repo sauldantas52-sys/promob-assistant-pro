@@ -570,8 +570,8 @@ function ProjectDetail() {
           <ProjectMetric icon={Scissors} label="Área (m²)" value={totalArea.toFixed(2)} color="text-slate-600" />
         </div>
 
-        <Tabs defaultValue="modules" className="space-y-8">
-          <TabsList className="flex w-fit bg-slate-200/50 p-1.5 h-16 rounded-[2rem] border border-slate-200 overflow-x-auto no-scrollbar">
+        <Tabs defaultValue="modules" className="space-y-10">
+          <TabsList className="flex w-fit bg-slate-100 p-2 h-20 rounded-[3rem] border border-slate-200 overflow-x-auto no-scrollbar shadow-sm">
             <TabTrigger value="modules" icon={LayoutGrid} label="Módulos" />
             <TabTrigger value="parts" icon={ClipboardList} label="Lista Técnica" />
             <TabTrigger value="loose" icon={PackageCheck} label="Avulsos" />
@@ -1441,9 +1441,9 @@ function TabTrigger({ value, icon: Icon, label }: { value: string; icon: any; la
   return (
     <TabsTrigger 
       value={value} 
-      className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm rounded-[1.5rem] px-6 transition-all duration-300 gap-2 font-black uppercase tracking-widest text-[10px] h-full"
+      className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-2xl rounded-[2.5rem] px-8 transition-all duration-500 gap-3 font-black uppercase tracking-[0.2em] text-[11px] h-full active:scale-95"
     >
-      <Icon className="h-4 w-4" />
+      <Icon className="h-5 w-5" />
       <span className="hidden lg:inline">{label}</span>
     </TabsTrigger>
   );
