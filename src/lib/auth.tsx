@@ -93,10 +93,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const { error: profileError } = await supabase
       .from("profiles")
-      .insert({ id: userId, company_id: company.id, full_name: name });
-    if (profileError) throw profileError;
+      .upsert({ id: userId, company_id: company.id, full_name: name });
+    if (profileError) {
+      console.error("Profile Error:", profileError);
+      throw profileError;
+    }
 
-    await supabase.from("user_roles").insert({ user_id: userId, role: r as any });
+    const { error: roleError } = await supabase.from("user_roles").upsert({ user_id: userId, role: r as any });
+    if (roleError) {
+      console.error("Role Error:", roleError);
+      throw roleError;
+    }
+
     
     if (data.session) {
       await loadProfile(userId);
