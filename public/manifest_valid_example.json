@@ -1,6 +1,6 @@
 {
   "plugin_version": "1.0.0",
-  "project_id": "81fa35c2-70ed-4be7-8bb0-e64501b55952",
+  "project_id": "5e1598ce-5020-41f1-8d67-19d1bd2c2bf4",
   "version_number": 1,
   "items": [
     {
@@ -14,7 +14,9 @@
       "width_mm": 800,
       "height_mm": 720,
       "depth_mm": 580,
-      "position_x": 0, "position_y": 0, "position_z": 0,
+      "position_x": 0,
+      "position_y": 0,
+      "position_z": 0,
       "tags": ["02_MODULOS", "03_G1"]
     }
   ]
