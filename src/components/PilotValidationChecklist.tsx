@@ -1,0 +1,197 @@
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { 
+  ShieldCheck, 
+  CheckCircle2, 
+  Circle, 
+  AlertTriangle,
+  FileSearch,
+  Ruler,
+  CircleDot,
+  LayoutGrid,
+  ClipboardList
+} from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+
+interface PilotValidationChecklistProps {
+  projectId: string;
+  isMachiningBlocked: boolean;
+}
+
+const CHECK_ITEMS = [
+  { id: 'bitola', label: 'Audit de Bitolas Nominais', icon: ClipboardList, description: 'MDF 6, 15, 18, 25, 36mm validados' },
+  { id: 'medidas', label: 'Medidas Críticas (PDF)', icon: Ruler, description: 'Conformidade com PDF Executivo' },
+  { id: 'furacao', label: 'Furação Técnica (DXF)', icon: CircleDot, description: 'Geometria de furos confirmada' },
+  { id: 'tags', label: 'Tags Industriais (00-18)', icon: FileSearch, description: 'Identidade visual Bridge SKP' },
+  { id: 'hierarquia', label: 'Estrutura G1-G3', icon: LayoutGrid, description: 'Módulos físicos organizados' },
+];
+
+export function PilotValidationChecklist({ projectId, isMachiningBlocked }: PilotValidationChecklistProps) {
+  const queryClient = useQueryClient();
+
+  const { data: checks, isLoading } = useQuery({
+    queryKey: ["validation-checks", projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("validation_checks")
+        .select("*")
+        .eq("project_id", projectId);
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  const toggleCheck = useMutation({
+    mutationFn: async ({ type, completed }: { type: string; completed: boolean }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Não autenticado");
+
+      const { error } = await supabase
+        .from("validation_checks")
+        .upsert({
+          project_id: projectId,
+          check_type: type,
+          is_completed: completed,
+          completed_by: user.id,
+          completed_at: completed ? new Date().toISOString() : null,
+          updated_at: new Date().toISOString(),
+        });
+
+      if (error) throw error;
+
+      // Log action
+      await (supabase.from('production_logs') as any).insert({
+        project_id: projectId,
+        user_id: user.id,
+        action: `Validação de Piloto: ${type}`,
+        status_to: completed ? 'concluido' : 'pendente',
+        notes: `Checklist industrial: ${type} ${completed ? 'validado' : 'reaberto'}`
+      });
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["validation-checks", projectId] });
+      void queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+      void queryClient.invalidateQueries({ queryKey: ["production-logs", projectId] });
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
+  const allCompleted = CHECK_ITEMS.every(item => 
+    checks?.find(c => c.check_type === item.id)?.is_completed
+  );
+
+  const completedCount = checks?.filter(c => c.is_completed).length || 0;
+
+  if (isLoading) return null;
+
+  return (
+    <Card className={cn(
+      "border-2 transition-all duration-500 rounded-[2.5rem] overflow-hidden shadow-2xl",
+      allCompleted ? "border-emerald-200 bg-emerald-50/30" : "border-amber-200 bg-amber-50/30"
+    )}>
+      <CardHeader className="pb-4 pt-8 px-8 border-b border-white/50">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <CardTitle className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 flex items-center gap-2">
+              <ShieldCheck className={cn("h-4 w-4", allCompleted ? "text-emerald-600" : "text-amber-600")} />
+              Checklist de Validação Piloto
+            </CardTitle>
+            <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">
+              Protocolo de Segurança 4.0
+            </h3>
+          </div>
+          <Badge className={cn(
+            "px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-full",
+            allCompleted ? "bg-emerald-600 text-white" : "bg-amber-600 text-white"
+          )}>
+            {completedCount} / {CHECK_ITEMS.length} VALIDADOS
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="p-8 space-y-6">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {CHECK_ITEMS.map((item) => {
+            const isDone = checks?.find(c => c.check_type === item.id)?.is_completed;
+            const Icon = item.icon;
+            
+            return (
+              <div 
+                key={item.id}
+                className={cn(
+                  "relative group p-6 rounded-3xl border-2 transition-all duration-300 cursor-pointer hover:scale-[1.02]",
+                  isDone 
+                    ? "bg-white border-emerald-100 shadow-lg shadow-emerald-600/5" 
+                    : "bg-white border-slate-100 hover:border-amber-200 shadow-sm"
+                )}
+                onClick={() => toggleCheck.mutate({ type: item.id, completed: !isDone })}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-3">
+                    <div className={cn(
+                      "p-3 rounded-2xl w-fit transition-colors",
+                      isDone ? "bg-emerald-50 text-emerald-600" : "bg-slate-50 text-slate-400 group-hover:bg-amber-50 group-hover:text-amber-600"
+                    )}>
+                      <Icon className="h-6 w-6" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className={cn(
+                        "text-[11px] font-black uppercase tracking-widest",
+                        isDone ? "text-emerald-700" : "text-slate-900"
+                      )}>
+                        {item.label}
+                      </p>
+                      <p className="text-[10px] text-slate-400 font-medium leading-relaxed">
+                        {item.description}
+                      </p>
+                    </div>
+                  </div>
+                  <Checkbox 
+                    checked={isDone || false} 
+                    className={cn(
+                      "h-6 w-6 rounded-lg transition-all",
+                      isDone ? "bg-emerald-600 border-emerald-600 text-white" : "border-slate-200"
+                    )}
+                  />
+                </div>
+                {isDone && (
+                  <div className="absolute top-2 right-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500 opacity-20" />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {!allCompleted && (
+          <div className="flex items-center gap-4 p-6 rounded-[1.5rem] bg-red-50 border-2 border-red-100 text-red-900">
+            <AlertTriangle className="h-8 w-8 text-red-600 shrink-0" />
+            <div className="space-y-1">
+              <p className="text-[11px] font-black uppercase tracking-[0.2em]">Bloqueio Industrial Ativo</p>
+              <p className="text-xs font-medium leading-relaxed">
+                A produção e usinagem estão suspensas. Conclua todos os itens do checklist para liberar o avanço do status e desbloquear o controle CNC.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {allCompleted && isMachiningBlocked && (
+          <div className="flex items-center gap-4 p-6 rounded-[1.5rem] bg-blue-50 border-2 border-blue-100 text-blue-900">
+            <ShieldCheck className="h-8 w-8 text-blue-600 shrink-0" />
+            <div className="space-y-1">
+              <p className="text-[11px] font-black uppercase tracking-[0.2em]">Checklist 100% Concluído</p>
+              <p className="text-xs font-medium leading-relaxed">
+                Validação técnica finalizada. O administrador agora pode liberar a usinagem individual na aba Engenharia e avançar o projeto para Corte.
+              </p>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}

@@ -31,6 +31,8 @@ import {
 import { Parser } from "@json2csv/plainjs";
 import { EngineeringTab } from "@/components/EngineeringTab";
 import { SketchUpBridgeTab } from "@/components/SketchUpBridgeTab";
+import { PilotValidationChecklist } from "@/components/PilotValidationChecklist";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -101,13 +103,14 @@ function ProjectDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
-        .select("id, name, client_name, environment, status, notes, created_at, company_id, cutting_status, machining_status, is_cutting_edge_released, machining_blocked")
+        .select("id, name, client_name, environment, status, notes, created_at, company_id, cutting_status, machining_status, is_cutting_edge_released, machining_blocked, is_validated")
         .eq("id", projectId)
         .maybeSingle();
       if (error) throw error;
       return data;
     },
   });
+
 
   const modules = useQuery({
     queryKey: ["modules", projectId],
@@ -463,6 +466,11 @@ function ProjectDetail() {
               disabled={!hasPermission(role, "projects", "approve")}
               onValueChange={async (v) => {
                 if (["corte", "borda", "usinagem"].includes(v)) {
+                  if (!project.data?.is_validated) {
+                    toast.error("Bloqueio Industrial: O Checklist de Validação Piloto deve estar 100% concluído antes de iniciar a produção.");
+                    return;
+                  }
+
                   const unconfirmedParts = allParts.filter(p => 
                     (!p.width_mm || !p.length_mm || !p.thickness_mm || !p.material) && 
                     p.kind !== 'ferragem' && 
@@ -476,6 +484,7 @@ function ProjectDetail() {
                     return;
                   }
                 }
+
 
                 const oldStatus = project.data?.status || "novo";
                 updateStatus.mutate(v, {
@@ -528,24 +537,34 @@ function ProjectDetail() {
                 <span className="text-[10px] font-black uppercase tracking-widest">Protocolo de Rastreabilidade Ativo</span>
               </div>
             </div>
-            <input
-              ref={fileInput}
-              type="file"
-              accept=".xml,.pdf,.dxf"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) void handleImport(file);
-              }}
-            />
-            <div className="flex flex-wrap gap-6">
-              <Button className="h-20 px-12 rounded-[1.5rem] bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-[0.2em] text-[12px] shadow-2xl shadow-blue-600/30 gap-4 transition-all duration-500 active:scale-95 group" disabled={importing} onClick={() => fileInput.current?.click()}>
-                {importing ? <Loader2 className="h-6 w-6 animate-spin" /> : <FileUp className="h-7 w-7 transition-transform group-hover:-translate-y-1" />}
-                Importar Arquivo Promob
-              </Button>
+            <div className="grid gap-12">
+              <PilotValidationChecklist 
+                projectId={projectId} 
+                isMachiningBlocked={project.data?.machining_blocked ?? true} 
+              />
+              
+              <div className="space-y-6">
+                <input
+                  ref={fileInput}
+                  type="file"
+                  accept=".xml,.pdf,.dxf"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) void handleImport(file);
+                  }}
+                />
+                <div className="flex flex-wrap gap-6">
+                  <Button className="h-20 px-12 rounded-[1.5rem] bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-[0.2em] text-[12px] shadow-2xl shadow-blue-600/30 gap-4 transition-all duration-500 active:scale-95 group" disabled={importing} onClick={() => fileInput.current?.click()}>
+                    {importing ? <Loader2 className="h-6 w-6 animate-spin" /> : <FileUp className="h-7 w-7 transition-transform group-hover:-translate-y-1" />}
+                    Importar Arquivo Promob
+                  </Button>
+                </div>
+              </div>
             </div>
 
             {warnings.length > 0 && (
+
               <div className="space-y-4 rounded-[2rem] border-2 border-red-100 bg-red-50/50 p-8 mt-6">
                 <div className="flex items-center gap-3 mb-2">
                   <AlertTriangle className="h-6 w-6 text-red-600" />
@@ -879,8 +898,13 @@ function ProjectDetail() {
         </TabsContent>
 
         <TabsContent value="engineering" className="mt-6">
-          <EngineeringTab projectId={projectId} parts={allParts} />
+          <EngineeringTab 
+            projectId={projectId} 
+            parts={allParts} 
+            isValidated={project.data?.is_validated}
+          />
         </TabsContent>
+
 
         <TabsContent value="sketchup" className="mt-6">
           <SketchUpBridgeTab projectId={projectId} />

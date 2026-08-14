@@ -1090,12 +1090,15 @@ export type Database = {
           id: string
           is_cutting_edge_released: boolean | null
           is_machining_assembly_blocked: boolean | null
+          is_validated: boolean
           machining_blocked: boolean | null
           machining_status: string | null
           name: string
           notes: string | null
           status: string | null
           updated_at: string
+          validated_at: string | null
+          validated_by: string | null
         }
         Insert: {
           assembly_notes?: string | null
@@ -1108,12 +1111,15 @@ export type Database = {
           id?: string
           is_cutting_edge_released?: boolean | null
           is_machining_assembly_blocked?: boolean | null
+          is_validated?: boolean
           machining_blocked?: boolean | null
           machining_status?: string | null
           name: string
           notes?: string | null
           status?: string | null
           updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
         }
         Update: {
           assembly_notes?: string | null
@@ -1126,12 +1132,15 @@ export type Database = {
           id?: string
           is_cutting_edge_released?: boolean | null
           is_machining_assembly_blocked?: boolean | null
+          is_validated?: boolean
           machining_blocked?: boolean | null
           machining_status?: string | null
           name?: string
           notes?: string | null
           status?: string | null
           updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
         }
         Relationships: [
           {
@@ -1262,6 +1271,50 @@ export type Database = {
         }
         Relationships: []
       }
+      validation_checks: {
+        Row: {
+          check_type: string
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          id: string
+          is_completed: boolean
+          notes: string | null
+          project_id: string
+          updated_at: string
+        }
+        Insert: {
+          check_type: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          notes?: string | null
+          project_id: string
+          updated_at?: string
+        }
+        Update: {
+          check_type?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          notes?: string | null
+          project_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "validation_checks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1281,7 +1334,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "escritorio" | "fabrica" | "montador"
+      app_role: "admin" | "escritorio" | "fabrica" | "montador" | "auditor"
       maintenance_status:
         | "aberto"
         | "em_analise"
@@ -1428,7 +1481,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "escritorio", "fabrica", "montador"],
+      app_role: ["admin", "escritorio", "fabrica", "montador", "auditor"],
       maintenance_status: [
         "aberto",
         "em_analise",
