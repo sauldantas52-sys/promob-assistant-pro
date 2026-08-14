@@ -244,9 +244,9 @@ function ProjectDetail() {
           "Nome": p.name,
           "Tipo": p.kind,
           "Material": p.material || "-",
-          "Espessura (mm)": p.thickness_mm ?? "Não confirmado",
-          "Largura (mm)": p.width_mm ?? "Não confirmado",
-          "Comprimento (mm)": p.length_mm ?? "Não confirmado",
+          "Espessura (mm)": p.thickness_mm ?? "Não confirmado (NÃO USAR PARA FABRICAÇÃO)",
+          "Largura (mm)": p.width_mm ?? "Não confirmado (NÃO USAR PARA FABRICAÇÃO)",
+          "Comprimento (mm)": p.length_mm ?? "Não confirmado (NÃO USAR PARA FABRICAÇÃO)",
           "Quantidade": p.quantity,
           "Unidade": p.unit || "un",
           "Fita de Borda": p.edge_banding || "-",
@@ -375,6 +375,7 @@ function ProjectDetail() {
           <TabsTrigger value="modules" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Módulos</TabsTrigger>
           <TabsTrigger value="parts" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Lista Técnica</TabsTrigger>
           <TabsTrigger value="loose" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Itens sem Módulo</TabsTrigger>
+          <TabsTrigger value="audit" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Auditoria Técnica</TabsTrigger>
           <TabsTrigger value="files" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Arquivos</TabsTrigger>
         </TabsList>
 
@@ -591,6 +592,77 @@ function ProjectDetail() {
                   )}
                 </TableBody>
               </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="audit" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Auditoria de Dados</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="rounded-lg border p-4">
+                  <p className="text-xs font-medium text-muted-foreground uppercase">Módulos no XML</p>
+                  <p className="mt-1 text-2xl font-bold">{modules.data?.length ?? 0}</p>
+                </div>
+                <div className="rounded-lg border p-4">
+                  <p className="text-xs font-medium text-muted-foreground uppercase">Peças/Ferragens Totais</p>
+                  <p className="mt-1 text-2xl font-bold">{allParts.length}</p>
+                </div>
+                <div className="rounded-lg border p-4">
+                  <p className="text-xs font-medium text-muted-foreground uppercase">Itens sem Módulo</p>
+                  <p className="mt-1 text-2xl font-bold text-amber-600">{allParts.filter(p => !p.module_id).length}</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="font-semibold text-sm">Integridade de Medidas</h3>
+                <div className="rounded-lg border overflow-hidden">
+                  <Table>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell className="font-medium">Peças sem medida confirmada</TableCell>
+                        <TableCell className="text-right text-destructive font-bold">
+                          {allParts.filter(p => !p.width_mm || !p.length_mm).length}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">Ferragens sem dimensões</TableCell>
+                        <TableCell className="text-right text-muted-foreground">
+                          {hardware.filter(p => !p.width_mm).length}
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+                <p className="text-[10px] text-muted-foreground italic">
+                  * Peças sem medida são marcadas como "Não confirmado" e não devem ser enviadas para fabricação sem conferência manual.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="font-semibold text-sm">Classificação de Itens</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  <div className="bg-muted/50 p-2 rounded text-center">
+                    <p className="text-[10px] uppercase text-muted-foreground">Peças</p>
+                    <p className="font-bold">{allParts.filter(p => p.kind === 'peca').length}</p>
+                  </div>
+                  <div className="bg-muted/50 p-2 rounded text-center">
+                    <p className="text-[10px] uppercase text-muted-foreground">Chapas</p>
+                    <p className="font-bold">{allParts.filter(p => p.kind === 'chapa').length}</p>
+                  </div>
+                  <div className="bg-muted/50 p-2 rounded text-center">
+                    <p className="text-[10px] uppercase text-muted-foreground">Ferragens</p>
+                    <p className="font-bold">{allParts.filter(p => p.kind === 'ferragem').length}</p>
+                  </div>
+                  <div className="bg-muted/50 p-2 rounded text-center">
+                    <p className="text-[10px] uppercase text-muted-foreground">Acessórios</p>
+                    <p className="font-bold">{allParts.filter(p => p.kind === 'acessorio').length}</p>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
