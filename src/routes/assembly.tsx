@@ -41,6 +41,7 @@ import { statusLabel, statusTone } from "@/lib/project-status";
 import { toast } from "sonner";
 import { useState } from "react";
 import { AssemblyLabel } from "@/components/AssemblyLabel";
+import { ConferenceDialog } from "@/components/ConferenceDialog";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/assembly")({
@@ -77,7 +78,7 @@ function AssemblyContent() {
           id, name, client_name, environment, status, 
           modules(id, name, environment, width_mm, height_mm, depth_mm, quantity, is_completed, data_source),
           parts(id, name, kind, quantity, unit, is_completed, material, thickness_mm, width_mm, length_mm, assembly_group_id, visibility_type, data_source),
-          assembly_groups(id, module_id, code, name, color, is_locked, lock_reason)
+          assembly_groups(id, module_id, code, name, color, is_locked, lock_reason, conference_status, sealed_at)
         `)
         .in("status", ["montagem", "conferencia", "assistencia"])
         .order("created_at", { ascending: false });
@@ -178,6 +179,8 @@ function AssemblyContent() {
                         const total = parts.length;
                         const progress = total > 0 ? (completed / total) * 100 : 0;
                         
+                          const [confDialogOpen, setConfDialogOpen] = useState(false);
+                        
                         return (
                           <Card key={m.id} className={cn("overflow-hidden border-2", group?.is_locked ? "border-amber-200" : "border-green-200")}>
                             <div className="h-2" style={{ backgroundColor: group?.color || "#ccc" }} />
@@ -202,40 +205,24 @@ function AssemblyContent() {
                               </div>
                               
                               <div className="flex gap-2">
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                    <Button variant="outline" size="sm" className="flex-1 gap-2">
-                                      <Scan className="h-4 w-4" /> Conferir
-                                    </Button>
-                                  </DialogTrigger>
-                                  <DialogContent className="max-h-[90vh] overflow-y-auto">
-                                    <DialogHeader>
-                                      <DialogTitle>Conferência: {group?.code} - {m.name}</DialogTitle>
-                                      <DialogDescription>
-                                        Escanear ou marcar itens do módulo.
-                                      </DialogDescription>
-                                    </DialogHeader>
-                                    <div className="space-y-4">
-                                      {parts.map(p => (
-                                        <div key={p.id} className="flex items-center gap-2 border-b pb-2">
-                                          <Checkbox 
-                                            checked={p.is_completed ?? false}
-                                            onCheckedChange={async (val) => {
-                                              await supabase.from('parts').update({ is_completed: !!val }).eq('id', p.id);
-                                              queryClient.invalidateQueries({ queryKey: ["assembly-projects"] });
-                                            }}
-                                          />
-                                          <span className={cn("text-sm", p.is_completed && "line-through text-muted-foreground")}>{p.name} ({p.quantity} {p.unit})</span>
-                                        </div>
-                                      ))}
-                                    </div>
-                                    <DialogFooter className="flex-col gap-2 sm:flex-row">
-                                      <Button variant="ghost" className="text-xs">Reportar Dano</Button>
-                                      <Button variant="secondary" className="text-xs">Exceção Autorizada</Button>
-                                      <Button className="w-full sm:w-auto">Finalizar Kit</Button>
-                                    </DialogFooter>
-                                  </DialogContent>
-                                </Dialog>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="flex-1 gap-2"
+                                  onClick={() => setConfDialogOpen(true)}
+                                >
+                                  <Scan className="h-4 w-4" /> Conferir
+                                </Button>
+
+                                <ConferenceDialog
+                                  open={confDialogOpen}
+                                  onOpenChange={setConfDialogOpen}
+                                  projectId={project.id}
+                                  projectPartIds={project.parts?.map(p => p.id) || []}
+                                  moduleName={m.name}
+                                  group={group}
+                                  parts={parts}
+                                />
                                 
                                 <Dialog>
                                   <DialogTrigger asChild>
@@ -256,7 +243,7 @@ function AssemblyContent() {
                                           color={group?.color ?? "#000"}
                                           partName={p.name}
                                           dimensions={`${p.width_mm}x${p.length_mm}mm`}
-                                          qrValue={p.id}
+                                          qrValue={`montaai://${project.id}/${p.id}`}
                                           projectId={project.id}
                                         />
                                       ))}
