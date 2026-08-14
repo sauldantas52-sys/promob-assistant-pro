@@ -111,24 +111,26 @@ function AssemblyContent() {
       ) : (
         <div className="space-y-4">
           {list.map((project) => (
-            <Card key={project.id}>
-              <CardHeader className="pb-3">
-                <div className="flex flex-wrap items-start justify-between gap-2">
+            <Card key={project.id} className="border-none shadow-sm rounded-2xl overflow-hidden">
+              <CardHeader className="pb-4 pt-6 px-6 bg-slate-100/50 border-b border-slate-200/50">
+                <div className="flex flex-wrap items-center justify-between gap-4">
                   <div>
-                    <CardTitle className="text-base">{project.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      {project.client_name || "Sem cliente"} · {project.environment || "—"}
+                    <CardTitle className="text-xl font-black text-slate-900 tracking-tight">{project.name}</CardTitle>
+                    <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mt-1">
+                      {project.client_name || "Sem cliente"} · {project.environment || "Ambiente geral"}
                     </p>
                   </div>
-                  <Badge className={statusTone(project.status)}>{statusLabel(project.status)}</Badge>
+                  <Badge className={cn("px-4 py-1.5 text-xs font-black uppercase tracking-widest border", statusTone(project.status))}>
+                    {statusLabel(project.status)}
+                  </Badge>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-6 p-6">
                 <Tabs defaultValue="modules">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="modules">Módulos</TabsTrigger>
-                    <TabsTrigger value="groups">Módulos/Grupos</TabsTrigger>
-                    <TabsTrigger value="hardware">Caderno</TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-3 bg-slate-100 p-1 h-12 rounded-xl">
+                    <TabsTrigger value="modules" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold text-xs uppercase tracking-wider">Módulos</TabsTrigger>
+                    <TabsTrigger value="groups" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold text-xs uppercase tracking-wider">Grupos G1/G2</TabsTrigger>
+                    <TabsTrigger value="hardware" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold text-xs uppercase tracking-wider">Caderno</TabsTrigger>
                   </TabsList>
                   
                   <TabsContent value="modules" className="space-y-3 mt-4">
