@@ -360,7 +360,7 @@ function VolumeRow({ volume, project }: { volume: any, project: any }) {
                 ENTREGUE
               </div>
             )}
-          </>
+          </div>
         )}
         
         <Dialog>
