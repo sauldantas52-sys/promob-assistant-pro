@@ -26,9 +26,11 @@ import {
   Truck,
   ShieldCheck,
   Scissors,
+  ArrowRightLeft,
 } from "lucide-react";
 import { Parser } from "@json2csv/plainjs";
 import { EngineeringTab } from "@/components/EngineeringTab";
+import { SketchUpBridgeTab } from "@/components/SketchUpBridgeTab";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -580,6 +582,7 @@ function ProjectDetail() {
             <TabTrigger value="modules" icon={LayoutGrid} label="Módulos" />
             <TabTrigger value="parts" icon={ClipboardList} label="Lista Técnica" />
             <TabTrigger value="engineering" icon={Settings} label="Usinagem" />
+            <TabTrigger value="sketchup" icon={ArrowRightLeft} label="Ponte SKP" />
             <TabTrigger value="shipping" icon={Truck} label="Logística" />
             <TabTrigger value="audit" icon={History} label="Auditoria" />
             <TabTrigger value="files" icon={FileUp} label="Arquivos" />
@@ -875,6 +878,10 @@ function ProjectDetail() {
 
         <TabsContent value="engineering" className="mt-6">
           <EngineeringTab projectId={projectId} parts={allParts} />
+        </TabsContent>
+
+        <TabsContent value="sketchup" className="mt-6">
+          <SketchUpBridgeTab projectId={projectId} />
         </TabsContent>
 
         <TabsContent value="production" className="mt-6">
