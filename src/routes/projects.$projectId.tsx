@@ -63,6 +63,8 @@ function ProjectDetail() {
   const fileInput = useRef<HTMLInputElement>(null);
   const [importing, setImporting] = useState(false);
   const [warnings, setWarnings] = useState<string[]>([]);
+  const [filterType, setFilterType] = useState<string>("all");
+  const [searchPart, setSearchPart] = useState("");
 
   const project = useQuery({
     queryKey: ["project", projectId],
@@ -368,13 +370,14 @@ function ProjectDetail() {
       </div>
 
       <Tabs defaultValue="modules">
-        <TabsList className="grid w-full grid-cols-3 md:w-auto md:grid-cols-none md:inline-flex">
-          <TabsTrigger value="modules">Módulos</TabsTrigger>
-          <TabsTrigger value="parts">Peças</TabsTrigger>
-          <TabsTrigger value="files">Arquivos</TabsTrigger>
+        <TabsList className="flex w-full flex-wrap justify-start gap-2 bg-transparent p-0 md:w-auto md:flex-nowrap">
+          <TabsTrigger value="modules" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Módulos</TabsTrigger>
+          <TabsTrigger value="parts" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Lista Técnica</TabsTrigger>
+          <TabsTrigger value="loose" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Itens sem Módulo</TabsTrigger>
+          <TabsTrigger value="files" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Arquivos</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="modules">
+        <TabsContent value="modules" className="mt-6">
           <Card>
             <CardContent className="p-0">
               <Accordion type="multiple" className="w-full">
@@ -474,8 +477,91 @@ function ProjectDetail() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="parts">
+        <TabsContent value="parts" className="mt-6">
           <Card>
+            <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <CardTitle className="text-base">Listagem Completa de Itens</CardTitle>
+              <div className="flex flex-wrap items-center gap-2">
+                <Input
+                  placeholder="Buscar peça..."
+                  className="h-9 w-full sm:w-48"
+                  value={searchPart}
+                  onChange={(e) => setSearchPart(e.target.value)}
+                />
+                <Select value={filterType} onValueChange={setFilterType}>
+                  <SelectTrigger className="h-9 w-full sm:w-36">
+                    <SelectValue placeholder="Tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="peca">Peças</SelectItem>
+                    <SelectItem value="ferragem">Ferragens</SelectItem>
+                    <SelectItem value="acessorio">Acessórios</SelectItem>
+                    <SelectItem value="chapa">Chapas</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardHeader>
+            <CardContent className="overflow-x-auto p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead>Item</TableHead>
+                    <TableHead>Módulo</TableHead>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead>Material</TableHead>
+                    <TableHead>Esp.</TableHead>
+                    <TableHead>Larg. × Comp. (mm)</TableHead>
+                    <TableHead>Fita</TableHead>
+                    <TableHead className="text-right">Qtd</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {allParts
+                    .filter((p) => {
+                      const matchesType = filterType === "all" || p.kind === filterType;
+                      const matchesSearch = p.name.toLowerCase().includes(searchPart.toLowerCase());
+                      return matchesType && matchesSearch;
+                    })
+                    .map((p) => (
+                      <TableRow key={p.id} className={p.is_completed ? "bg-muted/20" : ""}>
+                        <TableCell className="font-medium">
+                          <span className={p.is_completed ? "text-muted-foreground line-through" : ""}>{p.name}</span>
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {p.module_id ? modules.data?.find(m => m.id === p.module_id)?.name : "—"}
+                        </TableCell>
+                        <TableCell className="capitalize">
+                          <Badge variant="outline" className="text-[10px] font-normal uppercase tracking-wider">
+                            {p.kind}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-xs">{p.material || "—"}</TableCell>
+                        <TableCell className="text-xs">{p.thickness_mm ?? "Não confirmado"}</TableCell>
+                        <TableCell className="text-xs">
+                          {p.width_mm ?? "Não confirmado"} × {p.length_mm ?? "Não confirmado"}
+                        </TableCell>
+                        <TableCell className="text-xs">{p.edge_banding || "—"}</TableCell>
+                        <TableCell className="text-right font-medium">
+                          {p.quantity} {p.unit}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  {allParts.length === 0 && <EmptyRow colSpan={8} />}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="loose" className="mt-6">
+          <Card className="border-amber-200/50 dark:border-amber-900/30">
+            <CardHeader className="bg-amber-50/50 dark:bg-amber-950/20">
+              <CardTitle className="text-base flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-amber-500" />
+                Acessórios Avulsos / Itens sem Módulo
+              </CardTitle>
+            </CardHeader>
             <CardContent className="overflow-x-auto p-0">
               <Table>
                 <TableHeader>
@@ -483,29 +569,25 @@ function ProjectDetail() {
                     <TableHead>Item</TableHead>
                     <TableHead>Tipo</TableHead>
                     <TableHead>Material</TableHead>
-                    <TableHead>Esp.</TableHead>
-                    <TableHead>Larg. × Comp.</TableHead>
-                    <TableHead>Fita</TableHead>
                     <TableHead className="text-right">Qtd</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {allParts.map((p) => (
+                  {allParts.filter(p => !p.module_id).map((p) => (
                     <TableRow key={p.id}>
                       <TableCell className="font-medium">{p.name}</TableCell>
                       <TableCell className="capitalize">{p.kind}</TableCell>
-                      <TableCell>{p.material || "—"}</TableCell>
-                      <TableCell>{p.thickness_mm ?? "—"}</TableCell>
-                      <TableCell>
-                        {p.width_mm ?? "?"} × {p.length_mm ?? "?"}
-                      </TableCell>
-                      <TableCell>{p.edge_banding || "—"}</TableCell>
-                      <TableCell className="text-right">
-                        {p.quantity} {p.unit}
-                      </TableCell>
+                      <TableCell className="text-xs">{p.material || "—"}</TableCell>
+                      <TableCell className="text-right font-medium">{p.quantity} {p.unit}</TableCell>
                     </TableRow>
                   ))}
-                  {allParts.length === 0 && <EmptyRow colSpan={7} />}
+                  {allParts.filter(p => !p.module_id).length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="py-8 text-center text-sm text-muted-foreground">
+                        Nenhum item avulso identificado neste projeto.
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
