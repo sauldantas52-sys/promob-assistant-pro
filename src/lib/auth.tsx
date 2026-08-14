@@ -72,22 +72,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { 
-        emailRedirectTo: `${window.location.origin}/dashboard`, 
-        data: { full_name: name } 
-      },
+      options: {
+        data: {
+          full_name: name,
+        }
+      }
     });
     if (error) throw error;
     
-    let session = data.session;
-    if (!session) {
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-      if (signInError) throw signInError;
-      session = signInData.session;
-    }
-    
     const userId = data.user?.id;
-    if (!userId || !session) return;
+    if (!userId) return;
+
+    const { data: company, error: companyError } = await supabase
+      .from("companies")
+      .insert({ name: companyName })
+      .select("id")
+      .single();
+    if (companyError) throw companyError;
+
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .insert({ id: userId, company_id: company.id, full_name: name });
+    if (profileError) throw profileError;
+
+    await supabase.from("user_roles").insert({ user_id: userId, role: r });
+    
+    if (data.session) {
+      await loadProfile(userId);
+    } else {
+      // Se não logou automático (ex: confirmação de e-mail pendente no auth.config)
+      // Tentar login manual se o provedor permitir
+      try {
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (!signInError) await loadProfile(userId);
+      } catch (e) {
+        // Ignora erro de login automático
+      }
+    }
 
     const { data: company, error: companyError } = await supabase
       .from("companies")
