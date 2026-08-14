@@ -1107,7 +1107,29 @@ function MaintenanceTab({
                     {req.part_id && (
                       <span>Peça: {allParts.find(p => p.id === req.part_id)?.name}</span>
                     )}
+                    {req.deadline && (
+                      <span className="text-orange-600 font-medium">Prazo: {new Date(req.deadline).toLocaleDateString('pt-BR')}</span>
+                    )}
                   </div>
+                  {req.photos && req.photos.length > 0 && (
+                    <div className="flex gap-2 mt-2 overflow-x-auto pb-1">
+                      {req.photos.map((url: string, i: number) => (
+                        <a key={i} href={url} target="_blank" rel="noreferrer" className="shrink-0">
+                          <img src={url} alt="Evidência" className="h-12 w-12 rounded object-cover border" />
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                  {req.maintenance_history && req.maintenance_history.length > 0 && (
+                    <div className="mt-2 space-y-1 border-t pt-2">
+                      <p className="text-[10px] font-bold uppercase text-muted-foreground">Histórico</p>
+                      {req.maintenance_history.slice(0, 3).map((h: any) => (
+                        <p key={h.id} className="text-[10px] text-muted-foreground">
+                          {new Date(h.created_at).toLocaleDateString('pt-BR')}: {h.notes}
+                        </p>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="flex flex-col gap-2 min-w-[140px]">
                   <Select value={req.status} onValueChange={(val) => updateStatus.mutate({ id: req.id, oldStatus: req.status, newStatus: val })}>
