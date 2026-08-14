@@ -28,7 +28,9 @@ import { DrillingInspector } from "./DrillingInspector";
 interface EngineeringTabProps {
   projectId: string;
   parts: any[];
+  isValidated?: boolean;
 }
+
 
 
 export function EngineeringTab({ projectId, parts }: EngineeringTabProps) {
