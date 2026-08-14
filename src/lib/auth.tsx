@@ -72,11 +72,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: `${window.location.origin}/dashboard`, data: { full_name: name } },
+      options: {
+        data: {
+          full_name: name,
+        }
+      }
     });
     if (error) throw error;
+    
     const userId = data.user?.id;
-    if (!userId || !data.session) return;
+    if (!userId) return;
 
     const { data: company, error: companyError } = await supabase
       .from("companies")
@@ -91,7 +96,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (profileError) throw profileError;
 
     await supabase.from("user_roles").insert({ user_id: userId, role: r });
-    await loadProfile(userId);
+    
+    if (data.session) {
+      await loadProfile(userId);
+    } else {
+      // Se não logou automático (ex: confirmação de e-mail pendente no auth.config)
+      // Tentar login manual se o provedor permitir
+      try {
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (!signInError) await loadProfile(userId);
+      } catch (e) {
+        // Ignora erro de login automático
+      }
+    }
+
   };
 
   const signOut = async () => {
