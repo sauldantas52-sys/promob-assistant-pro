@@ -7,7 +7,8 @@ import {
   AlertTriangle, 
   XCircle,
   Wrench,
-  Boxes
+  Boxes,
+  ClipboardList
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
