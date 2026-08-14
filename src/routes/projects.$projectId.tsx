@@ -351,12 +351,38 @@ function ProjectDetail() {
           <Badge className={statusTone(project.data?.status || "novo")}>{statusLabel(project.data?.status || "novo")}</Badge>
           <Select 
             value={project.data?.status ?? "novo"} 
-            onValueChange={(v) => {
-              if (v === "producao" && allParts.some(p => (!p.width_mm || !p.length_mm) && p.kind !== 'ferragem' && p.kind !== 'acessorio' && !p.name.toLowerCase().includes("processo"))) {
-                toast.error("Bloqueio: Existem peças sem medida confirmada. Não é possível liberar para produção.");
-                return;
+            onValueChange={async (v) => {
+              if (v === "producao") {
+                const unconfirmedParts = allParts.filter(p => 
+                  (!p.width_mm || !p.length_mm || !p.thickness_mm || !p.material) && 
+                  p.kind !== 'ferragem' && 
+                  p.kind !== 'acessorio' && 
+                  !p.name.toLowerCase().includes("processo") &&
+                  p.visibility_type !== 'oculta'
+                );
+
+                if (unconfirmedParts.length > 0) {
+                  toast.error(`Bloqueio: ${unconfirmedParts.length} peça(s) possuem medidas ou dados críticos "Não confirmados".`);
+                  return;
+                }
               }
-              updateStatus.mutate(v);
+
+              const oldStatus = project.data?.status || "novo";
+              updateStatus.mutate(v, {
+                onSuccess: async () => {
+                  const { data: { user } } = await supabase.auth.getUser();
+                  if (user) {
+                    await (supabase.from('production_logs') as any).insert({
+                      project_id: projectId,
+                      user_id: user.id,
+                      action: `Alteração de status do projeto: ${v}`,
+                      status_from: oldStatus,
+                      status_to: v,
+                      notes: "Alteração via seletor de status principal"
+                    });
+                  }
+                }
+              });
             }}
           >
             <SelectTrigger className="h-11 w-44">
