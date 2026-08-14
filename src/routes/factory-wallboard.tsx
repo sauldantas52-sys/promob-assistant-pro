@@ -51,6 +51,8 @@ function WallboardContent() {
           name, 
           status, 
           client_name,
+          is_cutting_edge_released,
+          is_machining_assembly_blocked,
           production_steps(*)
         `)
         .in("status", ["producao", "conferencia"])
@@ -85,13 +87,20 @@ function WallboardContent() {
     const steps = project?.production_steps || [];
     const typeSteps = steps.filter(s => s.step_type === type);
     
-    // Bloqueio se houver qualquer peça não confirmada no projeto (segurança extra no wallboard)
-    const isProjectBlocked = steps.some(s => s.status === 'bloqueado');
+    // Rastreabilidade 4.0: Bloqueios explícitos no projeto
+    const isCuttingBlocked = !project?.is_cutting_edge_released;
+    const isMachiningBlocked = !!project?.is_machining_assembly_blocked;
+
+    let finalBlocked = steps.some(s => s.status === 'bloqueado') || typeSteps.some(s => s.status === 'bloqueado');
+    
+    if ((type === 'corte' || type === 'borda') && isCuttingBlocked) finalBlocked = true;
+    if ((type === 'usinagem' || type === 'separacao') && isMachiningBlocked) finalBlocked = true;
 
     return {
       total: typeSteps.length,
       done: typeSteps.filter(s => s.status === 'concluido').length,
-      blocked: isProjectBlocked || typeSteps.some(s => s.status === 'bloqueado'),
+      blocked: finalBlocked,
+      blockingReason: finalBlocked ? (isCuttingBlocked && (type === 'corte' || type === 'borda') ? 'Aguardando Liberação' : 'Bloqueio Técnico') : null
     };
   };
 
@@ -150,7 +159,24 @@ function WallboardContent() {
                 />
               </div>
 
-              {/* Alertas Críticos */}
+               {/* Alertas Críticos de Rastreabilidade */}
+              {(!project.is_cutting_edge_released || !!project.is_machining_assembly_blocked) && (
+                <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded-lg flex flex-col gap-1">
+                  {!project.is_cutting_edge_released && (
+                    <div className="flex items-center gap-2 text-amber-700 animate-pulse">
+                      <AlertOctagon className="h-3 w-3" />
+                      <span className="text-[9px] font-bold uppercase tracking-wider">Corte/Borda: Aguardando Eng.</span>
+                    </div>
+                  )}
+                  {!!project.is_machining_assembly_blocked && (
+                    <div className="flex items-center gap-2 text-destructive">
+                      <AlertOctagon className="h-3 w-3" />
+                      <span className="text-[9px] font-bold uppercase tracking-wider">Usinagem/Montagem: BLOQUEADO</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {project.production_steps?.some(s => s.status === 'bloqueado') && (
                 <div className="mt-2 p-2 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-2 text-destructive animate-pulse">
                   <AlertOctagon className="h-4 w-4" />
