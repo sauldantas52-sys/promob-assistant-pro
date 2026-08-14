@@ -1,7 +1,5 @@
-require_relative 'module_detector'
-
+# encoding: UTF-8
 module MontaAI
-
   module Bridge
     class ManifestBuilder
       def self.build
@@ -15,48 +13,34 @@ module MontaAI
             environments: ModuleDetector.detect_environments
           },
           items: []
-
         }
 
         model.entities.each do |entity|
           next unless entity.is_a?(Sketchup::ComponentInstance) || entity.is_a?(Sketchup::Group)
-          
           manifest[:items] << build_item(entity)
         end
-
         manifest
       end
 
-      def self.build_item(entity)
-        definition = entity.is_a?(Sketchup::ComponentInstance) ? entity.definition : entity
+      def self.build_item(entity, depth = 0)
         bounds = entity.bounds
+        definition = entity.is_a?(Sketchup::ComponentInstance) ? entity.definition : entity
         
-        {
+        data = {
           guid: entity.guid,
           name: entity.name.empty? ? "Item Sem Nome" : entity.name,
-          group_code: detect_group(entity),
-          dimensions: {
-            width: bounds.width.to_mm,
-            height: bounds.height.to_mm,
-            depth: bounds.depth.to_mm
-          },
-          position: {
-            x: entity.transformation.origin.x.to_mm,
-            y: entity.transformation.origin.y.to_mm,
-            z: entity.transformation.origin.z.to_mm
-          },
-          material: entity.material ? entity.material.name : "Padrão",
-          layer: entity.layer.name
+          layer: entity.layer.name,
+          dimensions: { w: bounds.width.to_mm, h: bounds.height.to_mm, d: bounds.depth.to_mm },
+          position: { x: entity.transformation.origin.x.to_mm, y: entity.transformation.origin.y.to_mm, z: entity.transformation.origin.z.to_mm },
+          material: entity.material ? entity.material.name : "Padrão"
         }
-      end
-
-      def self.detect_group(entity)
-        layer_name = entity.layer.name.upcase
-        return "G1" if layer_name.include?("G1")
-        return "G2" if layer_name.include?("G2")
-        return "G3" if layer_name.include?("G3")
-        return "AV" if layer_name.include?("AV")
-        "UNASSIGNED"
+        
+        # Identificação recursiva simplificada
+        if entity.respond_to?(:entities)
+          data[:children] = entity.entities.map { |e| build_item(e, depth + 1) if e.is_a?(Sketchup::ComponentInstance) || e.is_a?(Sketchup::Group) }.compact
+        end
+        
+        data
       end
     end
   end

@@ -1,48 +1,22 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <style>
-        :root {
-            --primary: #0F4C5C;
-            --bg: #F8FAFC;
-            --text: #1E293B;
-            --border: #E2E8F0;
-        }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
-        .card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        h2 { color: var(--primary); margin-top: 0; }
-        .btn { 
-            background: var(--primary); color: white; border: none; padding: 12px 24px; 
-            border-radius: 6px; cursor: pointer; width: 100%; font-weight: 600;
-        }
-        .btn:hover { opacity: 0.9; }
-        .status { margin-top: 20px; font-size: 14px; }
-        .valid { color: #10B981; }
-        .invalid { color: #EF4444; }
+        body { font-family: 'Inter', sans-serif; background: #F8FAFC; color: #1E293B; padding: 20px; }
+        .card { background: white; border: 1px solid #E2E8F0; border-radius: 8px; padding: 20px; }
+        button { background: #0F4C5C; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; width: 100%; margin-bottom: 10px; }
+        button:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
     <div class="card">
         <h2>Monta AI Bridge</h2>
-        <p>Prepare seu projeto SketchUp para fabricação.</p>
-        
-        <div id="validation-report">
-            <p>Aguardando análise do modelo...</p>
-        </div>
-
-        <button class="btn" onclick="startExport()">Exportar para Monta AI</button>
-
-        <div class="status" id="status-log">
-            Status: Pronto
-        </div>
+        <button onclick="window.location='skp:export_project'">Exportar para Monta AI</button>
+        <div id="status">Pronto para operação.</div>
     </div>
-
     <script>
-        function startExport() {
-            document.getElementById('status-log').innerHTML = 'Gerando manifesto...';
-            // Comunicação com Ruby: sketchup.export_data();
-        }
+        // A lógica de callback agora passa pelo bridge via href 'skp:'
     </script>
 </body>
 </html>
