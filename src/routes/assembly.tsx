@@ -160,7 +160,7 @@ function AssemblyContent() {
                                 <span className="text-primary">{p.width_mm}x{p.length_mm} mm</span>
                               </div>
                               <div className="flex justify-between text-[10px] text-muted-foreground">
-                                <span>ID: {p.id.split('-')[0].toUpperCase()}</span>
+                                <span>ID: {p.id?.split('-')[0].toUpperCase()}</span>
                                 <span>{p.material} {p.thickness_mm}mm</span>
                               </div>
                             </div>
