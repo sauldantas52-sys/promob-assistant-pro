@@ -439,7 +439,7 @@ function ProjectDetail() {
               <p className="text-[12px] font-black uppercase tracking-[0.6em] text-blue-600">Dossiê Técnico Industrial</p>
               <div className="h-3 w-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
             </div>
-            <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-slate-900 uppercase leading-[0.8]">
+            <h1 className="text-6xl md:text-[10rem] font-black tracking-tighter text-slate-900 uppercase leading-[0.8]">
               {project.data?.name}
             </h1>
             <div className="flex flex-wrap items-center gap-8 pt-4">
@@ -579,12 +579,9 @@ function ProjectDetail() {
           <TabsList className="flex w-fit bg-slate-100 p-2 h-20 rounded-[3rem] border border-slate-200 overflow-x-auto no-scrollbar shadow-sm">
             <TabTrigger value="modules" icon={LayoutGrid} label="Módulos" />
             <TabTrigger value="parts" icon={ClipboardList} label="Lista Técnica" />
-            <TabTrigger value="loose" icon={PackageCheck} label="Avulsos" />
-            <TabTrigger value="audit" icon={History} label="Auditoria" />
             <TabTrigger value="engineering" icon={Settings} label="Usinagem" />
-            <TabTrigger value="production" icon={Factory} label="Fábrica" />
             <TabTrigger value="shipping" icon={Truck} label="Logística" />
-            <TabTrigger value="maintenance" icon={Wrench} label="Assistência" />
+            <TabTrigger value="audit" icon={History} label="Auditoria" />
             <TabTrigger value="files" icon={FileUp} label="Arquivos" />
           </TabsList>
 
@@ -1463,13 +1460,17 @@ function Metric({
   value: string;
 }) {
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle>
-        <Icon className="h-4 w-4 text-primary" />
+    <Card className="border-none shadow-[0_20px_50px_-15px_rgba(0,0,0,0.06)] hover:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.12)] transition-all duration-700 rounded-[3rem] group bg-white overflow-hidden">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6 p-10">
+        <CardTitle className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-400">
+          {label}
+        </CardTitle>
+        <div className="p-4 rounded-3xl bg-slate-50 transition-all duration-700 group-hover:scale-110 group-hover:rotate-12">
+          <Icon className="h-7 w-7 text-blue-600" />
+        </div>
       </CardHeader>
-      <CardContent>
-        <p className="text-2xl font-bold">{value}</p>
+      <CardContent className="p-10 pt-0">
+        <p className="text-6xl font-black tracking-tighter leading-none text-slate-900">{value}</p>
       </CardContent>
     </Card>
   );

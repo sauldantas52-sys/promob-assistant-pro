@@ -106,25 +106,26 @@ function ProjectsContent() {
   });
 
   return (
-    <div className="space-y-10 p-6 md:p-12 max-w-[1600px] mx-auto">
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="space-y-2">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-600">
-            Módulo de Projetos
-          </p>
-          <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-slate-900 uppercase leading-none">
-            Gestão Técnica 4.0
+    <div className="space-y-16 p-8 md:p-16 max-w-[1800px] mx-auto animate-in fade-in duration-700">
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-10">
+        <div className="space-y-6">
+          <div className="flex items-center gap-4">
+            <span className="h-2 w-10 bg-blue-600 rounded-full" />
+            <p className="text-[12px] font-black uppercase tracking-[0.5em] text-blue-600">Módulo de Projetos</p>
+          </div>
+          <h1 className="text-6xl md:text-[8rem] font-black tracking-tighter text-slate-900 uppercase leading-[0.8]">
+            Engenharia <br className="hidden md:block" /> Técnica 4.0
           </h1>
-          <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-2">
-            Importação inteligente e controle industrial Promob
+          <p className="text-base font-black text-slate-500 uppercase tracking-[0.4em] mt-6">
+            Inteligência operacional e controle de fluxo Promob.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-4">
           {hasPermission(role, "projects", "import") && (
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
-                <Button className="h-14 px-8 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest text-[11px] shadow-lg shadow-blue-600/20 gap-3">
-                  <Plus className="h-5 w-5" /> Novo Projeto
+                <Button className="h-24 px-12 rounded-[2rem] bg-slate-900 hover:bg-black text-white font-black uppercase tracking-[0.3em] text-[12px] shadow-2xl shadow-slate-900/40 gap-6 transition-all duration-500 active:scale-95 group">
+                  <Plus className="h-8 w-8 text-blue-400 transition-transform group-hover:rotate-90" /> Novo Dossiê
                 </Button>
               </DialogTrigger>
               <DialogContent>
@@ -219,31 +220,37 @@ function ProjectsContent() {
         <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
           {filteredProjects.map((project) => (
             <Link key={project.id} to="/projects/$projectId" params={{ projectId: project.id }}>
-              <Card className="h-full border-none shadow-[0_20px_50px_-15px_rgba(0,0,0,0.06)] hover:shadow-[0_30px_70px_-15px_rgba(0,0,0,0.12)] transition-all duration-500 rounded-[3rem] overflow-hidden group bg-white">
-                <CardHeader className="pb-4 pt-10 px-10">
-                  <div className="flex items-start justify-between gap-4">
-                    <CardTitle className="text-2xl font-black text-slate-900 tracking-tighter leading-none uppercase group-hover:text-blue-600 transition-colors">{project.name}</CardTitle>
-                    <Badge className={cn("px-5 py-2 text-[10px] font-black uppercase tracking-[0.2em] border-none rounded-full shadow-sm", statusTone(project.status))}>
+              <Card className="h-full border-none shadow-[0_40px_100px_-20px_rgba(0,0,0,0.08)] hover:shadow-[0_60px_120px_-20px_rgba(0,0,0,0.15)] transition-all duration-700 rounded-[4rem] overflow-hidden group bg-white relative">
+                <div className="absolute top-0 right-0 p-10">
+                   <div className={cn("w-4 h-4 rounded-full animate-pulse", project.status === 'concluido' ? 'bg-slate-300' : 'bg-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.5)]')} />
+                </div>
+                <CardHeader className="pb-8 pt-16 px-16">
+                  <div className="space-y-6">
+                    <Badge className={cn("px-8 py-3 text-[10px] font-black uppercase tracking-[0.3em] border-none rounded-full shadow-sm", statusTone(project.status))}>
                       {statusLabel(project.status)}
                     </Badge>
+                    <CardTitle className="text-5xl font-black text-slate-900 tracking-tighter leading-[0.9] uppercase group-hover:text-blue-600 transition-colors duration-500">
+                      {project.name}
+                    </CardTitle>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-6 px-10 pb-10">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Cliente</p>
-                      <p className="text-xs font-black uppercase tracking-tight text-slate-900">{project.client_name || "—"}</p>
+                <CardContent className="space-y-10 px-16 pb-16 pt-4">
+                  <div className="grid grid-cols-2 gap-8">
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Cliente</p>
+                      <p className="text-lg font-black uppercase tracking-tighter text-slate-900 truncate">{project.client_name || "—"}</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Ambiente</p>
-                      <p className="text-xs font-black uppercase tracking-tight text-slate-900">{project.environment || "—"}</p>
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Ambiente</p>
+                      <p className="text-lg font-black uppercase tracking-tighter text-slate-900 truncate">{project.environment || "—"}</p>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-600">
-                      Rastreabilidade Ativa
-                    </p>
-                    <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-blue-600 group-hover:translate-x-1 transition-all duration-500" />
+                  <div className="flex items-center justify-between pt-10 border-t border-slate-50">
+                    <div className="flex items-center gap-3">
+                      <div className="h-2 w-8 bg-blue-600 rounded-full" />
+                      <p className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-600">Protocolo Industrial</p>
+                    </div>
+                    <ChevronRight className="h-8 w-8 text-slate-200 group-hover:text-blue-600 group-hover:translate-x-3 transition-all duration-700" />
                   </div>
                 </CardContent>
               </Card>

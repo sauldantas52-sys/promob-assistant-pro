@@ -7,7 +7,8 @@ import {
   AlertTriangle, 
   XCircle,
   Wrench,
-  Boxes
+  Boxes,
+  ClipboardList
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -62,17 +63,19 @@ function PickingPage() {
 
   return (
     <AppShell>
-      <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto">
-        <header className="flex flex-col gap-2">
-          <Link to="/dashboard" className="text-sm font-bold text-slate-500 flex items-center gap-2 hover:text-blue-600 transition-colors uppercase tracking-widest">
-            <ArrowLeft className="h-4 w-4" /> Voltar ao Painel
+      <div className="space-y-16 p-8 md:p-16 max-w-[1800px] mx-auto animate-in fade-in duration-700">
+        <header className="flex flex-col gap-8 mb-10">
+          <Link to="/dashboard" className="inline-flex items-center gap-4 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 hover:text-blue-600 transition-all duration-300 group">
+            <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-2" /> Voltar ao Painel
           </Link>
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase flex items-center gap-3">
-                <PackageCheck className="h-8 w-8 text-blue-600" /> Separação e Conferência
-              </h1>
-              <p className="text-base text-slate-500 font-medium mt-1">Ferragens, acessórios e peças por grupos G1, G2 e G3.</p>
+          <div className="flex flex-wrap items-center justify-between gap-10">
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <span className="h-2 w-10 bg-blue-600 rounded-full" />
+                <p className="text-[12px] font-black uppercase tracking-[0.5em] text-blue-600">Gestão de Insumos e Ferragens</p>
+              </div>
+              <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-slate-900 uppercase leading-[0.8] mb-4">Separação</h1>
+              <p className="text-base font-black text-slate-500 uppercase tracking-[0.4em]">Ferragens, acessórios e peças por grupos G1, G2 e G3.</p>
             </div>
           </div>
         </header>
@@ -87,20 +90,22 @@ function PickingPage() {
             const progress = total > 0 ? (done / total) * 100 : 0;
 
             return (
-              <Card key={project.id} className="border-none shadow-sm rounded-2xl overflow-hidden">
-                <CardHeader className="pb-4 pt-6 px-6 bg-slate-50 border-b border-slate-200">
-                  <div className="flex justify-between items-start gap-4">
-                    <div>
-                      <CardTitle className="text-xl font-black text-slate-900 tracking-tight uppercase">{project.name}</CardTitle>
-                      <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mt-1">{project.client_name} · {project.environment}</p>
+              <Card key={project.id} className="border-none shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)] rounded-[4rem] overflow-hidden bg-white mb-12 transition-all duration-700 hover:shadow-[0_60px_120px_-20px_rgba(0,0,0,0.15)]">
+                <CardHeader className="pb-10 pt-16 px-16 bg-slate-50/30 border-b border-slate-100">
+                  <div className="flex flex-wrap justify-between items-center gap-10">
+                    <div className="space-y-4">
+                      <CardTitle className="text-5xl font-black text-slate-900 tracking-tighter uppercase leading-[0.9]">{project.name}</CardTitle>
+                      <p className="text-[12px] font-black text-slate-500 uppercase tracking-[0.4em] flex items-center gap-3">
+                        {project.client_name || "CLIENTE ANÔNIMO"} <span className="h-1.5 w-1.5 rounded-full bg-slate-200" /> {project.environment || "AMBIENTE GERAL"}
+                      </p>
                     </div>
-                    <Badge className={cn("px-4 py-1.5 text-xs font-black uppercase tracking-widest border shadow-sm", progress === 100 ? "bg-green-600 text-white border-green-500" : "bg-blue-600 text-white border-blue-500")}>
-                      {done} / {total} ITENS
+                    <Badge className={cn("px-10 py-4 text-[11px] font-black uppercase tracking-[0.3em] border-none rounded-full shadow-2xl transition-all duration-500", progress === 100 ? "bg-emerald-600 text-white" : "bg-blue-600 text-white")}>
+                      {done} / {total} ITENS PROCESSADOS
                     </Badge>
                   </div>
-                  <div className="mt-6 w-full bg-slate-200 h-3 rounded-full overflow-hidden shadow-inner border border-slate-300/50">
+                  <div className="mt-12 w-full bg-slate-100 h-6 rounded-full overflow-hidden shadow-inner border border-slate-200 p-1.5">
                     <div 
-                      className="h-full bg-blue-600 transition-all duration-1000 shadow-[0_0_15px_rgba(37,99,235,0.4)]" 
+                      className="h-full bg-blue-600 transition-all duration-1000 shadow-[0_0_20px_rgba(37,99,235,0.4)] rounded-full" 
                       style={{ width: `${progress}%` }} 
                     />
                   </div>
@@ -108,21 +113,27 @@ function PickingPage() {
                 <CardContent className="p-0">
                   <div className="divide-y">
                     {pickingItems.map(item => (
-                      <div key={item.id} className="p-4 flex items-center justify-between gap-4">
-                        <div className="flex items-start gap-3">
+                      <div key={item.id} className="px-16 py-10 flex items-center justify-between gap-8 transition-all hover:bg-slate-50 border-b border-slate-50 last:border-b-0">
+                        <div className="flex items-center gap-8">
                           <Button 
                             variant={item.is_completed ? "default" : "outline"}
                             size="icon"
-                            className="h-10 w-10 shrink-0"
+                            className={cn(
+                              "h-16 w-16 shrink-0 rounded-[1.5rem] transition-all duration-300 border-2",
+                              item.is_completed ? "bg-emerald-600 border-emerald-600 shadow-xl shadow-emerald-600/20" : "bg-white border-slate-200 shadow-sm"
+                            )}
                             onClick={() => updatePart.mutate({ id: item.id, is_completed: !item.is_completed })}
                           >
-                            {item.is_completed ? <CheckCircle2 className="h-6 w-6" /> : <div className="h-6 w-6 rounded-full border-2" />}
+                            {item.is_completed ? <CheckCircle2 className="h-8 w-8 text-white" /> : <div className="h-8 w-8 rounded-full border-4 border-slate-100" />}
                           </Button>
                           <div>
-                            <p className={`font-medium ${item.is_completed ? "text-muted-foreground line-through" : ""}`}>
+                            <p className={cn(
+                              "text-xl font-black tracking-tighter uppercase leading-none mb-2 transition-all",
+                              item.is_completed ? "text-slate-400 line-through" : "text-slate-900"
+                            )}>
                               {item.name}
                             </p>
-                            <p className="text-xs text-muted-foreground">Quantidade: {item.quantity} {item.unit}</p>
+                            <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em]">Quantidade: {item.quantity} {item.unit}</p>
                           </div>
                         </div>
                         <div className="flex gap-2">
@@ -142,13 +153,28 @@ function PickingPage() {
                     )}
                   </div>
                 </CardContent>
-                {progress === 100 && (
-                  <div className="p-4 bg-primary/5 border-t">
-                    <Button className="w-full" variant="outline">
-                      <Wrench className="mr-2 h-4 w-4" /> Liberar para Montagem
-                    </Button>
+                <div className="p-16 bg-slate-50/30 flex flex-wrap justify-between items-center gap-10">
+                  <div className="flex items-center gap-3">
+                    <div className="h-2 w-8 bg-blue-600 rounded-full" />
+                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-600">Protocolo de Picking Finalizado</p>
                   </div>
-                )}
+                  <div className="flex gap-6">
+                    <Button 
+                      asChild 
+                      className="h-20 px-12 rounded-[2rem] bg-slate-900 hover:bg-black text-white font-black uppercase tracking-[0.3em] text-[12px] shadow-2xl shadow-slate-900/40 gap-6 transition-all duration-500 active:scale-95 group"
+                    >
+                      <Link to="/projects/$projectId" params={{ projectId: project.id }}>
+                        <ClipboardList className="h-7 w-7 text-blue-400" />
+                        Acessar Dossiê Completo
+                      </Link>
+                    </Button>
+                    {progress === 100 && (
+                      <Button className="h-20 px-12 rounded-[2rem] bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-[0.3em] text-[12px] shadow-2xl shadow-emerald-600/40 gap-6 transition-all duration-500 active:scale-95 group">
+                        <CheckCircle2 className="h-7 w-7 text-white" /> Liberar para Montagem
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </Card>
             );
           })}
