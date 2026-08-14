@@ -537,6 +537,7 @@ function ProjectDetail() {
           <TabsTrigger value="audit" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Auditoria Técnica</TabsTrigger>
           <TabsTrigger value="engineering" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Engenharia</TabsTrigger>
           <TabsTrigger value="production" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Produção / Fábrica</TabsTrigger>
+          <TabsTrigger value="shipping" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Expedição</TabsTrigger>
           <TabsTrigger value="maintenance" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Assistência</TabsTrigger>
           <TabsTrigger value="files" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Arquivos</TabsTrigger>
         </TabsList>
