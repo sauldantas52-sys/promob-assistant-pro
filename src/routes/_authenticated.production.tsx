@@ -77,7 +77,8 @@ function ProductionContent() {
         .select(`
           id, name, client_name, status, environment, 
           machining_blocked,
-          parts(id, is_completed, kind)
+          parts(id, is_completed, kind),
+          validation_checks(id, check_type, is_completed)
         `)
         .in("status", ["corte", "borda", "usinagem", "separacao", "conferencia", "expedicao"])
         .order("created_at", { ascending: false });
@@ -101,7 +102,28 @@ function ProductionContent() {
     onError: (error: Error) => toast.error(error.message),
   });
 
-  const queue = projects.data ?? [];
+  const queue = (projects.data ?? []).map(p => {
+    const checks = (p as any).validation_checks || [];
+    
+    // Gate logic
+    const gate1Items = ['xml_valido', 'lista_corte', 'nesting_dxf', 'materiais'];
+    const gate1Ok = gate1Items.every(id => checks.find((c: any) => c.check_type === id)?.is_completed);
+    
+    const gate2Items = ['documentacao_tecnica', 'cotas_furacao', 'bitolas', 'tags_skp'];
+    const gate2Ok = gate2Items.every(id => checks.find((c: any) => c.check_type === id)?.is_completed);
+    
+    const gate3Items = ['usinagem_liberada', 'pecas_conferidas', 'ferragens_conferidas', 'grupos_completos'];
+    const gate3Ok = gate3Items.every(id => checks.find((c: any) => c.check_type === id)?.is_completed);
+
+    const nextStatus = flow[p.status ?? ""]?.next;
+    let blocked = false;
+
+    if (nextStatus === 'corte') blocked = !gate1Ok;
+    if (nextStatus === 'usinagem') blocked = !gate2Ok;
+    if (nextStatus === 'montagem') blocked = !gate3Ok;
+
+    return { ...p, validation_blocked: blocked };
+  });
 
   return (
     <div className="space-y-16 p-8 md:p-16 max-w-[1800px] mx-auto animate-in fade-in duration-700">
@@ -194,15 +216,14 @@ function ProductionContent() {
                         size="lg"
                         className={cn(
                           "h-16 w-full rounded-[1.25rem] text-white font-black uppercase tracking-[0.2em] text-[11px] border-none shadow-xl transition-all duration-300 active:scale-[0.98]",
-                          project.machining_blocked && step.next === 'usinagem' ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 shadow-blue-600/20"
+                          (project as any).validation_blocked ? "bg-slate-200 text-slate-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 shadow-blue-600/20"
                         )}
-                        disabled={advance.isPending || (!!project.machining_blocked && step.next === 'usinagem')}
+                        disabled={advance.isPending || (project as any).validation_blocked}
                         onClick={() => advance.mutate({ id: project.id, status: step.next })}
                       >
-                        {!!project.machining_blocked && step.next === 'usinagem' ? (
-                          <span className="flex items-center gap-2"><Lock className="h-4 w-4" /> Bloqueado</span>
+                        {(project as any).validation_blocked ? (
+                          <span className="flex items-center gap-2"><Lock className="h-4 w-4" /> Bloqueado (Checklist)</span>
                         ) : step.action}
-
                       </Button>
                     )}
                     <Button asChild size="lg" variant="outline" className="h-16 w-full rounded-[1.25rem] border-2 border-slate-100 font-black uppercase tracking-[0.2em] text-[11px] hover:bg-slate-50 transition-all duration-300">
