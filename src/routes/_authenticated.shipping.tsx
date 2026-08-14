@@ -90,21 +90,21 @@ function ShippingPage() {
   return (
     <AppShell>
       <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto">
-        <header className="flex flex-col gap-2">
-          <Link to="/dashboard" className="text-sm text-muted-foreground flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4" /> Painel
+        <header className="flex flex-col gap-3">
+          <Link to="/dashboard" className="text-sm font-bold text-slate-500 flex items-center gap-2 hover:text-blue-600 transition-colors uppercase tracking-widest">
+            <ArrowLeft className="h-4 w-4" /> Voltar ao Painel
           </Link>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold flex items-center gap-2">
-                <Truck className="h-6 w-6 text-primary" /> Expedição e Carga
+              <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase flex items-center gap-3">
+                <Truck className="h-8 w-8 text-blue-600" /> Expedição e Carga
               </h1>
-              <p className="text-sm text-muted-foreground">Controle de volumes, logística e entregas.</p>
+              <p className="text-base text-slate-500 font-medium mt-1">Controle logístico, carregamento e romaneio digital.</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3 w-full md:w-auto">
                <Input 
                 placeholder="Buscar projeto ou cliente..." 
-                className="w-full md:w-64 h-9"
+                className="w-full md:w-80 h-12 rounded-xl border-slate-200 shadow-sm focus:ring-blue-500"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -113,9 +113,9 @@ function ShippingPage() {
         </header>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 max-w-md">
-            <TabsTrigger value="volumes">Volumes por Projeto</TabsTrigger>
-            <TabsTrigger value="active-loads">Cargas Ativas</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 max-w-md bg-slate-100 p-1 h-14 rounded-2xl">
+            <TabsTrigger value="volumes" className="rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm font-black text-xs uppercase tracking-widest">Volumes por Projeto</TabsTrigger>
+            <TabsTrigger value="active-loads" className="rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm font-black text-xs uppercase tracking-widest">Cargas Ativas</TabsTrigger>
           </TabsList>
 
           <TabsContent value="volumes" className="space-y-6">
