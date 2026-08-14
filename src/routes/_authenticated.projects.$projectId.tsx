@@ -603,13 +603,14 @@ function ProjectDetail() {
           <TabsList className="flex w-fit bg-slate-100 p-2 h-20 rounded-[3rem] border border-slate-200 overflow-x-auto no-scrollbar shadow-sm">
             <TabTrigger value="modules" icon={LayoutGrid} label="Módulos" />
             <TabTrigger value="parts" icon={ClipboardList} label="Lista Técnica" />
+            <TabTrigger value="commercial" icon={FileText} label="Comercial" />
+            <TabTrigger value="cutplan" icon={Scissors} label="Plano de Corte" />
             <TabTrigger value="engineering" icon={Settings} label="Usinagem" />
             <TabTrigger value="sketchup" icon={ArrowRightLeft} label="Ponte SKP" />
             <TabTrigger value="shipping" icon={Truck} label="Logística" />
             <TabTrigger value="maintenance" icon={HardHat} label="Assistência" />
             <TabTrigger value="audit" icon={History} label="Auditoria" />
             <TabTrigger value="files" icon={FileUp} label="Arquivos" />
-
           </TabsList>
 
           <TabsContent value="modules" className="mt-6">
@@ -900,6 +901,14 @@ function ProjectDetail() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="commercial" className="mt-6">
+          <BudgetTab projectId={projectId} />
+        </TabsContent>
+
+        <TabsContent value="cutplan" className="mt-6">
+          <PreliminaryCutPlanTab projectId={projectId} />
+        </TabsContent>
+
         <TabsContent value="engineering" className="mt-6">
           <EngineeringTab 
             projectId={projectId} 
@@ -907,7 +916,6 @@ function ProjectDetail() {
             isValidated={project.data?.is_validated}
           />
         </TabsContent>
-
 
         <TabsContent value="sketchup" className="mt-6">
           <SketchUpBridgeTab projectId={projectId} />

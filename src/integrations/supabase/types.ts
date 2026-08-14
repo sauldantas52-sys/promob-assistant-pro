@@ -254,6 +254,53 @@ export type Database = {
           },
         ]
       }
+      inventory_logs: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          id: string
+          material_name: string
+          metadata: Json | null
+          new_balance: number
+          previous_balance: number
+          project_id: string | null
+          quantity: number
+          type: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          id?: string
+          material_name: string
+          metadata?: Json | null
+          new_balance: number
+          previous_balance: number
+          project_id?: string | null
+          quantity: number
+          type: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          material_name?: string
+          metadata?: Json | null
+          new_balance?: number
+          previous_balance?: number
+          project_id?: string | null
+          quantity?: number
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_logs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       maintenance_history: {
         Row: {
           created_at: string | null
@@ -879,6 +926,50 @@ export type Database = {
           },
         ]
       }
+      project_quotes: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          data: Json
+          id: string
+          project_id: string
+          status: string
+          total_value: number
+          updated_at: string | null
+          version: number | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          data?: Json
+          id?: string
+          project_id: string
+          status: string
+          total_value?: number
+          updated_at?: string | null
+          version?: number | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          data?: Json
+          id?: string
+          project_id?: string
+          status?: string
+          total_value?: number
+          updated_at?: string | null
+          version?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_quotes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_version_files: {
         Row: {
           company_id: string
@@ -1083,6 +1174,7 @@ export type Database = {
           assembly_notes: string | null
           assembly_photos: Json | null
           client_name: string | null
+          commercial_approved: boolean | null
           company_id: string
           created_at: string | null
           cutting_status: string | null
@@ -1095,6 +1187,7 @@ export type Database = {
           machining_status: string | null
           name: string
           notes: string | null
+          official_cut_plan_validated: boolean | null
           status: string | null
           updated_at: string
           validated_at: string | null
@@ -1104,6 +1197,7 @@ export type Database = {
           assembly_notes?: string | null
           assembly_photos?: Json | null
           client_name?: string | null
+          commercial_approved?: boolean | null
           company_id: string
           created_at?: string | null
           cutting_status?: string | null
@@ -1116,6 +1210,7 @@ export type Database = {
           machining_status?: string | null
           name: string
           notes?: string | null
+          official_cut_plan_validated?: boolean | null
           status?: string | null
           updated_at?: string
           validated_at?: string | null
@@ -1125,6 +1220,7 @@ export type Database = {
           assembly_notes?: string | null
           assembly_photos?: Json | null
           client_name?: string | null
+          commercial_approved?: boolean | null
           company_id?: string
           created_at?: string | null
           cutting_status?: string | null
@@ -1137,6 +1233,7 @@ export type Database = {
           machining_status?: string | null
           name?: string
           notes?: string | null
+          official_cut_plan_validated?: boolean | null
           status?: string | null
           updated_at?: string
           validated_at?: string | null
@@ -1252,6 +1349,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      supplier_prices: {
+        Row: {
+          availability: boolean | null
+          company_id: string
+          id: string
+          last_update: string | null
+          lead_time_days: number | null
+          material_name: string
+          price_per_unit: number
+          shipping_cost: number | null
+          supplier_name: string
+        }
+        Insert: {
+          availability?: boolean | null
+          company_id: string
+          id?: string
+          last_update?: string | null
+          lead_time_days?: number | null
+          material_name: string
+          price_per_unit: number
+          shipping_cost?: number | null
+          supplier_name: string
+        }
+        Update: {
+          availability?: boolean | null
+          company_id?: string
+          id?: string
+          last_update?: string | null
+          lead_time_days?: number | null
+          material_name?: string
+          price_per_unit?: number
+          shipping_cost?: number | null
+          supplier_name?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
