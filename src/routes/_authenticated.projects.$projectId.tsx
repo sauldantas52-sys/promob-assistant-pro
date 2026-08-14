@@ -458,67 +458,62 @@ function ProjectDetail() {
               </div>
             </div>
           </div>
-                    {project.data?.environment || "Ambiente Geral"}
-                  </p>
-                </div>
-              </div>
-            </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <Select 
-                value={project.data?.status ?? "novo"} 
-                disabled={!hasPermission(role, "projects", "approve")}
-                onValueChange={async (v) => {
-                  if (v === "producao") {
-                    const unconfirmedParts = allParts.filter(p => 
-                      (!p.width_mm || !p.length_mm || !p.thickness_mm || !p.material) && 
-                      p.kind !== 'ferragem' && 
-                      p.kind !== 'acessorio' && 
-                      !p.name.toLowerCase().includes("processo") &&
-                      p.visibility_type !== 'oculta'
-                    );
+          <div className="flex flex-wrap items-center gap-4">
+            <Select 
+              value={project.data?.status ?? "novo"} 
+              disabled={!hasPermission(role, "projects", "approve")}
+              onValueChange={async (v) => {
+                if (v === "producao") {
+                  const unconfirmedParts = allParts.filter(p => 
+                    (!p.width_mm || !p.length_mm || !p.thickness_mm || !p.material) && 
+                    p.kind !== 'ferragem' && 
+                    p.kind !== 'acessorio' && 
+                    !p.name.toLowerCase().includes("processo") &&
+                    p.visibility_type !== 'oculta'
+                  );
 
-                    if (unconfirmedParts.length > 0) {
-                      toast.error(`Bloqueio: ${unconfirmedParts.length} peça(s) possuem medidas ou dados críticos "Não confirmados".`);
-                      return;
+                  if (unconfirmedParts.length > 0) {
+                    toast.error(`Bloqueio: ${unconfirmedParts.length} peça(s) possuem medidas ou dados críticos "Não confirmados".`);
+                    return;
+                  }
+                }
+
+                const oldStatus = project.data?.status || "novo";
+                updateStatus.mutate(v, {
+                  onSuccess: async () => {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                      await (supabase.from('production_logs') as any).insert({
+                        project_id: projectId,
+                        user_id: user.id,
+                        action: `Alteração de status do projeto: ${v}`,
+                        status_from: oldStatus,
+                        status_to: v,
+                        notes: "Alteração via seletor de status principal"
+                      });
                     }
                   }
-
-                  const oldStatus = project.data?.status || "novo";
-                  updateStatus.mutate(v, {
-                    onSuccess: async () => {
-                      const { data: { user } } = await supabase.auth.getUser();
-                      if (user) {
-                        await (supabase.from('production_logs') as any).insert({
-                          project_id: projectId,
-                          user_id: user.id,
-                          action: `Alteração de status do projeto: ${v}`,
-                          status_from: oldStatus,
-                          status_to: v,
-                          notes: "Alteração via seletor de status principal"
-                        });
-                      }
-                    }
-                  });
-                }}
-              >
-                <SelectTrigger className="h-14 w-56 rounded-[1.25rem] border-2 border-slate-100 font-black uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-slate-900/5 bg-white hover:bg-slate-50 transition-all duration-300">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="rounded-2xl border-2 shadow-2xl">
-                  {projectStatuses.map((status) => (
-                    <SelectItem key={status} value={status} className="font-black uppercase text-[10px] tracking-widest py-4 focus:bg-blue-50 focus:text-blue-600">
-                      {statusLabel(status)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button variant="outline" className="h-14 px-8 rounded-[1.25rem] border-2 border-slate-100 font-black uppercase tracking-[0.2em] text-[10px] gap-3 bg-white hover:bg-slate-50 shadow-xl shadow-slate-900/5 transition-all duration-300" onClick={exportCSV}>
-                <Download className="h-5 w-5 text-blue-600" /> Exportar OP
-              </Button>
-            </div>
+                });
+              }}
+            >
+              <SelectTrigger className="h-16 w-64 rounded-[1.5rem] border-none bg-slate-900 text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-slate-900/20 hover:bg-slate-800 transition-all duration-500">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="rounded-[1.5rem] border-2 shadow-2xl p-4">
+                {projectStatuses.map((status) => (
+                  <SelectItem key={status} value={status} className="font-black uppercase text-[11px] tracking-widest py-4 focus:bg-blue-50 focus:text-blue-600">
+                    {statusLabel(status)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button variant="outline" className="h-16 px-10 rounded-[1.5rem] border-2 border-slate-100 font-black uppercase tracking-[0.2em] text-[11px] gap-4 bg-white hover:bg-slate-50 shadow-2xl shadow-slate-900/5 transition-all duration-500" onClick={exportCSV}>
+              <Download className="h-6 w-6 text-blue-600" /> Exportar OP
+            </Button>
           </div>
-        </header>
+        </div>
+      </header>
 
         <Card className="border-none shadow-[0_25px_60px_-15px_rgba(0,0,0,0.08)] rounded-[3.5rem] overflow-hidden bg-white">
           <CardHeader className="pb-6 pt-12 px-12 border-b border-slate-50">
