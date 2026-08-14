@@ -18,7 +18,9 @@ import {
   MapPin,
   Calendar,
   User,
-  ShieldAlert
+  ShieldAlert,
+  Search,
+  Monitor
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -90,32 +92,37 @@ function ShippingPage() {
   return (
     <AppShell>
       <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto">
-        <header className="flex flex-col gap-3">
-          <Link to="/dashboard" className="text-sm font-bold text-slate-500 flex items-center gap-2 hover:text-blue-600 transition-colors uppercase tracking-widest">
-            <ArrowLeft className="h-4 w-4" /> Voltar ao Painel
-          </Link>
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase flex items-center gap-3">
-                <Truck className="h-8 w-8 text-blue-600" /> Expedição e Carga
-              </h1>
-              <p className="text-base text-slate-500 font-medium mt-1">Controle logístico, carregamento e romaneio digital.</p>
-            </div>
-            <div className="flex items-center gap-3 w-full md:w-auto">
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-10 mb-10">
+          <div className="space-y-4">
+            <Link to="/dashboard" className="text-[10px] font-black text-slate-400 flex items-center gap-2 hover:text-blue-600 transition-colors uppercase tracking-[0.3em]">
+              <ArrowLeft className="h-4 w-4" /> Voltar ao Painel
+            </Link>
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-600">Expedição e Logística</p>
+            <h1 className="text-4xl md:text-7xl font-black tracking-tighter text-slate-900 uppercase leading-none">Carga e Envio</h1>
+            <p className="text-base font-bold text-slate-500 uppercase tracking-widest mt-2">
+              Gestão de volumes, romaneios e status de carregamento.
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center gap-6 w-full md:w-auto">
+             <div className="relative w-full sm:w-80">
+               <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
                <Input 
                 placeholder="Buscar projeto ou cliente..." 
-                className="w-full md:w-80 h-12 rounded-xl border-slate-200 shadow-sm focus:ring-blue-500"
+                className="w-full h-16 pl-14 rounded-[1.25rem] border-none bg-slate-50 text-sm font-black uppercase tracking-widest placeholder:text-slate-400"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-            </div>
+             </div>
+             <Button variant="outline" className="h-16 px-8 rounded-[1.25rem] border-2 border-slate-100 font-black uppercase tracking-[0.2em] text-[10px] gap-3 bg-white hover:bg-slate-50 shadow-xl shadow-slate-900/5 transition-all duration-300">
+               <Monitor className="h-5 w-5 text-indigo-600" /> Modo Logístico
+             </Button>
           </div>
         </header>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 max-w-md bg-slate-100 p-1 h-14 rounded-2xl">
-            <TabsTrigger value="volumes" className="rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm font-black text-xs uppercase tracking-widest">Volumes por Projeto</TabsTrigger>
-            <TabsTrigger value="active-loads" className="rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm font-black text-xs uppercase tracking-widest">Cargas Ativas</TabsTrigger>
+          <TabsList className="flex w-fit bg-slate-100 p-2 h-20 rounded-[2.5rem] border border-slate-200 shadow-sm">
+            <TabsTrigger value="volumes" className="rounded-[2rem] px-8 data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-2xl font-black text-[11px] uppercase tracking-[0.2em] h-full transition-all duration-500">Volumes por Projeto</TabsTrigger>
+            <TabsTrigger value="active-loads" className="rounded-[2rem] px-8 data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-2xl font-black text-[11px] uppercase tracking-[0.2em] h-full transition-all duration-500">Cargas Ativas</TabsTrigger>
           </TabsList>
 
           <TabsContent value="volumes" className="space-y-6">
@@ -189,23 +196,23 @@ function ProjectShippingCard({ project }: { project: any }) {
   };
 
   return (
-    <Card className="overflow-hidden border-none shadow-sm rounded-2xl">
-      <CardHeader className="bg-slate-50 border-b border-slate-200 py-6 px-6">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <CardTitle className="text-xl font-black text-slate-900 tracking-tight">{project.name}</CardTitle>
-            <CardDescription className="text-slate-500 font-bold uppercase text-[10px] tracking-widest mt-1">
-              {project.client_name} · {project.environment}
+    <Card className="border-none shadow-[0_25px_60px_-15px_rgba(0,0,0,0.06)] hover:shadow-[0_35px_80px_-15px_rgba(0,0,0,0.12)] transition-all duration-700 rounded-[3.5rem] overflow-hidden group bg-white mb-10">
+      <CardHeader className="pb-8 pt-12 px-12 bg-slate-50/50 border-b border-slate-100">
+        <div className="flex flex-wrap items-center justify-between gap-8">
+          <div className="space-y-3">
+            <CardTitle className="text-3xl font-black text-slate-900 tracking-tighter uppercase leading-none group-hover:text-indigo-600 transition-colors duration-500">{project.name}</CardTitle>
+            <CardDescription className="text-[11px] font-black text-slate-500 uppercase tracking-[0.3em] flex items-center gap-3">
+              {project.client_name} <span className="h-1 w-1 rounded-full bg-slate-300" /> {project.environment}
             </CardDescription>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             {pendingSealedGroups.length > 0 && (
-              <Button size="sm" className="h-10 font-bold rounded-xl shadow-lg shadow-blue-600/20" onClick={generateVolumes} disabled={isGenerating}>
-                {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <QrCode className="mr-2 h-4 w-4" />}
+              <Button size="lg" className="h-14 px-8 rounded-[1.25rem] bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-[0.2em] text-[10px] border-none shadow-xl shadow-indigo-600/20 transition-all active:scale-95" onClick={generateVolumes} disabled={isGenerating}>
+                {isGenerating ? <Loader2 className="mr-3 h-5 w-5 animate-spin" /> : <QrCode className="mr-3 h-5 w-5" />}
                 Gerar Volumes ({pendingSealedGroups.length})
               </Button>
             )}
-            <Badge className={cn("px-4 py-1.5 text-xs font-black uppercase tracking-widest border shadow-sm", project.status === 'expedicao' ? 'bg-blue-600 text-white border-blue-500' : 'bg-green-600 text-white border-green-500')}>
+            <Badge className={cn("px-8 py-3 text-[10px] font-black uppercase tracking-[0.3em] border-none rounded-full shadow-lg", project.status === 'expedicao' ? 'bg-blue-600 text-white shadow-blue-600/30' : 'bg-emerald-600 text-white shadow-emerald-600/30')}>
               {project.status === 'expedicao' ? 'LIBERAR CARGA' : 'PRONTO PARA EXPEDIÇÃO'}
             </Badge>
           </div>

@@ -433,22 +433,32 @@ function ProjectDetail() {
     <AppShell>
       <div className="space-y-8 p-4 md:p-10 max-w-[1600px] mx-auto">
         <header className="flex flex-col gap-6">
-          <Link to="/projects" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-blue-600 transition-colors">
-            <ArrowLeft className="h-3.5 w-3.5" /> Voltar para Projetos
+          <Link to="/projects" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 hover:text-blue-600 transition-colors">
+            <ArrowLeft className="h-4 w-4" /> Voltar para Projetos
           </Link>
 
-          <div className="flex flex-wrap items-end justify-between gap-8">
-            <div className="space-y-3">
-              <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-slate-900 uppercase leading-none">
+          <div className="flex flex-wrap items-end justify-between gap-10">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-600">Ficha Técnica do Projeto</p>
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-600 animate-pulse" />
+              </div>
+              <h1 className="text-4xl md:text-7xl font-black tracking-tighter text-slate-900 uppercase leading-none">
                 {project.data?.name}
               </h1>
-              <div className="flex flex-wrap items-center gap-4">
-                <Badge className={cn("px-4 py-1.5 text-[10px] font-black shadow-sm uppercase tracking-[0.2em] border-none rounded-full", statusTone(project.data?.status || "novo"))}>
+              <div className="flex flex-wrap items-center gap-6">
+                <Badge className={cn("px-6 py-2.5 text-[10px] font-black shadow-lg uppercase tracking-[0.2em] border-none rounded-full", statusTone(project.data?.status || "novo"))}>
                   {statusLabel(project.data?.status || "novo")}
                 </Badge>
-                <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">
-                  {project.data?.client_name || "Sem cliente"} <span className="mx-2 text-slate-300">|</span> {project.data?.environment || "Ambiente Geral"}
-                </p>
+                <div className="flex items-center gap-3">
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
+                    {project.data?.client_name || "Sem cliente"}
+                  </p>
+                  <span className="h-1 w-1 rounded-full bg-slate-300" />
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
+                    {project.data?.environment || "Ambiente Geral"}
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -490,33 +500,39 @@ function ProjectDetail() {
                   });
                 }}
               >
-                <SelectTrigger className="h-12 w-48 rounded-2xl border-2 font-black uppercase tracking-widest text-[10px] shadow-sm">
+                <SelectTrigger className="h-14 w-56 rounded-[1.25rem] border-2 border-slate-100 font-black uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-slate-900/5 bg-white hover:bg-slate-50 transition-all duration-300">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="rounded-2xl border-2">
+                <SelectContent className="rounded-2xl border-2 shadow-2xl">
                   {projectStatuses.map((status) => (
-                    <SelectItem key={status} value={status} className="font-bold uppercase text-[10px] tracking-widest py-3">
+                    <SelectItem key={status} value={status} className="font-black uppercase text-[10px] tracking-widest py-4 focus:bg-blue-50 focus:text-blue-600">
                       {statusLabel(status)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <Button variant="outline" className="h-12 px-6 rounded-2xl border-2 font-black uppercase tracking-widest text-[10px] gap-2" onClick={exportCSV}>
-                <Download className="h-4 w-4" /> Exportar OP
+              <Button variant="outline" className="h-14 px-8 rounded-[1.25rem] border-2 border-slate-100 font-black uppercase tracking-[0.2em] text-[10px] gap-3 bg-white hover:bg-slate-50 shadow-xl shadow-slate-900/5 transition-all duration-300" onClick={exportCSV}>
+                <Download className="h-5 w-5 text-blue-600" /> Exportar OP
               </Button>
             </div>
           </div>
         </header>
 
-        <Card className="border-none shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] rounded-[2.5rem] overflow-hidden bg-white">
-          <CardHeader className="pb-4 pt-8 px-8">
-            <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Importação e Engenharia</CardTitle>
+        <Card className="border-none shadow-[0_25px_60px_-15px_rgba(0,0,0,0.08)] rounded-[3.5rem] overflow-hidden bg-white">
+          <CardHeader className="pb-6 pt-12 px-12 border-b border-slate-50">
+            <CardTitle className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Importação e Engenharia de Precisão</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6 px-8 pb-8">
-            <p className="text-sm font-medium text-slate-500 leading-relaxed max-w-2xl">
-              Extraia a inteligência do projeto Promob. Gere listas de corte, furação e ferragens automaticamente. 
-              PDFs e DXFs anexados servem como referência visual técnica.
-            </p>
+          <CardContent className="space-y-10 px-12 pb-12 pt-10">
+            <div className="space-y-4">
+              <p className="text-base font-medium text-slate-500 leading-relaxed max-w-3xl">
+                O Monta AI extrai a inteligência técnica dos seus arquivos Promob para gerar listas de corte, 
+                mapas de furação e romaneios de expedição com erro zero.
+              </p>
+              <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 w-fit px-4 py-2 rounded-full border border-emerald-100">
+                <ShieldCheck className="h-4 w-4" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Protocolo de Rastreabilidade Ativo</span>
+              </div>
+            </div>
             <input
               ref={fileInput}
               type="file"
@@ -527,26 +543,32 @@ function ProjectDetail() {
                 if (file) void handleImport(file);
               }}
             />
-            <div className="flex flex-wrap gap-4">
-              <Button className="h-14 px-8 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest text-[11px] shadow-lg shadow-blue-600/20 gap-3" disabled={importing} onClick={() => fileInput.current?.click()}>
-                {importing ? <Loader2 className="h-5 w-5 animate-spin" /> : <FileUp className="h-5 w-5" />}
+            <div className="flex flex-wrap gap-6">
+              <Button className="h-20 px-12 rounded-[1.5rem] bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-[0.2em] text-[12px] shadow-2xl shadow-blue-600/30 gap-4 transition-all duration-500 active:scale-95 group" disabled={importing} onClick={() => fileInput.current?.click()}>
+                {importing ? <Loader2 className="h-6 w-6 animate-spin" /> : <FileUp className="h-7 w-7 transition-transform group-hover:-translate-y-1" />}
                 Importar Arquivo Promob
               </Button>
             </div>
 
             {warnings.length > 0 && (
-              <div className="space-y-3 rounded-2xl border-2 border-red-100 bg-red-50/50 p-5 mt-4">
-                {warnings.map((warning) => (
-                  <p key={warning} className="flex gap-3 text-xs font-bold text-red-600 uppercase tracking-wider">
-                    <AlertTriangle className="h-4 w-4 shrink-0" /> {warning}
-                  </p>
-                ))}
+              <div className="space-y-4 rounded-[2rem] border-2 border-red-100 bg-red-50/50 p-8 mt-6">
+                <div className="flex items-center gap-3 mb-2">
+                  <AlertTriangle className="h-6 w-6 text-red-600" />
+                  <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-red-900">Alertas de Integridade Técnica</h4>
+                </div>
+                <div className="grid gap-3">
+                  {warnings.map((warning) => (
+                    <p key={warning} className="text-xs font-bold text-red-700 uppercase tracking-widest leading-relaxed pl-9 border-l-2 border-red-200">
+                      {warning}
+                    </p>
+                  ))}
+                </div>
               </div>
             )}
           </CardContent>
         </Card>
 
-        <div className="grid gap-6 grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
+        <div className="grid gap-8 grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
           <ProjectMetric icon={LayoutGrid} label="Módulos" value={String(modules.data?.length ?? 0)} color="text-blue-600" />
           <ProjectMetric icon={Layers} label="Peças / Chapas" value={String(panels.length)} color="text-violet-600" />
           <ProjectMetric icon={Wrench} label="Ferragens" value={String(hardware.length)} color="text-emerald-600" />
@@ -560,8 +582,8 @@ function ProjectDetail() {
           <ProjectMetric icon={Scissors} label="Área (m²)" value={totalArea.toFixed(2)} color="text-slate-600" />
         </div>
 
-        <Tabs defaultValue="modules" className="space-y-8">
-          <TabsList className="flex w-fit bg-slate-200/50 p-1.5 h-16 rounded-[2rem] border border-slate-200 overflow-x-auto no-scrollbar">
+        <Tabs defaultValue="modules" className="space-y-10">
+          <TabsList className="flex w-fit bg-slate-100 p-2 h-20 rounded-[3rem] border border-slate-200 overflow-x-auto no-scrollbar shadow-sm">
             <TabTrigger value="modules" icon={LayoutGrid} label="Módulos" />
             <TabTrigger value="parts" icon={ClipboardList} label="Lista Técnica" />
             <TabTrigger value="loose" icon={PackageCheck} label="Avulsos" />
@@ -1415,13 +1437,13 @@ function ProjectMetric({
   color?: string;
 }) {
   return (
-    <div className="bg-white rounded-[2rem] p-6 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] border border-slate-100 flex flex-col gap-4">
-      <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center bg-slate-50", color.replace('text-', 'bg-').replace('-600', '-50'))}>
-        <Icon className={cn("h-6 w-6", color)} />
+    <div className="bg-white rounded-[2.5rem] p-8 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.06)] border border-slate-100 flex flex-col gap-6 group hover:shadow-[0_30px_70px_-15px_rgba(0,0,0,0.12)] transition-all duration-500">
+      <div className={cn("w-16 h-16 rounded-[1.25rem] flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-6", color.replace('text-', 'bg-').replace('-600', '-50'))}>
+        <Icon className={cn("h-8 w-8", color)} />
       </div>
-      <div className="space-y-1">
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{label}</p>
-        <p className="text-xl font-black text-slate-900 leading-none">{value}</p>
+      <div className="space-y-2">
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">{label}</p>
+        <p className="text-3xl font-black text-slate-900 leading-none tracking-tighter uppercase">{value}</p>
       </div>
     </div>
   );
@@ -1431,9 +1453,9 @@ function TabTrigger({ value, icon: Icon, label }: { value: string; icon: any; la
   return (
     <TabsTrigger 
       value={value} 
-      className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm rounded-[1.5rem] px-6 transition-all duration-300 gap-2 font-black uppercase tracking-widest text-[10px] h-full"
+      className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-2xl rounded-[2.5rem] px-8 transition-all duration-500 gap-3 font-black uppercase tracking-[0.2em] text-[11px] h-full active:scale-95"
     >
-      <Icon className="h-4 w-4" />
+      <Icon className="h-5 w-5" />
       <span className="hidden lg:inline">{label}</span>
     </TabsTrigger>
   );
