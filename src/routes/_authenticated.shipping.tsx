@@ -42,7 +42,7 @@ import { useState, useMemo } from "react";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/shipping")({
+export const Route = createFileRoute("/_authenticated/shipping")({
   head: () => ({
     meta: [
       { title: "Expedição e Carga | Monta AI" },

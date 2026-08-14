@@ -10,7 +10,7 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { statusLabel, statusTone } from "@/lib/project-status";
 
-export const Route = createFileRoute("/production")({
+export const Route = createFileRoute("/_authenticated/production")({
   head: () => ({
     meta: [
       { title: "Produção | Monta AI — Promob Assistant Pro" },

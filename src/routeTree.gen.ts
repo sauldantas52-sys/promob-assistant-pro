@@ -10,29 +10,24 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AssemblyRouteImport } from './routes/assembly'
-import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as FactoryWallboardRouteImport } from './routes/factory-wallboard'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as PickingRouteImport } from './routes/picking'
-import { Route as ProductionRouteImport } from './routes/production'
-import { Route as ShippingRouteImport } from './routes/shipping'
-import { Route as ProjectsIndexRouteImport } from './routes/projects.index'
+import { Route as AuthenticatedAssemblyRouteImport } from './routes/_authenticated.assembly'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
+import { Route as AuthenticatedProductionRouteImport } from './routes/_authenticated.production'
+import { Route as AuthenticatedShippingRouteImport } from './routes/_authenticated.shipping'
 import { Route as ProjectsProjectIdRouteImport } from './routes/projects.$projectId'
+import { Route as AuthenticatedProjectsIndexRouteImport } from './routes/_authenticated.projects.index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AssemblyRoute = AssemblyRouteImport.update({
-  id: '/assembly',
-  path: '/assembly',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FactoryWallboardRoute = FactoryWallboardRouteImport.update({
@@ -50,73 +45,85 @@ const PickingRoute = PickingRouteImport.update({
   path: '/picking',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProductionRoute = ProductionRouteImport.update({
+const AuthenticatedAssemblyRoute = AuthenticatedAssemblyRouteImport.update({
+  id: '/assembly',
+  path: '/assembly',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedProductionRoute = AuthenticatedProductionRouteImport.update({
   id: '/production',
   path: '/production',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
-const ShippingRoute = ShippingRouteImport.update({
+const AuthenticatedShippingRoute = AuthenticatedShippingRouteImport.update({
   id: '/shipping',
   path: '/shipping',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProjectsIndexRoute = ProjectsIndexRouteImport.update({
-  id: '/projects/',
-  path: '/projects/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const ProjectsProjectIdRoute = ProjectsProjectIdRouteImport.update({
   id: '/projects/$projectId',
   path: '/projects/$projectId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedProjectsIndexRoute =
+  AuthenticatedProjectsIndexRouteImport.update({
+    id: '/projects/',
+    path: '/projects/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/assembly': typeof AssemblyRoute
-  '/dashboard': typeof DashboardRoute
   '/factory-wallboard': typeof FactoryWallboardRoute
   '/login': typeof LoginRoute
   '/picking': typeof PickingRoute
-  '/production': typeof ProductionRoute
-  '/shipping': typeof ShippingRoute
+  '/assembly': typeof AuthenticatedAssemblyRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/production': typeof AuthenticatedProductionRoute
+  '/shipping': typeof AuthenticatedShippingRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
-  '/projects/': typeof ProjectsIndexRoute
+  '/projects/': typeof AuthenticatedProjectsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/assembly': typeof AssemblyRoute
-  '/dashboard': typeof DashboardRoute
   '/factory-wallboard': typeof FactoryWallboardRoute
   '/login': typeof LoginRoute
   '/picking': typeof PickingRoute
-  '/production': typeof ProductionRoute
-  '/shipping': typeof ShippingRoute
+  '/assembly': typeof AuthenticatedAssemblyRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/production': typeof AuthenticatedProductionRoute
+  '/shipping': typeof AuthenticatedShippingRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
-  '/projects': typeof ProjectsIndexRoute
+  '/projects': typeof AuthenticatedProjectsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/assembly': typeof AssemblyRoute
-  '/dashboard': typeof DashboardRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/factory-wallboard': typeof FactoryWallboardRoute
   '/login': typeof LoginRoute
   '/picking': typeof PickingRoute
-  '/production': typeof ProductionRoute
-  '/shipping': typeof ShippingRoute
+  '/_authenticated/assembly': typeof AuthenticatedAssemblyRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/production': typeof AuthenticatedProductionRoute
+  '/_authenticated/shipping': typeof AuthenticatedShippingRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
-  '/projects/': typeof ProjectsIndexRoute
+  '/_authenticated/projects/': typeof AuthenticatedProjectsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/assembly'
-    | '/dashboard'
     | '/factory-wallboard'
     | '/login'
     | '/picking'
+    | '/assembly'
+    | '/dashboard'
     | '/production'
     | '/shipping'
     | '/projects/$projectId'
@@ -124,11 +131,11 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/assembly'
-    | '/dashboard'
     | '/factory-wallboard'
     | '/login'
     | '/picking'
+    | '/assembly'
+    | '/dashboard'
     | '/production'
     | '/shipping'
     | '/projects/$projectId'
@@ -136,28 +143,25 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/assembly'
-    | '/dashboard'
+    | '/_authenticated'
     | '/factory-wallboard'
     | '/login'
     | '/picking'
-    | '/production'
-    | '/shipping'
+    | '/_authenticated/assembly'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/production'
+    | '/_authenticated/shipping'
     | '/projects/$projectId'
-    | '/projects/'
+    | '/_authenticated/projects/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AssemblyRoute: typeof AssemblyRoute
-  DashboardRoute: typeof DashboardRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   FactoryWallboardRoute: typeof FactoryWallboardRoute
   LoginRoute: typeof LoginRoute
   PickingRoute: typeof PickingRoute
-  ProductionRoute: typeof ProductionRoute
-  ShippingRoute: typeof ShippingRoute
   ProjectsProjectIdRoute: typeof ProjectsProjectIdRoute
-  ProjectsIndexRoute: typeof ProjectsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -169,18 +173,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/assembly': {
-      id: '/assembly'
-      path: '/assembly'
-      fullPath: '/assembly'
-      preLoaderRoute: typeof AssemblyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/factory-wallboard': {
@@ -204,26 +201,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PickingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/production': {
-      id: '/production'
+    '/_authenticated/assembly': {
+      id: '/_authenticated/assembly'
+      path: '/assembly'
+      fullPath: '/assembly'
+      preLoaderRoute: typeof AuthenticatedAssemblyRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/production': {
+      id: '/_authenticated/production'
       path: '/production'
       fullPath: '/production'
-      preLoaderRoute: typeof ProductionRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedProductionRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/shipping': {
-      id: '/shipping'
+    '/_authenticated/shipping': {
+      id: '/_authenticated/shipping'
       path: '/shipping'
       fullPath: '/shipping'
-      preLoaderRoute: typeof ShippingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/projects/': {
-      id: '/projects/'
-      path: '/projects'
-      fullPath: '/projects/'
-      preLoaderRoute: typeof ProjectsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedShippingRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/projects/$projectId': {
       id: '/projects/$projectId'
@@ -232,20 +236,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectsProjectIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/projects/': {
+      id: '/_authenticated/projects/'
+      path: '/projects'
+      fullPath: '/projects/'
+      preLoaderRoute: typeof AuthenticatedProjectsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedAssemblyRoute: typeof AuthenticatedAssemblyRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedProductionRoute: typeof AuthenticatedProductionRoute
+  AuthenticatedShippingRoute: typeof AuthenticatedShippingRoute
+  AuthenticatedProjectsIndexRoute: typeof AuthenticatedProjectsIndexRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAssemblyRoute: AuthenticatedAssemblyRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedProductionRoute: AuthenticatedProductionRoute,
+  AuthenticatedShippingRoute: AuthenticatedShippingRoute,
+  AuthenticatedProjectsIndexRoute: AuthenticatedProjectsIndexRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AssemblyRoute: AssemblyRoute,
-  DashboardRoute: DashboardRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
   FactoryWallboardRoute: FactoryWallboardRoute,
   LoginRoute: LoginRoute,
   PickingRoute: PickingRoute,
-  ProductionRoute: ProductionRoute,
-  ShippingRoute: ShippingRoute,
   ProjectsProjectIdRoute: ProjectsProjectIdRoute,
-  ProjectsIndexRoute: ProjectsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
