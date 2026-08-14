@@ -12,7 +12,7 @@ export const ReceiptParser = {
     // Lógica de regex para identificar fornecedores e valores comuns (Mock oficial)
     const isSupplierA = rawText.includes("FORNECEDOR A");
     const totalMatch = rawText.match(/R\$\s?(\d+[,.]\d+)/);
-    const totalValue = totalMatch ? parseFloat(totalMatch[1].replace(',', '.')) : 0;
+    const totalValue = totalMatch && totalMatch[1] ? parseFloat(totalMatch[1].replace(',', '.')) : 0;
 
     return {
       parsed_at: new Date().toISOString(),
