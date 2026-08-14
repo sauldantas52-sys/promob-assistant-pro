@@ -1,4 +1,7 @@
+require_relative 'module_detector'
+
 module MontaAI
+
   module Bridge
     class ManifestBuilder
       def self.build
@@ -8,9 +11,11 @@ module MontaAI
             name: model.title || "Projeto Sem Nome",
             source: "SketchUp Bridge",
             version: "1.0",
-            is_machining_assembly_blocked: true
+            is_machining_assembly_blocked: true,
+            environments: ModuleDetector.detect_environments
           },
           items: []
+
         }
 
         model.entities.each do |entity|

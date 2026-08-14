@@ -4,6 +4,8 @@ require_relative 'manifest_builder'
 require_relative 'tag_manager'
 require_relative 'validation'
 require_relative 'api_client'
+require_relative 'module_detector'
+
 
 module MontaAI
   module Bridge
