@@ -357,12 +357,14 @@ export type Database = {
         Row: {
           assembly_group_id: string | null
           created_at: string
+          cutting_edge_released: boolean | null
           data_source: string | null
           edge_banding: string | null
           id: string
           is_completed: boolean | null
           kind: string
           length_mm: number | null
+          machining_blocked: boolean | null
           material: string | null
           module_id: string | null
           name: string
@@ -376,12 +378,14 @@ export type Database = {
         Insert: {
           assembly_group_id?: string | null
           created_at?: string
+          cutting_edge_released?: boolean | null
           data_source?: string | null
           edge_banding?: string | null
           id?: string
           is_completed?: boolean | null
           kind?: string
           length_mm?: number | null
+          machining_blocked?: boolean | null
           material?: string | null
           module_id?: string | null
           name: string
@@ -395,12 +399,14 @@ export type Database = {
         Update: {
           assembly_group_id?: string | null
           created_at?: string
+          cutting_edge_released?: boolean | null
           data_source?: string | null
           edge_banding?: string | null
           id?: string
           is_completed?: boolean | null
           kind?: string
           length_mm?: number | null
+          machining_blocked?: boolean | null
           material?: string | null
           module_id?: string | null
           name?: string
