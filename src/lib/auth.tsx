@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-export type AppRole = "admin" | "escritorio" | "fabrica" | "montador";
+export type AppRole = "admin" | "escritorio" | "fabrica" | "montador" | "auditor";
 
 type AuthState = {
   user: User | null;
@@ -20,6 +20,7 @@ type AuthState = {
     companyName: string;
     role: AppRole;
   }) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -112,6 +113,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   };
 
+  const resetPassword = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/login?mode=reset`,
+    });
+    if (error) throw error;
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
   };
@@ -130,6 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
         signIn,
         signUp,
+        resetPassword,
         signOut,
       }}
     >
@@ -149,4 +158,5 @@ export const roleLabels: Record<AppRole, string> = {
   escritorio: "Escritório / Projetos",
   fabrica: "Fábrica / Produção",
   montador: "Montador",
+  auditor: "Auditor",
 };
