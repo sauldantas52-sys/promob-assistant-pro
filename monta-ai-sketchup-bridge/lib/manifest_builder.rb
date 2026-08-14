@@ -2,89 +2,118 @@
 module MontaAI
   module Bridge
     class ManifestBuilder
-      def self.build
+      def self.build(scale = "1:20")
         model = Sketchup.active_model
+        
+        # Obter metadados do projeto salvos no modelo
+        project_name = model.get_attribute("MontaAI", "project_name", "Projeto Sem Nome")
+        client_name = model.get_attribute("MontaAI", "client_name", "Cliente Não Informado")
+        
         manifest = {
-          plugin_version: "1.0.0",
-          project_id: model.get_attribute("MontaAI", "project_id", ""),
-          version_number: (model.get_attribute("MontaAI", "version_count", 0) + 1).to_i,
-          items: [],
-          is_machining_blocked: true # Contrato Industrial Seguro
+          project: project_name,
+          client: client_name,
+          version_plugin: "0.1.0-beta",
+          sketchup_version: Sketchup.version,
+          origin_data: "SketchUp Bridge",
+          unit: "mm",
+          scale: scale,
+          origin_point: [0, 0, 0], # Ponto de referência global
+          machining_blocked: true, # Contrato Industrial Seguro
+          status: "Não confirmado",
+          timestamp: Time.now.to_s,
+          environments: []
         }
 
+        # Dicionário para organizar por ambiente
+        envs_map = {}
+
         # Processamento recursivo a partir da raiz
-        model.entities.each do |entity|
-          next unless valid_entity?(entity)
-          process_entity(entity, manifest[:items])
-        end
+        process_entities(model.entities, envs_map, "Geral", nil)
         
-        # Incrementa contador local
-        model.set_attribute("MontaAI", "version_count", manifest[:version_number])
+        manifest[:environments] = envs_map.values
         
         manifest
       end
 
-      def self.valid_entity?(entity)
-        entity.is_a?(Sketchup::ComponentInstance) || entity.is_a?(Sketchup::Group)
-      end
+      def self.process_entities(entities, envs_map, current_env_name, parent_id)
+        entities.each do |entity|
+          next unless entity.is_a?(Sketchup::ComponentInstance) || entity.is_a?(Sketchup::Group)
+          
+          layer_name = entity.layer.name
+          
+          # Se for a tag de ambiente, atualiza o contexto para os filhos
+          if layer_name == "01_AMBIENTES"
+            env_name = entity.name.empty? ? "Ambiente" : entity.name
+            envs_map[env_name] ||= { name: env_name, modules: [] }
+            process_entities(get_definition(entity).entities, envs_map, env_name, entity.guid)
+            next
+          end
 
-      def self.process_entity(entity, items_list, environment_name = nil, parent_module_id = nil)
-        bounds = entity.bounds
-        layer_name = entity.layer.name
-        
-        # Identificação de Ambientes (Tag 01)
-        current_env = (layer_name == "01_AMBIENTES") ? (entity.name.empty? ? "Ambiente Geral" : entity.name) : environment_name
-        
-        # Classificação Automática G1, G2, G3, AV
-        group_code = detect_group(entity)
-        
-        # Metadados de Módulo/Peça
-        item = {
-          environment_name: current_env,
-          module_id: entity.guid,
-          parent_id: parent_module_id,
-          group_code: group_code,
-          name: entity.name.empty? ? "Item Sem Nome" : entity.name,
-          material: entity.material ? entity.material.name : "Padrão",
-          color: entity.material ? entity.material.color.to_a.to_s : "N/A",
-          width_mm: bounds.width.to_mm.round(2),
-          height_mm: bounds.height.to_mm.round(2),
-          depth_mm: bounds.depth.to_mm.round(2),
-          pos_x: entity.transformation.origin.x.to_mm.round(2),
-          pos_y: entity.transformation.origin.y.to_mm.round(2),
-          pos_z: entity.transformation.origin.z.to_mm.round(2),
-          tags: [layer_name],
-          is_machining_blocked: true # Reforço por item
-        }
-        
-        items_list << item
-
-        # Leitura Recursiva de Sub-grupos e Sub-componentes
-        definition = entity.is_a?(Sketchup::ComponentInstance) ? entity.definition : entity
-        if definition.respond_to?(:entities)
-          definition.entities.each do |child|
-            next unless valid_entity?(child)
-            process_entity(child, items_list, current_env, entity.guid)
+          # Se for um módulo (Tag 04 ou similar)
+          if layer_name == "04_MODULOS" || layer_name == "02_MODULOS" # 02_MODULOS suporte legado
+            env_name = current_env_name || "Geral"
+            envs_map[env_name] ||= { name: env_name, modules: [] }
+            
+            module_data = extract_module_data(entity, parent_id)
+            envs_map[env_name][:modules] << module_data
+            
+            # Não processamos recursivamente dentro do módulo para o manifest de arquitetura,
+            # a menos que precisemos identificar sub-peças como portas/frentes.
+            process_sub_items(entity, module_data)
+          end
+          
+          # Se não for módulo nem ambiente, mas tiver filhos, continua a busca (ex: grupos organizacionais)
+          if layer_name != "04_MODULOS" && layer_name != "01_AMBIENTES"
+            process_entities(get_definition(entity).entities, envs_map, current_env_name, parent_id)
           end
         end
       end
 
-      def self.detect_group(entity)
-        layer = entity.layer.name
-        return "G1" if layer.include?("03_G1")
-        return "G2" if layer.include?("04_G2")
-        return "G3" if layer.include?("05_G3")
-        return "AV" if layer.include?("06_AV")
+      def self.extract_module_data(entity, parent_id)
+        bounds = entity.bounds
+        trans = entity.transformation
         
-        # Sugestão inteligente baseada em nome se a tag não for explícita
-        name = entity.name.upcase
-        return "G1" if name.include?("BALCAO") || name.include?("ARMARIO")
-        return "G2" if name.include?("PRATELEIRA") || name.include?("DIVISORIA")
-        return "G3" if name.include?("PORTA") || name.include?("FRENTE")
+        material = entity.material
         
-        "AV"
+        {
+          guid: entity.guid,
+          parent_guid: parent_id,
+          name: entity.name.empty? ? "Módulo" : entity.name,
+          code: entity.get_attribute("MontaAI", "code", "Não confirmado"),
+          width: bounds.width.to_mm.round(2),
+          height: bounds.height.to_mm.round(2),
+          depth: bounds.depth.to_mm.round(2),
+          pos_x: trans.origin.x.to_mm.round(2),
+          pos_y: trans.origin.y.to_mm.round(2),
+          pos_z: trans.origin.z.to_mm.round(2),
+          material: material ? material.name : "Não confirmado",
+          color: material ? material.color.to_a.to_s : "Não confirmado",
+          thickness: entity.get_attribute("MontaAI", "thickness", "Não confirmado"),
+          parts: []
+        }
+      end
+      
+      def self.process_sub_items(entity, module_data)
+        definition = get_definition(entity)
+        definition.entities.each do |child|
+          next unless child.is_a?(Sketchup::ComponentInstance) || child.is_a?(Sketchup::Group)
+          
+          if child.layer.name == "07_PORTAS_FRENTES"
+            bounds = child.bounds
+            module_data[:parts] << {
+              type: "Porta/Frente",
+              name: child.name.empty? ? "Peça" : child.name,
+              width: bounds.width.to_mm.round(2),
+              height: bounds.height.to_mm.round(2),
+              depth: bounds.depth.to_mm.round(2)
+            }
+          end
+        end
+      end
+
+      def self.get_definition(entity)
+        entity.is_a?(Sketchup::ComponentInstance) ? entity.definition : entity
       end
     end
   end
 end
-
