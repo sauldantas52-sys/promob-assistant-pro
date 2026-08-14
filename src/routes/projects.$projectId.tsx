@@ -48,6 +48,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { supabase } from "@/integrations/supabase/client";
+import { ProjectShippingTab } from "@/components/ProjectShippingTab";
 import { parseProjectFile } from "@/lib/promob-import";
 import { projectStatuses, statusLabel, statusTone } from "@/lib/project-status";
 
