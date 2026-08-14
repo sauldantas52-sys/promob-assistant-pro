@@ -299,7 +299,7 @@ function ProjectDetail() {
             
             const looseHardware = insertedLoose.filter(p => p.kind === 'ferragem' || p.kind === 'acessorio');
             if (looseHardware.length > 0) {
-              await supabase.from('assembly_group_hardware').insert(
+              await (supabase.from('assembly_group_hardware') as any).insert(
                 looseHardware.map(h => ({
                   group_id: looseGroup.id,
                   part_id: h.id,
