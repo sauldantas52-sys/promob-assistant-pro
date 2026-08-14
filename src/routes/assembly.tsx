@@ -172,7 +172,7 @@ function AssemblyContent() {
                   <TabsContent value="groups" className="space-y-4 mt-4">
                     <div className="grid gap-4">
                       {(project.modules ?? []).map((m) => {
-                        const group = (project.assembly_groups ?? []).find(g => g.module_id === m.id);
+                        const group = ((project as any).assembly_groups ?? []).find((g: any) => g.module_id === m.id);
                         const parts = (project.parts ?? []).filter(p => p.assembly_group_id === group?.id);
                         const completed = parts.filter(p => p.is_completed).length;
                         const total = parts.length;
