@@ -1397,9 +1397,8 @@ function MaintenanceTab({
             Nenhuma assistência registrada para este projeto.
           </div>
         )}
-        </Tabs>
       </div>
-    </AppShell>
+    </div>
   );
 }
 
