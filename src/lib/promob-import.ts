@@ -30,8 +30,10 @@ export type ImportResult = {
 };
 
 const num = (value: string | null | undefined): number | null => {
-  if (!value) return null;
-  const parsed = Number(String(value).replace(",", ".").replace(/[^\d.-]/g, ""));
+  if (value === null || value === undefined || value.trim() === "") return null;
+  // Converte "1080,6" para "1080.6", remove caracteres não numéricos exceto ponto, sinal e decimais
+  const sanitized = String(value).replace(",", ".").trim();
+  const parsed = parseFloat(sanitized);
   return Number.isFinite(parsed) ? parsed : null;
 };
 
@@ -59,69 +61,101 @@ export function parsePromobXml(fileName: string, sizeBytes: number, xmlText: str
     };
   }
 
-  const moduleNodes = Array.from(
-    doc.querySelectorAll("ITEM[COMPONENTS], MODULE, Module, module, Item, ITEM"),
-  );
-
   const modules: ParsedModule[] = [];
   const looseParts: ParsedPart[] = [];
   const seen = new Set<Element>();
 
-  for (const node of moduleNodes) {
+  // 1. Encontrar todos os ITEM na árvore
+  const allItemNodes = Array.from(doc.querySelectorAll("ITEM, Item, item"));
+
+  // 2. Identificar Módulos (itens que têm filhos ou são estruturais)
+  // No Promob real, UNIQUEPARENTID="-2" ou "0" costuma indicar raiz.
+  for (const node of allItemNodes) {
     if (seen.has(node)) continue;
-    const name =
-      attr(node, ["DESCRIPTION", "description", "name", "NAME", "REFERENCE"]) ?? "Módulo sem descrição";
-    const width = num(attr(node, ["WIDTH", "width", "largura", "L"]));
-    const height = num(attr(node, ["HEIGHT", "height", "altura", "A"]));
-    const depth = num(attr(node, ["DEPTH", "depth", "profundidade", "P"]));
-    const quantity = num(attr(node, ["QUANTITY", "quantity", "qtd", "QTD"])) ?? 1;
-    const environment = attr(node, ["ENVIRONMENT", "environment", "ambiente", "GROUP"]);
 
-    const partNodes = Array.from(node.querySelectorAll("PIECE, Piece, piece, PART, Part, COMPONENT, ITEM[DESCRIPTION]:not([COMPONENTS])"));
-    const parts: ParsedPart[] = partNodes.map((p) => {
-      partsMark(p, seen);
-      return {
-        kind: classifyKind(attr(p, ["TYPE", "type", "CATEGORY"]) ?? ""),
-        name: attr(p, ["DESCRIPTION", "description", "name", "NAME", "REFERENCE"]) ?? "Peça",
-        material: attr(p, ["MATERIAL", "material", "COLOR", "cor"]),
-        thickness_mm: num(attr(p, ["THICKNESS", "thickness", "espessura", "E"])),
-        width_mm: num(attr(p, ["WIDTH", "width", "largura", "L"])),
-        length_mm: num(attr(p, ["LENGTH", "length", "comprimento", "HEIGHT", "C"])),
-        quantity: num(attr(p, ["QUANTITY", "quantity", "qtd", "QTD"])) ?? 1,
-        unit: "un",
-        edge_banding: attr(p, ["EDGE", "edge", "fita", "BORDER"]),
-      };
-    });
+    const parentId = attr(node, ["UNIQUEPARENTID"]);
+    const hasChildren = node.querySelector("ITEMS > ITEM, COMPONENTS > ITEM, COMPONENT, PART");
+    
+    // Se for um item da raiz (-2) e tiver filhos, tratamos como Módulo
+    if (parentId === "-2" && hasChildren) {
+      const name = attr(node, ["DESCRIPTION", "name", "REFERENCE"]) ?? "Módulo";
+      const width = num(attr(node, ["WIDTH", "L"]));
+      const height = num(attr(node, ["HEIGHT", "A"]));
+      const depth = num(attr(node, ["DEPTH", "P"]));
+      const quantity = num(attr(node, ["QUANTITY", "qtd"])) ?? 1;
+      const environment = attr(node, ["ENVIRONMENT", "ambiente", "GROUP"]);
 
-    seen.add(node);
-    if (parts.length === 0 && !width && !height && !depth) continue;
-    modules.push({ name, environment, width_mm: width, height_mm: height, depth_mm: depth, quantity, parts });
+      // Buscar peças dentro deste módulo
+      const childNodes = Array.from(node.querySelectorAll("ITEM, COMPONENT, PART, PIECE"));
+      const parts: ParsedPart[] = [];
+
+      for (const child of childNodes) {
+        if (child === node || seen.has(child)) continue;
+        
+        // Só adiciona se for folha (não tem ITEM dentro de si na tag ITEMS ou COMPONENTS) ou se for explicitamente um componente/peça
+        const isLeaf = !child.querySelector("ITEMS > ITEM, COMPONENTS > ITEM");
+        if (isLeaf || child.tagName.toUpperCase() === "COMPONENT" || child.tagName.toUpperCase() === "PART") {
+          parts.push(parsePartNode(child));
+          seen.add(child);
+        }
+      }
+
+      modules.push({ name, environment, width_mm: width, height_mm: height, depth_mm: depth, quantity, parts });
+      seen.add(node);
+    }
   }
 
-  if (modules.length === 0) {
-    warnings.push(
-      "Nenhum módulo reconhecido automaticamente. Confira se o arquivo é uma exportação de lista/XML do Promob.",
-    );
+  // 3. Capturar itens que sobraram na raiz (Acessórios Avulsos / Itens sem módulo)
+  for (const node of allItemNodes) {
+    if (seen.has(node)) continue;
+    const parentId = attr(node, ["UNIQUEPARENTID"]);
+    
+    // Itens na raiz que não foram processados como módulos
+    if (parentId === "-2") {
+      looseParts.push(parsePartNode(node));
+      seen.add(node);
+    }
   }
-  const missingDims = modules.filter((m) => !m.width_mm || !m.height_mm || !m.depth_mm).length;
-  if (missingDims > 0) warnings.push(`${missingDims} módulo(s) sem dimensões completas — confirmar no projeto.`);
-  const missingMaterial = modules
-    .flatMap((m) => m.parts)
-    .filter((p) => !p.material).length;
-  if (missingMaterial > 0) warnings.push(`${missingMaterial} peça(s) sem material/cor definidos.`);
 
+  if (modules.length === 0 && looseParts.length === 0) {
+    warnings.push("Nenhum item ou módulo reconhecido. Verifique se o XML é uma exportação válida do Promob.");
+  }
+
+  const missingDims = modules.filter((m) => !m.width_mm && !m.height_mm && !m.depth_mm).length;
+  // Não avisamos se for 0, mas se tiver algum valor parcial e faltar outro, pode ser útil
+  
   return { fileName, fileType: "xml", sizeBytes, modules, looseParts, warnings };
 }
 
-function partsMark(el: Element, seen: Set<Element>) {
-  seen.add(el);
+function parsePartNode(p: Element): ParsedPart {
+  const rawType = attr(p, ["FAMILY", "GROUP", "TYPE", "CATEGORY"]) ?? "";
+  const description = attr(p, ["DESCRIPTION", "name", "REFERENCE"]) ?? "Item";
+  
+  // Tenta pegar a medida do TEXTDIMENSION se os atributos individuais falharem ou para validar
+  let width = num(attr(p, ["WIDTH", "L"]));
+  let length = num(attr(p, ["LENGTH", "HEIGHT", "C"]));
+  const thickness = num(attr(p, ["THICKNESS", "E"]));
+
+  return {
+    kind: classifyKind(rawType, description),
+    name: description,
+    material: attr(p, ["MATERIAL", "COLOR", "REFERENCE"]),
+    thickness_mm: thickness,
+    width_mm: width,
+    length_mm: length,
+    quantity: num(attr(p, ["QUANTITY", "qtd"])) ?? 1,
+    unit: attr(p, ["UNIT"])?.toLowerCase() ?? "un",
+    edge_banding: attr(p, ["EDGE", "BORDER"]),
+  };
 }
 
-function classifyKind(raw: string): ParsedPart["kind"] {
-  const value = raw.toLowerCase();
-  if (value.includes("ferrag") || value.includes("hardware") || value.includes("accessor")) return "ferragem";
-  if (value.includes("chapa") || value.includes("sheet")) return "chapa";
-  if (value.includes("acess")) return "acessorio";
+function classifyKind(rawGroup: string, name: string): ParsedPart["kind"] {
+  const g = rawGroup.toLowerCase();
+  const n = name.toLowerCase();
+  
+  if (g.includes("ferrag") || n.includes("dobradiça") || n.includes("corrediça") || n.includes("parafuso") || n.includes("suporte")) return "ferragem";
+  if (g.includes("acess") || n.includes("cabideiro") || n.includes("aramado") || n.includes("organizador")) return "acessorio";
+  if (g.includes("chapa") || g.includes("painel")) return "chapa";
   return "peca";
 }
 
