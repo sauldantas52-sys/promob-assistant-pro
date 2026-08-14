@@ -81,11 +81,7 @@ export const Route = createFileRoute("/_authenticated/projects/$projectId")({
 });
 
 function ProjectDetailPage() {
-  return (
-    <AppShell>
-      <ProjectDetail />
-    </AppShell>
-  );
+  return <ProjectDetail />;
 }
 
 function ProjectDetail() {
@@ -430,93 +426,90 @@ function ProjectDetail() {
   }
 
   return (
-    <AppShell>
-      <div className="space-y-8 p-4 md:p-10 max-w-[1600px] mx-auto">
-        <header className="flex flex-col gap-6">
-          <Link to="/projects" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 hover:text-blue-600 transition-colors">
-            <ArrowLeft className="h-4 w-4" /> Voltar para Projetos
-          </Link>
+    <div className="space-y-12 p-8 md:p-16 max-w-[1800px] mx-auto animate-in fade-in duration-700">
+      <header className="flex flex-col gap-8">
+        <Link to="/projects" className="inline-flex items-center gap-4 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 hover:text-blue-600 transition-all duration-300 group">
+          <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-2" /> Voltar para o Centro de Comando
+        </Link>
 
-          <div className="flex flex-wrap items-end justify-between gap-10">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-600">Ficha Técnica do Projeto</p>
-                <span className="h-1.5 w-1.5 rounded-full bg-blue-600 animate-pulse" />
-              </div>
-              <h1 className="text-4xl md:text-7xl font-black tracking-tighter text-slate-900 uppercase leading-none">
-                {project.data?.name}
-              </h1>
-              <div className="flex flex-wrap items-center gap-6">
-                <Badge className={cn("px-6 py-2.5 text-[10px] font-black shadow-lg uppercase tracking-[0.2em] border-none rounded-full", statusTone(project.data?.status || "novo"))}>
-                  {statusLabel(project.data?.status || "novo")}
-                </Badge>
-                <div className="flex items-center gap-3">
-                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
-                    {project.data?.client_name || "Sem cliente"}
-                  </p>
-                  <span className="h-1 w-1 rounded-full bg-slate-300" />
-                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
-                    {project.data?.environment || "Ambiente Geral"}
-                  </p>
-                </div>
-              </div>
+        <div className="flex flex-wrap items-end justify-between gap-12">
+          <div className="space-y-6">
+            <div className="flex items-center gap-4">
+              <span className="h-2 w-10 bg-blue-600 rounded-full" />
+              <p className="text-[12px] font-black uppercase tracking-[0.6em] text-blue-600">Dossiê Técnico Industrial</p>
+              <div className="h-3 w-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
             </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <Select 
-                value={project.data?.status ?? "novo"} 
-                disabled={!hasPermission(role, "projects", "approve")}
-                onValueChange={async (v) => {
-                  if (v === "producao") {
-                    const unconfirmedParts = allParts.filter(p => 
-                      (!p.width_mm || !p.length_mm || !p.thickness_mm || !p.material) && 
-                      p.kind !== 'ferragem' && 
-                      p.kind !== 'acessorio' && 
-                      !p.name.toLowerCase().includes("processo") &&
-                      p.visibility_type !== 'oculta'
-                    );
-
-                    if (unconfirmedParts.length > 0) {
-                      toast.error(`Bloqueio: ${unconfirmedParts.length} peça(s) possuem medidas ou dados críticos "Não confirmados".`);
-                      return;
-                    }
-                  }
-
-                  const oldStatus = project.data?.status || "novo";
-                  updateStatus.mutate(v, {
-                    onSuccess: async () => {
-                      const { data: { user } } = await supabase.auth.getUser();
-                      if (user) {
-                        await (supabase.from('production_logs') as any).insert({
-                          project_id: projectId,
-                          user_id: user.id,
-                          action: `Alteração de status do projeto: ${v}`,
-                          status_from: oldStatus,
-                          status_to: v,
-                          notes: "Alteração via seletor de status principal"
-                        });
-                      }
-                    }
-                  });
-                }}
-              >
-                <SelectTrigger className="h-14 w-56 rounded-[1.25rem] border-2 border-slate-100 font-black uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-slate-900/5 bg-white hover:bg-slate-50 transition-all duration-300">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="rounded-2xl border-2 shadow-2xl">
-                  {projectStatuses.map((status) => (
-                    <SelectItem key={status} value={status} className="font-black uppercase text-[10px] tracking-widest py-4 focus:bg-blue-50 focus:text-blue-600">
-                      {statusLabel(status)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button variant="outline" className="h-14 px-8 rounded-[1.25rem] border-2 border-slate-100 font-black uppercase tracking-[0.2em] text-[10px] gap-3 bg-white hover:bg-slate-50 shadow-xl shadow-slate-900/5 transition-all duration-300" onClick={exportCSV}>
-                <Download className="h-5 w-5 text-blue-600" /> Exportar OP
-              </Button>
+            <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-slate-900 uppercase leading-[0.8]">
+              {project.data?.name}
+            </h1>
+            <div className="flex flex-wrap items-center gap-8 pt-4">
+              <Badge className={cn("px-8 py-3.5 text-[11px] font-black shadow-2xl uppercase tracking-[0.3em] border-none rounded-[1.5rem] transition-all duration-500 hover:scale-105", statusTone(project.data?.status || "novo"))}>
+                {statusLabel(project.data?.status || "novo")}
+              </Badge>
+              <div className="flex items-center gap-4 border-l-4 border-slate-200 pl-8">
+                <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.4em]">Proprietário</p>
+                <p className="text-xl font-black text-slate-900 uppercase tracking-tighter">
+                  {project.data?.client_name || "CLIENTE ANÔNIMO"}
+                </p>
+              </div>
             </div>
           </div>
-        </header>
+
+          <div className="flex flex-wrap items-center gap-4">
+            <Select 
+              value={project.data?.status ?? "novo"} 
+              disabled={!hasPermission(role, "projects", "approve")}
+              onValueChange={async (v) => {
+                if (v === "producao") {
+                  const unconfirmedParts = allParts.filter(p => 
+                    (!p.width_mm || !p.length_mm || !p.thickness_mm || !p.material) && 
+                    p.kind !== 'ferragem' && 
+                    p.kind !== 'acessorio' && 
+                    !p.name.toLowerCase().includes("processo") &&
+                    p.visibility_type !== 'oculta'
+                  );
+
+                  if (unconfirmedParts.length > 0) {
+                    toast.error(`Bloqueio: ${unconfirmedParts.length} peça(s) possuem medidas ou dados críticos "Não confirmados".`);
+                    return;
+                  }
+                }
+
+                const oldStatus = project.data?.status || "novo";
+                updateStatus.mutate(v, {
+                  onSuccess: async () => {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                      await (supabase.from('production_logs') as any).insert({
+                        project_id: projectId,
+                        user_id: user.id,
+                        action: `Alteração de status do projeto: ${v}`,
+                        status_from: oldStatus,
+                        status_to: v,
+                        notes: "Alteração via seletor de status principal"
+                      });
+                    }
+                  }
+                });
+              }}
+            >
+              <SelectTrigger className="h-16 w-64 rounded-[1.5rem] border-none bg-slate-900 text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl shadow-slate-900/20 hover:bg-slate-800 transition-all duration-500">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="rounded-[1.5rem] border-2 shadow-2xl p-4">
+                {projectStatuses.map((status) => (
+                  <SelectItem key={status} value={status} className="font-black uppercase text-[11px] tracking-widest py-4 focus:bg-blue-50 focus:text-blue-600">
+                    {statusLabel(status)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button variant="outline" className="h-16 px-10 rounded-[1.5rem] border-2 border-slate-100 font-black uppercase tracking-[0.2em] text-[11px] gap-4 bg-white hover:bg-slate-50 shadow-2xl shadow-slate-900/5 transition-all duration-500" onClick={exportCSV}>
+              <Download className="h-6 w-6 text-blue-600" /> Exportar OP
+            </Button>
+          </div>
+        </div>
+      </header>
 
         <Card className="border-none shadow-[0_25px_60px_-15px_rgba(0,0,0,0.08)] rounded-[3.5rem] overflow-hidden bg-white">
           <CardHeader className="pb-6 pt-12 px-12 border-b border-slate-50">
@@ -1061,7 +1054,6 @@ function ProjectDetail() {
         </TabsContent>
       </Tabs>
     </div>
-    </AppShell>
   );
 }
 

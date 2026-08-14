@@ -43,80 +43,44 @@
 }
 
 :root {
-  --radius: 0.75rem;
-  /* Paleta Industrial Moderna - Monta AI */
-  --background: #F8FAFC;
-  --foreground: #0F172A;
+  --radius: 1rem;
+  --background: #F1F5F9; /* Slate 100 industrial */
+  --foreground: #020617;
   --card: #FFFFFF;
-  --card-foreground: #0F172A;
-  --popover: #FFFFFF;
-  --popover-foreground: #0F172A;
-  --primary: #0F4C5C; /* Azul Petróleo Industrial */
+  --card-foreground: #020617;
+  --primary: #0F4C5C;
   --primary-foreground: #F8FAFC;
-  --secondary: #F1F5F9;
-  --secondary-foreground: #475569;
-  --muted: #F1F5F9;
-  --muted-foreground: #64748B;
-  --accent: #2563EB;
-  --accent-foreground: #FFFFFF;
-  --destructive: #EF4444; 
-  --destructive-foreground: #FFFFFF;
+  --secondary: #E2E8F0;
+  --secondary-foreground: #1E293B;
   --border: #E2E8F0;
-  --input: #E2E8F0;
-  --ring: #0F4C5C;
   
-  /* Cores Operacionais - Design System */
-  --corte: #EF4444;
-  --borda: #F59E0B;
-  --usinagem: #8B5CF6;
-  --picking: #3B82F6;
-  --montagem: #10B981;
-  --expedicao: #6366f1;
+  /* Cores Operacionais Refinadas */
+  --corte: #B91C1C;
+  --borda: #D97706;
+  --usinagem: #7C3AED;
+  --picking: #2563EB;
+  --montagem: #059669;
+  --expedicao: #4F46E5;
 
-  /* Grupos Físicos */
-  --g1: #0F4C5C;
-  --g2: #475569;
-  --g3: #4F46E5;
-  --av: #EA580C;
-
-  --sidebar: #0F4C5C;
+  --sidebar: #0F172A;
   --sidebar-foreground: #F8FAFC;
-  --sidebar-primary: #2563EB;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #1E293B;
-  --sidebar-accent-foreground: #F8FAFC;
+  --sidebar-primary: #3B82F6;
   --sidebar-border: #1E293B;
-  --sidebar-ring: #2563EB;
 }
 
 .dark {
-  --background: #020617; /* Navy Profundo Industrial */
-  --foreground: #F8FAFC;
+  --background: #020617;
+  --foreground: #F1F5F9;
   --card: #0F172A;
-  --card-foreground: #F8FAFC;
-  --popover: #0F172A;
-  --popover-foreground: #F8FAFC;
+  --card-foreground: #F1F5F9;
   --primary: #3B82F6;
   --primary-foreground: #FFFFFF;
   --secondary: #1E293B;
-  --secondary-foreground: #94A3B8;
-  --muted: #1E293B;
-  --muted-foreground: #94A3B8;
-  --accent: #3B82F6;
-  --accent-foreground: #FFFFFF;
-  --destructive: #EF4444;
-  --destructive-foreground: #FFFFFF;
+  --secondary-foreground: #CBD5E1;
   --border: #1E293B;
-  --input: #1E293B;
-  --ring: #3B82F6;
+  
   --sidebar: #020617;
-  --sidebar-foreground: #F8FAFC;
-  --sidebar-primary: #3B82F6;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #0F172A;
-  --sidebar-accent-foreground: #F8FAFC;
-  --sidebar-border: #1E293B;
-  --sidebar-ring: #3B82F6;
+  --sidebar-foreground: #F1F5F9;
 }
 
 @layer base {

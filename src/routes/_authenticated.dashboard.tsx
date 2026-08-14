@@ -62,45 +62,51 @@ function DashboardContent() {
   ];
 
   return (
-    <div className="space-y-10 p-6 md:p-12 max-w-[1600px] mx-auto">
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="space-y-2">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-600">
-            Painel Operacional 4.0
-          </p>
-          <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-slate-900 uppercase leading-none">
-            Olá, {fullName?.split(" ")[0] ?? "bem-vindo"}!
+    <div className="space-y-16 p-8 md:p-16 max-w-[1800px] mx-auto animate-in fade-in duration-700">
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-10">
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <span className="h-2 w-8 bg-blue-600 rounded-full" />
+            <p className="text-[12px] font-black uppercase tracking-[0.5em] text-blue-600">
+              Industrial Monitoring 4.0
+            </p>
+          </div>
+          <h1 className="text-5xl md:text-8xl font-black tracking-tighter text-slate-900 uppercase leading-[0.85]">
+            Olá, {fullName?.split(" ")[0] ?? "Operador"}
           </h1>
-          <div className="flex items-center gap-3 mt-4">
-            <Badge className="px-4 py-1.5 text-[10px] font-black shadow-sm uppercase tracking-[0.2em] border-none rounded-full bg-slate-900 text-white">
-              {role ? roleLabels[role] : "Perfil não definido"}
+          <div className="flex items-center gap-4 mt-6">
+            <Badge className="px-6 py-2 text-[11px] font-black shadow-xl uppercase tracking-[0.2em] border-none rounded-2xl bg-slate-900 text-white">
+              {role ? roleLabels[role] : "Operador Geral"}
             </Badge>
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-              Aprovado para piloto controlado
+            <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Piloto Controlado Ativo
             </span>
           </div>
         </div>
-        <div className="hidden md:block text-right">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+        <div className="hidden md:block text-right border-l-4 border-slate-200 pl-8">
+          <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.4em] mb-1">Status do Turno</p>
+          <p className="text-xl font-black text-slate-900 uppercase tracking-tighter">{new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
         </div>
       </header>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10">
         {stats.map((stat, i) => (
           <Card key={stat.label} className={cn(
-            "border-none shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] hover:shadow-[0_30px_70px_-12px_rgba(0,0,0,0.15)] transition-all duration-500 rounded-[2.5rem] group overflow-hidden",
+            "border-none shadow-[0_40px_80px_-20px_rgba(0,0,0,0.12)] hover:shadow-[0_60px_100px_-20px_rgba(0,0,0,0.18)] transition-all duration-700 rounded-[3.5rem] group overflow-hidden relative",
             i === 0 ? "bg-blue-600 text-white" : "bg-white"
           )}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-8">
-              <CardTitle className={cn("text-[10px] font-black uppercase tracking-[0.3em]", i === 0 ? "text-blue-100" : "text-slate-400")}>
+            {i === 0 && <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl" />}
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 p-10">
+              <CardTitle className={cn("text-[11px] font-black uppercase tracking-[0.4em]", i === 0 ? "text-blue-100" : "text-slate-400")}>
                 {stat.label}
               </CardTitle>
-              <div className={cn("p-3 rounded-2xl transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6", i === 0 ? "bg-blue-500/50" : "bg-slate-50")}>
-                <stat.icon className={cn("h-6 w-6", i === 0 ? "text-white" : "text-blue-600")} />
+              <div className={cn("p-4 rounded-3xl transition-all duration-700 group-hover:scale-110 group-hover:rotate-12", i === 0 ? "bg-blue-500/50" : "bg-slate-50")}>
+                <stat.icon className={cn("h-7 w-7", i === 0 ? "text-white" : "text-blue-600")} />
               </div>
             </CardHeader>
-            <CardContent className="p-8 pt-0">
-              <p className={cn("text-5xl font-black tracking-tighter", i === 0 ? "text-white" : "text-slate-900")}>{stat.value}</p>
+            <CardContent className="p-10 pt-0">
+              <p className={cn("text-7xl font-black tracking-tighter leading-none", i === 0 ? "text-white" : "text-slate-900")}>{stat.value}</p>
             </CardContent>
           </Card>
         ))}

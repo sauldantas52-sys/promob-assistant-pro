@@ -85,45 +85,43 @@ function WallboardContent({ time }: { time: Date }) {
   const list = projects.data ?? [];
 
   return (
-    <div className="p-10 lg:p-16 space-y-16">
+    <div className="p-16 space-y-20">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-12 w-full">
         <div className="space-y-6">
-          <div className="flex items-center gap-4">
-            <div className="h-4 w-4 rounded-full bg-blue-500 animate-pulse shadow-[0_0_20px_rgba(59,130,246,0.6)]" />
-            <p className="text-[12px] font-black uppercase tracking-[0.5em] text-blue-500/80">Industrial Wallboard v4.0</p>
+          <div className="flex items-center gap-6">
+            <div className="h-4 w-12 bg-blue-600 rounded-full animate-pulse" />
+            <p className="text-[12px] font-black uppercase tracking-[0.6em] text-blue-500">Monitoramento Industrial 4.0</p>
           </div>
-          <h1 className="text-7xl md:text-9xl font-black tracking-tighter uppercase leading-none text-white">
-            Produção
-          </h1>
-          <p className="text-2xl font-bold text-slate-500 uppercase tracking-[0.3em]">
+          <h1 className="text-[10rem] font-black tracking-tighter uppercase leading-[0.8] text-white">Produção</h1>
+          <p className="text-4xl font-black text-slate-500 uppercase tracking-[0.5em]">
             {time.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}
           </p>
         </div>
         
-        <div className="flex gap-16 items-center">
-          <div className="text-right border-r border-slate-800 pr-16">
-            <p className="text-slate-500 font-black uppercase tracking-[0.3em] text-[12px] mb-3">Em Linha</p>
-            <p className="text-8xl font-black text-white">{list.length}</p>
+        <div className="flex gap-20 items-center">
+          <div className="text-right border-r border-slate-800 pr-20">
+            <p className="text-slate-500 font-black uppercase tracking-[0.4em] text-[14px] mb-4">Em Linha</p>
+            <p className="text-[8rem] font-black text-white leading-none">{list.length}</p>
           </div>
           <div className="text-right">
-            <p className="text-8xl font-black font-mono tracking-tighter text-white">
+            <p className="text-[8rem] font-black font-mono tracking-tighter text-white leading-none">
               {time.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
             </p>
-            <p className="text-blue-500 font-black uppercase tracking-[0.4em] text-[12px] mt-4 animate-pulse">
+            <p className="text-blue-500 font-black uppercase tracking-[0.5em] text-[14px] mt-6 animate-pulse">
               Factory Sync Active
             </p>
           </div>
         </div>
       </header>
 
-      <div className="grid gap-12 grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+      <div className="grid gap-12 grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3">
         {list.map((project) => (
           <ProjectCard key={project.id} project={project} />
         ))}
         {list.length === 0 && (
-          <div className="col-span-full py-48 flex flex-col items-center justify-center text-slate-500 border-4 border-dashed border-slate-800 rounded-[4rem] bg-slate-900/10">
-            <Monitor className="h-24 w-24 mb-6 opacity-20 text-blue-500" />
-            <p className="text-2xl font-black uppercase tracking-[0.4em] opacity-40">Aguardando Ordens de Produção</p>
+          <div className="col-span-full py-64 flex flex-col items-center justify-center text-slate-500 border-[6px] border-dashed border-slate-800 rounded-[5rem] bg-slate-900/10">
+            <Monitor className="h-48 w-48 mb-12 opacity-20 text-blue-500" />
+            <p className="text-5xl font-black uppercase tracking-[0.5em] opacity-40">Aguardando Ordens</p>
           </div>
         )}
       </div>

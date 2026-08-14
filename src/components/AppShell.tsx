@@ -52,57 +52,57 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen bg-background">
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 transform bg-sidebar text-sidebar-foreground transition-transform lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 w-80 transform bg-sidebar text-sidebar-foreground transition-all duration-700 lg:static lg:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex h-20 items-center gap-3 border-b border-sidebar-border/30 px-6">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 shadow-xl shadow-blue-600/20 ring-4 ring-blue-600/10">
-            <Boxes className="h-7 w-7 text-white" />
+        <div className="flex h-28 items-center gap-5 border-b border-sidebar-border/30 px-10">
+          <div className="flex h-16 w-16 items-center justify-center rounded-[2rem] bg-blue-600 shadow-2xl shadow-blue-600/30 ring-4 ring-blue-600/10">
+            <Boxes className="h-9 w-9 text-white" />
           </div>
-          <div className="leading-tight">
-            <p className="text-lg font-black tracking-tighter uppercase text-white">Monta AI</p>
-            <p className="text-[10px] font-black text-sidebar-foreground/40 uppercase tracking-[0.2em]">Industrial v4.0</p>
+          <div className="leading-none space-y-1">
+            <p className="text-2xl font-black tracking-tighter uppercase text-white">Monta AI</p>
+            <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em]">Industrial 4.0</p>
           </div>
           <button className="ml-auto lg:hidden" onClick={() => setOpen(false)} aria-label="Fechar menu">
-            <X className="h-5 w-5" />
+            <X className="h-6 w-6" />
           </button>
         </div>
-        <nav className="space-y-2 p-4">
+        <nav className="space-y-3 p-8">
           {navItems.filter(item => !role || item.roles.includes(role)).map((item) => {
             const active = pathname.startsWith(item.to);
             return (
               <Link
                 key={item.to}
                 to={item.to}
-                className={`flex items-center gap-3 rounded-[1.25rem] px-5 py-4 text-sm font-black uppercase tracking-widest transition-all duration-300 ${
+                className={`flex items-center gap-5 rounded-[2rem] px-8 py-6 text-[12px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${
                   active
-                    ? "bg-blue-600 text-white shadow-xl shadow-blue-600/20 translate-x-2"
-                    : "text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-foreground hover:translate-x-1"
+                    ? "bg-blue-600 text-white shadow-2xl shadow-blue-600/20 translate-x-2"
+                    : "text-sidebar-foreground/40 hover:bg-white/5 hover:text-white hover:translate-x-1"
                 }`}
               >
-                <item.icon className={`h-5 w-5 transition-transform duration-300 ${active ? "scale-110" : "opacity-70"}`} />
+                <item.icon className={`h-6 w-6 transition-transform duration-500 ${active ? "scale-110" : ""}`} />
                 {item.label}
               </Link>
             );
           })}
         </nav>
-        <div className="absolute bottom-0 w-full border-t border-sidebar-border/30 p-8 bg-sidebar/80 backdrop-blur-xl">
-          <div className="flex flex-col gap-1.5">
-            <p className="truncate text-base font-black text-white uppercase tracking-tight">{fullName ?? user.email}</p>
-            <Badge variant="outline" className="w-fit border-sidebar-border/50 bg-sidebar-accent/50 text-[9px] font-black uppercase tracking-[0.2em] text-sidebar-foreground/50 py-1 px-3">
-              {role ? (roleLabels[role] || role) : "Sem perfil"}
+        <div className="absolute bottom-0 w-full border-t border-sidebar-border/30 p-10 bg-sidebar/90 backdrop-blur-3xl">
+          <div className="flex flex-col gap-2">
+            <p className="truncate text-lg font-black text-white uppercase tracking-tight">{fullName ?? user.email}</p>
+            <Badge variant="outline" className="w-fit border-sidebar-border/50 bg-slate-900 text-[10px] font-black uppercase tracking-[0.3em] text-blue-400 py-2 px-4 rounded-full">
+              {role ? (roleLabels[role] || role) : "Operador"}
             </Badge>
           </div>
           <Button
             variant="ghost"
-            className="mt-6 w-full justify-start rounded-2xl px-5 py-7 text-xs font-black uppercase tracking-[0.2em] text-sidebar-foreground/50 hover:bg-red-500/10 hover:text-red-400 transition-all duration-300 group"
+            className="mt-10 w-full justify-start rounded-[1.5rem] px-8 py-8 text-[11px] font-black uppercase tracking-[0.3em] text-sidebar-foreground/40 hover:bg-red-900/20 hover:text-red-400 transition-all duration-500 group"
             onClick={async () => {
               await signOut();
               navigate({ to: "/login" });
             }}
           >
-            <LogOut className="mr-3 h-5 w-5 transition-transform group-hover:-translate-x-1" /> Sair do sistema
+            <LogOut className="mr-4 h-6 w-6 transition-transform group-hover:-translate-x-2" /> Encerrar Acesso
           </Button>
         </div>
       </aside>

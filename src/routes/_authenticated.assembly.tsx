@@ -90,48 +90,46 @@ function AssemblyContent() {
   const list = projects.data ?? [];
 
   return (
-    <div className="space-y-10 p-6 md:p-12 max-w-[1600px] mx-auto">
-      <header className="flex flex-col gap-3">
-        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-600">Montagem Externa</p>
-        <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-slate-900 uppercase leading-none">Casa do Cliente</h1>
-        <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-2">
-          Roteiro técnico, sequência de montagem e checklists mobile.
-        </p>
+    <div className="space-y-16 p-8 md:p-16 max-w-[1800px] mx-auto animate-in fade-in duration-700">
+      <header className="flex flex-col gap-6">
+        <div className="flex items-center gap-4">
+          <span className="h-2 w-10 bg-emerald-600 rounded-full" />
+          <p className="text-[12px] font-black uppercase tracking-[0.5em] text-emerald-600">Protocolo de Instalação</p>
+        </div>
+        <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-slate-900 uppercase leading-[0.8] mb-4">Montagem</h1>
+        <p className="text-base font-black text-slate-500 uppercase tracking-[0.4em]">Guia técnico mobile para montadores especializados.</p>
       </header>
 
       {list.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center gap-2 py-12 text-center">
-            <Wrench className="h-10 w-10 text-muted-foreground" />
-            <p className="font-medium">Nada liberado para montagem</p>
-            <p className="text-sm text-muted-foreground">
-              Assim que a fábrica liberar um projeto, ele aparece aqui.
-            </p>
+        <Card className="border-[4px] border-dashed border-slate-200 rounded-[4rem] bg-slate-50/50">
+          <CardContent className="flex flex-col items-center gap-6 py-32 text-center">
+            <Wrench className="h-24 w-24 text-slate-200" />
+            <p className="text-2xl font-black uppercase tracking-[0.4em] text-slate-400">Sem Montagens Agendadas</p>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
           {list.map((project) => (
-            <Card key={project.id} className="border-none shadow-[0_20px_50px_-15px_rgba(0,0,0,0.06)] rounded-[3rem] overflow-hidden bg-white">
-              <CardHeader className="pb-8 pt-10 px-10 bg-slate-50/50 border-b border-slate-100">
-                <div className="flex flex-wrap items-center justify-between gap-6">
-                  <div className="space-y-2">
-                    <CardTitle className="text-3xl font-black text-slate-900 tracking-tighter uppercase leading-none">{project.name}</CardTitle>
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
-                      {project.client_name || "Sem cliente"} <span className="mx-2 text-slate-300">|</span> {project.environment || "Ambiente geral"}
+            <Card key={project.id} className="border-none shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)] rounded-[4rem] overflow-hidden bg-white mb-12 transition-all duration-700 hover:shadow-[0_60px_120px_-20px_rgba(0,0,0,0.15)]">
+              <CardHeader className="pb-10 pt-16 px-16 bg-slate-50/30 border-b border-slate-100">
+                <div className="flex flex-wrap items-center justify-between gap-10">
+                  <div className="space-y-4">
+                    <CardTitle className="text-5xl font-black text-slate-900 tracking-tighter uppercase leading-[0.9]">{project.name}</CardTitle>
+                    <p className="text-[12px] font-black text-slate-500 uppercase tracking-[0.4em] flex items-center gap-3">
+                      {project.client_name || "CLIENTE ANÔNIMO"} <span className="h-1.5 w-1.5 rounded-full bg-slate-200" /> {project.environment || "AMBIENTE GERAL"}
                     </p>
                   </div>
-                  <Badge className={cn("px-6 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] border-none rounded-full shadow-sm", statusTone(project.status))}>
+                  <Badge className={cn("px-8 py-3.5 text-[11px] font-black uppercase tracking-[0.3em] border-none rounded-[1.5rem] shadow-2xl", statusTone(project.status))}>
                     {statusLabel(project.status)}
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-6 p-6">
-                <Tabs defaultValue="modules" className="space-y-8">
-                  <TabsList className="grid w-full grid-cols-3 bg-slate-100 p-1.5 h-16 rounded-[1.5rem]">
-                    <TabsTrigger value="modules" className="rounded-[1.15rem] data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm font-black text-[10px] uppercase tracking-[0.2em]">Módulos</TabsTrigger>
-                    <TabsTrigger value="groups" className="rounded-[1.15rem] data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm font-black text-[10px] uppercase tracking-[0.2em]">Grupos G1/G2</TabsTrigger>
-                    <TabsTrigger value="hardware" className="rounded-[1.15rem] data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm font-black text-[10px] uppercase tracking-[0.2em]">Caderno</TabsTrigger>
+              <CardContent className="space-y-12 p-16">
+                <Tabs defaultValue="modules" className="space-y-12">
+                  <TabsList className="grid w-full grid-cols-3 bg-slate-100 p-2 h-20 rounded-[2.5rem] border border-slate-200">
+                    <TabsTrigger value="modules" className="rounded-[2rem] data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-2xl font-black text-[11px] uppercase tracking-[0.3em]">Módulos</TabsTrigger>
+                    <TabsTrigger value="groups" className="rounded-[2rem] data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-2xl font-black text-[11px] uppercase tracking-[0.3em]">Grupos G1/G2</TabsTrigger>
+                    <TabsTrigger value="hardware" className="rounded-[2rem] data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-2xl font-black text-[11px] uppercase tracking-[0.3em]">Instruções</TabsTrigger>
                   </TabsList>
                   
                   <TabsContent value="modules" className="space-y-3 mt-4">

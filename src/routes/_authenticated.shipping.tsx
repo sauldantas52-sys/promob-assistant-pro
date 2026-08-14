@@ -196,24 +196,24 @@ function ProjectShippingCard({ project }: { project: any }) {
   };
 
   return (
-    <Card className="border-none shadow-[0_25px_60px_-15px_rgba(0,0,0,0.06)] hover:shadow-[0_35px_80px_-15px_rgba(0,0,0,0.12)] transition-all duration-700 rounded-[3.5rem] overflow-hidden group bg-white mb-10">
-      <CardHeader className="pb-8 pt-12 px-12 bg-slate-50/50 border-b border-slate-100">
-        <div className="flex flex-wrap items-center justify-between gap-8">
-          <div className="space-y-3">
-            <CardTitle className="text-3xl font-black text-slate-900 tracking-tighter uppercase leading-none group-hover:text-indigo-600 transition-colors duration-500">{project.name}</CardTitle>
-            <CardDescription className="text-[11px] font-black text-slate-500 uppercase tracking-[0.3em] flex items-center gap-3">
-              {project.client_name} <span className="h-1 w-1 rounded-full bg-slate-300" /> {project.environment}
+    <Card className="border-none shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)] hover:shadow-[0_60px_120px_-20px_rgba(0,0,0,0.15)] transition-all duration-700 rounded-[4rem] overflow-hidden group bg-white mb-12">
+      <CardHeader className="pb-10 pt-16 px-16 bg-slate-50/30 border-b border-slate-100">
+        <div className="flex flex-wrap items-center justify-between gap-10">
+          <div className="space-y-4">
+            <CardTitle className="text-5xl font-black text-slate-900 tracking-tighter uppercase leading-[0.9] group-hover:text-indigo-600 transition-colors duration-500">{project.name}</CardTitle>
+            <CardDescription className="text-[12px] font-black text-slate-500 uppercase tracking-[0.4em] flex items-center gap-3">
+              {project.client_name} <span className="h-1.5 w-1.5 rounded-full bg-slate-200" /> {project.environment}
             </CardDescription>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             {pendingSealedGroups.length > 0 && (
-              <Button size="lg" className="h-14 px-8 rounded-[1.25rem] bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-[0.2em] text-[10px] border-none shadow-xl shadow-indigo-600/20 transition-all active:scale-95" onClick={generateVolumes} disabled={isGenerating}>
-                {isGenerating ? <Loader2 className="mr-3 h-5 w-5 animate-spin" /> : <QrCode className="mr-3 h-5 w-5" />}
+              <Button size="lg" className="h-16 px-10 rounded-[1.5rem] bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-[0.2em] text-[11px] border-none shadow-2xl shadow-indigo-600/20 transition-all active:scale-95" onClick={generateVolumes} disabled={isGenerating}>
+                {isGenerating ? <Loader2 className="mr-4 h-6 w-6 animate-spin" /> : <QrCode className="mr-4 h-6 w-6" />}
                 Gerar Volumes ({pendingSealedGroups.length})
               </Button>
             )}
-            <Badge className={cn("px-8 py-3 text-[10px] font-black uppercase tracking-[0.3em] border-none rounded-full shadow-lg", project.status === 'expedicao' ? 'bg-blue-600 text-white shadow-blue-600/30' : 'bg-emerald-600 text-white shadow-emerald-600/30')}>
-              {project.status === 'expedicao' ? 'LIBERAR CARGA' : 'PRONTO PARA EXPEDIÇÃO'}
+            <Badge className={cn("px-10 py-4 text-[11px] font-black uppercase tracking-[0.3em] border-none rounded-full shadow-2xl transition-all duration-500", project.status === 'expedicao' ? 'bg-blue-600 text-white' : 'bg-emerald-600 text-white')}>
+              {project.status === 'expedicao' ? 'LIBERAR CARGA' : 'EXPEDIÇÃO PRONTA'}
             </Badge>
           </div>
         </div>
@@ -291,51 +291,56 @@ function VolumeRow({ volume, project }: { volume: any, project: any }) {
   };
 
   return (
-    <div className={cn("p-4 flex flex-wrap items-center justify-between gap-4 transition-colors", isLocked && "bg-destructive/5")}>
-      <div className="flex items-center gap-4 min-w-[280px]">
-        <div className="h-10 w-10 bg-muted rounded flex items-center justify-center border border-dashed text-muted-foreground">
-          <QrCode className="h-5 w-5" />
+    <div className={cn("px-16 py-10 flex flex-wrap items-center justify-between gap-8 transition-all hover:bg-slate-50", isLocked && "bg-destructive/5")}>
+      <div className="flex items-center gap-8 min-w-[320px]">
+        <div className="h-20 w-20 bg-slate-100 rounded-[1.5rem] flex items-center justify-center border-2 border-dashed border-slate-200 text-slate-400 shadow-inner">
+          <QrCode className="h-8 w-8" />
         </div>
         <div>
-          <div className="flex items-center gap-2">
-            <p className="font-bold text-sm">{volume.name}</p>
-            <Badge variant="outline" className={cn("text-[10px] h-5", statusColors[volume.status])}>
+          <div className="flex items-center gap-4 mb-2">
+            <p className="text-xl font-black text-slate-900 tracking-tighter uppercase leading-none">{volume.name}</p>
+            <Badge variant="outline" className={cn("px-4 py-1 text-[9px] font-black uppercase tracking-[0.2em] border-none rounded-full shadow-sm", statusColors[volume.status])}>
               {volume.status.toUpperCase()}
             </Badge>
           </div>
-          <p className="text-xs text-muted-foreground flex items-center gap-1">
+          <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-3">
             <span className="font-mono">{volume.code}</span>
-            {volume.weight_kg && <span> · {volume.weight_kg}kg</span>}
+            {volume.weight_kg && (
+              <>
+                <span className="h-1.5 w-1.5 rounded-full bg-slate-200" />
+                <span>{volume.weight_kg}kg</span>
+              </>
+            )}
           </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4">
         {isLocked ? (
-          <div className="flex items-center gap-2 text-destructive px-3 py-1 bg-destructive/10 rounded-full text-xs font-bold animate-pulse">
-            <Lock className="h-3 w-3" />
+          <div className="flex items-center gap-4 text-destructive px-8 py-3 bg-destructive/10 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-destructive/5 ring-1 ring-destructive/20">
+            <Lock className="h-4 w-4" />
             <span>BLOQUEADO: {lockReason}</span>
           </div>
         ) : (
-          <>
+          <div className="flex items-center gap-3">
             {volume.status === 'aguardando' && (
-              <Button size="sm" variant="outline" onClick={() => updateStatus('conferido')} disabled={busy}>
-                <Scan className="mr-2 h-4 w-4" /> Conferir
+              <Button size="lg" className="h-12 px-8 rounded-[1.25rem] bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-[0.2em] text-[10px] border-none shadow-xl shadow-blue-600/20 transition-all active:scale-95" onClick={() => updateStatus('conferido')} disabled={busy}>
+                <Scan className="mr-3 h-5 w-5" /> Conferir
               </Button>
             )}
             
             {volume.status === 'conferido' && (
-               <Dialog>
+              <Dialog>
                 <DialogTrigger asChild>
-                  <Button size="sm" variant="default" disabled={busy}>
-                    <Truck className="mr-2 h-4 w-4" /> Carregar
+                  <Button size="lg" className="h-12 px-8 rounded-[1.25rem] bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-[0.2em] text-[10px] border-none shadow-xl shadow-indigo-600/20 transition-all active:scale-95">
+                    <Truck className="mr-3 h-5 w-5" /> Carregar
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Carregamento de Volume</DialogTitle>
-                    <DialogDescription>
-                      Informe os dados logísticos para o volume {volume.code}.
+                <DialogContent className="rounded-[3rem] border-none shadow-2xl p-12">
+                  <DialogHeader className="mb-8">
+                    <DialogTitle className="text-3xl font-black text-slate-900 tracking-tighter uppercase">Carregamento Logístico</DialogTitle>
+                    <DialogDescription className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em] mt-2">
+                      Informe os dados do veículo para o volume {volume.code}.
                     </DialogDescription>
                   </DialogHeader>
                   <LoadingForm onSubmit={(data) => updateStatus('carregado', data)} />
@@ -344,29 +349,29 @@ function VolumeRow({ volume, project }: { volume: any, project: any }) {
             )}
 
             {volume.status === 'carregado' && (
-              <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => updateStatus('entregue')} disabled={busy}>
-                <CheckCircle2 className="mr-2 h-4 w-4" /> Entregar
+              <Button size="lg" className="h-12 px-8 rounded-[1.25rem] bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-[0.2em] text-[10px] border-none shadow-xl shadow-emerald-600/20 transition-all active:scale-95" onClick={() => updateStatus('entregue')} disabled={busy}>
+                <CheckCircle2 className="mr-3 h-5 w-5" /> Entregar
               </Button>
             )}
             
             {volume.status === 'entregue' && (
-              <div className="flex items-center gap-2 text-primary font-bold text-xs px-3 py-1 bg-primary/5 rounded-full border border-primary/20">
-                <ShieldCheck className="h-3.5 w-3.5" />
+              <div className="flex items-center gap-4 text-emerald-600 font-black text-[10px] px-8 py-3 bg-emerald-50 rounded-full border border-emerald-100 uppercase tracking-[0.2em] shadow-sm">
+                <ShieldCheck className="h-4 w-4" />
                 ENTREGUE
               </div>
             )}
-          </>
+          </div>
         )}
         
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <Info className="h-4 w-4 text-muted-foreground" />
+            <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full hover:bg-slate-100 transition-colors">
+              <Info className="h-5 w-5 text-slate-400" />
             </Button>
           </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Informações do Volume</DialogTitle>
+          <DialogContent className="rounded-[3rem] border-none shadow-2xl p-12">
+            <DialogHeader className="mb-8">
+              <DialogTitle className="text-3xl font-black text-slate-900 tracking-tighter uppercase">Detalhes do Volume</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="grid grid-cols-2 gap-4 text-sm">

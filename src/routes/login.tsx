@@ -104,14 +104,14 @@ function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
-      <div className="w-full max-w-md">
-        <div className="mb-10 flex flex-col items-center text-center">
-          <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-[2rem] bg-blue-600 text-white shadow-2xl shadow-blue-600/30">
-            <Boxes className="h-10 w-10" />
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
+      <div className="w-full max-w-lg">
+        <div className="mb-16 flex flex-col items-center text-center">
+          <div className="mb-8 flex h-28 w-28 items-center justify-center rounded-[3rem] bg-blue-600 text-white shadow-2xl shadow-blue-600/30 ring-8 ring-blue-600/5">
+            <Boxes className="h-14 w-14" />
           </div>
-          <h1 className="text-4xl font-black text-slate-900 uppercase tracking-tighter">Monta AI</h1>
-          <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-1">Aprovado para piloto controlado</p>
+          <h1 className="text-6xl font-black text-slate-900 uppercase tracking-tighter leading-none mb-4">Monta AI</h1>
+          <p className="text-[12px] font-black text-blue-600 uppercase tracking-[0.5em]">Protocolo Piloto Ativo</p>
         </div>
 
         {mode === "forgot" ? (
@@ -133,16 +133,16 @@ function LoginPage() {
             </CardContent>
           </Card>
         ) : (
-          <Card className="border-none shadow-2xl shadow-slate-200/50 rounded-3xl">
-            <CardHeader className="pb-6 pt-8 px-8">
-              <CardTitle className="text-2xl font-black text-slate-900">Acesso ao sistema</CardTitle>
-              <CardDescription className="text-slate-500 font-medium">Lojas, fábricas e montadores.</CardDescription>
+          <Card className="border-none shadow-[0_60px_150px_-30px_rgba(0,0,0,0.15)] rounded-[4rem] bg-white overflow-hidden">
+            <CardHeader className="pb-8 pt-16 px-16 border-b border-slate-50">
+              <CardTitle className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Acesso Restrito</CardTitle>
+              <CardDescription className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em] mt-2">Lojas, Fábricas e Engenharia</CardDescription>
             </CardHeader>
-            <CardContent className="px-8 pb-8">
+            <CardContent className="px-16 pb-16 pt-12">
               <Tabs value={mode} onValueChange={(v) => setMode(v as any)}>
-                <TabsList className="mb-8 grid w-full grid-cols-2 p-1 bg-slate-100 rounded-2xl h-14">
-                  <TabsTrigger value="signin" className="rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold text-sm">Entrar</TabsTrigger>
-                  <TabsTrigger value="signup" className="rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold text-sm">Criar conta</TabsTrigger>
+                <TabsList className="mb-12 grid w-full grid-cols-2 p-2 bg-slate-100 rounded-[2rem] h-20 border border-slate-200 shadow-sm">
+                  <TabsTrigger value="signin" className="rounded-[1.6rem] data-[state=active]:bg-white data-[state=active]:shadow-2xl font-black text-[12px] uppercase tracking-[0.2em]">Entrar</TabsTrigger>
+                  <TabsTrigger value="signup" className="rounded-[1.6rem] data-[state=active]:bg-white data-[state=active]:shadow-2xl font-black text-[12px] uppercase tracking-[0.2em]">Cadastrar</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="signin">
