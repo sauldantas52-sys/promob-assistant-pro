@@ -573,7 +573,7 @@ function ProjectDetail() {
             <TabTrigger value="files" icon={FileUp} label="Arquivos" />
           </TabsList>
 
-        <TabsContent value="modules" className="mt-6">
+          <TabsContent value="modules" className="mt-6">
           <Card>
             <CardContent className="p-0">
               <Accordion type="multiple" className="w-full">
