@@ -145,7 +145,7 @@ function WallboardContent() {
                   project.status === 'expedicao' ? 'bg-purple-600' : 
                   'bg-orange-500'
                 }>
-                  {project.status.toUpperCase()}
+                  {(project.status || 'pendente').toUpperCase()}
                 </Badge>
               </div>
             </CardHeader>
