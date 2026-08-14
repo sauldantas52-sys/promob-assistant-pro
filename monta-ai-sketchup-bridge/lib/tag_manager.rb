@@ -14,10 +14,13 @@ module MontaAI
           "17_PROCESSO_SEPARACAO", "18_MONTAGEM"
         ]
         
+        model.start_operation('Criar Tags Monta AI', true)
         tags.each do |tag|
           layers.add(tag) unless layers[tag]
         end
-        UI.messagebox("Tags industriais criadas com sucesso.")
+        model.commit_operation
+        
+        UI.messagebox("Tags industriais (00 a 18) criadas com sucesso.")
       end
     end
   end
