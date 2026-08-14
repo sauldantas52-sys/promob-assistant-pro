@@ -30,9 +30,9 @@ export async function parseExecutivePDF(file: File): Promise<CriticalDimension[]
 
     let match;
     while ((match = dimensionRegex.exec(fullText)) !== null) {
-      const valueStr = match[1].replace(',', '.');
+      const valueStr = match[1]?.replace(',', '.') || '0';
       const value = parseFloat(valueStr);
-      const unit = match[2].toLowerCase();
+      const unit = (match[2] || 'mm').toLowerCase();
 
       if (!isNaN(value)) {
         dimensions.push({
