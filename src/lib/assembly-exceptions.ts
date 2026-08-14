@@ -43,6 +43,7 @@ export const blockingExceptions: ExceptionKind[] = [
 ];
 
 export interface ExceptionEvent {
+  id?: string; // Idempotent ID (client-side generated)
   projectId: string;
   groupId?: string | null;
   kind: ExceptionKind;
@@ -83,6 +84,22 @@ async function persist(event: ExceptionEvent): Promise<void> {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Usuário não autenticado");
 
+  // Prevent duplicates using the idempotent ID in metadata
+  if (event.id) {
+    const { data: existing } = await supabase
+      .from("production_logs")
+      .select("id")
+      .eq("project_id", event.projectId)
+      .eq("action", `excecao_montagem:${event.kind}`)
+      .contains("metadata", { event_id: event.id })
+      .maybeSingle();
+
+    if (existing) {
+      console.log(`Evento ${event.id} já processado. Ignorando duplicata.`);
+      return;
+    }
+  }
+
   const { error } = await supabase.from("production_logs").insert({
     project_id: event.projectId,
     user_id: user.id,
@@ -91,6 +108,7 @@ async function persist(event: ExceptionEvent): Promise<void> {
     status_from: event.statusFrom ?? null,
     status_to: event.statusTo ?? null,
     metadata: {
+      event_id: event.id ?? null,
       kind: event.kind,
       label: exceptionLabels[event.kind],
       blocking: blockingExceptions.includes(event.kind),
@@ -108,7 +126,12 @@ async function persist(event: ExceptionEvent): Promise<void> {
  * localmente para sincronizar depois — nunca descarta o evento.
  */
 export async function logException(event: ExceptionEvent): Promise<"registrado" | "pendente"> {
-  const stamped: ExceptionEvent = { ...event, occurredAt: event.occurredAt ?? new Date().toISOString() };
+  const stamped: ExceptionEvent = { 
+    ...event, 
+    id: event.id ?? crypto.randomUUID(),
+    occurredAt: event.occurredAt ?? new Date().toISOString() 
+  };
+  
   if (typeof navigator !== "undefined" && navigator.onLine === false) {
     enqueue(stamped);
     return "pendente";
@@ -116,7 +139,8 @@ export async function logException(event: ExceptionEvent): Promise<"registrado" 
   try {
     await persist(stamped);
     return "registrado";
-  } catch {
+  } catch (error) {
+    console.error("Erro ao persistir evento, enfileirando:", error);
     enqueue(stamped);
     return "pendente";
   }
@@ -131,28 +155,39 @@ export async function syncPendingExceptions(): Promise<{ synced: number; remaini
   let synced = 0;
   for (const event of queue) {
     try {
+      // 1. Revalidar integridade básica antes de persistir
+      if (!event.projectId || !event.kind || !event.id) {
+        console.warn("Evento corrompido na fila offline, descartando:", event);
+        continue;
+      }
+
       await persist(event);
       synced += 1;
-    } catch {
+    } catch (error) {
+      console.error("Falha ao sincronizar evento:", error);
       remaining.push(event);
     }
   }
   writeQueue(remaining);
 
-  if (synced > 0 && remaining.length === 0) {
+  if (synced > 0) {
     const first = queue[0];
     if (first) {
       try {
         await persist({
+          id: crypto.randomUUID(),
           projectId: first.projectId,
           groupId: first.groupId ?? null,
           kind: "sincronizacao",
-          reason: `${synced} exceção(ões) registradas offline foram sincronizadas.`,
+          reason: `${synced} evento(s) sincronizados. Revalidação manual obrigatória.`,
           statusTo: "sincronizado",
-          metadata: { synced },
+          metadata: { 
+            synced_count: synced,
+            requires_manual_audit: true
+          },
         });
-      } catch {
-        /* o resumo é informativo; os eventos já foram gravados */
+      } catch (e) {
+        console.error("Erro ao registrar log de sincronização:", e);
       }
     }
   }
@@ -218,7 +253,7 @@ export interface KitGuardInput {
 }
 
 /** Decide se o kit pode ser finalizado. Nunca libera silenciosamente. */
-export function canFinalizeKit(input: KitGuardInput): { allowed: boolean; reasons: string[] } {
+export function canFinalizeKit(input: KitGuardInput): { allowed: boolean; reasons: string[]; conference_status: "concluida" | "com_excecao" | "sincronizado" } {
   const reasons: string[] = [];
   if (input.totalParts === 0) reasons.push("Kit sem peças vinculadas.");
   if (input.confirmedParts < input.totalParts)
@@ -227,7 +262,11 @@ export function canFinalizeKit(input: KitGuardInput): { allowed: boolean; reason
     reasons.push(`${input.totalHardware - input.confirmedHardware} ferragem(ns) não conferida(s).`);
   if (input.openExceptions > 0)
     reasons.push(`${input.openExceptions} exceção(ões) bloqueante(s) em aberto.`);
-  return { allowed: reasons.length === 0, reasons };
+  
+  let status: "concluida" | "com_excecao" | "sincronizado" = "concluida";
+  if (reasons.length > 0) status = "com_excecao";
+  
+  return { allowed: reasons.length === 0, reasons, conference_status: status };
 }
 
 /** Expedição só é liberada com kit selado e sem exceção bloqueante. */
