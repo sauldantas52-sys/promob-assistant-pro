@@ -427,7 +427,8 @@ Body: { "email": "...", "password": "..." }`}
                     <h4 className="text-amber-500 font-black uppercase text-[12px] tracking-widest border-l-4 border-amber-500 pl-4">2. Envio do Pacote (manifest.json)</h4>
                     <div className="bg-slate-950 p-6 rounded-[1.5rem] border border-slate-800">
                       <p className="text-[11px] text-slate-300 mb-4 font-medium">Endpoint seguro para processamento de geometria e auditoria técnica.</p>
-                      <pre className="text-[10px] text-emerald-400 font-mono">RPC: /_server/processSkpPackage
+                      <pre className="text-[10px] text-emerald-400 font-mono">
+{`RPC: /_server/processSkpPackage
 Payload: {
   "projectId": "UUID",
   "manifest": {
@@ -444,7 +445,8 @@ Payload: {
       "tags": ["02_MODULOS", "03_G1"]
     }]
   }
-}</pre>
+}`}
+                      </pre>
                     </div>
                   </section>
 
