@@ -90,10 +90,11 @@ function AssemblyContent() {
   const list = projects.data ?? [];
 
   return (
-    <div className="space-y-6 p-4 md:p-8 max-w-7xl mx-auto">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Montagem na Casa do Cliente</h1>
-        <p className="text-base text-slate-500 font-medium">
+    <div className="space-y-10 p-6 md:p-12 max-w-[1600px] mx-auto">
+      <header className="flex flex-col gap-3">
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-600">Montagem Externa</p>
+        <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-slate-900 uppercase leading-none">Casa do Cliente</h1>
+        <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-2">
           Roteiro técnico, sequência de montagem e checklists mobile.
         </p>
       </header>
@@ -111,26 +112,26 @@ function AssemblyContent() {
       ) : (
         <div className="space-y-4">
           {list.map((project) => (
-            <Card key={project.id} className="border-none shadow-sm rounded-2xl overflow-hidden">
-              <CardHeader className="pb-4 pt-6 px-6 bg-slate-100/50 border-b border-slate-200/50">
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                  <div>
-                    <CardTitle className="text-xl font-black text-slate-900 tracking-tight">{project.name}</CardTitle>
-                    <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mt-1">
-                      {project.client_name || "Sem cliente"} · {project.environment || "Ambiente geral"}
+            <Card key={project.id} className="border-none shadow-[0_20px_50px_-15px_rgba(0,0,0,0.06)] rounded-[3rem] overflow-hidden bg-white">
+              <CardHeader className="pb-8 pt-10 px-10 bg-slate-50/50 border-b border-slate-100">
+                <div className="flex flex-wrap items-center justify-between gap-6">
+                  <div className="space-y-2">
+                    <CardTitle className="text-3xl font-black text-slate-900 tracking-tighter uppercase leading-none">{project.name}</CardTitle>
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
+                      {project.client_name || "Sem cliente"} <span className="mx-2 text-slate-300">|</span> {project.environment || "Ambiente geral"}
                     </p>
                   </div>
-                  <Badge className={cn("px-4 py-1.5 text-xs font-black uppercase tracking-widest border", statusTone(project.status))}>
+                  <Badge className={cn("px-6 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] border-none rounded-full shadow-sm", statusTone(project.status))}>
                     {statusLabel(project.status)}
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent className="space-y-6 p-6">
-                <Tabs defaultValue="modules">
-                  <TabsList className="grid w-full grid-cols-3 bg-slate-100 p-1 h-12 rounded-xl">
-                    <TabsTrigger value="modules" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold text-xs uppercase tracking-wider">Módulos</TabsTrigger>
-                    <TabsTrigger value="groups" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold text-xs uppercase tracking-wider">Grupos G1/G2</TabsTrigger>
-                    <TabsTrigger value="hardware" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold text-xs uppercase tracking-wider">Caderno</TabsTrigger>
+                <Tabs defaultValue="modules" className="space-y-8">
+                  <TabsList className="grid w-full grid-cols-3 bg-slate-100 p-1.5 h-16 rounded-[1.5rem]">
+                    <TabsTrigger value="modules" className="rounded-[1.15rem] data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm font-black text-[10px] uppercase tracking-[0.2em]">Módulos</TabsTrigger>
+                    <TabsTrigger value="groups" className="rounded-[1.15rem] data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm font-black text-[10px] uppercase tracking-[0.2em]">Grupos G1/G2</TabsTrigger>
+                    <TabsTrigger value="hardware" className="rounded-[1.15rem] data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm font-black text-[10px] uppercase tracking-[0.2em]">Caderno</TabsTrigger>
                   </TabsList>
                   
                   <TabsContent value="modules" className="space-y-3 mt-4">
@@ -184,17 +185,17 @@ function AssemblyContent() {
                           const [confDialogOpen, setConfDialogOpen] = useState(false);
                         
                         return (
-                          <Card key={m.id} className={cn("overflow-hidden border-2 shadow-sm rounded-2xl transition-all", group?.is_locked ? "border-red-100 bg-red-50/20" : "border-emerald-100 bg-emerald-50/20")}>
-                            <div className="h-3 w-full" style={{ backgroundColor: group?.is_locked ? "#EF4444" : "#10B981" }} />
-                            <CardHeader className="p-5 pb-3 flex flex-row items-center justify-between">
+                          <Card key={m.id} className={cn("overflow-hidden border-none shadow-[0_15px_40px_-15px_rgba(0,0,0,0.08)] rounded-[2.5rem] transition-all", group?.is_locked ? "bg-red-50/30" : "bg-emerald-50/30")}>
+                            <div className="h-4 w-full" style={{ backgroundColor: group?.is_locked ? "#EF4444" : "#10B981" }} />
+                            <CardHeader className="p-8 pb-4 flex flex-row items-center justify-between">
                               <div>
-                                <CardTitle className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
-                                  <span className="px-2 py-0.5 bg-slate-900 text-white rounded text-xs font-black uppercase">{group?.code}</span>
+                                <CardTitle className="text-xl font-black text-slate-900 tracking-tighter uppercase flex items-center gap-3">
+                                  <span className="px-3 py-1 bg-slate-900 text-white rounded-lg text-[10px] font-black uppercase tracking-widest">{group?.code}</span>
                                   {m.name}
-                                  {group?.is_locked ? <Lock className="h-4 w-4 text-amber-600" /> : <Unlock className="h-4 w-4 text-green-600" />}
+                                  {group?.is_locked ? <Lock className="h-5 w-5 text-red-600" /> : <Unlock className="h-5 w-5 text-emerald-600" />}
                                 </CardTitle>
                               </div>
-                              <Badge className={cn("px-3 py-1 text-[10px] font-black uppercase tracking-widest", group?.is_locked ? "bg-red-100 text-red-700 border-red-200" : "bg-emerald-600 text-white")}>
+                              <Badge className={cn("px-5 py-2 text-[10px] font-black uppercase tracking-[0.2em] border-none rounded-full shadow-sm", group?.is_locked ? "bg-red-600 text-white" : "bg-emerald-600 text-white")}>
                                 {group?.is_locked ? "Bloqueado" : "Liberado"}
                               </Badge>
                             </CardHeader>

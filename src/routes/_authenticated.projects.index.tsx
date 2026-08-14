@@ -221,23 +221,32 @@ function ProjectsContent() {
         <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
           {filteredProjects.map((project) => (
             <Link key={project.id} to="/projects/$projectId" params={{ projectId: project.id }}>
-              <Card className="h-full border-none shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] transition-all duration-300 rounded-[2.5rem] overflow-hidden group bg-white">
-                <CardHeader className="pb-3 pt-6 px-6">
-                  <div className="flex items-start justify-between gap-2">
-                    <CardTitle className="text-lg font-black text-slate-900 tracking-tight leading-tight group-hover:text-blue-600 transition-colors">{project.name}</CardTitle>
-                    <Badge className={cn("px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] border-none rounded-full", statusTone(project.status))}>
+              <Card className="h-full border-none shadow-[0_20px_50px_-15px_rgba(0,0,0,0.06)] hover:shadow-[0_30px_70px_-15px_rgba(0,0,0,0.12)] transition-all duration-500 rounded-[3rem] overflow-hidden group bg-white">
+                <CardHeader className="pb-4 pt-10 px-10">
+                  <div className="flex items-start justify-between gap-4">
+                    <CardTitle className="text-2xl font-black text-slate-900 tracking-tighter leading-none uppercase group-hover:text-blue-600 transition-colors">{project.name}</CardTitle>
+                    <Badge className={cn("px-5 py-2 text-[10px] font-black uppercase tracking-[0.2em] border-none rounded-full shadow-sm", statusTone(project.status))}>
                       {statusLabel(project.status)}
                     </Badge>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-3 px-6 pb-6">
-                  <div className="space-y-1 text-sm font-medium text-slate-500">
-                    <p>Cliente: <span className="text-slate-900">{project.client_name || "—"}</span></p>
-                    <p>Ambiente: <span className="text-slate-900">{project.environment || "—"}</span></p>
+                <CardContent className="space-y-6 px-10 pb-10">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Cliente</p>
+                      <p className="text-xs font-black uppercase tracking-tight text-slate-900">{project.client_name || "—"}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Ambiente</p>
+                      <p className="text-xs font-black uppercase tracking-tight text-slate-900">{project.environment || "—"}</p>
+                    </div>
                   </div>
-                  <p className="flex items-center gap-1 pt-2 text-xs font-black uppercase tracking-widest text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                    Abrir Detalhes <ChevronRight className="h-3 w-3" />
-                  </p>
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-600">
+                      Rastreabilidade Ativa
+                    </p>
+                    <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-blue-600 group-hover:translate-x-1 transition-all duration-500" />
+                  </div>
                 </CardContent>
               </Card>
             </Link>
