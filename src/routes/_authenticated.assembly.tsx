@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { 
   Wrench, 
@@ -17,7 +17,8 @@ import {
   History,
   ClipboardList,
   Camera,
-  Image as ImageIcon
+  Image as ImageIcon,
+  LayoutDashboard
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -93,13 +94,23 @@ function AssemblyContent() {
 
   return (
     <div className="space-y-16 p-8 md:p-16 max-w-[1800px] mx-auto animate-in fade-in duration-700">
-      <header className="flex flex-col gap-6">
-        <div className="flex items-center gap-4">
-          <span className="h-2 w-10 bg-emerald-600 rounded-full" />
-          <p className="text-[12px] font-black uppercase tracking-[0.5em] text-emerald-600">Protocolo de Instalação</p>
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-10">
+        <div className="space-y-6">
+          <Button 
+            variant="ghost" 
+            onClick={() => window.location.href = '/dashboard'} 
+            className="rounded-full px-4 text-slate-400 hover:text-blue-600 gap-2 mb-2"
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            <span className="text-[10px] font-black uppercase tracking-widest">Dashboard</span>
+          </Button>
+          <div className="flex items-center gap-4">
+            <span className="h-2 w-10 bg-emerald-600 rounded-full" />
+            <p className="text-[12px] font-black uppercase tracking-[0.5em] text-emerald-600">Protocolo de Instalação</p>
+          </div>
+          <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-slate-900 uppercase leading-[0.8] mb-4">Montagem</h1>
+          <p className="text-base font-black text-slate-500 uppercase tracking-[0.4em]">Guia técnico mobile para montadores especializados.</p>
         </div>
-        <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-slate-900 uppercase leading-[0.8] mb-4">Montagem</h1>
-        <p className="text-base font-black text-slate-500 uppercase tracking-[0.4em]">Guia técnico mobile para montadores especializados.</p>
       </header>
 
       {list.length === 0 ? (
