@@ -1,5 +1,5 @@
 export type ParsedPart = {
-  id_xml?: string;
+  id_xml?: string | null;
   kind: "peca" | "chapa" | "ferragem" | "acessorio";
   name: string;
   material?: string | null;
@@ -16,7 +16,7 @@ export type ParsedPart = {
 };
 
 export type ParsedModule = {
-  id_xml?: string;
+  id_xml?: string | null;
   name: string;
   environment?: string | null;
   width_mm?: number | null;
@@ -108,7 +108,7 @@ export function parsePromobXml(fileName: string, sizeBytes: number, xmlText: str
         }
       }
 
-      modules.push({ id_xml: idXml ?? undefined, name, environment, width_mm: width, height_mm: height, depth_mm: depth, quantity, parts, data_source: "XML" });
+      modules.push({ id_xml: idXml ?? null, name, environment, width_mm: width, height_mm: height, depth_mm: depth, quantity, parts, data_source: "XML" });
       seen.add(node);
     }
   }
@@ -149,7 +149,7 @@ function parsePartNode(p: Element): ParsedPart {
   const visibility: ParsedPart["visibility_type"] = isVisible ? "visivel" : "oculta";
 
   return {
-    id_xml: idXml ?? undefined,
+    id_xml: idXml ?? null,
     kind: classifyKind(rawType, description),
     name: description,
     material: attr(p, ["MATERIAL", "COLOR", "REFERENCE"]),
