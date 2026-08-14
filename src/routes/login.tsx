@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { useAuth, roleLabels, type AppRole } from "@/lib/auth";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon, ShieldAlert } from "lucide-react";
-import { AUTH_CONFIG, isValidPasswordLength, isPasswordStrong } from "@/lib/auth-config";
+import { AUTH_CONFIG, isValidPasswordLength, isPasswordStrong, isNumeric } from "@/lib/auth-config";
 
 
 export const Route = createFileRoute("/login")({
@@ -84,8 +84,13 @@ function LoginPage() {
     e.preventDefault();
     setBusy(true);
     try {
+      if (!isNumeric(password)) {
+        toast.error("O PIN deve conter apenas números.");
+        setBusy(false);
+        return;
+      }
       if (!isValidPasswordLength(password)) {
-        toast.error(`A senha deve ter entre ${AUTH_CONFIG.MIN_PASSWORD_LENGTH} e ${AUTH_CONFIG.MAX_PASSWORD_LENGTH} caracteres.`);
+        toast.error(`Use de ${AUTH_CONFIG.MIN_PASSWORD_LENGTH} a ${AUTH_CONFIG.MAX_PASSWORD_LENGTH} números para o seu PIN.`);
         setBusy(false);
         return;
       }
@@ -174,7 +179,17 @@ function LoginPage() {
                 <TabsContent value="signin">
                   <form onSubmit={handleSignIn} className="space-y-4">
                     <Field id="email" label="E-mail" type="email" value={email} onChange={setEmail} />
-                    <Field id="password" label="Senha" type="password" value={password} onChange={setPassword} />
+                    <Field 
+                      id="password" 
+                      label="PIN de Acesso" 
+                      type="password" 
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={password} 
+                      onChange={(v) => {
+                        if (v === "" || isNumeric(v)) setPassword(v);
+                      }} 
+                    />
                     <div className="flex justify-end">
                       <button 
                         type="button" 
@@ -223,27 +238,37 @@ function LoginPage() {
                     <Field id="signup-email" label="E-mail" type="email" value={email} onChange={setEmail} />
                     <Field
                       id="signup-password"
-                      label="Senha"
+                      label="PIN de Acesso"
                       type="password"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       value={password}
-                      onChange={setPassword}
+                      onChange={(v) => {
+                        if (v === "" || isNumeric(v)) setPassword(v);
+                      }}
                     />
                     {password.length > 0 && !isValidPasswordLength(password) && (
                       <div className="flex items-center gap-2 rounded-lg bg-red-50 p-2 border border-red-100 mt-2">
                         <ShieldAlert className="h-4 w-4 text-red-600" />
                         <span className="text-[10px] font-bold text-red-700 uppercase tracking-wider">
-                          Senha Inválida: Deve ter entre 8 e 20 caracteres.
+                          PIN Inválido: Use de 8 a 20 números.
                         </span>
                       </div>
                     )}
-                    {password.length >= 8 && !isPasswordStrong(password) && (
-                      <div className="flex items-center gap-2 rounded-lg bg-amber-50 p-2 border border-amber-100 mt-2">
-                        <ShieldAlert className="h-4 w-4 text-amber-600" />
-                        <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">
-                          Sugestão: Use letras, números e símbolos para uma senha mais forte.
+                    {password.length > 0 && !isNumeric(password) && (
+                      <div className="flex items-center gap-2 rounded-lg bg-red-50 p-2 border border-red-100 mt-2">
+                        <ShieldAlert className="h-4 w-4 text-red-600" />
+                        <span className="text-[10px] font-bold text-red-700 uppercase tracking-wider">
+                          Use apenas números (0-9).
                         </span>
                       </div>
                     )}
+                    <div className="flex items-center gap-2 rounded-lg bg-blue-50 p-2 border border-blue-100 mt-2">
+                      <InfoIcon className="h-4 w-4 text-blue-600" />
+                      <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider">
+                        Requisito: PIN numérico de 8 a 20 dígitos.
+                      </span>
+                    </div>
 
                     <Button 
                       type="submit" 
@@ -271,12 +296,16 @@ function Field({
   value,
   onChange,
   type = "text",
+  inputMode,
+  pattern,
 }: {
   id: string;
   label: string;
   value: string;
   onChange: (value: string) => void;
   type?: string;
+  inputMode?: "none" | "text" | "tel" | "url" | "email" | "numeric" | "decimal" | "search";
+  pattern?: string;
 }) {
   return (
     <div className="space-y-2">
@@ -287,6 +316,8 @@ function Field({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required
+        inputMode={inputMode}
+        pattern={pattern}
         className="h-12"
       />
     </div>
