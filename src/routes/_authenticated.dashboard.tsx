@@ -106,39 +106,73 @@ function DashboardContent() {
         ))}
       </div>
 
-      <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
-        <CardHeader className="flex flex-row items-center justify-between bg-slate-50/50 py-4 px-6 border-b border-slate-100">
-          <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-700">Projetos recentes</CardTitle>
-          <Button asChild variant="ghost" size="sm" className="font-bold text-blue-600 hover:bg-blue-50">
-            <Link to="/projects" className="flex items-center gap-1">Ver todos <ChevronRight className="h-4 w-4" /></Link>
-          </Button>
-        </CardHeader>
-        <CardContent className="divide-y divide-slate-100 p-0">
-          {list.slice(0, 6).map((project) => (
-            <Link
-              key={project.id}
-              to="/projects/$projectId"
-              params={{ projectId: project.id }}
-              className="flex items-center justify-between gap-3 p-4 hover:bg-muted/50"
-            >
-              <div className="min-w-0">
-                <p className="truncate text-sm font-black text-slate-900 uppercase tracking-tight">{project.name}</p>
-                <p className="truncate text-xs font-medium text-slate-500">
-                  {project.client_name || "Sem cliente"} · {project.environment || "—"}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        <div className="lg:col-span-2 space-y-6">
+          <div className="flex items-center justify-between px-2">
+            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Projetos Recentes</h2>
+            <Link to="/projects" className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 hover:underline">Ver Todos</Link>
+          </div>
+          
+          <div className="grid gap-4">
+            {list.slice(0, 5).map((project) => (
+              <Link
+                key={project.id}
+                to="/projects/$projectId"
+                params={{ projectId: project.id }}
+                className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 bg-white border border-slate-100 rounded-[2rem] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] transition-all duration-300"
+              >
+                <div className="space-y-1">
+                  <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight group-hover:text-blue-600 transition-colors">
+                    {project.name}
+                  </h3>
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+                    {project.client_name || "Sem cliente"} <span className="mx-2 text-slate-300">|</span> {project.environment || "Ambiente Geral"}
+                  </p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Badge className={cn("px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] border-none rounded-full", statusTone(project.status))}>
+                    {statusLabel(project.status)}
+                  </Badge>
+                  <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+                </div>
+              </Link>
+            ))}
+            {list.length === 0 && (
+              <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-[2.5rem] p-12 text-center">
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Nenhum projeto encontrado</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 px-2">Ações Rápidas</h2>
+          <Card className="border-none shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] rounded-[2.5rem] bg-slate-900 text-white overflow-hidden">
+            <CardContent className="p-8 space-y-6">
+              <div className="space-y-2">
+                <h3 className="text-xl font-black uppercase tracking-tight text-white leading-tight">Nova Importação Promob</h3>
+                <p className="text-xs font-medium text-slate-400 leading-relaxed">
+                  Carregue arquivos XML, PDF ou DXF para iniciar o processamento técnico e gerar listas de corte automáticas.
                 </p>
               </div>
-              <Badge className={cn("px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border", statusTone(project.status))}>
-                {statusLabel(project.status)}
-              </Badge>
+              <Button asChild className="w-full h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest text-[11px] border-none shadow-lg shadow-blue-600/20">
+                <Link to="/projects">Gerenciar Projetos</Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Link to="/production" className="flex flex-col items-center justify-center p-6 bg-white border border-slate-100 rounded-[2rem] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] hover:bg-slate-50 transition-colors gap-3">
+              <Factory className="h-6 w-6 text-blue-600" />
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-900">Produção</span>
             </Link>
-          ))}
-          {list.length === 0 && (
-            <p className="p-6 text-sm text-muted-foreground">
-              Nenhum projeto ainda. Crie um projeto e importe o arquivo do Promob.
-            </p>
-          )}
-        </CardContent>
-      </Card>
+            <Link to="/assembly" className="flex flex-col items-center justify-center p-6 bg-white border border-slate-100 rounded-[2rem] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] hover:bg-slate-50 transition-colors gap-3">
+              <Wrench className="h-6 w-6 text-emerald-600" />
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-900">Montagem</span>
+            </Link>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
