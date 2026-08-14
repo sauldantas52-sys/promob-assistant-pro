@@ -132,35 +132,48 @@ function AssemblyContent() {
                     <TabsTrigger value="hardware" className="rounded-[2rem] data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-2xl font-black text-[11px] uppercase tracking-[0.3em]">Instruções</TabsTrigger>
                   </TabsList>
                   
-                  <TabsContent value="modules" className="space-y-3 mt-4">
-                    <div className="grid gap-2">
+                  <TabsContent value="modules" className="space-y-8 mt-10">
+                    <div className="grid gap-4">
                       {(project.modules ?? []).map((m) => (
-                        <div key={m.id} className={`rounded-lg border p-3 transition-colors ${m.is_completed ? "bg-primary/5 border-primary/20" : "border-border"}`}>
-                          <div className="flex items-start gap-3">
-                            <Checkbox
-                              checked={m.is_completed ?? false}
-                              className="mt-0.5"
-                              onCheckedChange={async (checked) => {
+                        <div key={m.id} className={cn(
+                          "rounded-[2.5rem] border-2 p-10 transition-all duration-500 flex flex-wrap items-center justify-between gap-10",
+                          m.is_completed ? "bg-emerald-50/30 border-emerald-100 shadow-xl shadow-emerald-600/5" : "bg-white border-slate-50 shadow-sm"
+                        )}>
+                          <div className="flex items-center gap-10">
+                            <Button 
+                              variant={m.is_completed ? "default" : "outline"}
+                              size="icon"
+                              className={cn(
+                                "h-16 w-16 shrink-0 rounded-[1.5rem] transition-all duration-300 border-2",
+                                m.is_completed ? "bg-emerald-600 border-emerald-600 shadow-xl shadow-emerald-600/20" : "bg-white border-slate-200 shadow-sm"
+                              )}
+                              onClick={async () => {
                                 const { error } = await supabase
                                   .from("modules")
-                                  .update({ is_completed: !!checked })
+                                  .update({ is_completed: !m.is_completed })
                                   .eq("id", m.id);
                                 if (error) toast.error(error.message);
                                 else void queryClient.invalidateQueries({ queryKey: ["assembly-projects"] });
                               }}
-                            />
-                            <div className="flex-1 min-w-0">
-                              <p className={`text-sm font-medium flex items-center gap-2 ${m.is_completed ? "text-muted-foreground line-through" : ""}`}>
+                            >
+                              {m.is_completed ? <CheckCircle2 className="h-8 w-8 text-white" /> : <div className="h-8 w-8 rounded-full border-4 border-slate-100" />}
+                            </Button>
+                            <div className="space-y-2">
+                              <p className={cn(
+                                "text-2xl font-black tracking-tighter uppercase leading-none transition-all",
+                                m.is_completed ? "text-slate-400 line-through" : "text-slate-900"
+                              )}>
                                 {m.name}
-                                {m.is_completed && <CheckCircle2 className="h-3.5 w-3.5 text-primary" />}
-                                <span className="ml-auto text-xs text-muted-foreground">x{m.quantity}</span>
                               </p>
-                              <p className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-                                <Ruler className="h-3.5 w-3.5" />
+                              <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-4">
+                                <Ruler className="h-4 w-4" />
                                 {m.width_mm ?? "?"} × {m.height_mm ?? "?"} × {m.depth_mm ?? "?"} mm
                               </p>
                             </div>
                           </div>
+                          <Badge variant="outline" className="px-6 py-2 rounded-full border-2 border-slate-100 text-[11px] font-black uppercase tracking-widest text-slate-500">
+                            {m.quantity} UNIDADES
+                          </Badge>
                         </div>
                       ))}
                       {(project.modules?.length ?? 0) === 0 && (
@@ -304,9 +317,10 @@ function AssemblyContent() {
                     </Card>
                   </TabsContent>
                 </Tabs>
-                <Button asChild className="h-12 w-full sm:w-auto">
+                <Button asChild className="h-20 w-full px-12 rounded-[2rem] bg-slate-900 hover:bg-black text-white font-black uppercase tracking-[0.3em] text-[12px] shadow-2xl shadow-slate-900/40 gap-6 transition-all duration-500 active:scale-95 group mt-10">
                   <Link to="/projects/$projectId" params={{ projectId: project.id }}>
-                    Abrir listas técnicas
+                    <ClipboardList className="h-7 w-7 text-blue-400 transition-transform group-hover:scale-110" />
+                    Abrir Dossiê Técnico
                   </Link>
                 </Button>
               </CardContent>
