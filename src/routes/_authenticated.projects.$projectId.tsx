@@ -32,6 +32,9 @@ import { Parser } from "@json2csv/plainjs";
 import { EngineeringTab } from "@/components/EngineeringTab";
 import { SketchUpBridgeTab } from "@/components/SketchUpBridgeTab";
 import { PilotValidationChecklist } from "@/components/PilotValidationChecklist";
+import { BudgetTab } from "@/components/project/BudgetTab";
+import { PreliminaryCutPlanTab } from "@/components/project/PreliminaryCutPlanTab";
+import { VisualEstimateTab } from "@/components/project/VisualEstimateTab";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1087,6 +1090,18 @@ function ProjectDetail() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="estimate" className="mt-6">
+          <VisualEstimateTab projectId={projectId} />
+        </TabsContent>
+
+        <TabsContent value="budget" className="mt-6">
+          <BudgetTab projectId={projectId} />
+        </TabsContent>
+
+        <TabsContent value="cutting_beta" className="mt-6">
+          <PreliminaryCutPlanTab projectId={projectId} />
         </TabsContent>
       </Tabs>
     </div>
