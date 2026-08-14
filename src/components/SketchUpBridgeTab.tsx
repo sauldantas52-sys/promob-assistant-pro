@@ -341,6 +341,47 @@ export function SketchUpBridgeTab({ projectId }: SketchUpBridgeTabProps) {
         </div>
       </div>
 
+      {/* Package Details Panel */}
+      {currentVersion && activeTab === "versions" && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <Card className="rounded-[2.5rem] border-none shadow-xl p-8 space-y-4">
+            <h4 className="text-[12px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+              <Package className="h-4 w-4 text-amber-600" /> Resumo do Pacote
+            </h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-slate-50 rounded-[1.5rem]">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Módulos</p>
+                <p className="text-xl font-black text-slate-900">24</p>
+              </div>
+              <div className="p-4 bg-slate-50 rounded-[1.5rem]">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Ambientes</p>
+                <p className="text-xl font-black text-slate-900">3</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="rounded-[2.5rem] border-none shadow-xl p-8 space-y-4 md:col-span-2">
+            <h4 className="text-[12px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-emerald-600" /> Validações de Integridade
+            </h4>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-emerald-50 rounded-[1rem] border border-emerald-100">
+                <span className="text-[10px] font-bold text-emerald-700 uppercase">Campos obrigatórios preenchidos</span>
+                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-red-50 rounded-[1rem] border border-red-100">
+                <span className="text-[10px] font-bold text-red-700 uppercase">Divergência de medidas detectada (G2)</span>
+                <AlertTriangle className="h-4 w-4 text-red-600" />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-amber-50 rounded-[1rem] border border-amber-100">
+                <span className="text-[10px] font-bold text-amber-700 uppercase">Módulos sem ambiente (AV)</span>
+                <Badge className="bg-amber-200 text-amber-700 border-none text-[8px] font-black">2 ITENS</Badge>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
       {/* Safety Locks Panel */}
       <div className="bg-blue-50/50 rounded-[2rem] p-8 border border-blue-100 flex items-start gap-6">
         <div className="h-12 w-12 rounded-[1rem] bg-blue-600 flex items-center justify-center shrink-0">
