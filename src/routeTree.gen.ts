@@ -15,6 +15,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedAssemblyRouteImport } from './routes/_authenticated.assembly'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedFactoryWallboardRouteImport } from './routes/_authenticated.factory-wallboard'
+import { Route as AuthenticatedForcePasswordChangeRouteImport } from './routes/_authenticated.force-password-change'
 import { Route as AuthenticatedPickingRouteImport } from './routes/_authenticated.picking'
 import { Route as AuthenticatedProductionRouteImport } from './routes/_authenticated.production'
 import { Route as AuthenticatedShippingRouteImport } from './routes/_authenticated.shipping'
@@ -51,6 +52,12 @@ const AuthenticatedFactoryWallboardRoute =
     path: '/factory-wallboard',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedForcePasswordChangeRoute =
+  AuthenticatedForcePasswordChangeRouteImport.update({
+    id: '/force-password-change',
+    path: '/force-password-change',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedPickingRoute = AuthenticatedPickingRouteImport.update({
   id: '/picking',
   path: '/picking',
@@ -85,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/assembly': typeof AuthenticatedAssemblyRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/factory-wallboard': typeof AuthenticatedFactoryWallboardRoute
+  '/force-password-change': typeof AuthenticatedForcePasswordChangeRoute
   '/picking': typeof AuthenticatedPickingRoute
   '/production': typeof AuthenticatedProductionRoute
   '/shipping': typeof AuthenticatedShippingRoute
@@ -97,6 +105,7 @@ export interface FileRoutesByTo {
   '/assembly': typeof AuthenticatedAssemblyRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/factory-wallboard': typeof AuthenticatedFactoryWallboardRoute
+  '/force-password-change': typeof AuthenticatedForcePasswordChangeRoute
   '/picking': typeof AuthenticatedPickingRoute
   '/production': typeof AuthenticatedProductionRoute
   '/shipping': typeof AuthenticatedShippingRoute
@@ -111,6 +120,7 @@ export interface FileRoutesById {
   '/_authenticated/assembly': typeof AuthenticatedAssemblyRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/factory-wallboard': typeof AuthenticatedFactoryWallboardRoute
+  '/_authenticated/force-password-change': typeof AuthenticatedForcePasswordChangeRoute
   '/_authenticated/picking': typeof AuthenticatedPickingRoute
   '/_authenticated/production': typeof AuthenticatedProductionRoute
   '/_authenticated/shipping': typeof AuthenticatedShippingRoute
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
     | '/assembly'
     | '/dashboard'
     | '/factory-wallboard'
+    | '/force-password-change'
     | '/picking'
     | '/production'
     | '/shipping'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '/assembly'
     | '/dashboard'
     | '/factory-wallboard'
+    | '/force-password-change'
     | '/picking'
     | '/production'
     | '/shipping'
@@ -150,6 +162,7 @@ export interface FileRouteTypes {
     | '/_authenticated/assembly'
     | '/_authenticated/dashboard'
     | '/_authenticated/factory-wallboard'
+    | '/_authenticated/force-password-change'
     | '/_authenticated/picking'
     | '/_authenticated/production'
     | '/_authenticated/shipping'
@@ -207,6 +220,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFactoryWallboardRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/force-password-change': {
+      id: '/_authenticated/force-password-change'
+      path: '/force-password-change'
+      fullPath: '/force-password-change'
+      preLoaderRoute: typeof AuthenticatedForcePasswordChangeRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/picking': {
       id: '/_authenticated/picking'
       path: '/picking'
@@ -249,6 +269,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAssemblyRoute: typeof AuthenticatedAssemblyRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedFactoryWallboardRoute: typeof AuthenticatedFactoryWallboardRoute
+  AuthenticatedForcePasswordChangeRoute: typeof AuthenticatedForcePasswordChangeRoute
   AuthenticatedPickingRoute: typeof AuthenticatedPickingRoute
   AuthenticatedProductionRoute: typeof AuthenticatedProductionRoute
   AuthenticatedShippingRoute: typeof AuthenticatedShippingRoute
@@ -260,6 +281,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAssemblyRoute: AuthenticatedAssemblyRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedFactoryWallboardRoute: AuthenticatedFactoryWallboardRoute,
+  AuthenticatedForcePasswordChangeRoute: AuthenticatedForcePasswordChangeRoute,
   AuthenticatedPickingRoute: AuthenticatedPickingRoute,
   AuthenticatedProductionRoute: AuthenticatedProductionRoute,
   AuthenticatedShippingRoute: AuthenticatedShippingRoute,

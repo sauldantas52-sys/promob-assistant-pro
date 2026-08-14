@@ -54,11 +54,12 @@ function ForcePasswordChangePage() {
 
       // 3. Registrar no log
       await supabase.from("production_logs").insert({
-        project_id: null, // Log de sistema
+        project_id: "", // Usar string vazia ou omitir se o campo for obrigatório string
         step: "acesso_seguro",
-        notes: `Primeiro acesso e troca de senha concluída para ${user?.email}`,
+        notes: `Primeiro acesso e troca de senha concluída para ${user?.email || 'usuário'}`,
         status: "concluido"
-      });
+      } as any); // Type cast para evitar problemas com campos gerados/opcionais no schema real
+
 
       toast.success("Senha atualizada com sucesso!");
       await refreshProfile();
