@@ -579,12 +579,9 @@ function ProjectDetail() {
           <TabsList className="flex w-fit bg-slate-100 p-2 h-20 rounded-[3rem] border border-slate-200 overflow-x-auto no-scrollbar shadow-sm">
             <TabTrigger value="modules" icon={LayoutGrid} label="Módulos" />
             <TabTrigger value="parts" icon={ClipboardList} label="Lista Técnica" />
-            <TabTrigger value="loose" icon={PackageCheck} label="Avulsos" />
-            <TabTrigger value="audit" icon={History} label="Auditoria" />
             <TabTrigger value="engineering" icon={Settings} label="Usinagem" />
-            <TabTrigger value="production" icon={Factory} label="Fábrica" />
             <TabTrigger value="shipping" icon={Truck} label="Logística" />
-            <TabTrigger value="maintenance" icon={Wrench} label="Assistência" />
+            <TabTrigger value="audit" icon={History} label="Auditoria" />
             <TabTrigger value="files" icon={FileUp} label="Arquivos" />
           </TabsList>
 
