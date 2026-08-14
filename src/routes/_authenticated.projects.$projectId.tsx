@@ -612,6 +612,7 @@ function ProjectDetail() {
             <TabTrigger value="shipping" icon={Truck} label="Logística" />
             <TabTrigger value="maintenance" icon={HardHat} label="Assistência" />
             <TabTrigger value="audit" icon={History} label="Auditoria" />
+            <TabTrigger value="validation" icon={ShieldCheck} label="Checklist Piloto" />
             <TabTrigger value="integration_audit" icon={CheckSquare} label="Motores IA" />
             <TabTrigger value="files" icon={FileUp} label="Arquivos" />
           </TabsList>
@@ -922,6 +923,13 @@ function ProjectDetail() {
 
         <TabsContent value="sketchup" className="mt-6">
           <SketchUpBridgeTab projectId={projectId} />
+        </TabsContent>
+
+        <TabsContent value="validation" className="mt-6">
+          <PilotValidationChecklist 
+            projectId={projectId} 
+            isMachiningBlocked={!!allParts.some(p => p.machining_blocked)} 
+          />
         </TabsContent>
 
         <TabsContent value="integration_audit" className="mt-6">

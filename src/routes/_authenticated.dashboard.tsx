@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { FolderKanban, Factory, Wrench, AlertTriangle, ClipboardCheck, ChevronRight } from "lucide-react";
+import { FolderKanban, Factory, Wrench, AlertTriangle, ClipboardCheck, ChevronRight, ShieldCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -186,6 +186,29 @@ function DashboardContent() {
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-900">Montagem</span>
             </Link>
           </div>
+
+          <Card className="border-none shadow-[0_40px_80px_-20px_rgba(0,0,0,0.12)] rounded-[2.5rem] bg-white overflow-hidden">
+            <CardHeader className="bg-slate-50 border-b border-slate-100 py-6 px-8">
+              <CardTitle className="text-xs font-black uppercase tracking-[0.3em] text-slate-500 flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-blue-600" />
+                Protocolos de Segurança
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-8 space-y-4">
+              <div className="flex items-start gap-4 p-4 rounded-2xl bg-amber-50 border border-amber-100">
+                <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black uppercase tracking-wider text-amber-900">Usinagem Bloqueada</p>
+                  <p className="text-[10px] font-medium text-amber-700 leading-tight">
+                    O controle CNC permanece travado até a validação completa do checklist piloto em cada projeto.
+                  </p>
+                </div>
+              </div>
+              <p className="text-[10px] text-slate-400 font-medium leading-relaxed px-2">
+                Acesse o dossiê técnico de cada projeto para gerenciar os checklists de validação e liberar a produção industrial.
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
