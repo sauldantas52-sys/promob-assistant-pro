@@ -175,6 +175,8 @@ function ProjectDetail() {
 
       for (let i = 0; i < result.modules.length; i++) {
         const parsedModule = result.modules[i];
+        if (!parsedModule) continue;
+
         const color = moduleColors[i % moduleColors.length];
         
         // 1. Criar Módulo
@@ -202,7 +204,7 @@ function ProjectDetail() {
             module_id: created.id,
             code: `M${(i + 1).toString().padStart(2, '0')}`,
             name: parsedModule.name,
-            color: color,
+            color: color ?? null,
             separation_status: 'pendente',
             conference_status: 'pendente',
             is_locked: true,
