@@ -107,17 +107,33 @@ function WallboardContent({ time }: { time: Date }) {
         </div>
         
         <div className="flex items-center gap-10">
-          <div className="text-right border-r border-slate-800 pr-10">
-            <p className="text-slate-500 font-bold uppercase tracking-widest text-xs mb-1">Total em Linha</p>
-            <p className="text-4xl font-black text-white">{list.length}</p>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-10 w-full">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="h-3 w-3 rounded-full bg-blue-500 animate-pulse shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
+              <p className="text-[10px] font-black uppercase tracking-[0.5em] text-blue-500/80">Real-time Industrial Monitoring</p>
+            </div>
+            <h1 className="text-6xl md:text-8xl font-black tracking-tighter uppercase leading-none text-white">
+              Painel de Fábrica
+            </h1>
+            <p className="text-xl font-bold text-slate-500 uppercase tracking-widest">
+              {time.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}
+            </p>
           </div>
-          <div className="text-right">
-            <p className="text-6xl font-black font-mono tracking-tighter text-white">
-              {time.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-            </p>
-            <p className="text-slate-500 font-bold uppercase tracking-widest text-xs mt-1">
-              {time.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
-            </p>
+          
+          <div className="flex gap-10 items-center">
+            <div className="text-right border-r border-slate-800 pr-10">
+              <p className="text-slate-500 font-bold uppercase tracking-[0.3em] text-[10px] mb-2">Total em Linha</p>
+              <p className="text-6xl font-black text-white">{list.length}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-7xl font-black font-mono tracking-tighter text-white">
+                {time.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+              </p>
+              <p className="text-blue-500 font-black uppercase tracking-[0.4em] text-[10px] mt-2 animate-pulse">
+                Sincronizado
+              </p>
+            </div>
           </div>
         </div>
       </header>
