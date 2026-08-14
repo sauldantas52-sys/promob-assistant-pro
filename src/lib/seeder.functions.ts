@@ -24,11 +24,10 @@ export const seedIntegrationTestData = createServerFn({ method: "POST" })
       .insert({
         id: data.userId,
         company_id: company.id,
-        full_name: "Operador de Teste",
-        role: "admin"
+        full_name: "Operador de Teste"
       });
     
-    if (pErr) return { error: pErr.message };
+    if (pErr) console.warn("Profile might already exist:", pErr.message);
 
     // 3. Create Project
     const { data: project, error: projErr } = await admin
