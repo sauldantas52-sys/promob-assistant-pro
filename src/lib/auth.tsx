@@ -78,8 +78,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
     });
     if (error) throw error;
+    
+    let session = data.session;
+    if (!session) {
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) throw signInError;
+      session = signInData.session;
+    }
+    
     const userId = data.user?.id;
-    if (!userId || !data.session) return;
+    if (!userId || !session) return;
 
     const { data: company, error: companyError } = await supabase
       .from("companies")
