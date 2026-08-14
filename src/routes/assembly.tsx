@@ -88,15 +88,32 @@ function AssemblyContent() {
               <CardContent className="space-y-3">
                 <div className="grid gap-2 sm:grid-cols-2">
                   {(project.modules ?? []).map((m) => (
-                    <div key={m.id} className="rounded-lg border border-border p-3">
-                      <p className="flex items-center gap-2 text-sm font-medium">
-                        <Boxes className="h-4 w-4 text-primary" /> {m.name}
-                        <span className="ml-auto text-xs text-muted-foreground">x{m.quantity}</span>
-                      </p>
-                      <p className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-                        <Ruler className="h-3.5 w-3.5" />
-                        {m.width_mm ?? "?"} × {m.height_mm ?? "?"} × {m.depth_mm ?? "?"} mm
-                      </p>
+                    <div key={m.id} className={`rounded-lg border p-3 transition-colors ${m.is_completed ? "bg-primary/5 border-primary/20" : "border-border"}`}>
+                      <div className="flex items-start gap-3">
+                        <Checkbox
+                          checked={m.is_completed ?? false}
+                          className="mt-0.5"
+                          onCheckedChange={async (checked) => {
+                            const { error } = await supabase
+                              .from("modules")
+                              .update({ is_completed: !!checked })
+                              .eq("id", m.id);
+                            if (error) toast.error(error.message);
+                            else void queryClient.invalidateQueries({ queryKey: ["assembly-projects"] });
+                          }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm font-medium flex items-center gap-2 ${m.is_completed ? "text-muted-foreground line-through" : ""}`}>
+                            {m.name}
+                            {m.is_completed && <CheckCircle2 className="h-3.5 w-3.5 text-primary" />}
+                            <span className="ml-auto text-xs text-muted-foreground">x{m.quantity}</span>
+                          </p>
+                          <p className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                            <Ruler className="h-3.5 w-3.5" />
+                            {m.width_mm ?? "?"} × {m.height_mm ?? "?"} × {m.depth_mm ?? "?"} mm
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   ))}
                   {(project.modules?.length ?? 0) === 0 && (
