@@ -1,4 +1,4 @@
-import { createServerFn } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
  */
 
 export const inviteUser = createServerFn({ method: "POST" })
-  .inputValidator((data) => z.object({
+  .validator((data: unknown) => z.object({
     email: z.string().email(),
     fullName: z.string().min(2),
     role: z.string(),

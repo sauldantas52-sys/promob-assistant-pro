@@ -9,8 +9,10 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, UserPlus, Mail, Shield, UserCheck, Trash2 } from "lucide-react";
+import { inviteUser } from "@/lib/user-management.functions";
 
 export const Route = createFileRoute('/_authenticated/settings/users')({
+
   component: UsersManagementPage,
 });
 
@@ -66,30 +68,25 @@ function UsersManagementPage() {
     setInviting(true);
     
     try {
-      // Nota: Em uma aplicação real com Edge Functions, usaríamos uma função admin
-      // Para o MVP, estamos usando o signUp padrão, mas o ideal é o convite admin
-      // Como o linter e o projeto restringem anon signups e pedem segurança,
-      // simulamos o fluxo que seria disparado via Dashboard do Admin.
+      await inviteUser({
+        data: {
+          email,
+          fullName,
+          role,
+          companyId
+        }
+      });
       
-      toast.info("Funcionalidade de convite via e-mail requer configuração de SMTP no provedor.");
-      
-      // Simulando a criação de registro para auditoria
-      await supabase.from("production_logs").insert({
-        project_id: "",
-        step: "gestao_usuarios",
-        notes: `Convite enviado para ${email} com perfil ${roleLabels[role]}`,
-        status: "concluido"
-      } as any);
-
-      toast.success(`Convite enviado para ${email}`);
+      toast.success(`Convite registrado para ${email}`);
       setEmail("");
       setFullName("");
       fetchUsers();
     } catch (error) {
-      toast.error("Erro ao enviar convite.");
+      toast.error("Erro ao registrar convite.");
     } finally {
       setInviting(false);
     }
+
   };
 
   if (currentRole !== 'admin' && currentRole !== 'escritorio') {
