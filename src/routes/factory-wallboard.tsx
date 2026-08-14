@@ -8,7 +8,9 @@ import {
   Layers, 
   PackageCheck,
   Clock,
-  CheckCircle2
+  CheckCircle2,
+  Truck,
+  Package
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -53,9 +55,10 @@ function WallboardContent() {
           client_name,
           is_cutting_edge_released,
           is_machining_assembly_blocked,
-          production_steps(*)
+          production_steps(*),
+          shipping_volumes(*)
         `)
-        .in("status", ["producao", "conferencia"])
+        .in("status", ["producao", "conferencia", "expedicao"])
         .order("updated_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -69,6 +72,13 @@ function WallboardContent() {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'production_steps' },
+        () => {
+          void queryClient.invalidateQueries({ queryKey: ["factory-projects"] });
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'shipping_volumes' },
         () => {
           void queryClient.invalidateQueries({ queryKey: ["factory-projects"] });
         }
@@ -130,8 +140,12 @@ function WallboardContent() {
                   <CardTitle className="text-lg font-bold truncate max-w-[200px]">{project.name}</CardTitle>
                   <p className="text-xs text-muted-foreground truncate">{project.client_name}</p>
                 </div>
-                <Badge className={project.status === 'conferencia' ? 'bg-blue-500' : 'bg-orange-500'}>
-                  {project.status === 'conferencia' ? 'CONFERÊNCIA' : 'PRODUÇÃO'}
+                <Badge className={
+                  project.status === 'conferencia' ? 'bg-blue-500' : 
+                  project.status === 'expedicao' ? 'bg-purple-600' : 
+                  'bg-orange-500'
+                }>
+                  {(project.status || 'pendente').toUpperCase()}
                 </Badge>
               </div>
             </CardHeader>
@@ -157,6 +171,7 @@ function WallboardContent() {
                   label="Separação" 
                   stats={getStepStats(project.id, 'separacao')} 
                 />
+                <ShippingMetric volumes={project.shipping_volumes || []} />
               </div>
 
                {/* Alertas Críticos de Rastreabilidade */}
@@ -213,6 +228,35 @@ function StepMetric({ icon: Icon, label, stats }: { icon: any, label: string, st
           style={{ width: `${percent}%` }}
         />
       </div>
+    </div>
+  );
+}
+
+function ShippingMetric({ volumes }: { volumes: any[] }) {
+  const total = volumes.length;
+  const loaded = volumes.filter(v => v.status === 'carregado' || v.status === 'entregue').length;
+  const delivered = volumes.filter(v => v.status === 'entregue').length;
+  const percent = total > 0 ? (loaded / total) * 100 : 0;
+  
+  if (total === 0) return null;
+
+  return (
+    <div className="p-2 rounded-lg border bg-purple-500/5 border-purple-200 flex flex-col items-center justify-center text-center">
+      <Truck className="h-4 w-4 mb-1 text-purple-600" />
+      <p className="text-[10px] uppercase font-medium text-muted-foreground">Expedição</p>
+      <div className="mt-1 flex items-baseline gap-1">
+        <span className="text-sm font-bold text-purple-700">{loaded}</span>
+        <span className="text-[10px] text-muted-foreground">/ {total}</span>
+      </div>
+      <div className="w-full bg-muted h-1 rounded-full mt-2 overflow-hidden">
+        <div 
+          className="h-full bg-purple-600 transition-all" 
+          style={{ width: `${percent}%` }}
+        />
+      </div>
+      {delivered === total && total > 0 && (
+        <p className="text-[8px] font-bold text-green-600 mt-1 uppercase">Entregue</p>
+      )}
     </div>
   );
 }

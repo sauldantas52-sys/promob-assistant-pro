@@ -11,6 +11,7 @@ import {
   Boxes,
   Tv,
   PackageCheck,
+  Truck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth, roleLabels } from "@/lib/auth";
@@ -22,6 +23,7 @@ const navItems = [
   { to: "/factory-wallboard", label: "Painel TV", icon: Tv },
   { to: "/picking", label: "Separação", icon: PackageCheck },
   { to: "/assembly", label: "Montagem", icon: Wrench },
+  { to: "/shipping", label: "Expedição", icon: Truck },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {

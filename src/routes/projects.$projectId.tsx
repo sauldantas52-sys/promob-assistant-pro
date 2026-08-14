@@ -48,6 +48,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { supabase } from "@/integrations/supabase/client";
+import { ProjectShippingTab } from "@/components/ProjectShippingTab";
 import { parseProjectFile } from "@/lib/promob-import";
 import { projectStatuses, statusLabel, statusTone } from "@/lib/project-status";
 
@@ -537,6 +538,7 @@ function ProjectDetail() {
           <TabsTrigger value="audit" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Auditoria Técnica</TabsTrigger>
           <TabsTrigger value="engineering" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Engenharia</TabsTrigger>
           <TabsTrigger value="production" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Produção / Fábrica</TabsTrigger>
+          <TabsTrigger value="shipping" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Expedição</TabsTrigger>
           <TabsTrigger value="maintenance" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Assistência</TabsTrigger>
           <TabsTrigger value="files" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Arquivos</TabsTrigger>
         </TabsList>
@@ -975,6 +977,10 @@ function ProjectDetail() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="shipping" className="mt-6">
+          <ProjectShippingTab projectId={projectId} />
         </TabsContent>
 
         <TabsContent value="maintenance" className="mt-6">
