@@ -11,12 +11,22 @@
 </head>
 <body>
     <div class="card">
-        <h2>Monta AI Bridge</h2>
-        <button onclick="window.location='skp:export_project'">Exportar para Monta AI</button>
-        <div id="status">Pronto para operação.</div>
+        <h2 style="margin-top:0; color:#0F4C5C;">Monta AI Bridge 4.0</h2>
+        <p style="font-size: 14px; color: #64748B;">Ponte Industrial SketchUp ↔ Produção</p>
+        
+        <div style="margin-bottom: 20px;">
+            <button onclick="window.location='skp:export_project'">Exportar Manifesto JSON</button>
+            <button style="background: #64748B;" onclick="window.location='skp:export_validation_report'">Gerar Relatório de Auditoria</button>
+        </div>
+
+        <div id="status" style="padding: 10px; border-radius: 4px; background: #F1F5F9; font-size: 12px;">
+            <strong>Status:</strong> Modo Piloto Local Ativo<br>
+            <strong>Segurança:</strong> machining_blocked = true
+        </div>
+        
+        <div style="margin-top: 20px; font-size: 11px; color: #94A3B8; text-align: center;">
+            Monta AI © 2026 - v1.0.0
+        </div>
     </div>
-    <script>
-        // A lógica de callback agora passa pelo bridge via href 'skp:'
-    </script>
 </body>
 </html>
