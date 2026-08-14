@@ -188,6 +188,7 @@ export type Database = {
       modules: {
         Row: {
           created_at: string
+          data_source: string | null
           depth_mm: number | null
           environment: string | null
           height_mm: number | null
@@ -200,6 +201,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          data_source?: string | null
           depth_mm?: number | null
           environment?: string | null
           height_mm?: number | null
@@ -212,6 +214,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          data_source?: string | null
           depth_mm?: number | null
           environment?: string | null
           height_mm?: number | null
@@ -236,6 +239,7 @@ export type Database = {
         Row: {
           assembly_group_id: string | null
           created_at: string
+          data_source: string | null
           edge_banding: string | null
           id: string
           is_completed: boolean | null
@@ -248,11 +252,13 @@ export type Database = {
           quantity: number
           thickness_mm: number | null
           unit: string | null
+          visibility_type: string | null
           width_mm: number | null
         }
         Insert: {
           assembly_group_id?: string | null
           created_at?: string
+          data_source?: string | null
           edge_banding?: string | null
           id?: string
           is_completed?: boolean | null
@@ -265,11 +271,13 @@ export type Database = {
           quantity?: number
           thickness_mm?: number | null
           unit?: string | null
+          visibility_type?: string | null
           width_mm?: number | null
         }
         Update: {
           assembly_group_id?: string | null
           created_at?: string
+          data_source?: string | null
           edge_banding?: string | null
           id?: string
           is_completed?: boolean | null
@@ -282,6 +290,7 @@ export type Database = {
           quantity?: number
           thickness_mm?: number | null
           unit?: string | null
+          visibility_type?: string | null
           width_mm?: number | null
         }
         Relationships: [
