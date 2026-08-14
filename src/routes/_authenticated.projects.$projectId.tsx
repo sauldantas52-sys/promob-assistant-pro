@@ -612,6 +612,7 @@ function ProjectDetail() {
             <TabTrigger value="shipping" icon={Truck} label="Logística" />
             <TabTrigger value="maintenance" icon={HardHat} label="Assistência" />
             <TabTrigger value="audit" icon={History} label="Auditoria" />
+            <TabTrigger value="integration_audit" icon={CheckSquare} label="Motores IA" />
             <TabTrigger value="files" icon={FileUp} label="Arquivos" />
           </TabsList>
 
