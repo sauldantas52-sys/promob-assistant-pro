@@ -460,7 +460,7 @@ function ProjectDetail() {
               value={project.data?.status ?? "novo"} 
               disabled={!hasPermission(role, "projects", "approve")}
               onValueChange={async (v) => {
-                if (v === "producao") {
+                if (["corte", "borda", "usinagem"].includes(v)) {
                   const unconfirmedParts = allParts.filter(p => 
                     (!p.width_mm || !p.length_mm || !p.thickness_mm || !p.material) && 
                     p.kind !== 'ferragem' && 
