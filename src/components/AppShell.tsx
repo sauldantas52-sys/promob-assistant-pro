@@ -86,7 +86,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         </nav>
         <div className="absolute bottom-0 w-full border-t border-sidebar-border p-4">
           <p className="truncate text-sm font-medium">{fullName ?? user.email}</p>
-          <p className="text-xs text-sidebar-foreground/70">{role ? roleLabels[role] : "Sem perfil definido"}</p>
+          <p className="text-xs text-sidebar-foreground/70">
+            {role ? (roleLabels[role] || role) : "Sem perfil definido"}
+          </p>
           <Button
             variant="ghost"
             className="mt-3 w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent"
