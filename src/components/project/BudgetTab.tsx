@@ -1,13 +1,22 @@
 import { useState } from "react";
-import { Calculator, FileText, Download, Building2, Layers } from "lucide-react";
+import { Calculator, FileText, Download, Building2, Layers, AlertTriangle, ShieldCheck } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export function BudgetTab({ projectId }: { projectId: string }) {
   return (
     <div className="space-y-6">
+      <Alert className="bg-blue-50 border-blue-200 text-blue-800 rounded-2xl">
+        <ShieldCheck className="h-4 w-4" />
+        <AlertTitle className="font-black uppercase tracking-tight text-xs">Aviso de Governança Comercial</AlertTitle>
+        <AlertDescription className="text-sm">
+          A produção industrial deste projeto está **bloqueada** até a aprovação formal da Proposta Comercial e Contrato. 
+          O uso de estimativas visuais é estritamente orçamentário.
+        </AlertDescription>
+      </Alert>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="rounded-3xl border-none shadow-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white">
           <CardHeader>
