@@ -291,21 +291,26 @@ function VolumeRow({ volume, project }: { volume: any, project: any }) {
   };
 
   return (
-    <div className={cn("p-4 flex flex-wrap items-center justify-between gap-4 transition-colors", isLocked && "bg-destructive/5")}>
-      <div className="flex items-center gap-4 min-w-[280px]">
-        <div className="h-10 w-10 bg-muted rounded flex items-center justify-center border border-dashed text-muted-foreground">
-          <QrCode className="h-5 w-5" />
+    <div className={cn("px-16 py-10 flex flex-wrap items-center justify-between gap-8 transition-all hover:bg-slate-50", isLocked && "bg-destructive/5")}>
+      <div className="flex items-center gap-8 min-w-[320px]">
+        <div className="h-20 w-20 bg-slate-100 rounded-[1.5rem] flex items-center justify-center border-2 border-dashed border-slate-200 text-slate-400 shadow-inner">
+          <QrCode className="h-8 w-8" />
         </div>
         <div>
-          <div className="flex items-center gap-2">
-            <p className="font-bold text-sm">{volume.name}</p>
-            <Badge variant="outline" className={cn("text-[10px] h-5", statusColors[volume.status])}>
+          <div className="flex items-center gap-4 mb-2">
+            <p className="text-xl font-black text-slate-900 tracking-tighter uppercase leading-none">{volume.name}</p>
+            <Badge variant="outline" className={cn("px-4 py-1 text-[9px] font-black uppercase tracking-[0.2em] border-none rounded-full shadow-sm", statusColors[volume.status])}>
               {volume.status.toUpperCase()}
             </Badge>
           </div>
-          <p className="text-xs text-muted-foreground flex items-center gap-1">
+          <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-3">
             <span className="font-mono">{volume.code}</span>
-            {volume.weight_kg && <span> · {volume.weight_kg}kg</span>}
+            {volume.weight_kg && (
+              <>
+                <span className="h-1.5 w-1.5 rounded-full bg-slate-200" />
+                <span>{volume.weight_kg}kg</span>
+              </>
+            )}
           </p>
         </div>
       </div>
