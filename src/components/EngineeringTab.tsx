@@ -278,6 +278,73 @@ export function EngineeringTab({ projectId, parts }: EngineeringTabProps) {
           </CardContent>
         </Card>
       )}
+
+      {activeView === 'report' && (
+        <Card className="border-amber-200">
+          <CardHeader className="bg-amber-50/50">
+            <CardTitle className="text-base flex items-center gap-2 text-amber-900">
+              <ClipboardList className="h-5 w-5" /> Relatório Técnico de Bitolas e Tolerâncias
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="space-y-6">
+              <div className="grid gap-4 md:grid-cols-3">
+                {PROMOB_BITOLA_RULES.map(rule => (
+                  <div key={rule.bitola} className="p-3 border rounded-lg">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="text-lg font-bold">{rule.bitola}mm</span>
+                      <Badge variant="secondary">±{rule.tolerancia_mm}mm</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{rule.description}</p>
+                  </div>
+                ))}
+              </div>
+
+              <Alert>
+                <Binary className="h-4 w-4" />
+                <AlertTitle>Matriz de Correspondência XML (amanda_111.xml)</AlertTitle>
+                <AlertDescription className="text-xs">
+                  Relacionando bitolas nominais aos códigos reais e tolerâncias permitidas pelo motor Promob.
+                </AlertDescription>
+              </Alert>
+
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Peça</TableHead>
+                    <TableHead>Bitola Real</TableHead>
+                    <TableHead>Padrão Promob</TableHead>
+                    <TableHead>Tolerância</TableHead>
+                    <TableHead>Usinagem</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {parts.filter(p => p.kind === 'peca').map(part => {
+                    const rule = PROMOB_BITOLA_RULES.find(r => 
+                      Math.abs((part.thickness_mm || 0) - r.bitola) <= r.tolerancia_mm
+                    );
+                    return (
+                      <TableRow key={part.id}>
+                        <TableCell className="text-xs font-medium">{part.name}</TableCell>
+                        <TableCell className="text-xs">{part.thickness_mm}mm</TableCell>
+                        <TableCell className="text-xs">{rule ? `${rule.bitola}mm` : 'Não identificado'}</TableCell>
+                        <TableCell className="text-xs">{rule ? `±${rule.tolerancia_mm}mm` : '-'}</TableCell>
+                        <TableCell>
+                          {part.machining_blocked ? (
+                            <Badge variant="destructive" className="text-[10px]">BLOQUEADO</Badge>
+                          ) : (
+                            <Badge className="bg-green-600 text-[10px]">LIBERADO</Badge>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
