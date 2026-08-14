@@ -144,7 +144,8 @@ function ProjectDetail() {
         size_bytes: result.sizeBytes,
         summary: {
           modules: result.modules.length,
-          parts: result.modules.reduce((total, m) => total + m.parts.length, 0),
+          parts: result.modules.reduce((total, m) => total + m.parts.length, 0) + result.looseParts.length,
+          looseParts: result.looseParts.length,
           warnings: result.warnings,
         },
       });
@@ -185,6 +186,24 @@ function ProjectDetail() {
         }
       }
 
+      if (result.looseParts.length > 0) {
+        await supabase.from("parts").insert(
+          result.looseParts.map((part) => ({
+            project_id: projectId,
+            module_id: null, // Itens sem módulo
+            kind: part.kind,
+            name: part.name,
+            material: part.material ?? null,
+            thickness_mm: part.thickness_mm ?? null,
+            width_mm: part.width_mm ?? null,
+            length_mm: part.length_mm ?? null,
+            quantity: part.quantity,
+            unit: part.unit ?? "un",
+            edge_banding: part.edge_banding ?? null,
+          })),
+        );
+      }
+
       setWarnings(result.warnings);
       toast.success(
         result.modules.length > 0
@@ -214,15 +233,17 @@ function ProjectDetail() {
   const exportCSV = () => {
     try {
       const dataToExport = allParts.map((p) => {
-        const moduleName = modules.data?.find((m) => m.id === p.module_id)?.name || "Sem módulo";
+        const moduleName = p.module_id 
+          ? (modules.data?.find((m) => m.id === p.module_id)?.name || "Módulo não encontrado")
+          : "Itens sem módulo";
         return {
           "Módulo": moduleName,
           "Nome": p.name,
           "Tipo": p.kind,
           "Material": p.material || "-",
-          "Espessura (mm)": p.thickness_mm || "-",
-          "Largura (mm)": p.width_mm || "-",
-          "Comprimento (mm)": p.length_mm || "-",
+          "Espessura (mm)": p.thickness_mm ?? "Não confirmado",
+          "Largura (mm)": p.width_mm ?? "Não confirmado",
+          "Comprimento (mm)": p.length_mm ?? "Não confirmado",
           "Quantidade": p.quantity,
           "Unidade": p.unit || "un",
           "Fita de Borda": p.edge_banding || "-",
@@ -338,10 +359,11 @@ function ProjectDetail() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <Metric icon={Boxes} label="Módulos" value={String(modules.data?.length ?? 0)} />
         <Metric icon={Layers} label="Peças / chapas" value={String(panels.length)} />
-        <Metric icon={Wrench} label="Ferragens" value={String(hardware.length)} />
+        <Metric icon={Wrench} label="Ferragens / Acessórios" value={String(hardware.length)} />
+        <Metric icon={AlertTriangle} label="Itens sem módulo" value={String(allParts.filter(p => !p.module_id).length)} />
         <Metric icon={FileText} label="Área de chapa (m²)" value={totalArea.toFixed(2)} />
       </div>
 
