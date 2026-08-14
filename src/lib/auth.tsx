@@ -110,20 +110,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    const { data: company, error: companyError } = await supabase
-      .from("companies")
-      .insert({ name: companyName })
-      .select("id")
-      .single();
-    if (companyError) throw companyError;
-
-    const { error: profileError } = await supabase
-      .from("profiles")
-      .insert({ id: userId, company_id: company.id, full_name: name });
-    if (profileError) throw profileError;
-
-    await supabase.from("user_roles").insert({ user_id: userId, role: r });
-    await loadProfile(userId);
   };
 
   const signOut = async () => {
