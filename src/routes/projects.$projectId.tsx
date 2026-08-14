@@ -818,14 +818,22 @@ function MaintenanceTab({
   const [urgency, setUrgency] = useState("baixa");
   const [selectedModule, setSelectedModule] = useState<string>("none");
   const [selectedPart, setSelectedPart] = useState<string>("none");
+  const [deadline, setDeadline] = useState("");
+  const [photoUrls, setPhotoUrls] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   const { data: requests, isLoading } = useQuery({
     queryKey: ["maintenance_requests", projectId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("maintenance_requests")
-        .select("*")
+        .select(`
+          *,
+          maintenance_history (
+            *
+          )
+        `)
         .eq("project_id", projectId)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -849,7 +857,9 @@ function MaintenanceTab({
           urgency: urgency as any,
           module_id: selectedModule === "none" ? null : selectedModule,
           part_id: selectedPart === "none" ? null : selectedPart,
-          status: "aberto"
+          status: "aberto",
+          photos: photoUrls,
+          deadline: deadline || null
         });
       if (error) throw error;
     },
@@ -857,18 +867,69 @@ function MaintenanceTab({
       toast.success("Chamado de assistência aberto.");
       setIsAdding(false);
       setDescription("");
+      setPhotoUrls([]);
+      setDeadline("");
       void queryClient.invalidateQueries({ queryKey: ["maintenance_requests", projectId] });
     },
     onError: (err: Error) => toast.error(err.message),
   });
 
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    try {
+      const newUrls: string[] = [...photoUrls];
+      for (const file of Array.from(files)) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `${projectId}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('maintenance_photos')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('maintenance_photos')
+          .getPublicUrl(filePath);
+
+        newUrls.push(publicUrl);
+      }
+      setPhotoUrls(newUrls);
+      toast.success("Fotos anexadas.");
+    } catch (error) {
+      toast.error("Erro ao subir fotos.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const updateStatus = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const { error } = await supabase
+    mutationFn: async ({ id, oldStatus, newStatus }: { id: string; oldStatus: string; newStatus: string }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Não autenticado");
+
+      const { error: updateError } = await supabase
         .from("maintenance_requests")
-        .update({ status: status as any })
+        .update({ status: newStatus as any })
         .eq("id", id);
-      if (error) throw error;
+      
+      if (updateError) throw updateError;
+
+      const { error: historyError } = await supabase
+        .from("maintenance_history")
+        .insert({
+          request_id: id,
+          created_by: user.id,
+          old_status: oldStatus as any,
+          new_status: newStatus as any,
+          notes: `Status alterado de ${oldStatus} para ${newStatus}`
+        });
+      
+      if (historyError) throw historyError;
     },
     onSuccess: () => {
       toast.success("Status da assistência atualizado.");
@@ -974,10 +1035,38 @@ function MaintenanceTab({
               </div>
 
               <div className="space-y-2">
+                <Label>Prazo de Reposição (Opcional)</Label>
+                <Input 
+                  type="date" 
+                  value={deadline}
+                  onChange={(e) => setDeadline(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
                 <Label>Fotos / Evidências</Label>
-                <div className="flex aspect-video w-full flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50 text-muted-foreground">
-                  <Camera className="mb-2 h-8 w-8" />
-                  <p className="text-xs">Clique para anexar fotos (Em breve)</p>
+                <input 
+                  type="file" 
+                  ref={photoInputRef}
+                  className="hidden" 
+                  accept="image/*" 
+                  multiple
+                  onChange={handlePhotoUpload}
+                />
+                <div 
+                  className="flex aspect-video w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50 text-muted-foreground hover:bg-muted"
+                  onClick={() => photoInputRef.current?.click()}
+                >
+                  {uploading ? (
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                  ) : (
+                    <>
+                      <Camera className="mb-2 h-8 w-8" />
+                      <p className="text-xs">
+                        {photoUrls.length > 0 ? `${photoUrls.length} fotos anexadas` : "Clique para anexar fotos"}
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -1018,10 +1107,32 @@ function MaintenanceTab({
                     {req.part_id && (
                       <span>Peça: {allParts.find(p => p.id === req.part_id)?.name}</span>
                     )}
+                    {req.deadline && (
+                      <span className="text-orange-600 font-medium">Prazo: {new Date(req.deadline).toLocaleDateString('pt-BR')}</span>
+                    )}
                   </div>
+                  {req.photos && req.photos.length > 0 && (
+                    <div className="flex gap-2 mt-2 overflow-x-auto pb-1">
+                      {req.photos.map((url: string, i: number) => (
+                        <a key={i} href={url} target="_blank" rel="noreferrer" className="shrink-0">
+                          <img src={url} alt="Evidência" className="h-12 w-12 rounded object-cover border" />
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                  {req.maintenance_history && req.maintenance_history.length > 0 && (
+                    <div className="mt-2 space-y-1 border-t pt-2">
+                      <p className="text-[10px] font-bold uppercase text-muted-foreground">Histórico</p>
+                      {req.maintenance_history.slice(0, 3).map((h: any) => (
+                        <p key={h.id} className="text-[10px] text-muted-foreground">
+                          {new Date(h.created_at).toLocaleDateString('pt-BR')}: {h.notes}
+                        </p>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="flex flex-col gap-2 min-w-[140px]">
-                  <Select value={req.status} onValueChange={(val) => updateStatus.mutate({ id: req.id, status: val })}>
+                  <Select value={req.status} onValueChange={(val) => updateStatus.mutate({ id: req.id, oldStatus: req.status, newStatus: val })}>
                     <SelectTrigger className="h-8 text-xs">
                       <SelectValue />
                     </SelectTrigger>
