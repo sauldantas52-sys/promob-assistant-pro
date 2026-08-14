@@ -48,7 +48,7 @@ function ForcePasswordChangePage() {
           must_change_password: false,
           first_login_at: new Date().toISOString()
         })
-        .eq("id", user?.id);
+        .eq("id", user?.id || "");
 
       if (profileError) throw profileError;
 
