@@ -397,6 +397,77 @@ export function SketchUpBridgeTab({ projectId }: SketchUpBridgeTabProps) {
               </CardContent>
             </Card>
           )}
+
+          {activeTab === "api" && (
+            <Card className="rounded-[2.5rem] border-none shadow-xl overflow-hidden">
+              <CardHeader className="bg-slate-900 p-8 border-b border-slate-800">
+                <CardTitle className="text-[14px] font-black text-white uppercase tracking-[0.3em] flex items-center gap-3">
+                  <FileCode className="h-5 w-5 text-amber-500" /> Documentação Técnica API SketchUp
+                </CardTitle>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Especificações para o Desenvolvedor do Plugin Ruby</p>
+              </CardHeader>
+              <CardContent className="p-8 space-y-8 overflow-y-auto max-h-[600px] prose prose-invert prose-slate max-w-none">
+                <div className="space-y-6">
+                  <section className="space-y-4">
+                    <h4 className="text-amber-500 font-black uppercase text-[12px] tracking-widest border-l-4 border-amber-500 pl-4">1. Autenticação Operacional</h4>
+                    <div className="bg-slate-950 p-6 rounded-[1.5rem] border border-slate-800">
+                      <p className="text-[11px] text-slate-300 mb-4 font-medium">Use as credenciais do Supabase para obter o JWT.</p>
+                      <pre className="text-[10px] text-emerald-400 font-mono">POST https://nhkburqoligtdyrjtkrs.supabase.co/auth/v1/token?grant_type=password
+Headers: {
+  "apikey": "sb_publishable_M9jDHpJ214--HnafZLr8dA_CS3WAlF2",
+  "Content-Type": "application/json"
+}
+Body: { "email": "...", "password": "..." }</pre>
+                    </div>
+                  </section>
+
+                  <section className="space-y-4">
+                    <h4 className="text-amber-500 font-black uppercase text-[12px] tracking-widest border-l-4 border-amber-500 pl-4">2. Envio do Pacote (manifest.json)</h4>
+                    <div className="bg-slate-950 p-6 rounded-[1.5rem] border border-slate-800">
+                      <p className="text-[11px] text-slate-300 mb-4 font-medium">Endpoint seguro para processamento de geometria e auditoria técnica.</p>
+                      <pre className="text-[10px] text-emerald-400 font-mono">RPC: /_server/processSkpPackage
+Payload: {
+  "projectId": "UUID",
+  "manifest": {
+    "plugin_version": "1.0.0",
+    "version_number": 1,
+    "items": [{
+      "environment_id": "Cozinha",
+      "module_id": "GUID_UNIQUE_SKP",
+      "group_code": "G1",
+      "module_name": "Balcão Pia 1200",
+      "thickness_mm": 18,
+      "width_mm": 1200, "height_mm": 720, "depth_mm": 580,
+      "position_x": 0, "position_y": 0, "position_z": 0,
+      "tags": ["02_MODULOS", "03_G1"]
+    }]
+  }
+}</pre>
+                    </div>
+                  </section>
+
+                  <section className="space-y-4">
+                    <h4 className="text-amber-500 font-black uppercase text-[12px] tracking-widest border-l-4 border-amber-500 pl-4">3. Arquivos de Apoio</h4>
+                    <p className="text-[11px] text-slate-400 font-medium">O pacote deve incluir URLs do Supabase Storage para:</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {['SKP (Modelo 3D)', 'PDF (Planta)', 'Perspectivas', 'Cotas Técnicas'].map(f => (
+                        <div key={f} className="p-3 bg-slate-800 rounded-xl text-center text-[9px] font-black uppercase text-slate-300 border border-slate-700">{f}</div>
+                      ))}
+                    </div>
+                  </section>
+
+                  <div className="flex gap-4 pt-4 border-t border-slate-800">
+                    <Button variant="outline" asChild className="rounded-full border-slate-700 bg-slate-800 text-white hover:bg-slate-700 font-black uppercase text-[10px]">
+                      <a href="/manifest_valid_example.json" download><Download className="mr-2 h-4 w-4" /> Exemplo Válido</a>
+                    </Button>
+                    <Button variant="outline" asChild className="rounded-full border-slate-700 bg-slate-800 text-white hover:bg-slate-700 font-black uppercase text-[10px]">
+                      <a href="/manifest_invalid_example.json" download><Download className="mr-2 h-4 w-4" /> Exemplo Inválido</a>
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
 
