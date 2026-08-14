@@ -825,7 +825,12 @@ function MaintenanceTab({
     queryFn: async () => {
       const { data, error } = await supabase
         .from("maintenance_requests")
-        .select("*")
+        .select(`
+          *,
+          maintenance_history (
+            *
+          )
+        `)
         .eq("project_id", projectId)
         .order("created_at", { ascending: false });
       if (error) throw error;
