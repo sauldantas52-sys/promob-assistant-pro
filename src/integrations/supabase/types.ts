@@ -323,7 +323,10 @@ export type Database = {
           created_at: string | null
           id: string
           metadata: Json | null
+          notes: string | null
           project_id: string
+          status_from: string | null
+          status_to: string | null
           user_id: string | null
         }
         Insert: {
@@ -331,7 +334,10 @@ export type Database = {
           created_at?: string | null
           id?: string
           metadata?: Json | null
+          notes?: string | null
           project_id: string
+          status_from?: string | null
+          status_to?: string | null
           user_id?: string | null
         }
         Update: {
@@ -339,7 +345,10 @@ export type Database = {
           created_at?: string | null
           id?: string
           metadata?: Json | null
+          notes?: string | null
           project_id?: string
+          status_from?: string | null
+          status_to?: string | null
           user_id?: string | null
         }
         Relationships: [
