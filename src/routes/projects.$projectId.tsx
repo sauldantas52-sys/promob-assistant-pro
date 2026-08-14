@@ -234,7 +234,7 @@ function ProjectDetail() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.setAttribute("href", url);
-      link.setAttribute("download", `lista-tecnica-${project.data.name}.csv`);
+      link.setAttribute("download", `lista-tecnica-${project.data?.name || 'projeto'}.csv`);
       link.style.visibility = "hidden";
       document.body.appendChild(link);
       link.click();
@@ -268,14 +268,14 @@ function ProjectDetail() {
 
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold md:text-3xl">{project.data.name}</h1>
+          <h1 className="text-2xl font-bold md:text-3xl">{project.data?.name}</h1>
           <p className="text-sm text-muted-foreground">
-            {project.data.client_name || "Sem cliente"} · {project.data.environment || "Ambiente não informado"}
+            {project.data?.client_name || "Sem cliente"} · {project.data?.environment || "Ambiente não informado"}
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Badge className={statusTone(project.data.status)}>{statusLabel(project.data.status)}</Badge>
-          <Select value={project.data.status ?? "novo"} onValueChange={(v) => updateStatus.mutate(v)}>
+          <Badge className={statusTone(project.data?.status || "novo")}>{statusLabel(project.data?.status || "novo")}</Badge>
+          <Select value={project.data?.status ?? "novo"} onValueChange={(v) => updateStatus.mutate(v)}>
             <SelectTrigger className="h-11 w-44">
               <SelectValue />
             </SelectTrigger>
