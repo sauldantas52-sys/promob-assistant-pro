@@ -231,7 +231,7 @@ function UsersManagementPage() {
                         className="h-12 w-12 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50"
                         onClick={() => {
                           setConfiguringOperator(u);
-                          setOpCode(`OP-${u.full_name?.split(' ')[0].toUpperCase() || 'USR'}`);
+                          setOpCode(`OP-${(u.full_name?.split(' ')[0] || 'USR').toUpperCase()}`);
                         }}
                       >
                         <KeyRound className="h-5 w-5" />
