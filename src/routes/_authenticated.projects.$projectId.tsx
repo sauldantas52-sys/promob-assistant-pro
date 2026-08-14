@@ -1437,13 +1437,13 @@ function ProjectMetric({
   color?: string;
 }) {
   return (
-    <div className="bg-white rounded-[2rem] p-6 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] border border-slate-100 flex flex-col gap-4">
-      <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center bg-slate-50", color.replace('text-', 'bg-').replace('-600', '-50'))}>
-        <Icon className={cn("h-6 w-6", color)} />
+    <div className="bg-white rounded-[2.5rem] p-8 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.06)] border border-slate-100 flex flex-col gap-6 group hover:shadow-[0_30px_70px_-15px_rgba(0,0,0,0.12)] transition-all duration-500">
+      <div className={cn("w-16 h-16 rounded-[1.25rem] flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-6", color.replace('text-', 'bg-').replace('-600', '-50'))}>
+        <Icon className={cn("h-8 w-8", color)} />
       </div>
-      <div className="space-y-1">
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{label}</p>
-        <p className="text-xl font-black text-slate-900 leading-none">{value}</p>
+      <div className="space-y-2">
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">{label}</p>
+        <p className="text-3xl font-black text-slate-900 leading-none tracking-tighter uppercase">{value}</p>
       </div>
     </div>
   );
