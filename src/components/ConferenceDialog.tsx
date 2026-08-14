@@ -177,6 +177,11 @@ export function ConferenceDialog({
     [parts.length, confirmedParts, hwRows.length, confirmedHardware, openExceptions.length],
   );
 
+  const isSynchronizing = pending > 0 && online;
+  const statusToDisplay = isSynchronizing 
+    ? "Sincronizado — aguardando conferência" 
+    : (group?.conference_status === "sincronizado" ? "Sincronizado — conferência manual necessária" : null);
+
   const sealed = !!group?.sealed_at;
   const shipping = canShipModule({ sealed, guard });
   const progress = parts.length ? (confirmedParts / parts.length) * 100 : 0;
