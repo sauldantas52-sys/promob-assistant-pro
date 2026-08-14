@@ -70,6 +70,7 @@ export const Route = createFileRoute("/_authenticated/assembly")({
 function AssemblyContent() {
   const { companyId } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const projects = useQuery({
     queryKey: ["assembly-projects", companyId],
@@ -98,7 +99,7 @@ function AssemblyContent() {
         <div className="space-y-6">
           <Button 
             variant="ghost" 
-            onClick={() => window.location.href = '/dashboard'} 
+            onClick={() => navigate({ to: "/dashboard" })} 
             className="rounded-full px-4 text-slate-400 hover:text-blue-600 gap-2 mb-2"
           >
             <LayoutDashboard className="h-4 w-4" />

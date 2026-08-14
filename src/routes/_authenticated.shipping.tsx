@@ -58,6 +58,7 @@ export const Route = createFileRoute("/_authenticated/shipping")({
 function ShippingPage() {
   const { companyId } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("volumes");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -97,7 +98,7 @@ function ShippingPage() {
           <div className="space-y-6">
             <Button 
               variant="ghost" 
-              onClick={() => window.location.href = '/dashboard'} 
+              onClick={() => navigate({ to: "/dashboard" })} 
               className="rounded-full px-4 text-slate-400 hover:text-blue-600 gap-2 mb-2"
             >
               <LayoutDashboard className="h-4 w-4" />
