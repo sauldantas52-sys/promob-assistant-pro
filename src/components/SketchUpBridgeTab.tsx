@@ -87,7 +87,7 @@ export function SketchUpBridgeTab({ projectId }: SketchUpBridgeTabProps) {
       });
 
       toast.success("Versão importada com sucesso!", {
-        description: `${result.itemCount} itens processados e ${result.validationCount} validações registradas.`
+        description: `${result.itemCount} itens processados.`
       });
       
       void queryClient.invalidateQueries({ queryKey: ["project_versions", projectId] });
