@@ -11,6 +11,7 @@ import {
   Boxes,
   Tv,
   PackageCheck,
+  Truck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth, roleLabels } from "@/lib/auth";
