@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { 
   Factory, 
@@ -11,7 +11,8 @@ import {
   PackageCheck, 
   CheckCircle2,
   AlertOctagon,
-  Lock
+  Lock,
+  LayoutDashboard
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,7 @@ import { hasPermission } from "@/lib/permissions";
 import { supabase } from "@/integrations/supabase/client";
 import { statusLabel, statusTone } from "@/lib/project-status";
 import { cn } from "@/lib/utils";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/_authenticated/production")({
   head: () => ({
@@ -37,12 +39,16 @@ export const Route = createFileRoute("/_authenticated/production")({
       { property: "og:description", content: "Fluxo de produção e conferência de projetos." },
     ],
   }),
-  component: () => (
+  component: ProductionPage,
+});
+
+function ProductionPage() {
+  return (
     <AppShell>
       <ProductionContent />
     </AppShell>
-  ),
-});
+  );
+}
 
 const flow: Record<string, { next: string; action: string; color: string; icon: any }> = {
   novo: { next: "orcamento", action: "Enviar para orçamento", color: "bg-slate-200", icon: ClipboardList },
@@ -97,6 +103,14 @@ function ProductionContent() {
     <div className="space-y-16 p-8 md:p-16 max-w-[1800px] mx-auto animate-in fade-in duration-700">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-10">
         <div className="space-y-6">
+          <Button 
+            variant="ghost" 
+            onClick={() => window.location.href = '/dashboard'} 
+            className="rounded-full px-4 text-slate-400 hover:text-blue-600 gap-2 mb-2"
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            <span className="text-[10px] font-black uppercase tracking-widest">Dashboard</span>
+          </Button>
           <div className="flex items-center gap-4">
             <span className="h-2 w-10 bg-blue-600 rounded-full" />
             <p className="text-[12px] font-black uppercase tracking-[0.5em] text-blue-600">Fila Industrial de Precisão</p>

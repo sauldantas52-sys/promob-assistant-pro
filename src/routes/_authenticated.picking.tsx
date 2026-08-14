@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   PackageCheck, 
@@ -8,7 +8,8 @@ import {
   XCircle,
   Wrench,
   Boxes,
-  ClipboardList
+  ClipboardList,
+  LayoutDashboard
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
