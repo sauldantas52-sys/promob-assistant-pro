@@ -108,14 +108,23 @@ function ForcePasswordChangePage() {
                   className="h-12 rounded-xl"
                   placeholder={`Mínimo ${AUTH_CONFIG.MIN_PASSWORD_LENGTH} caracteres`}
                 />
-                {password.length > 0 && !isPasswordStrong(password) && (
-                  <div className="flex items-center gap-2 rounded-lg bg-amber-50 p-2 border border-amber-100">
-                    <ShieldAlert className="h-4 w-4 text-amber-600" />
-                    <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">
-                      Senha Curta (Modo Piloto)
+                {password.length > 0 && !isValidPasswordLength(password) && (
+                  <div className="flex items-center gap-2 rounded-lg bg-red-50 p-2 border border-red-100">
+                    <ShieldAlert className="h-4 w-4 text-red-600" />
+                    <span className="text-[10px] font-bold text-red-700 uppercase tracking-wider">
+                      Mínimo 8 e máximo 20 caracteres.
                     </span>
                   </div>
                 )}
+                {password.length >= 8 && !isPasswordStrong(password) && (
+                  <div className="flex items-center gap-2 rounded-lg bg-amber-50 p-2 border border-amber-100">
+                    <ShieldAlert className="h-4 w-4 text-amber-600" />
+                    <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">
+                      Dica: Use letras, números e símbolos.
+                    </span>
+                  </div>
+                )}
+
 
               </div>
               <div className="space-y-2">
