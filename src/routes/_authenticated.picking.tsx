@@ -89,20 +89,22 @@ function PickingPage() {
             const progress = total > 0 ? (done / total) * 100 : 0;
 
             return (
-              <Card key={project.id} className="border-none shadow-sm rounded-2xl overflow-hidden">
-                <CardHeader className="pb-4 pt-6 px-6 bg-slate-50 border-b border-slate-200">
-                  <div className="flex justify-between items-start gap-4">
-                    <div>
-                      <CardTitle className="text-xl font-black text-slate-900 tracking-tight uppercase">{project.name}</CardTitle>
-                      <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mt-1">{project.client_name} · {project.environment}</p>
+              <Card key={project.id} className="border-none shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)] rounded-[4rem] overflow-hidden bg-white mb-12 transition-all duration-700 hover:shadow-[0_60px_120px_-20px_rgba(0,0,0,0.15)]">
+                <CardHeader className="pb-10 pt-16 px-16 bg-slate-50/30 border-b border-slate-100">
+                  <div className="flex flex-wrap justify-between items-center gap-10">
+                    <div className="space-y-4">
+                      <CardTitle className="text-5xl font-black text-slate-900 tracking-tighter uppercase leading-[0.9]">{project.name}</CardTitle>
+                      <p className="text-[12px] font-black text-slate-500 uppercase tracking-[0.4em] flex items-center gap-3">
+                        {project.client_name || "CLIENTE ANÔNIMO"} <span className="h-1.5 w-1.5 rounded-full bg-slate-200" /> {project.environment || "AMBIENTE GERAL"}
+                      </p>
                     </div>
-                    <Badge className={cn("px-4 py-1.5 text-xs font-black uppercase tracking-widest border shadow-sm", progress === 100 ? "bg-green-600 text-white border-green-500" : "bg-blue-600 text-white border-blue-500")}>
-                      {done} / {total} ITENS
+                    <Badge className={cn("px-10 py-4 text-[11px] font-black uppercase tracking-[0.3em] border-none rounded-full shadow-2xl transition-all duration-500", progress === 100 ? "bg-emerald-600 text-white" : "bg-blue-600 text-white")}>
+                      {done} / {total} ITENS PROCESSADOS
                     </Badge>
                   </div>
-                  <div className="mt-6 w-full bg-slate-200 h-3 rounded-full overflow-hidden shadow-inner border border-slate-300/50">
+                  <div className="mt-12 w-full bg-slate-100 h-6 rounded-full overflow-hidden shadow-inner border border-slate-200 p-1.5">
                     <div 
-                      className="h-full bg-blue-600 transition-all duration-1000 shadow-[0_0_15px_rgba(37,99,235,0.4)]" 
+                      className="h-full bg-blue-600 transition-all duration-1000 shadow-[0_0_20px_rgba(37,99,235,0.4)] rounded-full" 
                       style={{ width: `${progress}%` }} 
                     />
                   </div>
