@@ -24,19 +24,19 @@ describe('parsePromobXml', () => {
     const result = parsePromobXml('test.xml', 1024, xml);
     
     expect(result.modules).toHaveLength(1);
-    expect(result.modules[0].name).toBe('Armário Cozinha');
-    expect(result.modules[0].parts).toHaveLength(3);
+    expect(result.modules[0]!.name).toBe('Armário Cozinha');
+    expect(result.modules[0]!.parts).toHaveLength(3);
     
-    const lateral = result.modules[0].parts.find(p => p.name === 'Lateral Direita');
+    const lateral = result.modules[0]!.parts.find(p => p.name === 'Lateral Direita');
     expect(lateral?.kind).toBe('peca');
     expect(lateral?.thickness_mm).toBe(18);
     expect(lateral?.width_mm).toBe(600);
     
-    const dobradica = result.modules[0].parts.find(p => p.name === 'Dobradiça 35mm');
+    const dobradica = result.modules[0]!.parts.find(p => p.name === 'Dobradiça 35mm');
     expect(dobradica?.kind).toBe('ferragem');
     
     expect(result.looseParts).toHaveLength(1);
-    expect(result.looseParts[0].kind).toBe('acessorio');
+    expect(result.looseParts[0]!.kind).toBe('acessorio');
   });
 
   it('should handle decimal commas in measurements', () => {
@@ -53,8 +53,8 @@ describe('parsePromobXml', () => {
     `;
     
     const result = parsePromobXml('test.xml', 1024, xml);
-    expect(result.modules[0].width_mm).toBe(1200.5);
-    expect(result.modules[0].parts[0].width_mm).toBe(600.25);
-    expect(result.modules[0].parts[0].thickness_mm).toBe(18);
+    expect(result.modules[0]!.width_mm).toBe(1200.5);
+    expect(result.modules[0]!.parts[0]!.width_mm).toBe(600.25);
+    expect(result.modules[0]!.parts[0]!.thickness_mm).toBe(18);
   });
 });
