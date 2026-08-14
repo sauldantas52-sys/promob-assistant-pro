@@ -365,13 +365,13 @@ function VolumeRow({ volume, project }: { volume: any, project: any }) {
         
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <Info className="h-4 w-4 text-muted-foreground" />
+            <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full hover:bg-slate-100 transition-colors">
+              <Info className="h-5 w-5 text-slate-400" />
             </Button>
           </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Informações do Volume</DialogTitle>
+          <DialogContent className="rounded-[3rem] border-none shadow-2xl p-12">
+            <DialogHeader className="mb-8">
+              <DialogTitle className="text-3xl font-black text-slate-900 tracking-tighter uppercase">Detalhes do Volume</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="grid grid-cols-2 gap-4 text-sm">
