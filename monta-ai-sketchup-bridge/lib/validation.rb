@@ -6,7 +6,10 @@ module MontaAI
         model = Sketchup.active_model
         errors = []
         
-        # Auditoria recursiva de todas as entidades
+        # 1. Verificar Origem do Projeto
+        # Idealmente 0,0,0
+        
+        # 2. Auditoria recursiva de todas as entidades
         model.entities.each do |entity|
           next unless valid_entity?(entity)
           audit_entity(entity, errors)
@@ -20,35 +23,51 @@ module MontaAI
       end
 
       def self.audit_entity(entity, errors)
-        # 1. Validação de Tag Industrial
-        unless entity.layer.name =~ /^\d{2}_/
+        layer_name = entity.layer.name
+        
+        # 1. Validação de Tag Industrial conforme novo contrato
+        allowed_tags = [
+          "00_REFERENCIAS", "01_AMBIENTES", "02_PAREDES", "03_PORTAS_JANELAS",
+          "04_MODULOS", "05_COTAS", "06_MATERIAIS", "07_PORTAS_FRENTES",
+          "08_REVISAO", "09_NAO_FABRICAVEL"
+        ]
+        
+        unless allowed_tags.include?(layer_name)
           errors << { 
             guid: entity.guid, 
-            type: "TAG_NON_INDUSTRIAL", 
-            message: "Item '#{entity.name}' sem tag industrial (Tag atual: #{entity.layer.name}). Use 'Preparar Projeto'." 
+            type: "INVALID_TAG", 
+            message: "Item '#{entity.name}' em tag não reconhecida: #{layer_name}." 
           }
         end
 
-        # 2. Validação de Nome
-        if entity.name.empty?
+        # 2. Validação de Medidas e Identificação
+        if entity.name.empty? && layer_name == "04_MODULOS"
           errors << { 
             guid: entity.guid, 
             type: "MISSING_NAME", 
-            message: "Objeto detectado sem nome. Identidade industrial comprometida." 
+            message: "Módulo sem nome detectado." 
           }
         end
 
-        # 3. Validação de Medidas
         bounds = entity.bounds
-        if bounds.width.to_mm < 1 || bounds.height.to_mm < 1 || bounds.depth.to_mm < 1
+        if (bounds.width.to_mm < 1 || bounds.height.to_mm < 1 || bounds.depth.to_mm < 1) && layer_name != "05_COTAS"
           errors << {
             guid: entity.guid,
-            type: "INVALID_DIMENSIONS",
-            message: "Medidas ausentes ou inválidas detectadas no item '#{entity.name}'."
+            type: "UNCONFIRMED_MEASURE",
+            message: "Medida não confirmada ou inválida no item '#{entity.name}'."
           }
         end
 
-        # Recursividade
+        # 3. Materiais
+        if layer_name == "04_MODULOS" && !entity.material
+          errors << {
+            guid: entity.guid,
+            type: "MISSING_MATERIAL",
+            message: "Material 'Não confirmado' no módulo '#{entity.name}'."
+          }
+        end
+
+        # Recursividade controlada
         definition = entity.is_a?(Sketchup::ComponentInstance) ? entity.definition : entity
         if definition.respond_to?(:entities)
           definition.entities.each do |child|

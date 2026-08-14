@@ -2,31 +2,112 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <title>Monta AI Bridge</title>
     <style>
-        body { font-family: 'Inter', sans-serif; background: #F8FAFC; color: #1E293B; padding: 20px; }
-        .card { background: white; border: 1px solid #E2E8F0; border-radius: 8px; padding: 20px; }
-        button { background: #0F4C5C; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; width: 100%; margin-bottom: 10px; }
-        button:hover { opacity: 0.9; }
+        :root {
+            --primary: #0F172A;
+            --accent: #3B82F6;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --bg: #F8FAFC;
+        }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: var(--bg); 
+            color: var(--primary); 
+            padding: 24px; 
+            margin: 0;
+        }
+        .header { margin-bottom: 24px; border-bottom: 2px solid #E2E8F0; padding-bottom: 12px; }
+        .header h1 { font-size: 20px; margin: 0; color: var(--primary); }
+        .header p { font-size: 13px; color: #64748B; margin: 4px 0 0; }
+
+        .section { background: white; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .section-title { font-weight: 600; font-size: 14px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+        .control-group { margin-bottom: 16px; }
+        label { display: block; font-size: 12px; font-weight: 500; margin-bottom: 6px; color: #475569; }
+        select, input { width: 100%; padding: 10px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 14px; box-sizing: border-box; }
+
+        .btn { 
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 100%; padding: 12px; border-radius: 8px; border: none;
+            font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s;
+            margin-bottom: 10px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: #1E293B; }
+        .btn-outline { background: white; border: 1px solid #CBD5E1; color: var(--primary); }
+        .btn-outline:hover { background: #F1F5F9; }
+
+        .alert { 
+            padding: 12px; border-radius: 8px; font-size: 12px; line-height: 1.5; margin-bottom: 16px;
+            display: flex; gap: 8px;
+        }
+        .alert-info { background: #E0F2FE; color: #0369A1; border: 1px solid #BAE6FD; }
+        
+        .badge { 
+            padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase;
+            background: #F1F5F9; color: #64748B;
+        }
+        .badge-secure { background: #DCFCE7; color: #15803D; }
+
+        .footer { text-align: center; font-size: 11px; color: #94A3B8; margin-top: 20px; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2 style="margin-top:0; color:#0F4C5C;">Monta AI Bridge 4.0</h2>
-        <p style="font-size: 14px; color: #64748B;">Ponte Industrial SketchUp ↔ Produção</p>
+    <div class="header">
+        <h1>Monta AI Bridge <span class="badge">BETA v0.1.0</span></h1>
+        <p>Preparação Arquitetônica para Promob</p>
+    </div>
+
+    <div class="alert alert-info">
+        <strong>Objetivo:</strong> Preparar o ambiente para o projetista iniciar no Promob. Machining e CNC bloqueados por padrão.
+    </div>
+
+    <div class="section">
+        <div class="section-title">Configurações de Exportação</div>
         
-        <div style="margin-bottom: 20px;">
-            <button onclick="window.location='skp:export_project'">Exportar Manifesto JSON</button>
-            <button style="background: #64748B;" onclick="window.location='skp:export_validation_report'">Gerar Relatório de Auditoria</button>
+        <div class="control-group">
+            <label>Escala da Planta Baixa</label>
+            <select id="scale">
+                <option value="1:20">1:20 (Padrão)</option>
+                <option value="1:25">1:25</option>
+            </select>
         </div>
 
-        <div id="status" style="padding: 10px; border-radius: 4px; background: #F1F5F9; font-size: 12px;">
-            <strong>Status:</strong> Modo Piloto Local Ativo<br>
-            <strong>Segurança:</strong> machining_blocked = true
-        </div>
-        
-        <div style="margin-top: 20px; font-size: 11px; color: #94A3B8; text-align: center;">
-            Monta AI © 2026 - v1.0.0
+        <div class="control-group">
+            <label>Unidade de Medida</label>
+            <input type="text" value="Milímetros (mm)" disabled>
         </div>
     </div>
+
+    <div class="section">
+        <div class="section-title">Ações Industriais</div>
+        
+        <button class="btn btn-primary" onclick="exportManifest()">Exportar Projeto (JSON)</button>
+        <button class="btn btn-outline" onclick="generateDxf()">Gerar Referência DXF</button>
+        
+        <div style="margin-top: 12px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 12px; color: #64748B;">Segurança Industrial:</span>
+            <span class="badge badge-secure">machining_blocked = true</span>
+        </div>
+    </div>
+
+    <div class="footer">
+        Monta AI &copy; 2026 | Industrial Design System 4.0
+    </div>
+
+    <script>
+        function exportManifest() {
+            const scale = document.getElementById('scale').value;
+            window.location.href = 'skp:export_manifest@' + scale;
+        }
+
+        function generateDxf() {
+            window.location.href = 'skp:generate_dxf';
+        }
+    </script>
 </body>
 </html>

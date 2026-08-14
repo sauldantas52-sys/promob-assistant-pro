@@ -2,40 +2,27 @@
 module MontaAI
   module Bridge
     class ModuleDetector
-      def self.detect_environments
+      # Simplificado para o novo contrato: focado em Ambientes e Módulos
+      def self.get_summary
         model = Sketchup.active_model
-        environments = []
+        stats = {
+          environments: 0,
+          walls: 0,
+          openings: 0,
+          modules: 0,
+          dimensions: 0
+        }
         
-        # Procura por grupos/componentes que estejam na tag 01_AMBIENTES
         model.entities.each do |entity|
-          next unless entity.is_a?(Sketchup::Group) || entity.is_a?(Sketchup::ComponentInstance)
-          
-          if entity.layer.name == "01_AMBIENTES"
-            environments << {
-              name: entity.name.empty? ? "Ambiente Sem Nome" : entity.name,
-              guid: entity.guid,
-              modules: detect_modules(entity)
-            }
+          case entity.layer.name
+          when "01_AMBIENTES" then stats[:environments] += 1
+          when "02_PAREDES" then stats[:walls] += 1
+          when "03_PORTAS_JANELAS" then stats[:openings] += 1
+          when "04_MODULOS" then stats[:modules] += 1
+          when "05_COTAS" then stats[:dimensions] += 1
           end
         end
-        
-        environments
-      end
-
-      def self.detect_modules(env_entity)
-        modules = []
-        return modules unless env_entity.respond_to?(:entities)
-        
-        env_entity.entities.each do |entity|
-          next unless entity.is_a?(Sketchup::Group) || entity.is_a?(Sketchup::ComponentInstance)
-          if entity.layer.name == "02_MODULOS"
-            modules << {
-              name: entity.name.empty? ? "Módulo" : entity.name,
-              guid: entity.guid
-            }
-          end
-        end
-        modules
+        stats
       end
     end
   end

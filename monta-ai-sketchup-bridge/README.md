@@ -1,25 +1,33 @@
-# Monta AI Bridge para SketchUp (Beta v0.1.0)
+# Monta AI Bridge para SketchUp v0.1.0-beta
 
-## Visão Geral
-Este plugin conecta o SketchUp ao ecossistema Monta AI, permitindo que projetos 3D sejam convertidos em dados industriais para fabricação e montagem. Esta é uma versão **BETA** para testes controlados.
+Plugin para preparação de ambientes arquitetônicos e exportação de dados para o Promob.
 
-## Funcionalidades
-- Menu **Monta AI** no SketchUp.
-- Criação automática de **Tags Industriais** (00 a 18).
-- Auditoria de projeto com **Relatório de Validação**.
-- Exportação de **Manifesto JSON** (Modo Local).
-- Bloqueio de usinagem automático (`machining_blocked: true`).
+## Finalidade Principal
+Preparar o ambiente (paredes, janelas, portas, módulos) para que o projetista inicie o desenho técnico no Promob.
 
-## Requisitos
-- SketchUp 2021 ou superior.
-- Codificação UTF-8 ativa.
-- Test::Unit para execução de testes automatizados.
+## Tags Industriais (Padronizadas)
+- **00_REFERENCIAS**: Origem e eixos.
+- **01_AMBIENTES**: Agrupadores de cômodos.
+- **02_PAREDES**: Geometria de alvenaria.
+- **03_PORTAS_JANELAS**: Vãos e esquadrias.
+- **04_MODULOS**: Volume de armários e componentes.
+- **05_COTAS**: Dimensões visuais.
+- **06_MATERIAIS**: Definição de cores e MDF.
+- **07_PORTAS_FRENTES**: Peças de fechamento.
+- **08_REVISAO**: Itens para conferência.
+- **09_NAO_FABRICAVEL**: Itens decorativos.
 
-## Testes
-O plugin inclui uma suíte de testes em `tests/test_bridge.rb`. Para rodar no console do SketchUp:
-```ruby
-load 'monta-ai-sketchup-bridge/tests/test_bridge.rb'
-```
+## Segurança Industrial
+- **machining_blocked = true**: Bloqueio total de usinagem e CNC.
+- **Autoridade de Engenharia**: Promob.
 
-## Licença
-Propriedade da Monta AI. Uso restrito a parceiros autorizados.
+## Como Usar
+1. Clique em **Plugins > Monta AI > 1. Preparar Projeto**.
+2. Organize seu modelo nas tags criadas.
+3. Use o **2. Painel de Controle** para exportar o JSON.
+4. Importe o arquivo JSON no sistema Monta AI para sincronização com Promob.
+
+## Especificações Técnicas
+- Unidade: Milímetros (mm).
+- Escalas suportadas: 1:20, 1:25.
+- Formatos: JSON (Manifesto), DXF (Referência), TXT (Relatório).
