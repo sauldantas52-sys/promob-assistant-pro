@@ -302,11 +302,12 @@ export function EngineeringTab({ projectId, parts }: EngineeringTabProps) {
                 ))}
               </div>
 
-              <Alert>
-                <Binary className="h-4 w-4" />
-                <AlertTitle>Matriz de Correspondência XML (amanda_111.xml)</AlertTitle>
-                <AlertDescription className="text-xs">
-                  Relacionando bitolas nominais aos códigos reais e tolerâncias permitidas pelo motor Promob.
+              <Alert variant="destructive" className="border-red-200 bg-red-50">
+                <Binary className="h-4 w-4 text-red-600" />
+                <AlertTitle className="text-red-900 font-bold">MATRIZ DE AUDITORIA CRÍTICA</AlertTitle>
+                <AlertDescription className="text-xs text-red-800">
+                  Relacionando bitolas nominais aos códigos reais e tolerâncias permitidas. 
+                  <strong> A liberação de usinagem exige conformidade 100% com a matriz abaixo.</strong>
                 </AlertDescription>
               </Alert>
 

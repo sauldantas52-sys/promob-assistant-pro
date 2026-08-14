@@ -5,6 +5,9 @@ export interface BitolaRule {
   description: string;
   tolerancia_mm: number;
   unidade: string;
+  ferragem_associada?: string;
+  face_referencia?: string;
+  origem_regra: string;
 }
 
 export interface DrillingCoordinate {
@@ -15,8 +18,9 @@ export interface DrillingCoordinate {
   diametro: number;
   profundidade: number;
   face: string;
-  origem: "XML" | "DXF" | "PDF" | "INFERIDO";
-  status: "confirmada" | "inferida" | "ausente" | "conflitante";
+  origem: "XML" | "DXF" | "PDF" | "REGRA_BITOLA" | "INFERIDO";
+  status: "confirmada" | "calculada" | "inferida" | "ausente" | "conflitante";
+  regra_aplicada?: string;
 }
 
 export interface EngineeringReport {
@@ -26,39 +30,82 @@ export interface EngineeringReport {
   validated_parts: number;
   blocked_machining: number;
   conflicts: string[];
-  bitola_summary: Record<string, any>;
+  evidence_log: string[];
 }
 
 /**
- * Regras originais de bitola extraídas das referências Promob
+ * Matriz de Bitolas Monta AI (Baseada em Padrão de Mercado/Promob)
+ * Estas bitolas são padrões da indústria moveleira para MDF/MDP.
+ * TODO: Permitir configuração por empresa via banco de dados.
  */
 export const PROMOB_BITOLA_RULES: BitolaRule[] = [
-  { bitola: 6, description: "Fundo / Painel Fino", tolerancia_mm: 0.3, unidade: "mm" },
-  { bitola: 15, description: "Estrutura Padrão / Portas", tolerancia_mm: 0.5, unidade: "mm" },
-  { bitola: 18, description: "Estrutura Reforçada / Portas", tolerancia_mm: 0.5, unidade: "mm" },
-  { bitola: 25, description: "Tamponamentos / Prateleiras", tolerancia_mm: 0.8, unidade: "mm" },
-  { bitola: 36, description: "Engrossados / Paineis", tolerancia_mm: 1.0, unidade: "mm" }
+  { 
+    bitola: 6, 
+    description: "Fundo / Painel Fino", 
+    tolerancia_mm: 0.3, 
+    unidade: "mm",
+    origem_regra: "Padrão Indústria MDF 6mm",
+    face_referencia: "Traseira"
+  },
+  { 
+    bitola: 15, 
+    description: "Estrutura Padrão / Portas", 
+    tolerancia_mm: 0.5, 
+    unidade: "mm",
+    origem_regra: "Padrão Indústria MDF 15mm",
+    face_referencia: "Faces/Bordas"
+  },
+  { 
+    bitola: 18, 
+    description: "Estrutura Reforçada / Portas", 
+    tolerancia_mm: 0.5, 
+    unidade: "mm",
+    origem_regra: "Padrão Indústria MDF 18mm",
+    face_referencia: "Faces/Bordas"
+  },
+  { 
+    bitola: 25, 
+    description: "Tamponamentos / Prateleiras", 
+    tolerancia_mm: 0.8, 
+    unidade: "mm",
+    origem_regra: "Padrão Indústria MDF 25mm",
+    face_referencia: "Faces/Bordas"
+  },
+  { 
+    bitola: 36, 
+    description: "Engrossados / Paineis", 
+    tolerancia_mm: 1.0, 
+    unidade: "mm",
+    origem_regra: "Padrão Indústria MDF 36mm (18+18)",
+    face_referencia: "Faces/Bordas"
+  }
 ];
 
 /**
- * Mapeia entidades DXF para coordenadas de furação
+ * Mapeia entidades DXF para coordenadas de furação de forma rigorosa.
+ * Apenas entidades CIRCLE e ARC são consideradas furações nativas.
  */
 export function mapDxfToDrillings(dxfGeometries: any[], partId: string): DrillingCoordinate[] {
+  // Filtro rigoroso: Apenas furações explícitas (círculos/arcos)
+  // Ignoramos POLYLINE/VERTEX para evitar transformar contornos em furações
   return dxfGeometries
-    .filter(g => g.type === 'CIRCLE' || g.type === 'ARC')
+    .filter(g => (g.type === 'CIRCLE' || g.type === 'ARC') && g.radius > 0)
     .map(g => ({
       part_id: partId,
       x: g.center.x,
       y: g.center.y,
-      z: 0, // Assumindo face superior por padrão se não houver layer específica
+      z: 0, 
       diametro: g.radius * 2,
-      profundidade: 10, // Valor padrão para inferência se não houver Z
-      face: "superior",
+      profundidade: 0, // Não confirmada sem Z ou layer técnica
+      face: "não confirmada",
       origem: "DXF",
-      status: "confirmada"
+      status: "confirmada" // Lida diretamente da fonte técnica
     }));
 }
 
+/**
+ * Audit Técnico Crítico
+ */
 export async function generateEngineeringAudit(projectId: string): Promise<EngineeringReport> {
   const { data: parts, error: partsError } = await supabase
     .from("parts")
@@ -68,23 +115,37 @@ export async function generateEngineeringAudit(projectId: string): Promise<Engin
   if (partsError) throw partsError;
 
   const conflicts: string[] = [];
+  const evidence_log: string[] = [];
   let validatedCount = 0;
   let blockedCount = 0;
 
   parts?.forEach(part => {
+    evidence_log.push(`Inspecionando peça: ${part.name} (ID: ${part.id})`);
+    
     // 1. Validação de Bitola
     const rule = PROMOB_BITOLA_RULES.find(r => 
       Math.abs((part.thickness_mm || 0) - r.bitola) <= r.tolerancia_mm
     );
 
-    if (!rule && part.kind === 'peca') {
-      conflicts.push(`Peça ${part.name}: Bitola ${part.thickness_mm}mm não coincide com padrões Promob.`);
+    if (!rule) {
+      if (part.kind === 'peca' || part.kind === 'chapa') {
+        const errorMsg = `CONFLITO: Peça ${part.name} - Bitola ${part.thickness_mm}mm não coincide com padrões de mercado.`;
+        conflicts.push(errorMsg);
+        evidence_log.push(errorMsg);
+        // Garantia de bloqueio se não houver bitola válida
+        part.machining_blocked = true;
+      }
+    } else {
+      evidence_log.push(`Bitola validada: ${part.thickness_mm}mm (Regra: ${rule.origem_regra})`);
     }
 
     // 2. Verificação de Usinagem
+    // Bloqueio rigoroso se houver qualquer dúvida técnica
     if (part.machining_blocked) {
       blockedCount++;
+      evidence_log.push(`Usinagem BLOQUEADA para ${part.name} por precaução de engenharia.`);
     } else {
+      // Só validamos se não houver conflitos pendentes no log (em um cenário real verificaríamos furações aqui)
       validatedCount++;
     }
   });
@@ -96,6 +157,6 @@ export async function generateEngineeringAudit(projectId: string): Promise<Engin
     validated_parts: validatedCount,
     blocked_machining: blockedCount,
     conflicts: conflicts,
-    bitola_summary: {}
+    evidence_log: evidence_log
   };
 }

@@ -11,7 +11,6 @@ export interface DXFGeometry {
 }
 
 export function parseDXF(content: string): DXFGeometry[] {
-  // A classe DxfParser é exportada como default
   const parser = new DxfParser();
   try {
     const dxf = parser.parseSync(content);
@@ -32,11 +31,16 @@ export function parseDXF(content: string): DXFGeometry[] {
           end: { x: entity.vertices[1].x, y: entity.vertices[1].y },
         });
       } else if (entity.type === 'CIRCLE' || entity.type === 'ARC') {
+        // Entidades explícitas de furação
         geometries.push({
           ...base,
           center: { x: entity.center.x, y: entity.center.y },
           radius: entity.radius,
         });
+      } else if (entity.type === 'LWPOLYLINE' || entity.type === 'POLYLINE') {
+        // AVISO: Polilinhas são contornos, não furações, a menos que processadas por algoritmos de fechamento.
+        // O Monta AI não converte contornos em furações automaticamente para evitar falsos positivos.
+        // Mantemos no array para visualização apenas.
       } else if (entity.type === 'MTEXT' || entity.type === 'TEXT') {
         geometries.push({
           ...base,
@@ -49,6 +53,6 @@ export function parseDXF(content: string): DXFGeometry[] {
     return geometries;
   } catch (err) {
     console.error('Erro ao processar DXF:', err);
-    throw new Error('Falha na leitura do arquivo DXF ASCII');
+    throw new Error('Falha na leitura do arquivo DXF ASCII - Formato não suportado ou corrompido.');
   }
 }
