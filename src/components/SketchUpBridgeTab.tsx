@@ -412,12 +412,14 @@ export function SketchUpBridgeTab({ projectId }: SketchUpBridgeTabProps) {
                     <h4 className="text-amber-500 font-black uppercase text-[12px] tracking-widest border-l-4 border-amber-500 pl-4">1. Autenticação Operacional</h4>
                     <div className="bg-slate-950 p-6 rounded-[1.5rem] border border-slate-800">
                       <p className="text-[11px] text-slate-300 mb-4 font-medium">Use as credenciais do Supabase para obter o JWT.</p>
-                      <pre className="text-[10px] text-emerald-400 font-mono">POST https://nhkburqoligtdyrjtkrs.supabase.co/auth/v1/token?grant_type=password
+                      <pre className="text-[10px] text-emerald-400 font-mono">
+{`POST https://nhkburqoligtdyrjtkrs.supabase.co/auth/v1/token?grant_type=password
 Headers: {
   "apikey": "sb_publishable_M9jDHpJ214--HnafZLr8dA_CS3WAlF2",
   "Content-Type": "application/json"
 }
-Body: { "email": "...", "password": "..." }</pre>
+Body: { "email": "...", "password": "..." }`}
+                      </pre>
                     </div>
                   </section>
 
