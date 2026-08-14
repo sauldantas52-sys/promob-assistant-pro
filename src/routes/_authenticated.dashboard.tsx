@@ -55,10 +55,11 @@ function DashboardContent() {
 
   const stats = [
     { label: "Projetos ativos", value: list.length, icon: FolderKanban },
-    { label: "Em produção", value: count("producao"), icon: Factory },
-    { label: "Em conferência", value: count("conferencia"), icon: ClipboardCheck },
+    { label: "Em corte", value: count("corte"), icon: Factory },
+    { label: "Em borda", value: count("corte"), icon: ClipboardCheck },
+    { label: "Em usinagem", value: count("usinagem"), icon: Factory },
     { label: "Em montagem", value: count("montagem"), icon: Wrench },
-    { label: "Assistência técnica", value: count("assistencia"), icon: AlertTriangle },
+    { label: "Assistência", value: count("assistencia"), icon: AlertTriangle },
   ];
 
   return (
@@ -90,7 +91,7 @@ function DashboardContent() {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-10">
         {stats.map((stat, i) => (
           <Card key={stat.label} className={cn(
             "border-none shadow-[0_40px_80px_-20px_rgba(0,0,0,0.12)] hover:shadow-[0_60px_100px_-20px_rgba(0,0,0,0.18)] transition-all duration-700 rounded-[3.5rem] group overflow-hidden relative",
