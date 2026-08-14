@@ -32,11 +32,51 @@ export type Database = {
         }
         Relationships: []
       }
+      maintenance_history: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          id: string
+          new_status: Database["public"]["Enums"]["maintenance_status"] | null
+          notes: string | null
+          old_status: Database["public"]["Enums"]["maintenance_status"] | null
+          request_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          id?: string
+          new_status?: Database["public"]["Enums"]["maintenance_status"] | null
+          notes?: string | null
+          old_status?: Database["public"]["Enums"]["maintenance_status"] | null
+          request_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          new_status?: Database["public"]["Enums"]["maintenance_status"] | null
+          notes?: string | null
+          old_status?: Database["public"]["Enums"]["maintenance_status"] | null
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_history_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       maintenance_requests: {
         Row: {
+          audio_url: string | null
           company_id: string
           created_at: string | null
           created_by: string
+          deadline: string | null
           description: string
           id: string
           module_id: string | null
@@ -48,9 +88,11 @@ export type Database = {
           urgency: Database["public"]["Enums"]["maintenance_urgency"]
         }
         Insert: {
+          audio_url?: string | null
           company_id: string
           created_at?: string | null
           created_by: string
+          deadline?: string | null
           description: string
           id?: string
           module_id?: string | null
@@ -62,9 +104,11 @@ export type Database = {
           urgency?: Database["public"]["Enums"]["maintenance_urgency"]
         }
         Update: {
+          audio_url?: string | null
           company_id?: string
           created_at?: string | null
           created_by?: string
+          deadline?: string | null
           description?: string
           id?: string
           module_id?: string | null
