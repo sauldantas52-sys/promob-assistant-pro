@@ -10,7 +10,9 @@ import {
   Layers,
   Wrench,
   FileText,
+  Download,
 } from "lucide-react";
+import { Parser } from "@json2csv/plainjs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -209,6 +211,41 @@ function ProjectDetail() {
       0,
     ) || 0;
 
+  const exportCSV = () => {
+    try {
+      const opts = {};
+      const parser = new Parser(opts);
+      const csv = parser.parse(
+        allParts.map((p) => ({
+          Módulo: modules.data?.find((m) => m.id === p.module_id)?.name || "Sem módulo",
+          Nome: p.name,
+          Tipo: p.kind,
+          Material: p.material || "-",
+          Espessura: p.thickness_mm || "-",
+          Largura: p.width_mm || "-",
+          Comprimento: p.length_mm || "-",
+          Quantidade: p.quantity,
+          Unidade: p.unit,
+          Fita: p.edge_banding || "-",
+        })),
+      );
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `lista-tecnica-${project.data.name}.csv`);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success("Lista técnica exportada.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao exportar CSV.");
+    }
+  };
+
   if (project.isLoading) {
     return <p className="p-8 text-sm text-muted-foreground">Carregando projeto…</p>;
   }
@@ -250,6 +287,9 @@ function ProjectDetail() {
               ))}
             </SelectContent>
           </Select>
+          <Button variant="outline" size="icon" className="h-11 w-11" onClick={exportCSV} title="Exportar CSV">
+            <Download className="h-4 w-4" />
+          </Button>
         </div>
       </header>
 
