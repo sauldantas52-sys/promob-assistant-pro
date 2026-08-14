@@ -1,9 +1,10 @@
 export const AUTH_CONFIG = {
-  PILOT_MODE: true,
-  MIN_PASSWORD_LENGTH: 4,
-  RECOMMENDED_PASSWORD_LENGTH: 8,
+  PILOT_MODE: false,
+  MIN_PASSWORD_LENGTH: 8,
+  RECOMMENDED_PASSWORD_LENGTH: 12,
   MAX_PASSWORD_LENGTH: 20
 };
+
 
 export const isPasswordStrong = (password: string) => {
   return password.length >= AUTH_CONFIG.RECOMMENDED_PASSWORD_LENGTH;
