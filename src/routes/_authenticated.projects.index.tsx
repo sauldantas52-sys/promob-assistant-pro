@@ -19,6 +19,7 @@ import {
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/lib/auth";
+import { hasPermission } from "@/lib/permissions";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Select,
@@ -54,7 +55,7 @@ function ProjectsPage() {
 }
 
 function ProjectsContent() {
-  const { companyId } = useAuth();
+  const { companyId, role } = useAuth();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
@@ -113,53 +114,55 @@ function ProjectsContent() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button className="h-11">
-                <Plus className="mr-2 h-4 w-4" /> Novo projeto
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Novo projeto</DialogTitle>
-                <DialogDescription>Depois de criar, importe o arquivo do Promob.</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="p-name">Nome do projeto</Label>
-                  <Input id="p-name" className="h-11" value={name} onChange={(e) => setName(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="p-client">Cliente</Label>
-                  <Input
-                    id="p-client"
-                    className="h-11"
-                    value={clientName}
-                    onChange={(e) => setClientName(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="p-env">Ambiente principal</Label>
-                  <Input
-                    id="p-env"
-                    className="h-11"
-                    placeholder="Cozinha, dormitório, closet…"
-                    value={environment}
-                    onChange={(e) => setEnvironment(e.target.value)}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  className="h-11 w-full"
-                  disabled={!name || createProject.isPending}
-                  onClick={() => createProject.mutate()}
-                >
-                  {createProject.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Criar projeto
+          {hasPermission(role, "projects", "import") && (
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button className="h-11">
+                  <Plus className="mr-2 h-4 w-4" /> Novo projeto
                 </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Novo projeto</DialogTitle>
+                  <DialogDescription>Depois de criar, importe o arquivo do Promob.</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="p-name">Nome do projeto</Label>
+                    <Input id="p-name" className="h-11" value={name} onChange={(e) => setName(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="p-client">Cliente</Label>
+                    <Input
+                      id="p-client"
+                      className="h-11"
+                      value={clientName}
+                      onChange={(e) => setClientName(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="p-env">Ambiente principal</Label>
+                    <Input
+                      id="p-env"
+                      className="h-11"
+                      placeholder="Cozinha, dormitório, closet…"
+                      value={environment}
+                      onChange={(e) => setEnvironment(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button
+                    className="h-11 w-full"
+                    disabled={!name || createProject.isPending}
+                    onClick={() => createProject.mutate()}
+                  >
+                    {createProject.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Criar projeto
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
       </header>
 

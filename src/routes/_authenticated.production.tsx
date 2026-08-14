@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/lib/auth";
+import { hasPermission } from "@/lib/permissions";
 import { supabase } from "@/integrations/supabase/client";
 import { statusLabel, statusTone } from "@/lib/project-status";
 
@@ -39,7 +40,7 @@ const flow: Record<string, { next: string; action: string }> = {
 };
 
 function ProductionContent() {
-  const { companyId } = useAuth();
+  const { companyId, role } = useAuth();
   const queryClient = useQueryClient();
 
   const projects = useQuery({
@@ -104,7 +105,7 @@ function ProductionContent() {
                     {project.client_name || "Sem cliente"} · {project.environment || "—"}
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    {step && (
+                    {step && hasPermission(role, "production", "edit") && (
                       <Button
                         size="sm"
                         className="h-10"
