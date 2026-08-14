@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Parser } from "@json2csv/plainjs";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -486,7 +487,7 @@ function ProjectDetail() {
                   placeholder="Buscar peça..."
                   className="h-9 w-full sm:w-48"
                   value={searchPart}
-                  onChange={(e) => setSearchPart(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchPart(e.target.value)}
                 />
                 <Select value={filterType} onValueChange={setFilterType}>
                   <SelectTrigger className="h-9 w-full sm:w-36">
