@@ -181,6 +181,7 @@ function ProjectDetail() {
             height_mm: parsedModule.height_mm ?? null,
             depth_mm: parsedModule.depth_mm ?? null,
             quantity: parsedModule.quantity,
+            data_source: parsedModule.data_source || 'XML',
           })
           .select("id")
           .single();
@@ -200,6 +201,8 @@ function ProjectDetail() {
               quantity: part.quantity,
               unit: part.unit ?? "un",
               edge_banding: part.edge_banding ?? null,
+              data_source: part.data_source || 'XML',
+              visibility_type: part.visibility_type || 'visivel',
             })),
           ).select("id, module_id, kind");
           if (partsError) throw partsError;
@@ -221,6 +224,8 @@ function ProjectDetail() {
             quantity: part.quantity,
             unit: part.unit ?? "un",
             edge_banding: part.edge_banding ?? null,
+            data_source: part.data_source || 'XML',
+            visibility_type: part.visibility_type || 'visivel',
           })),
         ).select("id, module_id, kind");
         if (looseError) throw looseError;
