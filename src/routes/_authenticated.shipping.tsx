@@ -75,7 +75,7 @@ function ShippingPage() {
           ),
           shipping_volumes(*)
         `)
-        .in("status", ["separacao", "montagem", "concluido"])
+        .in("status", ["expedicao", "montagem", "concluido"])
         .order("updated_at", { ascending: false });
       if (error) throw error;
       return data || [];

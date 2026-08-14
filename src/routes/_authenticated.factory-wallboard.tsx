@@ -61,7 +61,7 @@ function WallboardContent({ time }: { time: Date }) {
           production_steps(*),
           shipping_volumes(*)
         `)
-        .in("status", ["corte", "borda", "usinagem", "separacao", "montagem"])
+        .in("status", ["corte", "borda", "usinagem", "separacao", "conferencia", "expedicao", "montagem"])
         .order("updated_at", { ascending: false });
       if (error) throw error;
       return data;
