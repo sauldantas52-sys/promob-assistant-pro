@@ -9,6 +9,8 @@ import {
   Menu,
   X,
   Boxes,
+  Tv,
+  PackageCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth, roleLabels } from "@/lib/auth";
@@ -17,6 +19,8 @@ const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/projects", label: "Projetos", icon: FolderKanban },
   { to: "/production", label: "Produção", icon: Factory },
+  { to: "/factory-wallboard", label: "Painel TV", icon: Tv },
+  { to: "/picking", label: "Separação", icon: PackageCheck },
   { to: "/assembly", label: "Montagem", icon: Wrench },
 ];
 
