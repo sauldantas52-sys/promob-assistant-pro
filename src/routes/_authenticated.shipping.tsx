@@ -205,8 +205,8 @@ function ProjectShippingCard({ project }: { project: any }) {
                 Gerar Volumes ({pendingSealedGroups.length})
               </Button>
             )}
-            <Badge className={cn("px-4 py-1.5 text-xs font-black uppercase tracking-widest border shadow-sm", project.status === 'expedicao' ? 'bg-blue-600 text-white' : 'bg-green-600 text-white')}>
-              {project.status}
+            <Badge className={cn("px-4 py-1.5 text-xs font-black uppercase tracking-widest border shadow-sm", project.status === 'expedicao' ? 'bg-blue-600 text-white border-blue-500' : 'bg-green-600 text-white border-green-500')}>
+              {project.status === 'expedicao' ? 'LIBERAR CARGA' : 'PRONTO PARA EXPEDIÇÃO'}
             </Badge>
           </div>
         </div>

@@ -92,9 +92,9 @@ function AssemblyContent() {
   return (
     <div className="space-y-6 p-4 md:p-8 max-w-7xl mx-auto">
       <header className="flex flex-col gap-1">
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Montagem</h1>
+        <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Montagem na Casa do Cliente</h1>
         <p className="text-base text-slate-500 font-medium">
-          Roteiro técnico e conferência de módulos para montadores.
+          Roteiro técnico, sequência de montagem e checklists mobile.
         </p>
       </header>
 
