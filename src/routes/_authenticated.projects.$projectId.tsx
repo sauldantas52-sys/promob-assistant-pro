@@ -27,6 +27,7 @@ import {
   ShieldCheck,
   Scissors,
   ArrowRightLeft,
+  CheckSquare,
 } from "lucide-react";
 import { Parser } from "@json2csv/plainjs";
 import { EngineeringTab } from "@/components/EngineeringTab";
@@ -35,6 +36,7 @@ import { PilotValidationChecklist } from "@/components/PilotValidationChecklist"
 import { BudgetTab } from "@/components/project/BudgetTab";
 import { PreliminaryCutPlanTab } from "@/components/project/PreliminaryCutPlanTab";
 import { VisualEstimateTab } from "@/components/project/VisualEstimateTab";
+import { AuditIntegrationTab } from "@/components/project/AuditIntegrationTab";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -610,6 +612,7 @@ function ProjectDetail() {
             <TabTrigger value="shipping" icon={Truck} label="Logística" />
             <TabTrigger value="maintenance" icon={HardHat} label="Assistência" />
             <TabTrigger value="audit" icon={History} label="Auditoria" />
+            <TabTrigger value="integration_audit" icon={CheckSquare} label="Motores IA" />
             <TabTrigger value="files" icon={FileUp} label="Arquivos" />
           </TabsList>
 
@@ -919,6 +922,10 @@ function ProjectDetail() {
 
         <TabsContent value="sketchup" className="mt-6">
           <SketchUpBridgeTab projectId={projectId} />
+        </TabsContent>
+
+        <TabsContent value="integration_audit" className="mt-6">
+          <AuditIntegrationTab />
         </TabsContent>
 
         <TabsContent value="production" className="mt-6">
