@@ -100,7 +100,7 @@ function ProjectDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("modules")
-        .select("id, name, environment, width_mm, height_mm, depth_mm, quantity, is_completed")
+        .select("id, name, environment, width_mm, height_mm, depth_mm, quantity, is_completed, data_source")
         .eq("project_id", projectId)
         .order("created_at");
       if (error) throw error;
