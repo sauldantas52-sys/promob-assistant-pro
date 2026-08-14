@@ -76,7 +76,8 @@ function AssemblyContent() {
         .select(`
           id, name, client_name, environment, status, 
           modules(id, name, environment, width_mm, height_mm, depth_mm, quantity, is_completed, data_source),
-          parts(id, name, kind, quantity, unit, is_completed, material, thickness_mm, width_mm, length_mm, assembly_group_id, visibility_type, data_source)
+          parts(id, name, kind, quantity, unit, is_completed, material, thickness_mm, width_mm, length_mm, assembly_group_id, visibility_type, data_source),
+          assembly_groups(id, module_id, code, name, color, is_locked, lock_reason)
         `)
         .in("status", ["montagem", "conferencia", "assistencia"])
         .order("created_at", { ascending: false });
