@@ -8,7 +8,7 @@ Este plugin conecta o SketchUp ao ecossistema Monta AI, permitindo que projetos 
 - Criação automática de **Tags Industriais** (00 a 18).
 - Auditoria de projeto com **Relatório de Validação**.
 - Exportação de **Manifesto JSON** (Modo Local).
-- Bloqueio de usinagem automático (`is_machining_assembly_blocked: true`).
+- Bloqueio de usinagem automático (`machining_blocked: true`).
 
 ## Requisitos
 - SketchUp 2021 ou superior.

@@ -57,7 +57,7 @@ function WallboardContent({ time }: { time: Date }) {
           client_name,
           environment,
           is_cutting_edge_released,
-          is_machining_assembly_blocked,
+          machining_blocked,
           production_steps(*),
           shipping_volumes(*)
         `)
