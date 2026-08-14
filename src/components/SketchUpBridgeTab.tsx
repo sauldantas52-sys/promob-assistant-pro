@@ -120,7 +120,9 @@ export function SketchUpBridgeTab({ projectId }: SketchUpBridgeTabProps) {
           {[
             { id: "versions", label: "Projetos para Fábrica", icon: Box },
             { id: "review", label: "Revisão do Projetista", icon: Eye },
+            { id: "comparativo", label: "Comparação Promob", icon: ArrowRightLeft },
             { id: "tags", label: "Estrutura de Tags", icon: Layers },
+
           ].map((tab) => (
             <button
               key={tab.id}
