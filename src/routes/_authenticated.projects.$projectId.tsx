@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo } from "react";
 import {
   ArrowLeft,
   Upload,
@@ -17,6 +17,15 @@ import {
   Camera,
   CheckCircle2,
   HardHat,
+  FileUp,
+  LayoutGrid,
+  ClipboardList,
+  PackageCheck,
+  History,
+  Settings,
+  Truck,
+  ShieldCheck,
+  Scissors,
 } from "lucide-react";
 import { Parser } from "@json2csv/plainjs";
 import { EngineeringTab } from "@/components/EngineeringTab";
