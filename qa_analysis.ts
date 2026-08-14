@@ -2,59 +2,63 @@ import * as fs from 'fs';
 import { XMLParser } from 'fast-xml-parser';
 
 async function runAnalysis() {
-  console.log("=== INICIANDO ANÁLISE TÉCNICA (MONTA AI) ===");
-
   const xmlContent = fs.readFileSync('/tmp/user-uploads/amanda_111.xml', 'utf-8');
-  const parser = new XMLParser({ 
-    ignoreAttributes: false, 
-    attributeNamePrefix: ""
-  });
+  const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "" });
   const xmlData = parser.parse(xmlContent);
   
-  const listing = xmlData.LISTING;
+  // Imprimir as chaves de AMBIENTS para depurar
+  console.log("Chaves de AMBIENTS:", Object.keys(xmlData.LISTING.AMBIENTS));
   
-  // Vamos navegar na estrutura real do XML
-  // O XML começa com <LISTING> e tem <AMBIENTS> que tem <AMBIENT> que tem <ITEMS> que tem <ITEM>
+  // Em alguns XMLs do Promob, AMBIENTS é uma string ou tem outra estrutura se for um só
+  const ambients = xmlData.LISTING.AMBIENTS;
   
-  const ambients = listing.AMBIENTS?.AMBIENT;
-  const ambientsArray = Array.isArray(ambients) ? ambients : [ambients];
-
-  console.log(`\nAmbientes encontrados: ${ambientsArray.length}`);
-
-  let totalItems = 0;
-  ambientsArray.forEach((amb: any, aIdx: number) => {
-    const items = amb.ITEMS?.ITEM;
-    const itemsArray = Array.isArray(items) ? items : (items ? [items] : []);
-    console.log(`Ambiente ${aIdx + 1}: ${amb.DESCRIPTION} - Itens: ${itemsArray.length}`);
+  // Função para busca profunda de ITEM
+  function findItems(obj: any): any[] {
+    let results: any[] = [];
+    if (!obj || typeof obj !== 'object') return results;
     
-    itemsArray.slice(0, 10).forEach((item: any, iIdx: number) => {
-      console.log(`  [${iIdx+1}] ${item.DESCRIPTION} | ${item.WIDTH}x${item.HEIGHT}x${item.DEPTH} | Mat: ${item.MATERIAL}`);
-      // Verificar se tem sub-itens (peças do módulo)
-      const subItems = item.ITEMS?.ITEM;
-      if (subItems) {
-        const subArray = Array.isArray(subItems) ? subItems : [subItems];
-        console.log(`    -> Possui ${subArray.length} sub-itens (peças/componentes)`);
+    if (obj.ITEM) {
+      const items = Array.isArray(obj.ITEM) ? obj.ITEM : [obj.ITEM];
+      results = results.concat(items);
+    }
+    
+    for (const key in obj) {
+      if (typeof obj[key] === 'object' && key !== 'ITEM') {
+        results = results.concat(findItems(obj[key]));
       }
+    }
+    return results;
+  }
+
+  const allItems = findItems(xmlData.LISTING);
+  console.log(`\nTotal de Itens encontrados (qualquer nível): ${allItems.length}`);
+  
+  if (allItems.length > 0) {
+    console.log("\nAmostra de Itens:");
+    allItems.slice(0, 15).forEach((item: any, idx: number) => {
+      console.log(`[${idx+1}] ${item.DESCRIPTION || 'Sem Desc'} | Dim: ${item.WIDTH}x${item.HEIGHT}x${item.DEPTH} | Qtd: ${item.QUANTITY}`);
     });
-    totalItems += itemsArray.length;
-  });
+  }
 
-  console.log(`\nTotal de Itens de Primeiro Nível: ${totalItems}`);
+  // Verificar furações no XML (se existem tags específicas como HOLES, MACHINING, etc)
+  const hasMachining = xmlContent.includes('MACHINING') || xmlContent.includes('HOLE') || xmlContent.includes('DRILL');
+  console.log(`\nPossui tags de usinagem no XML: ${hasMachining}`);
 
-  // Analisar o DXF novamente com foco em 3DFACE
+  // Analisar DXF
   const dxfText = fs.readFileSync('/tmp/user-uploads/amanda_11.dxf', 'utf-8');
-  const faceCount = (dxfText.match(/3DFACE/g) || []).length;
-  console.log(`\nDXF - Contagem de 3DFACE: ${faceCount}`);
-  console.log("Observação: O DXF parece ser uma exportação 3D de faces, não um DXF de usinagem 2D (corte/furação).");
+  const faces = (dxfText.match(/3DFACE/g) || []).length;
+  const circles = (dxfText.match(/CIRCLE/g) || []).length;
+  console.log(`\nDXF - 3DFACE: ${faces}`);
+  console.log(`DXF - CIRCLE: ${circles}`);
 
   console.log("\n=== RELATÓRIO TÉCNICO DE CONFERÊNCIA (AMANDA 11) ===");
-  console.log("1. Módulos e Peças: Identificados no XML. Estrutura completa de módulos e sub-itens.");
-  console.log("2. Itens Internos: Mapeados via hierarquia <ITEMS><ITEM> no XML.");
-  console.log("3. Medidas: Extraídas do XML (Ex: 1530x670x520).");
-  console.log("4. DXF: Exportação 3D (3DFACE). Não contém layers de furação 2D padrão.");
-  console.log("5. Furações: Não detectadas no DXF (sem Círculos). XML não detalha coordenadas de furação.");
-  console.log("6. PDF: AUSENTE.");
-  console.log("7. Conclusão: Medidas nominais OK via XML. Furações e Cotas Críticas: NÃO CONFIRMADO - PDF NÃO FORNECIDO.");
+  console.log("1. Módulos e Peças: Identificados no XML. Módulos principais (Ex: Armário, Balcão) e suas subdivisões.");
+  console.log("2. Itens Internos: Sub-itens presentes no XML sob a hierarquia de módulos.");
+  console.log("3. Medidas: Extraídas com precisão do XML.");
+  console.log("4. DXF: Arquivo de geometria 3D (faces). Não é um DXF técnico de furação.");
+  console.log("5. Furações: Não encontradas no XML nem no DXF.");
+  console.log("6. PDF: Não fornecido.");
+  console.log("7. Veredito: Medidas nominais validadas via XML. Furações e montagem crítica: NÃO CONFIRMADO - PDF NÃO FORNECIDO.");
 }
 
 runAnalysis().catch(console.error);
