@@ -168,6 +168,8 @@ function ProjectDetail() {
         },
       });
 
+      const allInsertedParts: { id: string; module_id: string | null; kind: string }[] = [];
+
       for (const parsedModule of result.modules) {
         const { data: created, error } = await supabase
           .from("modules")
@@ -185,7 +187,7 @@ function ProjectDetail() {
         if (error) throw error;
 
         if (parsedModule.parts.length > 0) {
-          const { error: partsError } = await supabase.from("parts").insert(
+          const { data: insertedParts, error: partsError } = await supabase.from("parts").insert(
             parsedModule.parts.map((part) => ({
               project_id: projectId,
               module_id: created.id,
@@ -199,16 +201,17 @@ function ProjectDetail() {
               unit: part.unit ?? "un",
               edge_banding: part.edge_banding ?? null,
             })),
-          );
+          ).select("id, module_id, kind");
           if (partsError) throw partsError;
+          if (insertedParts) allInsertedParts.push(...insertedParts);
         }
       }
 
       if (result.looseParts.length > 0) {
-        await supabase.from("parts").insert(
+        const { data: insertedLoose, error: looseError } = await supabase.from("parts").insert(
           result.looseParts.map((part) => ({
             project_id: projectId,
-            module_id: null, // Itens sem módulo
+            module_id: null,
             kind: part.kind,
             name: part.name,
             material: part.material ?? null,
@@ -219,7 +222,24 @@ function ProjectDetail() {
             unit: part.unit ?? "un",
             edge_banding: part.edge_banding ?? null,
           })),
-        );
+        ).select("id, module_id, kind");
+        if (looseError) throw looseError;
+        if (insertedLoose) allInsertedParts.push(...insertedLoose);
+      }
+
+      // Gerar etapas de produção automaticamente
+      if (allInsertedParts.length > 0) {
+        const stepsToCreate = [];
+        for (const p of allInsertedParts) {
+          if (p.kind === 'peca' || p.kind === 'chapa') {
+            stepsToCreate.push({ project_id: projectId, part_id: p.id, module_id: p.module_id, step_type: 'corte', status: 'pendente' });
+            stepsToCreate.push({ project_id: projectId, part_id: p.id, module_id: p.module_id, step_type: 'usinagem', status: 'pendente' });
+            stepsToCreate.push({ project_id: projectId, part_id: p.id, module_id: p.module_id, step_type: 'borda', status: 'pendente' });
+          } else {
+            stepsToCreate.push({ project_id: projectId, part_id: p.id, module_id: p.module_id, step_type: 'separacao', status: 'pendente' });
+          }
+        }
+        await supabase.from('production_steps').insert(stepsToCreate);
       }
 
       setWarnings(result.warnings);
@@ -231,6 +251,7 @@ function ProjectDetail() {
       void queryClient.invalidateQueries({ queryKey: ["modules", projectId] });
       void queryClient.invalidateQueries({ queryKey: ["parts", projectId] });
       void queryClient.invalidateQueries({ queryKey: ["project_files", projectId] });
+      void queryClient.invalidateQueries({ queryKey: ["factory-projects"] });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Falha na importação.");
     } finally {
