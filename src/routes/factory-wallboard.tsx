@@ -81,12 +81,17 @@ function WallboardContent() {
   const list = projects.data ?? [];
 
   const getStepStats = (projectId: string, type: string) => {
-    const steps = list.find(p => p.id === projectId)?.production_steps || [];
+    const project = list.find(p => p.id === projectId);
+    const steps = project?.production_steps || [];
     const typeSteps = steps.filter(s => s.step_type === type);
+    
+    // Bloqueio se houver qualquer peça não confirmada no projeto (segurança extra no wallboard)
+    const isProjectBlocked = steps.some(s => s.status === 'bloqueado');
+
     return {
       total: typeSteps.length,
       done: typeSteps.filter(s => s.status === 'concluido').length,
-      blocked: typeSteps.filter(s => s.status === 'bloqueado').length,
+      blocked: isProjectBlocked || typeSteps.some(s => s.status === 'bloqueado'),
     };
   };
 

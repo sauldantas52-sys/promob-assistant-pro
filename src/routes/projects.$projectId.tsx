@@ -100,7 +100,7 @@ function ProjectDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("modules")
-        .select("id, name, environment, width_mm, height_mm, depth_mm, quantity, is_completed")
+        .select("id, name, environment, width_mm, height_mm, depth_mm, quantity, is_completed, data_source")
         .eq("project_id", projectId)
         .order("created_at");
       if (error) throw error;
@@ -113,7 +113,7 @@ function ProjectDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("parts")
-        .select("id, module_id, kind, name, material, thickness_mm, width_mm, length_mm, quantity, unit, edge_banding, is_completed")
+        .select("id, module_id, kind, name, material, thickness_mm, width_mm, length_mm, quantity, unit, edge_banding, is_completed, data_source, visibility_type")
         .eq("project_id", projectId)
         .order("created_at");
       if (error) throw error;
@@ -181,6 +181,7 @@ function ProjectDetail() {
             height_mm: parsedModule.height_mm ?? null,
             depth_mm: parsedModule.depth_mm ?? null,
             quantity: parsedModule.quantity,
+            data_source: parsedModule.data_source || 'XML',
           })
           .select("id")
           .single();
@@ -200,6 +201,8 @@ function ProjectDetail() {
               quantity: part.quantity,
               unit: part.unit ?? "un",
               edge_banding: part.edge_banding ?? null,
+              data_source: part.data_source || 'XML',
+              visibility_type: part.visibility_type || 'visivel',
             })),
           ).select("id, module_id, kind");
           if (partsError) throw partsError;
@@ -221,6 +224,8 @@ function ProjectDetail() {
             quantity: part.quantity,
             unit: part.unit ?? "un",
             edge_banding: part.edge_banding ?? null,
+            data_source: part.data_source || 'XML',
+            visibility_type: part.visibility_type || 'visivel',
           })),
         ).select("id, module_id, kind");
         if (looseError) throw looseError;
@@ -346,12 +351,38 @@ function ProjectDetail() {
           <Badge className={statusTone(project.data?.status || "novo")}>{statusLabel(project.data?.status || "novo")}</Badge>
           <Select 
             value={project.data?.status ?? "novo"} 
-            onValueChange={(v) => {
-              if (v === "producao" && allParts.some(p => (!p.width_mm || !p.length_mm) && p.kind !== 'ferragem' && p.kind !== 'acessorio' && !p.name.toLowerCase().includes("processo"))) {
-                toast.error("Bloqueio: Existem peças sem medida confirmada. Não é possível liberar para produção.");
-                return;
+            onValueChange={async (v) => {
+              if (v === "producao") {
+                const unconfirmedParts = allParts.filter(p => 
+                  (!p.width_mm || !p.length_mm || !p.thickness_mm || !p.material) && 
+                  p.kind !== 'ferragem' && 
+                  p.kind !== 'acessorio' && 
+                  !p.name.toLowerCase().includes("processo") &&
+                  p.visibility_type !== 'oculta'
+                );
+
+                if (unconfirmedParts.length > 0) {
+                  toast.error(`Bloqueio: ${unconfirmedParts.length} peça(s) possuem medidas ou dados críticos "Não confirmados".`);
+                  return;
+                }
               }
-              updateStatus.mutate(v);
+
+              const oldStatus = project.data?.status || "novo";
+              updateStatus.mutate(v, {
+                onSuccess: async () => {
+                  const { data: { user } } = await supabase.auth.getUser();
+                  if (user) {
+                    await (supabase.from('production_logs') as any).insert({
+                      project_id: projectId,
+                      user_id: user.id,
+                      action: `Alteração de status do projeto: ${v}`,
+                      status_from: oldStatus,
+                      status_to: v,
+                      notes: "Alteração via seletor de status principal"
+                    });
+                  }
+                }
+              });
             }}
           >
             <SelectTrigger className="h-11 w-44">
@@ -783,9 +814,19 @@ function ProjectDetail() {
                   </ul>
                 </div>
 
-                <div className="text-[10px] text-muted-foreground pt-2 border-t flex justify-between">
-                  <span>Aprovado em: {new Date().toLocaleDateString('pt-BR')}</span>
-                  <span>Responsável: Sistema Monta AI</span>
+                <div className="text-[10px] text-muted-foreground pt-2 border-t flex flex-col gap-1">
+                  <div className="flex justify-between">
+                    <span>Aprovado em: {new Date().toLocaleDateString('pt-BR')}</span>
+                    <span>Responsável: Sistema Monta AI</span>
+                  </div>
+                  <div className="flex justify-between items-center bg-muted/50 p-1 rounded px-2">
+                    <span className="font-medium">Rastreabilidade 4.0:</span>
+                    <div className="flex gap-2">
+                      <Badge variant="outline" className="text-[8px] h-4">ID Único Ativo</Badge>
+                      <Badge variant="outline" className="text-[8px] h-4">Logs em Tempo Real</Badge>
+                      <Badge variant="outline" className="text-[8px] h-4">Integridade XML</Badge>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>

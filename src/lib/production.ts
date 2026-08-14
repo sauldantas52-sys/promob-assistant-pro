@@ -32,6 +32,18 @@ export async function updateStepStatus(
   status: ProductionStatus, 
   notes?: string
 ) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Usuário não autenticado");
+
+  // Buscar informações da etapa para o log
+  const { data: step, error: stepError } = await supabase
+    .from('production_steps')
+    .select('project_id, status')
+    .eq('id', stepId)
+    .single();
+  
+  if (stepError) throw stepError;
+
   const updateData: any = { 
     status, 
     updated_at: new Date().toISOString() 
@@ -51,4 +63,15 @@ export async function updateStepStatus(
     .eq('id', stepId);
 
   if (error) throw error;
+
+  // Registrar log de auditoria
+  // Usamos casting para 'any' para evitar erros de tipo até que o gerador de tipos do Supabase atualize
+  await (supabase.from('production_logs') as any).insert({
+    project_id: step.project_id,
+    user_id: user.id,
+    action: `Alteração de status da etapa: ${status}`,
+    status_from: step.status,
+    status_to: status,
+    notes: notes || null
+  });
 }

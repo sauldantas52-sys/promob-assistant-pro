@@ -8,6 +8,8 @@ export type ParsedPart = {
   quantity: number;
   unit?: string | null;
   edge_banding?: string | null;
+  data_source?: string;
+  visibility_type?: "visivel" | "oculta" | "avulsa" | "ausente" | "nao_confirmada";
 };
 
 export type ParsedModule = {
@@ -18,6 +20,7 @@ export type ParsedModule = {
   depth_mm?: number | null;
   quantity: number;
   parts: ParsedPart[];
+  data_source?: string;
 };
 
 export type ImportResult = {
@@ -100,7 +103,7 @@ export function parsePromobXml(fileName: string, sizeBytes: number, xmlText: str
         }
       }
 
-      modules.push({ name, environment, width_mm: width, height_mm: height, depth_mm: depth, quantity, parts });
+      modules.push({ name, environment, width_mm: width, height_mm: height, depth_mm: depth, quantity, parts, data_source: "XML" });
       seen.add(node);
     }
   }
@@ -136,6 +139,9 @@ function parsePartNode(p: Element): ParsedPart {
   let length = num(attr(p, ["LENGTH", "HEIGHT", "C"]));
   const thickness = num(attr(p, ["THICKNESS", "E"]));
 
+  const isVisible = attr(p, ["VISIBLE"])?.toLowerCase() !== "false";
+  const visibility: ParsedPart["visibility_type"] = isVisible ? "visivel" : "oculta";
+
   return {
     kind: classifyKind(rawType, description),
     name: description,
@@ -146,6 +152,8 @@ function parsePartNode(p: Element): ParsedPart {
     quantity: num(attr(p, ["QUANTITY", "qtd"])) ?? 1,
     unit: attr(p, ["UNIT"])?.toLowerCase() ?? "un",
     edge_banding: attr(p, ["EDGE", "BORDER"]),
+    data_source: "XML",
+    visibility_type: visibility,
   };
 }
 
