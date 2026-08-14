@@ -11,7 +11,7 @@ export interface DXFGeometry {
 }
 
 export function parseDXF(content: string): DXFGeometry[] {
-  // O construtor é o export default no dxf-parser
+  // A classe DxfParser é exportada como default
   const parser = new DxfParser();
   try {
     const dxf = parser.parseSync(content);

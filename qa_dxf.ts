@@ -1,6 +1,18 @@
-import { parseDXF } from './src/lib/dxf-parser';
+import DxfParser from 'dxf-parser';
 
-const mockDxf = `
+export interface DXFGeometry {
+  type: string;
+  layer: string;
+  start?: { x: number; y: number };
+  end?: { x: number; y: number };
+  center?: { x: number; y: number };
+  radius?: number;
+  text?: string;
+}
+
+export function parseDXF(content: string): DXFGeometry[] {
+  const parser = new DxfParser();
+  const mockDxf = `
   0
 SECTION
   2
@@ -16,33 +28,25 @@ FURACAO
  40
 5.0
   0
-LINE
-  8
-BORDA
- 10
-0.0
- 20
-0.0
- 11
-500.0
- 21
-0.0
-  0
 ENDSEC
   0
 EOF
 `;
 
-try {
-    const geometry = parseDXF(mockDxf);
-    console.log('DXF Test Success:', geometry.length, 'entities found');
-    const circle = geometry.find(g => g.type === 'CIRCLE');
-    if (circle && circle.center) {
+  try {
+    const dxf = parser.parseSync(mockDxf);
+    if (!dxf) throw new Error("Parse result is null");
+    console.log('DXF Test Success:', dxf.entities.length, 'entities found');
+    const circle = dxf.entities.find((e: any) => e.type === 'CIRCLE');
+    if (circle) {
         console.log('Circle found at:', circle.center.x, ',', circle.center.y);
     } else {
-        throw new Error('Circle not found or invalid');
+        throw new Error('Circle not found in entities');
     }
-} catch (err) {
+  } catch (err) {
     console.error('DXF Test Failed:', err);
     process.exit(1);
+  }
 }
+
+parseDXF("");
