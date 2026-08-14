@@ -153,9 +153,21 @@ function classifyKind(rawGroup: string, name: string): ParsedPart["kind"] {
   const g = rawGroup.toLowerCase();
   const n = name.toLowerCase();
   
-  if (g.includes("ferrag") || n.includes("dobradiça") || n.includes("corrediça") || n.includes("parafuso") || n.includes("suporte")) return "ferragem";
-  if (g.includes("acess") || n.includes("cabideiro") || n.includes("aramado") || n.includes("organizador")) return "acessorio";
-  if (g.includes("chapa") || g.includes("painel")) return "chapa";
+  // Peças Estruturais
+  if (n.includes("lateral") || n.includes("base") || n.includes("fundo") || n.includes("divisória") || n.includes("prateleira") || n.includes("tampo") || n.includes("travessa")) return "peca";
+  
+  // Portas e Frentes
+  if (n.includes("porta") || n.includes("frente")) return "peca";
+
+  // Ferragens
+  if (g.includes("ferrag") || n.includes("dobradiça") || n.includes("corrediça") || n.includes("parafuso") || n.includes("suporte") || n.includes("fixador")) return "ferragem";
+  
+  // Acessórios
+  if (g.includes("acess") || n.includes("cabideiro") || n.includes("aramado") || n.includes("organizador") || n.includes("puxador")) return "acessorio";
+  
+  // Chapas / Painéis
+  if (g.includes("chapa") || g.includes("painel") || n.includes("tamponamento") || n.includes("régua")) return "chapa";
+  
   return "peca";
 }
 

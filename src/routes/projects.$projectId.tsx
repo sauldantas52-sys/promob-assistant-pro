@@ -244,9 +244,9 @@ function ProjectDetail() {
           "Nome": p.name,
           "Tipo": p.kind,
           "Material": p.material || "-",
-          "Espessura (mm)": p.thickness_mm ?? "Não confirmado",
-          "Largura (mm)": p.width_mm ?? "Não confirmado",
-          "Comprimento (mm)": p.length_mm ?? "Não confirmado",
+          "Espessura (mm)": p.thickness_mm ?? "Não confirmado (NÃO USAR PARA FABRICAÇÃO)",
+          "Largura (mm)": p.width_mm ?? "Não confirmado (NÃO USAR PARA FABRICAÇÃO)",
+          "Comprimento (mm)": p.length_mm ?? "Não confirmado (NÃO USAR PARA FABRICAÇÃO)",
           "Quantidade": p.quantity,
           "Unidade": p.unit || "un",
           "Fita de Borda": p.edge_banding || "-",
@@ -375,6 +375,7 @@ function ProjectDetail() {
           <TabsTrigger value="modules" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Módulos</TabsTrigger>
           <TabsTrigger value="parts" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Lista Técnica</TabsTrigger>
           <TabsTrigger value="loose" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Itens sem Módulo</TabsTrigger>
+          <TabsTrigger value="audit" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Auditoria Técnica</TabsTrigger>
           <TabsTrigger value="files" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Arquivos</TabsTrigger>
         </TabsList>
 
