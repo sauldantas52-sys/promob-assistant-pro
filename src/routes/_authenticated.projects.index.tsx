@@ -1,7 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { FolderKanban, Plus, Loader2, ChevronRight, Search, Filter } from "lucide-react";
+import { FolderKanban, Plus, Loader2, ChevronRight, Search, Filter, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,6 +58,7 @@ function ProjectsPage() {
 function ProjectsContent() {
   const { companyId, role } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [clientName, setClientName] = useState("");
@@ -109,6 +110,14 @@ function ProjectsContent() {
     <div className="space-y-16 p-8 md:p-16 max-w-[1800px] mx-auto animate-in fade-in duration-700">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-10">
         <div className="space-y-6">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate({ to: "/dashboard" })} 
+            className="rounded-full px-4 text-slate-400 hover:text-blue-600 gap-2 mb-2"
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            <span className="text-[10px] font-black uppercase tracking-widest">Dashboard</span>
+          </Button>
           <div className="flex items-center gap-4">
             <span className="h-2 w-10 bg-blue-600 rounded-full" />
             <p className="text-[12px] font-black uppercase tracking-[0.5em] text-blue-600">Módulo de Projetos</p>
