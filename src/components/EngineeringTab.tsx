@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { 
   FileSearch, 
   Ruler, 
@@ -8,7 +8,9 @@ import {
   ChevronRight,
   Database,
   FileCode,
-  AlertTriangle
+  AlertTriangle,
+  ClipboardList,
+  Binary
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,6 +21,8 @@ import { parseDXF, DXFGeometry } from "@/lib/dxf-parser";
 import { parseExecutivePDF, CriticalDimension } from "@/lib/pdf-parser";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { PROMOB_BITOLA_RULES } from "@/lib/bitola-engineering";
+import { DrillingInspector } from "./DrillingInspector";
 
 interface EngineeringTabProps {
   projectId: string;
