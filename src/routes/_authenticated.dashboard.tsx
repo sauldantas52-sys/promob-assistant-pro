@@ -77,19 +77,22 @@ function DashboardContent() {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {stats.map((stat) => (
-          <Card key={stat.label} className="border-none shadow-sm hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+        {stats.map((stat, i) => (
+          <Card key={stat.label} className={cn(
+            "border-none shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] transition-all duration-300 rounded-[2rem]",
+            i === 0 ? "bg-blue-600 text-white" : "bg-white"
+          )}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-6">
+              <CardTitle className={cn("text-[10px] font-black uppercase tracking-[0.2em]", i === 0 ? "text-blue-100" : "text-slate-400")}>
                 {stat.label}
               </CardTitle>
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <stat.icon className="h-5 w-5 text-blue-600" />
+              <div className={cn("p-2 rounded-xl", i === 0 ? "bg-blue-500/50" : "bg-slate-50")}>
+                <stat.icon className={cn("h-5 w-5", i === 0 ? "text-white" : "text-blue-600")} />
               </div>
             </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-black text-slate-900">{stat.value}</p>
+            <CardContent className="p-6 pt-0">
+              <p className={cn("text-4xl font-black tracking-tighter", i === 0 ? "text-white" : "text-slate-900")}>{stat.value}</p>
             </CardContent>
           </Card>
         ))}
