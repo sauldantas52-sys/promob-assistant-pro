@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { statusLabel, statusTone } from "@/lib/project-status";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/projects/")({
   head: () => ({
@@ -105,12 +106,12 @@ function ProjectsContent() {
   });
 
   return (
-    <div className="space-y-6 p-4 md:p-8">
-      <header className="flex flex-wrap items-center justify-between gap-3">
+    <div className="space-y-6 p-4 md:p-8 max-w-7xl mx-auto">
+      <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold md:text-3xl">Projetos</h1>
-          <p className="text-sm text-muted-foreground">
-            Importe arquivos do Promob e acompanhe cada ambiente até a montagem.
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Projetos</h1>
+          <p className="text-base text-slate-500 font-medium">
+            Gestão técnica, importação Promob e acompanhamento 4.0.
           </p>
         </div>
         <div className="flex gap-2">
@@ -168,10 +169,10 @@ function ProjectsContent() {
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
           <Input
             placeholder="Buscar projeto ou cliente..."
-            className="h-11 pl-10"
+            className="h-12 pl-12 rounded-xl border-slate-200 shadow-sm focus:ring-blue-600"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -215,18 +216,22 @@ function ProjectsContent() {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filteredProjects.map((project) => (
             <Link key={project.id} to="/projects/$projectId" params={{ projectId: project.id }}>
-              <Card className="h-full transition-shadow hover:shadow-md">
-                <CardHeader className="pb-2">
+              <Card className="h-full border-none shadow-sm hover:shadow-md transition-all rounded-2xl overflow-hidden group">
+                <CardHeader className="pb-3 pt-6 px-6">
                   <div className="flex items-start justify-between gap-2">
-                    <CardTitle className="text-base">{project.name}</CardTitle>
-                    <Badge className={statusTone(project.status)}>{statusLabel(project.status)}</Badge>
+                    <CardTitle className="text-lg font-black text-slate-900 tracking-tight leading-tight group-hover:text-blue-600 transition-colors">{project.name}</CardTitle>
+                    <Badge className={cn("px-3 py-1 text-[10px] font-bold uppercase tracking-wider border", statusTone(project.status))}>
+                      {statusLabel(project.status)}
+                    </Badge>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-1 text-sm text-muted-foreground">
-                  <p>Cliente: {project.client_name || "—"}</p>
-                  <p>Ambiente: {project.environment || "—"}</p>
-                  <p className="flex items-center gap-1 pt-2 font-medium text-primary">
-                    Abrir projeto <ChevronRight className="h-4 w-4" />
+                <CardContent className="space-y-3 px-6 pb-6">
+                  <div className="space-y-1 text-sm font-medium text-slate-500">
+                    <p>Cliente: <span className="text-slate-900">{project.client_name || "—"}</span></p>
+                    <p>Ambiente: <span className="text-slate-900">{project.environment || "—"}</span></p>
+                  </div>
+                  <p className="flex items-center gap-1 pt-2 text-xs font-black uppercase tracking-widest text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                    Abrir Detalhes <ChevronRight className="h-3 w-3" />
                   </p>
                 </CardContent>
               </Card>

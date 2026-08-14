@@ -12,6 +12,7 @@ import {
   ClipboardList,
   Binary
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -63,20 +64,20 @@ export function EngineeringTab({ projectId, parts }: EngineeringTabProps) {
 
   return (
     <div className="space-y-6">
-      <Alert variant="destructive" className="bg-amber-50 border-amber-200 text-amber-900">
-        <AlertTriangle className="h-4 w-4 text-amber-600" />
-        <AlertTitle className="text-amber-800 font-bold">PROTOCOLO DE ENGENHARIA ATIVO</AlertTitle>
-        <AlertDescription>
+      <Alert className="bg-amber-50 border-2 border-amber-200 text-amber-900 rounded-2xl p-6 shadow-sm">
+        <AlertTriangle className="h-6 w-6 text-amber-600" />
+        <AlertTitle className="text-amber-800 font-black text-lg tracking-tight mb-2 uppercase">Protocolo de Engenharia Ativo</AlertTitle>
+        <AlertDescription className="text-base font-medium leading-relaxed">
           A visualização 3D está suspensa até a validação das cotas críticas via PDF e furações via DXF. 
-          <strong> Nunca deduza medidas ou posições.</strong>
+          <span className="block mt-2 font-black text-amber-700 underline">Nunca deduza medidas ou posições. A precisão técnica é absoluta.</span>
         </AlertDescription>
       </Alert>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <FileSearch className="h-4 w-4" /> PDF Executivo (Cotas)
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
+          <CardHeader className="bg-slate-50 border-b border-slate-200 py-4 px-6">
+            <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-600 flex items-center gap-2">
+              <FileSearch className="h-5 w-5 text-blue-600" /> PDF Executivo (Cotas)
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -94,10 +95,10 @@ export function EngineeringTab({ projectId, parts }: EngineeringTabProps) {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <FileCode className="h-4 w-4" /> DXF ASCII (Furação/Geometria)
+        <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
+          <CardHeader className="bg-slate-50 border-b border-slate-200 py-4 px-6">
+            <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-600 flex items-center gap-2">
+              <FileCode className="h-5 w-5 text-blue-600" /> DXF ASCII (Furação)
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -116,30 +117,33 @@ export function EngineeringTab({ projectId, parts }: EngineeringTabProps) {
         </Card>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-3 bg-slate-100 p-1.5 rounded-2xl w-fit">
         <Button 
-          variant={activeView === 'comparison' ? 'default' : 'outline'} 
+          variant={activeView === 'comparison' ? 'default' : 'ghost'} 
           size="sm"
+          className={cn("rounded-xl font-bold uppercase text-[10px] tracking-widest px-6 h-10", activeView === 'comparison' ? "bg-white text-blue-600 shadow-sm hover:bg-white" : "text-slate-500")}
           onClick={() => setActiveView('comparison')}
         >
           <Ruler className="h-4 w-4 mr-2" />
-          Comparação XML × PDF × DXF
+          Comparação Técnica
         </Button>
         <Button 
-          variant={activeView === 'drillings' ? 'default' : 'outline'} 
+          variant={activeView === 'drillings' ? 'default' : 'ghost'} 
           size="sm"
+          className={cn("rounded-xl font-bold uppercase text-[10px] tracking-widest px-6 h-10", activeView === 'drillings' ? "bg-white text-blue-600 shadow-sm hover:bg-white" : "text-slate-500")}
           onClick={() => setActiveView('drillings')}
         >
           <CircleDot className="h-4 w-4 mr-2" />
           Tela de Furação
         </Button>
         <Button 
-          variant={activeView === 'report' ? 'default' : 'outline'} 
+          variant={activeView === 'report' ? 'default' : 'ghost'} 
           size="sm"
+          className={cn("rounded-xl font-bold uppercase text-[10px] tracking-widest px-6 h-10", activeView === 'report' ? "bg-white text-blue-600 shadow-sm hover:bg-white" : "text-slate-500")}
           onClick={() => setActiveView('report')}
         >
           <ClipboardList className="h-4 w-4 mr-2" />
-          Relatório de Bitolas
+          Relatório Bitolas
         </Button>
       </div>
 

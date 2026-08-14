@@ -395,14 +395,13 @@ export function ConferenceDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-base">
-            Conferência: {group?.code} — {moduleName}
+      <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-lg rounded-3xl border-none shadow-2xl">
+        <DialogHeader className="pb-4 border-b border-slate-100">
+          <DialogTitle className="flex items-center gap-2 text-xl font-black text-slate-900 tracking-tight uppercase">
+            Conferência: {group?.code}
           </DialogTitle>
-          <DialogDescription>
-            Leia as etiquetas ou marque manualmente. Toda exceção fica registrada com usuário, data,
-            hora, motivo e status.
+          <DialogDescription className="font-medium text-slate-500">
+            {moduleName} · Validação técnica via QR Code.
           </DialogDescription>
         </DialogHeader>
 

@@ -90,11 +90,11 @@ function AssemblyContent() {
   const list = projects.data ?? [];
 
   return (
-    <div className="space-y-6 p-4 md:p-8">
-      <header>
-        <h1 className="text-2xl font-bold md:text-3xl">Montagem</h1>
-        <p className="text-sm text-muted-foreground">
-          Projetos liberados para montagem, com módulos e medidas em mãos.
+    <div className="space-y-6 p-4 md:p-8 max-w-7xl mx-auto">
+      <header className="flex flex-col gap-1">
+        <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Montagem</h1>
+        <p className="text-base text-slate-500 font-medium">
+          Roteiro técnico e conferência de módulos para montadores.
         </p>
       </header>
 
@@ -111,24 +111,26 @@ function AssemblyContent() {
       ) : (
         <div className="space-y-4">
           {list.map((project) => (
-            <Card key={project.id}>
-              <CardHeader className="pb-3">
-                <div className="flex flex-wrap items-start justify-between gap-2">
+            <Card key={project.id} className="border-none shadow-sm rounded-2xl overflow-hidden">
+              <CardHeader className="pb-4 pt-6 px-6 bg-slate-100/50 border-b border-slate-200/50">
+                <div className="flex flex-wrap items-center justify-between gap-4">
                   <div>
-                    <CardTitle className="text-base">{project.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      {project.client_name || "Sem cliente"} · {project.environment || "—"}
+                    <CardTitle className="text-xl font-black text-slate-900 tracking-tight">{project.name}</CardTitle>
+                    <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mt-1">
+                      {project.client_name || "Sem cliente"} · {project.environment || "Ambiente geral"}
                     </p>
                   </div>
-                  <Badge className={statusTone(project.status)}>{statusLabel(project.status)}</Badge>
+                  <Badge className={cn("px-4 py-1.5 text-xs font-black uppercase tracking-widest border", statusTone(project.status))}>
+                    {statusLabel(project.status)}
+                  </Badge>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-6 p-6">
                 <Tabs defaultValue="modules">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="modules">Módulos</TabsTrigger>
-                    <TabsTrigger value="groups">Módulos/Grupos</TabsTrigger>
-                    <TabsTrigger value="hardware">Caderno</TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-3 bg-slate-100 p-1 h-12 rounded-xl">
+                    <TabsTrigger value="modules" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold text-xs uppercase tracking-wider">Módulos</TabsTrigger>
+                    <TabsTrigger value="groups" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold text-xs uppercase tracking-wider">Grupos G1/G2</TabsTrigger>
+                    <TabsTrigger value="hardware" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm font-bold text-xs uppercase tracking-wider">Caderno</TabsTrigger>
                   </TabsList>
                   
                   <TabsContent value="modules" className="space-y-3 mt-4">
@@ -182,16 +184,17 @@ function AssemblyContent() {
                           const [confDialogOpen, setConfDialogOpen] = useState(false);
                         
                         return (
-                          <Card key={m.id} className={cn("overflow-hidden border-2", group?.is_locked ? "border-amber-200" : "border-green-200")}>
-                            <div className="h-2" style={{ backgroundColor: group?.color || "#ccc" }} />
-                            <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between">
+                          <Card key={m.id} className={cn("overflow-hidden border-2 shadow-sm rounded-2xl transition-all", group?.is_locked ? "border-amber-100 bg-amber-50/20" : "border-green-100 bg-green-50/20")}>
+                            <div className="h-3 w-full" style={{ backgroundColor: group?.color || "#cbd5e1" }} />
+                            <CardHeader className="p-5 pb-3 flex flex-row items-center justify-between">
                               <div>
-                                <CardTitle className="text-sm font-bold flex items-center gap-2">
-                                  {group?.code} - {m.name}
-                                  {group?.is_locked ? <Lock className="h-3 w-3 text-amber-500" /> : <Unlock className="h-3 w-3 text-green-500" />}
+                                <CardTitle className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
+                                  <span className="px-2 py-0.5 bg-slate-900 text-white rounded text-xs font-black uppercase">{group?.code}</span>
+                                  {m.name}
+                                  {group?.is_locked ? <Lock className="h-4 w-4 text-amber-600" /> : <Unlock className="h-4 w-4 text-green-600" />}
                                 </CardTitle>
                               </div>
-                              <Badge variant={group?.is_locked ? "outline" : "default"}>
+                              <Badge className={cn("px-3 py-1 text-[10px] font-black uppercase tracking-widest", group?.is_locked ? "bg-amber-100 text-amber-700 border-amber-200" : "bg-green-600 text-white")}>
                                 {group?.is_locked ? "Bloqueado" : "Liberado"}
                               </Badge>
                             </CardHeader>

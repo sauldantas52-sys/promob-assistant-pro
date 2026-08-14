@@ -43,65 +43,73 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  /* Palette: Verde-claro, branco, cinza suave e detalhes em verde escuro */
-  --background: oklch(0.98 0.01 150); /* Branco levemente esverdeado/cinza */
-  --foreground: oklch(0.2 0.04 160); /* Verde muito escuro quase preto */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.04 160);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.04 160);
-  --primary: oklch(0.65 0.15 150); /* Verde médio/claro profissional */
-  --primary-foreground: oklch(0.98 0.01 150);
-  --secondary: oklch(0.92 0.03 155); /* Verde bem claro para backgrounds suaves */
-  --secondary-foreground: oklch(0.25 0.08 150); /* Verde escuro para texto sobre claro */
-  --muted: oklch(0.95 0.01 150);
-  --muted-foreground: oklch(0.45 0.03 160);
-  --accent: oklch(0.65 0.15 150);
-  --accent-foreground: oklch(0.98 0.01 150);
-  --destructive: oklch(0.55 0.18 25);
-  --destructive-foreground: oklch(0.98 0.01 150);
-  --border: oklch(0.85 0.02 155);
-  --input: oklch(0.85 0.02 155);
-  --ring: oklch(0.65 0.15 150);
-  --sidebar: oklch(0.25 0.08 150); /* Verde escuro para sidebar */
-  --sidebar-foreground: oklch(0.98 0.01 150);
-  --sidebar-primary: oklch(0.65 0.15 150);
-  --sidebar-primary-foreground: oklch(0.98 0.01 150);
-  --sidebar-accent: oklch(0.3 0.1 155);
-  --sidebar-accent-foreground: oklch(0.98 0.01 150);
-  --sidebar-border: oklch(0.2 0.06 150);
-  --sidebar-ring: oklch(0.65 0.15 150);
+  --radius: 0.75rem;
+  /* Paleta Industrial Moderna - Monta AI */
+  --background: #F5F7FA;
+  --foreground: #17202A;
+  --card: #FFFFFF;
+  --card-foreground: #17202A;
+  --popover: #FFFFFF;
+  --popover-foreground: #17202A;
+  --primary: #2563EB; /* Azul Técnico */
+  --primary-foreground: #FFFFFF;
+  --secondary: #E2E8F0; /* Cinza de borda/suave */
+  --secondary-foreground: #64748B;
+  --muted: #F1F5F9;
+  --muted-foreground: #64748B;
+  --accent: #2563EB;
+  --accent-foreground: #FFFFFF;
+  --destructive: #DC2626; /* Vermelho Bloqueio */
+  --destructive-foreground: #FFFFFF;
+  --border: #E2E8F0;
+  --input: #E2E8F0;
+  --ring: #2563EB;
+  
+  /* Cores Temáticas de Status */
+  --success: #16A34A;
+  --warning: #D97706;
+  --technical: #0F4C5C; /* Azul Petróleo */
+  --maintenance: #7C3AED; /* Roxo Assistência */
+
+  --sidebar: #0F4C5C; /* Azul Petróleo Industrial */
+  --sidebar-foreground: #F8FAFC;
+  --sidebar-primary: #2563EB;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #1E293B;
+  --sidebar-accent-foreground: #F8FAFC;
+  --sidebar-border: #1E293B;
+  --sidebar-ring: #2563EB;
 }
 
 .dark {
-  --background: oklch(0.2 0.04 160);
-  --foreground: oklch(0.98 0.01 150);
-  --card: oklch(0.22 0.05 160);
-  --card-foreground: oklch(0.98 0.01 150);
-  --popover: oklch(0.22 0.05 160);
-  --popover-foreground: oklch(0.98 0.01 150);
-  --primary: oklch(0.65 0.15 150);
-  --primary-foreground: oklch(0.2 0.04 160);
-  --secondary: oklch(0.28 0.06 155);
-  --secondary-foreground: oklch(0.98 0.01 150);
-  --muted: oklch(0.28 0.06 155);
-  --muted-foreground: oklch(0.7 0.03 150);
-  --accent: oklch(0.65 0.15 150);
-  --accent-foreground: oklch(0.2 0.04 160);
-  --destructive: oklch(0.45 0.15 25);
-  --destructive-foreground: oklch(0.98 0.01 150);
-  --border: oklch(0.3 0.05 155);
-  --input: oklch(0.3 0.05 155);
-  --ring: oklch(0.65 0.15 150);
-  --sidebar: oklch(0.15 0.03 160);
-  --sidebar-foreground: oklch(0.98 0.01 150);
-  --sidebar-primary: oklch(0.65 0.15 150);
-  --sidebar-primary-foreground: oklch(0.98 0.01 150);
-  --sidebar-accent: oklch(0.22 0.05 160);
-  --sidebar-accent-foreground: oklch(0.98 0.01 150);
-  --sidebar-border: oklch(0.12 0.02 160);
-  --sidebar-ring: oklch(0.65 0.15 150);
+  /* Mantendo consistência industrial mesmo no dark */
+  --background: #0F172A;
+  --foreground: #F1F5F9;
+  --card: #1E293B;
+  --card-foreground: #F1F5F9;
+  --popover: #1E293B;
+  --popover-foreground: #F1F5F9;
+  --primary: #3B82F6;
+  --primary-foreground: #FFFFFF;
+  --secondary: #334155;
+  --secondary-foreground: #94A3B8;
+  --muted: #334155;
+  --muted-foreground: #94A3B8;
+  --accent: #3B82F6;
+  --accent-foreground: #FFFFFF;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: #334155;
+  --input: #334155;
+  --ring: #3B82F6;
+  --sidebar: #020617;
+  --sidebar-foreground: #F1F5F9;
+  --sidebar-primary: #3B82F6;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #1E293B;
+  --sidebar-accent-foreground: #F1F5F9;
+  --sidebar-border: #1E293B;
+  --sidebar-ring: #3B82F6;
 }
 
 @layer base {

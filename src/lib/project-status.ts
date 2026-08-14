@@ -21,13 +21,13 @@ const labels: Record<string, string> = {
 };
 
 const tones: Record<string, string> = {
-  novo: "bg-muted text-muted-foreground",
-  orcamento: "bg-secondary text-secondary-foreground",
-  producao: "bg-primary/15 text-primary",
-  conferencia: "bg-secondary text-secondary-foreground",
-  montagem: "bg-primary text-primary-foreground",
-  concluido: "bg-primary/25 text-primary",
-  assistencia: "bg-destructive/15 text-destructive",
+  novo: "bg-slate-100 text-slate-600 border-slate-200",
+  orcamento: "bg-blue-50 text-blue-700 border-blue-100",
+  producao: "bg-blue-50 text-blue-700 border-blue-100",
+  conferencia: "bg-amber-50 text-amber-700 border-amber-100",
+  montagem: "bg-blue-600 text-white",
+  concluido: "bg-green-600 text-white",
+  assistencia: "bg-purple-50 text-purple-700 border-purple-100",
 };
 
 export const statusLabel = (status: string | null | undefined) =>

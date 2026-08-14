@@ -13,6 +13,7 @@ import {
   PackageCheck,
   Truck,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuth, roleLabels } from "@/lib/auth";
 
@@ -55,65 +56,69 @@ export function AppShell({ children }: { children: ReactNode }) {
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex h-16 items-center gap-2 border-b border-sidebar-border px-5">
-          <Boxes className="h-6 w-6 text-sidebar-primary" />
+        <div className="flex h-20 items-center gap-3 border-b border-sidebar-border/30 px-6">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 shadow-lg shadow-blue-900/20">
+            <Boxes className="h-6 w-6 text-white" />
+          </div>
           <div className="leading-tight">
-            <p className="text-sm font-semibold">Monta AI</p>
-            <p className="text-[11px] text-sidebar-foreground/70">Promob Assistant Pro</p>
+            <p className="text-base font-black tracking-tight uppercase">Monta AI</p>
+            <p className="text-[10px] font-bold text-sidebar-foreground/50 uppercase tracking-widest">Assistant Pro</p>
           </div>
           <button className="ml-auto lg:hidden" onClick={() => setOpen(false)} aria-label="Fechar menu">
             <X className="h-5 w-5" />
           </button>
         </div>
-        <nav className="space-y-1 p-3">
+        <nav className="space-y-1.5 p-4">
           {navItems.filter(item => !role || item.roles.includes(role)).map((item) => {
             const active = pathname.startsWith(item.to);
             return (
               <Link
                 key={item.to}
                 to={item.to}
-                className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-colors ${
+                className={`flex items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-bold tracking-tight transition-all duration-200 ${
                   active
-                    ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                    : "text-sidebar-foreground/80 hover:bg-sidebar-accent"
+                    ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20 translate-x-1"
+                    : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground hover:translate-x-1"
                 }`}
               >
-                <item.icon className="h-5 w-5" />
+                <item.icon className={`h-5 w-5 transition-transform ${active ? "scale-110" : ""}`} />
                 {item.label}
               </Link>
             );
           })}
         </nav>
-        <div className="absolute bottom-0 w-full border-t border-sidebar-border p-4">
-          <p className="truncate text-sm font-medium">{fullName ?? user.email}</p>
-          <p className="text-xs text-sidebar-foreground/70">
-            {role ? (roleLabels[role] || role) : "Sem perfil definido"}
-          </p>
+        <div className="absolute bottom-0 w-full border-t border-sidebar-border/30 p-6 bg-sidebar/50 backdrop-blur-sm">
+          <div className="flex flex-col gap-1">
+            <p className="truncate text-sm font-black text-white">{fullName ?? user.email}</p>
+            <Badge variant="outline" className="w-fit border-sidebar-border text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/60">
+              {role ? (roleLabels[role] || role) : "Sem perfil"}
+            </Badge>
+          </div>
           <Button
             variant="ghost"
-            className="mt-3 w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent"
+            className="mt-5 w-full justify-start rounded-xl px-4 py-6 text-sm font-bold text-sidebar-foreground/70 hover:bg-red-500/10 hover:text-red-400 transition-colors"
             onClick={async () => {
               await signOut();
               navigate({ to: "/login" });
             }}
           >
-            <LogOut className="mr-2 h-4 w-4" /> Sair
+            <LogOut className="mr-3 h-5 w-5" /> Sair do sistema
           </Button>
         </div>
       </aside>
 
       {open && (
-        <div className="fixed inset-0 z-30 bg-foreground/40 lg:hidden" onClick={() => setOpen(false)} />
+        <div className="fixed inset-0 z-30 bg-slate-900/60 backdrop-blur-sm lg:hidden" onClick={() => setOpen(false)} />
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-16 items-center gap-3 border-b border-border bg-card px-4 lg:hidden">
-          <button onClick={() => setOpen(true)} aria-label="Abrir menu">
-            <Menu className="h-6 w-6" />
+        <header className="flex h-16 items-center gap-3 border-b border-slate-200 bg-white px-6 lg:hidden shadow-sm">
+          <button onClick={() => setOpen(true)} aria-label="Abrir menu" className="p-2 hover:bg-slate-100 rounded-lg">
+            <Menu className="h-6 w-6 text-slate-600" />
           </button>
-          <span className="font-semibold">Monta AI</span>
+          <span className="font-black text-slate-900 uppercase tracking-tight">Monta AI</span>
         </header>
-        <main className="min-w-0 flex-1">{children}</main>
+        <main className="min-w-0 flex-1 bg-slate-50/50">{children}</main>
       </div>
     </div>
   );

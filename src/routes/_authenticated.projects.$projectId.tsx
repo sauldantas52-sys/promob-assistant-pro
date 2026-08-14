@@ -53,6 +53,7 @@ import { parseProjectFile } from "@/lib/promob-import";
 import { projectStatuses, statusLabel, statusTone } from "@/lib/project-status";
 import { useAuth } from "@/lib/auth";
 import { hasPermission } from "@/lib/permissions";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId")({
   head: () => ({
@@ -427,13 +428,17 @@ function ProjectDetail() {
 
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold md:text-3xl">{project.data?.name}</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-3xl font-black tracking-tight text-slate-900 md:text-4xl">
+            {project.data?.name}
+          </h1>
+          <p className="text-lg text-slate-500 mt-1">
             {project.data?.client_name || "Sem cliente"} · {project.data?.environment || "Ambiente não informado"}
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Badge className={statusTone(project.data?.status || "novo")}>{statusLabel(project.data?.status || "novo")}</Badge>
+        <div className="flex flex-wrap items-center gap-3">
+          <Badge className={cn("px-4 py-1.5 text-sm font-bold shadow-sm uppercase tracking-wider border", statusTone(project.data?.status || "novo"))}>
+            {statusLabel(project.data?.status || "novo")}
+          </Badge>
           <Select 
             value={project.data?.status ?? "novo"} 
             disabled={!hasPermission(role, "projects", "approve")}

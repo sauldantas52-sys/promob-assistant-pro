@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { 
   Tv, 
@@ -31,11 +32,9 @@ export const Route = createFileRoute("/_authenticated/factory-wallboard")({
 
 function FactoryWallboardPage() {
   return (
-    <AppShell>
-      <div className="bg-background min-h-screen">
-        <WallboardContent />
-      </div>
-    </AppShell>
+    <div className="bg-[#0F172A] min-h-screen">
+      <WallboardContent />
+    </div>
   );
 }
 
@@ -115,41 +114,48 @@ function WallboardContent() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <header className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <Tv className="h-8 w-8 text-primary" /> Painel de Produção (TV)
-          </h1>
-          <p className="text-muted-foreground">Monitoramento em tempo real do fluxo da fábrica.</p>
+    <div className="p-8 space-y-8 bg-[#0F172A] min-h-screen text-white">
+      <header className="flex items-center justify-between border-b border-slate-800 pb-6">
+        <div className="flex items-center gap-6">
+          <div className="bg-blue-600 p-3 rounded-2xl shadow-lg shadow-blue-900/40">
+            <Tv className="h-10 w-10 text-white" />
+          </div>
+          <div>
+            <h1 className="text-4xl font-black tracking-tighter uppercase leading-tight">
+              Monitor de Produção Digital
+            </h1>
+            <p className="text-slate-400 font-bold uppercase tracking-widest text-sm mt-1 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              Real-time Factory Floor · Monta AI Traceability 4.0
+            </p>
+          </div>
         </div>
-        <div className="flex gap-4">
-          <Badge variant="outline" className="px-3 py-1 text-sm flex gap-2">
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            Sistema Online
-          </Badge>
+        <div className="text-right">
+          <p className="text-5xl font-black font-mono tracking-tighter">{new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
+          <p className="text-slate-500 font-bold uppercase tracking-widest text-xs mt-1">{new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
         </div>
       </header>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {list.map((project) => (
-          <Card key={project.id} className="border-2 overflow-hidden">
-            <CardHeader className="bg-muted/50 pb-3">
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-lg font-bold truncate max-w-[200px]">{project.name}</CardTitle>
-                  <p className="text-xs text-muted-foreground truncate">{project.client_name}</p>
+          <Card key={project.id} className="bg-slate-900 border-none shadow-2xl rounded-3xl overflow-hidden ring-1 ring-slate-800">
+            <CardHeader className="bg-slate-800/50 py-5 px-6 border-b border-slate-700/50">
+              <div className="flex justify-between items-center gap-4">
+                <div className="min-w-0">
+                  <CardTitle className="text-2xl font-black text-white tracking-tight truncate leading-tight">{project.name}</CardTitle>
+                  <p className="text-sm font-bold text-slate-400 uppercase tracking-widest truncate mt-0.5">{project.client_name}</p>
                 </div>
-                <Badge className={
-                  project.status === 'conferencia' ? 'bg-blue-500' : 
-                  project.status === 'expedicao' ? 'bg-purple-600' : 
-                  'bg-orange-500'
-                }>
-                  {(project.status || 'pendente').toUpperCase()}
+                <Badge className={cn(
+                  "px-4 py-1.5 text-xs font-black uppercase tracking-widest border shadow-lg",
+                  project.status === 'conferencia' ? 'bg-blue-600 text-white border-blue-500' : 
+                  project.status === 'expedicao' ? 'bg-purple-600 text-white border-purple-500' : 
+                  'bg-orange-600 text-white border-orange-500'
+                )}>
+                  {project.status}
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent className="p-4 space-y-4">
+            <CardContent className="p-6 space-y-6">
               <div className="grid grid-cols-2 gap-2">
                 <StepMetric 
                   icon={Scissors} 
@@ -215,16 +221,19 @@ function StepMetric({ icon: Icon, label, stats }: { icon: any, label: string, st
   const percent = stats.total > 0 ? (stats.done / stats.total) * 100 : 0;
   
   return (
-    <div className={`p-2 rounded-lg border flex flex-col items-center justify-center text-center ${stats.blocked > 0 ? 'bg-destructive/5 border-destructive/20' : 'bg-card'}`}>
-      <Icon className={`h-4 w-4 mb-1 ${stats.blocked > 0 ? 'text-destructive' : 'text-primary'}`} />
-      <p className="text-[10px] uppercase font-medium text-muted-foreground">{label}</p>
-      <div className="mt-1 flex items-baseline gap-1">
-        <span className="text-sm font-bold">{stats.done}</span>
-        <span className="text-[10px] text-muted-foreground">/ {stats.total}</span>
+    <div className={cn(
+      "p-4 rounded-2xl border transition-all flex flex-col items-center justify-center text-center",
+      stats.blocked ? "bg-red-500/10 border-red-500/30 text-red-400" : "bg-slate-800/50 border-slate-700 text-slate-300"
+    )}>
+      <Icon className={cn("h-6 w-6 mb-2", stats.blocked ? "text-red-500" : "text-blue-500")} />
+      <p className="text-[10px] uppercase font-black tracking-widest opacity-60">{label}</p>
+      <div className="mt-2 flex items-baseline gap-1">
+        <span className="text-2xl font-black">{stats.done}</span>
+        <span className="text-xs font-bold opacity-40">/ {stats.total}</span>
       </div>
-      <div className="w-full bg-muted h-1 rounded-full mt-2 overflow-hidden">
+      <div className="w-full bg-slate-900 h-2 rounded-full mt-3 overflow-hidden">
         <div 
-          className={`h-full transition-all ${stats.blocked > 0 ? 'bg-destructive' : 'bg-primary'}`} 
+          className={cn("h-full transition-all", stats.blocked ? "bg-red-600" : "bg-blue-600")} 
           style={{ width: `${percent}%` }}
         />
       </div>
@@ -241,21 +250,21 @@ function ShippingMetric({ volumes }: { volumes: any[] }) {
   if (total === 0) return null;
 
   return (
-    <div className="p-2 rounded-lg border bg-purple-500/5 border-purple-200 flex flex-col items-center justify-center text-center">
-      <Truck className="h-4 w-4 mb-1 text-purple-600" />
-      <p className="text-[10px] uppercase font-medium text-muted-foreground">Expedição</p>
-      <div className="mt-1 flex items-baseline gap-1">
-        <span className="text-sm font-bold text-purple-700">{loaded}</span>
-        <span className="text-[10px] text-muted-foreground">/ {total}</span>
+    <div className="p-4 rounded-2xl border bg-purple-600/10 border-purple-500/30 text-purple-300 flex flex-col items-center justify-center text-center">
+      <Truck className="h-6 w-6 mb-2 text-purple-500" />
+      <p className="text-[10px] uppercase font-black tracking-widest opacity-60">Expedição</p>
+      <div className="mt-2 flex items-baseline gap-1">
+        <span className="text-2xl font-black">{loaded}</span>
+        <span className="text-xs font-bold opacity-40">/ {total}</span>
       </div>
-      <div className="w-full bg-muted h-1 rounded-full mt-2 overflow-hidden">
+      <div className="w-full bg-slate-900 h-2 rounded-full mt-3 overflow-hidden">
         <div 
-          className="h-full bg-purple-600 transition-all" 
+          className="h-full bg-purple-600 transition-all shadow-[0_0_10px_rgba(147,51,234,0.5)]" 
           style={{ width: `${percent}%` }}
         />
       </div>
       {delivered === total && total > 0 && (
-        <p className="text-[8px] font-bold text-green-600 mt-1 uppercase">Entregue</p>
+        <p className="text-[10px] font-black text-green-500 mt-2 uppercase tracking-widest">Entregue</p>
       )}
     </div>
   );
