@@ -274,8 +274,8 @@ function ProjectDetail() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Badge className={statusTone(project.data.status)}>{statusLabel(project.data.status)}</Badge>
-          <Select value={project.data.status ?? "novo"} onValueChange={(v) => updateStatus.mutate(v)}>
+          <Badge className={statusTone(project.data?.status || "novo")}>{statusLabel(project.data?.status || "novo")}</Badge>
+          <Select value={project.data?.status ?? "novo"} onValueChange={(v) => updateStatus.mutate(v)}>
             <SelectTrigger className="h-11 w-44">
               <SelectValue />
             </SelectTrigger>
