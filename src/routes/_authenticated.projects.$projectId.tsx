@@ -1054,7 +1054,6 @@ function ProjectDetail() {
         </TabsContent>
       </Tabs>
     </div>
-    </AppShell>
   );
 }
 
