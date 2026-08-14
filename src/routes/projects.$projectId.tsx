@@ -1082,7 +1082,7 @@ function MaintenanceTab({
                   </div>
                 </div>
                 <div className="flex flex-col gap-2 min-w-[140px]">
-                  <Select value={req.status} onValueChange={(val) => updateStatus.mutate({ id: req.id, status: val })}>
+                  <Select value={req.status} onValueChange={(val) => updateStatus.mutate({ id: req.id, oldStatus: req.status, newStatus: val })}>
                     <SelectTrigger className="h-8 text-xs">
                       <SelectValue />
                     </SelectTrigger>
