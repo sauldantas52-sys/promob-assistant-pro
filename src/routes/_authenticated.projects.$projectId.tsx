@@ -439,7 +439,7 @@ function ProjectDetail() {
               <p className="text-[12px] font-black uppercase tracking-[0.6em] text-blue-600">Dossiê Técnico Industrial</p>
               <div className="h-3 w-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
             </div>
-            <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-slate-900 uppercase leading-[0.8]">
+            <h1 className="text-6xl md:text-[10rem] font-black tracking-tighter text-slate-900 uppercase leading-[0.8]">
               {project.data?.name}
             </h1>
             <div className="flex flex-wrap items-center gap-8 pt-4">
