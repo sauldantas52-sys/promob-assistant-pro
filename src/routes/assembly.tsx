@@ -229,9 +229,10 @@ function AssemblyContent() {
                                         </div>
                                       ))}
                                     </div>
-                                    <DialogFooter>
-                                      <Button variant="ghost">Exceção</Button>
-                                      <Button>Finalizar Conferência</Button>
+                                    <DialogFooter className="flex-col gap-2 sm:flex-row">
+                                      <Button variant="ghost" className="text-xs">Reportar Dano</Button>
+                                      <Button variant="secondary" className="text-xs">Exceção Autorizada</Button>
+                                      <Button className="w-full sm:w-auto">Finalizar Kit</Button>
                                     </DialogFooter>
                                   </DialogContent>
                                 </Dialog>
