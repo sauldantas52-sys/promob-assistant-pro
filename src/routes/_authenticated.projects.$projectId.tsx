@@ -436,7 +436,7 @@ function ProjectDetail() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Badge className={cn("px-4 py-1.5 text-sm font-bold shadow-sm uppercase tracking-wider border", statusTone(project.data?.status || "novo"))}>
+          <Badge className={cn("px-4 py-1.5 text-[10px] font-bold shadow-sm uppercase tracking-widest border", statusTone(project.data?.status || "novo"))}>
             {statusLabel(project.data?.status || "novo")}
           </Badge>
           <Select 
