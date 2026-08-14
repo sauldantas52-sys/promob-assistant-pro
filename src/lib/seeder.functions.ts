@@ -25,7 +25,8 @@ export const seedIntegrationTestData = createServerFn({ method: "POST" })
       full_name: "Operador de Teste"
     });
 
-    // 3. Create Project
+    // 3. Create Project - Use exact columns from types.ts
+    // is_machining_assembly_blocked is the correct column name from types.ts:848
     const { data: project, error: projErr } = await admin
       .from("projects")
       .insert({
