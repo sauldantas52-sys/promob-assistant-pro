@@ -14,16 +14,17 @@ export const Route = createFileRoute('/_authenticated')({
       });
     }
     
-    // Check if user is auditor and the account exists in user_roles
     const { data: roleData } = await supabase
       .from('user_roles')
-      .select('role')
+      .select('role, companies(id, name)')
       .eq('user_id', session.user.id)
       .maybeSingle();
 
     return {
       session,
-      userRole: roleData?.role || null,
+      userRole: (roleData?.role as any) || null,
+      companyId: (roleData?.companies as any)?.id || null,
+      companyName: (roleData?.companies as any)?.name || null,
     };
   },
 });
