@@ -15,7 +15,9 @@ const rolePermissions: Record<AppRole, Record<string, Permission[]>> = {
     production: ["view"],
     assembly: ["view"],
     shipping: ["view"],
+    settings: ["view"],
   },
+
   fabrica: {
     projects: ["view"],
     production: ["view", "edit"],
