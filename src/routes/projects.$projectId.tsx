@@ -270,7 +270,7 @@ function ProjectDetail() {
         <div>
           <h1 className="text-2xl font-bold md:text-3xl">{project.data?.name}</h1>
           <p className="text-sm text-muted-foreground">
-            {project.data.client_name || "Sem cliente"} · {project.data.environment || "Ambiente não informado"}
+            {project.data?.client_name || "Sem cliente"} · {project.data?.environment || "Ambiente não informado"}
           </p>
         </div>
         <div className="flex items-center gap-3">
