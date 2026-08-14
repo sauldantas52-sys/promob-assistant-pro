@@ -1,18 +1,15 @@
 # Monta AI Bridge para SketchUp
 
-Este plugin permite a integração entre o SketchUp e o ecossistema Monta AI, facilitando a organização de projetos e a exportação de dados para orçamentação e engenharia.
+## Visão Geral
+Este plugin conecta o SketchUp ao ecossistema Monta AI, permitindo que projetos 3D sejam convertidos em dados industriais para fabricação e montagem.
 
 ## Funcionalidades
-- Organização automática de tags (G1, G2, G3, AV).
-- Auditoria geométrica e dimensional.
-- Geração de manifesto JSON compatível com Monta AI.
-- Sincronização segura com a nuvem.
+- Menu **Monta AI** no SketchUp.
+- Criação automática de **Tags Industriais** (00 a 18).
+- Auditoria de projeto com **Relatório de Validação**.
+- Exportação de **Manifesto JSON** (Modo Local).
+- Bloqueio de usinagem automático (`is_machining_assembly_blocked: true`).
 
 ## Requisitos
 - SketchUp 2021 ou superior.
-- Acesso à internet (para modo conectado).
-
-## Segurança
-- `machining_blocked = true` por padrão.
-- Não gera furação ou códigos CNC.
-- Focado exclusivamente em layout e metadados.
+- Codificação UTF-8 ativa.

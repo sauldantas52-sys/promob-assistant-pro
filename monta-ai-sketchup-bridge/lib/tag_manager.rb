@@ -1,3 +1,4 @@
+# encoding: UTF-8
 module MontaAI
   module Bridge
     class TagManager
@@ -5,17 +6,18 @@ module MontaAI
         model = Sketchup.active_model
         layers = model.layers
         
-        industrial_tags = [
-          "MONTA_AI_G1_MODULOS",
-          "MONTA_AI_G2_COMPONENTES",
-          "MONTA_AI_G3_FERRAGENS",
-          "MONTA_AI_AV_ACABAMENTOS",
-          "MONTA_AI_LAYOUT_PLANTA"
+        tags = [
+          "00_REFERENCIAS", "01_AMBIENTES", "02_MODULOS", "03_G1", "04_G2", 
+          "05_G3", "06_AV", "07_PORTAS_FRENTES", "08_ESTRUTURA", "09_INTERNOS", 
+          "10_FERRAGENS_VISUAIS", "11_COTAS", "12_MATERIAIS", "13_NAO_FABRICAVEL", 
+          "14_PROCESSO_CORTE", "15_PROCESSO_BORDA", "16_PROCESSO_USINAGEM", 
+          "17_PROCESSO_SEPARACAO", "18_MONTAGEM"
         ]
         
-        industrial_tags.each do |tag|
+        tags.each do |tag|
           layers.add(tag) unless layers[tag]
         end
+        UI.messagebox("Tags industriais criadas com sucesso.")
       end
     end
   end
