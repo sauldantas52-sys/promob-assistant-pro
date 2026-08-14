@@ -1,0 +1,13 @@
+{
+  "plugin_version": "1.0.0",
+  "project_id": "INVALID-UUID",
+  "version_number": 0,
+  "items": [
+    {
+      "module_id": "GUID_001",
+      "module_name": "",
+      "group_code": "INVALID",
+      "thickness_mm": -5
+    }
+  ]
+}

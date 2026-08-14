@@ -1,0 +1,21 @@
+{
+  "plugin_version": "1.0.0",
+  "project_id": "81fa35c2-70ed-4be7-8bb0-e64501b55952",
+  "version_number": 1,
+  "items": [
+    {
+      "environment_id": "Cozinha",
+      "module_id": "SKP-GUID-998877",
+      "group_code": "G1",
+      "module_name": "Balcão 2 Portas",
+      "material": "MDF Branco",
+      "color": "Branco",
+      "thickness_mm": 18,
+      "width_mm": 800,
+      "height_mm": 720,
+      "depth_mm": 580,
+      "position_x": 0, "position_y": 0, "position_z": 0,
+      "tags": ["02_MODULOS", "03_G1"]
+    }
+  ]
+}
