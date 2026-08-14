@@ -40,13 +40,12 @@ export const processSkpPackage = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { projectId, manifest, files } = data;
     
-    // Use casting to bypass strict type errors for non-generated tables during development
     const admin = supabaseAdmin as any;
 
-    // 1. Get company_id
+    // 1. Get project metadata and company_id
     const { data: projectData, error: pError } = await admin
       .from("projects")
-      .select("company_id")
+      .select("company_id, name, environment")
       .eq("id", projectId)
       .single();
     
@@ -71,70 +70,62 @@ export const processSkpPackage = createServerFn({ method: "POST" })
     const processedItems: any[] = [];
     const seenGuids = new Set<string>();
 
-    // 3. Validate and Organize
+    // 3. Process items with industrial rules
     for (const item of manifest.items) {
       let status: "confirmado" | "não_confirmado" | "divergente" = "confirmado";
       const notes: string[] = [];
 
-      // Industrial Tag Validation (00-18)
-      const hasIndustrialTag = item.tags?.some(tag => /^\d{2}_/.test(tag));
+      // A. Industrial Tag Validation (00-18)
+      const tags = item.tags || [];
+      const hasIndustrialTag = tags.some(tag => /^(0[0-9]|1[0-8])_/.test(tag));
+      
       if (!hasIndustrialTag) {
         validations.push({
           version_id: version.id,
           status: "aviso",
           error_code: "TAG_NON_INDUSTRIAL",
-          message: `Objeto ${item.module_id} não possui tag industrial padronizada.`,
+          message: `Objeto ${item.module_id} não possui tag industrial padronizada (00-18).`,
           item_id: item.module_id,
           company_id: companyId
         });
         status = "não_confirmado";
-        notes.push("Tag não industrial");
+        notes.push("Tag industrial ausente");
       }
 
-      // Validations
-      if (!item.module_name || item.module_name === "" || item.module_name === "Item Sem Nome") {
+      // B. Group Validation (G1, G2, G3, AV)
+      const groupCode = item.group_code || "AV";
+      const validGroups = ["G1", "G2", "G3", "AV"];
+      if (!validGroups.includes(groupCode)) {
         validations.push({
           version_id: version.id,
-          status: "aviso",
-          error_code: "MISSING_NAME",
-          message: `Módulo ${item.module_id} sem nome definido no SketchUp.`,
+          status: "erro",
+          error_code: "INVALID_GROUP",
+          message: `Grupo ${groupCode} inválido no item ${item.module_id}.`,
           item_id: item.module_id,
           company_id: companyId
         });
         status = "não_confirmado";
-        notes.push("Nome ausente");
       }
 
+      // C. Dimensions Validation
+      if (!item.width_mm || !item.height_mm || !item.depth_mm) {
+        status = "não_confirmado";
+        notes.push("Medidas incompletas");
+      }
+
+      // D. Duplicate detection
       if (seenGuids.has(item.module_id)) {
         validations.push({
           version_id: version.id,
           status: "erro",
-          error_code: "DUPLICATE_GROUP",
-          message: `ID Duplicado detectado: ${item.module_id}.`,
+          error_code: "DUPLICATE_GUID",
+          message: `GUID Duplicado: ${item.module_id}.`,
           item_id: item.module_id,
           company_id: companyId
         });
         status = "não_confirmado";
-        notes.push("ID Duplicado");
       }
       seenGuids.add(item.module_id);
-
-      if (!item.environment_id) {
-        validations.push({
-          version_id: version.id,
-          status: "aviso",
-          error_code: "ORPHAN_OBJECT",
-          message: `Objeto ${item.module_id} sem ambiente definido.`,
-          item_id: item.module_id,
-          company_id: companyId
-        });
-        status = "não_confirmado";
-        notes.push("Sem ambiente");
-      }
-
-
-      // Organize groups
-      let groupCode = item.group_code || "AV";
 
       processedItems.push({
         version_id: version.id,
@@ -155,32 +146,47 @@ export const processSkpPackage = createServerFn({ method: "POST" })
         plugin_version: manifest.plugin_version,
         engineering_status: status,
         validation_notes: notes.join(", "),
-        tags: item.tags,
+        tags: tags,
         company_id: companyId
       });
     }
 
-    // 4. Batch Inserts
+    // 4. Persistence with Safety Locks
     if (processedItems.length > 0) {
       await admin.from("project_version_items").insert(processedItems);
       
-      // Also insert into regular 'parts' table with machining_blocked: true
+      // Auto-insert into 'parts' with safety lock
       const partsToInsert = processedItems.map(item => ({
         project_id: projectId,
+        company_id: companyId,
         name: item.module_name,
-        kind: 'peca', // Default to 'peca' for SKP imports
-        material: item.material,
+        kind: 'peca',
+        material: item.material || 'NÃO DEFINIDO',
         thickness_mm: item.thickness_mm,
         width_mm: item.width_mm,
         length_mm: item.height_mm,
         quantity: 1,
         data_source: 'SKP_BRIDGE',
-        machining_blocked: true,
-        company_id: companyId,
-        metadata: { skp_guid: item.module_id, environment: item.environment_id }
+        machining_blocked: true, // Safety Lock
+        status: 'Não confirmado', // Industrial Status
+        metadata: { 
+          skp_guid: item.module_id, 
+          environment: item.environment_id,
+          group: item.group_code
+        }
       }));
+      
       await admin.from("parts").insert(partsToInsert);
+      
+      // Update global project block
+      await admin.from("projects")
+        .update({ 
+          machining_blocked: true,
+          status: 'conferencia' // Move to conference for audit
+        })
+        .eq("id", projectId);
     }
+
     if (validations.length > 0) {
       await admin.from("project_package_validations").insert(validations);
     }
@@ -196,5 +202,9 @@ export const processSkpPackage = createServerFn({ method: "POST" })
       await admin.from("project_version_files").insert(versionFiles);
     }
 
-    return { versionId: version.id, itemCount: processedItems.length, validationCount: validations.length };
+    return { 
+      versionId: version.id, 
+      itemCount: processedItems.length, 
+      validationCount: validations.length 
+    };
   });
