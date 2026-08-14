@@ -40,6 +40,25 @@ export const PROMOB_BITOLA_RULES: BitolaRule[] = [
   { bitola: 36, description: "Engrossados / Paineis", tolerancia_mm: 1.0, unidade: "mm" }
 ];
 
+/**
+ * Mapeia entidades DXF para coordenadas de furação
+ */
+export function mapDxfToDrillings(dxfGeometries: any[], partId: string): DrillingCoordinate[] {
+  return dxfGeometries
+    .filter(g => g.type === 'CIRCLE' || g.type === 'ARC')
+    .map(g => ({
+      part_id: partId,
+      x: g.center.x,
+      y: g.center.y,
+      z: 0, // Assumindo face superior por padrão se não houver layer específica
+      diametro: g.radius * 2,
+      profundidade: 10, // Valor padrão para inferência se não houver Z
+      face: "superior",
+      origem: "DXF",
+      status: "confirmada"
+    }));
+}
+
 export async function generateEngineeringAudit(projectId: string): Promise<EngineeringReport> {
   const { data: parts, error: partsError } = await supabase
     .from("parts")
@@ -51,16 +70,6 @@ export async function generateEngineeringAudit(projectId: string): Promise<Engin
   const conflicts: string[] = [];
   let validatedCount = 0;
   let blockedCount = 0;
-
-  const report: EngineeringReport = {
-    project_id: projectId,
-    timestamp: new Date().toISOString(),
-    total_parts: parts?.length || 0,
-    validated_parts: 0,
-    blocked_machining: 0,
-    conflicts: [],
-    bitola_summary: {}
-  };
 
   parts?.forEach(part => {
     // 1. Validação de Bitola
@@ -80,9 +89,13 @@ export async function generateEngineeringAudit(projectId: string): Promise<Engin
     }
   });
 
-  report.validated_parts = validatedCount;
-  report.blocked_machining = blockedCount;
-  report.conflicts = conflicts;
-
-  return report;
+  return {
+    project_id: projectId,
+    timestamp: new Date().toISOString(),
+    total_parts: parts?.length || 0,
+    validated_parts: validatedCount,
+    blocked_machining: blockedCount,
+    conflicts: conflicts,
+    bitola_summary: {}
+  };
 }

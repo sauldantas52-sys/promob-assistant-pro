@@ -21,7 +21,7 @@ import { parseDXF, DXFGeometry } from "@/lib/dxf-parser";
 import { parseExecutivePDF, CriticalDimension } from "@/lib/pdf-parser";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { PROMOB_BITOLA_RULES } from "@/lib/bitola-engineering";
+import { PROMOB_BITOLA_RULES, mapDxfToDrillings, DrillingCoordinate } from "@/lib/bitola-engineering";
 import { DrillingInspector } from "./DrillingInspector";
 
 interface EngineeringTabProps {
