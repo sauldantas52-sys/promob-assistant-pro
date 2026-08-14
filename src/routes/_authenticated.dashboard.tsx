@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AppShell } from "@/components/AppShell";
-import { useAuth, roleLabels } from "@/lib/auth";
+import { useAuth, roleLabels, type AppRole } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { statusLabel, statusTone } from "@/lib/project-status";
 import { cn } from "@/lib/utils";
