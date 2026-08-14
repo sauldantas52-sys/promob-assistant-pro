@@ -825,47 +825,74 @@ export type Database = {
             referencedRelation: "modules"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "shipping_volume_items_volume_id_fkey"
-            columns: ["volume_id"]
-            isOneToOne: false
-            referencedRelation: "shipping_volumes"
-            referencedColumns: ["id"]
-          },
         ]
       }
       shipping_volumes: {
         Row: {
+          code: string
           created_at: string | null
           delivered_at: string | null
-          description: string
           driver_name: string | null
+          group_id: string | null
           id: string
+          loaded_at: string | null
+          metadata: Json | null
+          name: string
+          photo_url: string | null
           project_id: string
-          shipped_at: string | null
+          responsible_id: string | null
+          scanned_at: string | null
           status: string
+          updated_at: string | null
+          vehicle_plate: string | null
+          weight_kg: number | null
         }
         Insert: {
+          code: string
           created_at?: string | null
           delivered_at?: string | null
-          description: string
           driver_name?: string | null
+          group_id?: string | null
           id?: string
+          loaded_at?: string | null
+          metadata?: Json | null
+          name: string
+          photo_url?: string | null
           project_id: string
-          shipped_at?: string | null
+          responsible_id?: string | null
+          scanned_at?: string | null
           status?: string
+          updated_at?: string | null
+          vehicle_plate?: string | null
+          weight_kg?: number | null
         }
         Update: {
+          code?: string
           created_at?: string | null
           delivered_at?: string | null
-          description?: string
           driver_name?: string | null
+          group_id?: string | null
           id?: string
+          loaded_at?: string | null
+          metadata?: Json | null
+          name?: string
+          photo_url?: string | null
           project_id?: string
-          shipped_at?: string | null
+          responsible_id?: string | null
+          scanned_at?: string | null
           status?: string
+          updated_at?: string | null
+          vehicle_plate?: string | null
+          weight_kg?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "shipping_volumes_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "assembly_groups"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "shipping_volumes_project_id_fkey"
             columns: ["project_id"]
