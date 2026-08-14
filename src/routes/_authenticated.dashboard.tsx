@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { FolderKanban, Factory, Wrench, AlertTriangle, ClipboardCheck } from "lucide-react";
+import { FolderKanban, Factory, Wrench, AlertTriangle, ClipboardCheck, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -94,14 +94,14 @@ function DashboardContent() {
         ))}
       </div>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-base">Projetos recentes</CardTitle>
-          <Button asChild variant="outline" size="sm">
-            <Link to="/projects">Ver todos</Link>
+      <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between bg-slate-50/50 py-4 px-6 border-b border-slate-100">
+          <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-700">Projetos recentes</CardTitle>
+          <Button asChild variant="ghost" size="sm" className="font-bold text-blue-600 hover:bg-blue-50">
+            <Link to="/projects" className="flex items-center gap-1">Ver todos <ChevronRight className="h-4 w-4" /></Link>
           </Button>
         </CardHeader>
-        <CardContent className="divide-y p-0">
+        <CardContent className="divide-y divide-slate-100 p-0">
           {list.slice(0, 6).map((project) => (
             <Link
               key={project.id}
