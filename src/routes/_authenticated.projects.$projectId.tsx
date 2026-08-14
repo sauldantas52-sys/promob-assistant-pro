@@ -924,6 +924,10 @@ function ProjectDetail() {
           <SketchUpBridgeTab projectId={projectId} />
         </TabsContent>
 
+        <TabsContent value="integration_audit" className="mt-6">
+          <AuditIntegrationTab />
+        </TabsContent>
+
         <TabsContent value="production" className="mt-6">
           <div className="grid gap-6">
             <Card>
