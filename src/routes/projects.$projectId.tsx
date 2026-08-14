@@ -748,6 +748,10 @@ function ProjectDetail() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="engineering" className="mt-6">
+          <EngineeringTab projectId={projectId} parts={allParts} />
+        </TabsContent>
+
         <TabsContent value="production" className="mt-6">
           <div className="grid gap-6">
             <Card>
