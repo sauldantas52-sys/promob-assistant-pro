@@ -139,16 +139,18 @@ export function SketchUpBridgeTab({ projectId }: SketchUpBridgeTabProps) {
         </div>
         
         <div className="flex items-center gap-4">
-          <Button variant="outline" className="rounded-full border-slate-700 bg-slate-800 text-white hover:bg-slate-700 font-black uppercase text-[10px] tracking-widest px-8 h-12">
-            <Download className="mr-2 h-4 w-4" /> Download SKP
-          </Button>
+          <a href="/MontaAI_Sketchup_Bridge_v0.1.0-beta.rbz" download>
+            <Button variant="outline" className="rounded-full border-slate-700 bg-slate-800 text-white hover:bg-slate-700 font-black uppercase text-[10px] tracking-widest px-8 h-12">
+              <Download className="mr-2 h-4 w-4" /> Download Plugin (RBZ)
+            </Button>
+          </a>
           <Button 
             className="rounded-full bg-amber-600 text-white hover:bg-amber-500 font-black uppercase text-[10px] tracking-widest px-8 h-12 shadow-xl shadow-amber-600/20"
             disabled={uploading}
             onClick={() => fileInputRef.current?.click()}
           >
             {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileUp className="mr-2 h-4 w-4" />}
-            Nova Versão
+            Importar Manifesto
           </Button>
         </div>
       </div>
