@@ -44,12 +44,23 @@ function LoginPage() {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
+  const [countdown, setCountdown] = useState(0);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [role, setRole] = useState<AppRole>("escritorio");
+
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+    return undefined;
+  }, [countdown]);
+
+
 
   useEffect(() => {
     if (user) navigate({ to: "/dashboard" });
@@ -83,10 +94,17 @@ function LoginPage() {
       toast.success("Conta criada com sucesso!");
       navigate({ to: "/dashboard" });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Não foi possível criar a conta.");
+      const msg = error instanceof Error ? error.message : "";
+      if (msg.includes("rate limit") || msg.includes("too many requests") || (error as any)?.status === 429) {
+        toast.error("Muitas tentativas. Aguarde alguns segundos antes de tentar novamente.");
+        setCountdown(40);
+      } else {
+        toast.error(error instanceof Error ? error.message : "Não foi possível criar a conta.");
+      }
     } finally {
       setBusy(false);
     }
+
   };
 
   const handleResetPassword = async (e: React.FormEvent) => {
@@ -227,10 +245,15 @@ function LoginPage() {
                       </div>
                     )}
 
-                    <Button type="submit" className="h-12 w-full text-base" disabled={busy}>
-
-                      {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Criar conta
+                    <Button 
+                      type="submit" 
+                      className="h-12 w-full text-base" 
+                      disabled={busy || countdown > 0}
+                    >
+                      {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} 
+                      {countdown > 0 ? `Aguarde ${countdown}s` : "Criar conta"}
                     </Button>
+
                   </form>
                 </TabsContent>
               </Tabs>
