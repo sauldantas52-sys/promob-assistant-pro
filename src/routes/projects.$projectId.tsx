@@ -821,7 +821,7 @@ function ProjectDetail() {
                       <div className="flex items-center justify-between">
                         <Label className="text-xs font-bold">1. CORTE E BORDA</Label>
                         <Badge className={project.data?.is_cutting_edge_released ? "bg-green-500" : "bg-amber-500"}>
-                          {project.data?.is_cutting_edge_released ? "LIBERADO" : "PENDENTE"}
+                          {!!project.data?.is_cutting_edge_released ? "LIBERADO" : "PENDENTE"}
                         </Badge>
                       </div>
                       <p className="text-[10px] text-amber-700 leading-tight">
