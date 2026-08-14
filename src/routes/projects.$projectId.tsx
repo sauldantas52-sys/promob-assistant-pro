@@ -242,7 +242,7 @@ function ProjectDetail() {
             // 3. Criar Kit de Ferragens automaticamente
             const hardwareItems = insertedParts.filter(p => p.kind === 'ferragem' || p.kind === 'acessorio');
             if (hardwareItems.length > 0) {
-              await supabase.from('assembly_group_hardware').insert(
+              await (supabase.from('assembly_group_hardware') as any).insert(
                 hardwareItems.map(h => ({
                   group_id: group.id,
                   part_id: h.id,
