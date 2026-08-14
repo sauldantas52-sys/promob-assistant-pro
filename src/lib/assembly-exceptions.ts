@@ -43,6 +43,7 @@ export const blockingExceptions: ExceptionKind[] = [
 ];
 
 export interface ExceptionEvent {
+  id?: string; // Idempotent ID (client-side generated)
   projectId: string;
   groupId?: string | null;
   kind: ExceptionKind;
