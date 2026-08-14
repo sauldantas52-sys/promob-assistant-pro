@@ -196,24 +196,24 @@ function ProjectShippingCard({ project }: { project: any }) {
   };
 
   return (
-    <Card className="border-none shadow-[0_25px_60px_-15px_rgba(0,0,0,0.06)] hover:shadow-[0_35px_80px_-15px_rgba(0,0,0,0.12)] transition-all duration-700 rounded-[3.5rem] overflow-hidden group bg-white mb-10">
-      <CardHeader className="pb-8 pt-12 px-12 bg-slate-50/50 border-b border-slate-100">
-        <div className="flex flex-wrap items-center justify-between gap-8">
-          <div className="space-y-3">
-            <CardTitle className="text-3xl font-black text-slate-900 tracking-tighter uppercase leading-none group-hover:text-indigo-600 transition-colors duration-500">{project.name}</CardTitle>
-            <CardDescription className="text-[11px] font-black text-slate-500 uppercase tracking-[0.3em] flex items-center gap-3">
-              {project.client_name} <span className="h-1 w-1 rounded-full bg-slate-300" /> {project.environment}
+    <Card className="border-none shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)] hover:shadow-[0_60px_120px_-20px_rgba(0,0,0,0.15)] transition-all duration-700 rounded-[4rem] overflow-hidden group bg-white mb-12">
+      <CardHeader className="pb-10 pt-16 px-16 bg-slate-50/30 border-b border-slate-100">
+        <div className="flex flex-wrap items-center justify-between gap-10">
+          <div className="space-y-4">
+            <CardTitle className="text-5xl font-black text-slate-900 tracking-tighter uppercase leading-[0.9] group-hover:text-indigo-600 transition-colors duration-500">{project.name}</CardTitle>
+            <CardDescription className="text-[12px] font-black text-slate-500 uppercase tracking-[0.4em] flex items-center gap-3">
+              {project.client_name} <span className="h-1.5 w-1.5 rounded-full bg-slate-200" /> {project.environment}
             </CardDescription>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             {pendingSealedGroups.length > 0 && (
-              <Button size="lg" className="h-14 px-8 rounded-[1.25rem] bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-[0.2em] text-[10px] border-none shadow-xl shadow-indigo-600/20 transition-all active:scale-95" onClick={generateVolumes} disabled={isGenerating}>
-                {isGenerating ? <Loader2 className="mr-3 h-5 w-5 animate-spin" /> : <QrCode className="mr-3 h-5 w-5" />}
+              <Button size="lg" className="h-16 px-10 rounded-[1.5rem] bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-[0.2em] text-[11px] border-none shadow-2xl shadow-indigo-600/20 transition-all active:scale-95" onClick={generateVolumes} disabled={isGenerating}>
+                {isGenerating ? <Loader2 className="mr-4 h-6 w-6 animate-spin" /> : <QrCode className="mr-4 h-6 w-6" />}
                 Gerar Volumes ({pendingSealedGroups.length})
               </Button>
             )}
-            <Badge className={cn("px-8 py-3 text-[10px] font-black uppercase tracking-[0.3em] border-none rounded-full shadow-lg", project.status === 'expedicao' ? 'bg-blue-600 text-white shadow-blue-600/30' : 'bg-emerald-600 text-white shadow-emerald-600/30')}>
-              {project.status === 'expedicao' ? 'LIBERAR CARGA' : 'PRONTO PARA EXPEDIÇÃO'}
+            <Badge className={cn("px-10 py-4 text-[11px] font-black uppercase tracking-[0.3em] border-none rounded-full shadow-2xl transition-all duration-500", project.status === 'expedicao' ? 'bg-blue-600 text-white' : 'bg-emerald-600 text-white')}>
+              {project.status === 'expedicao' ? 'LIBERAR CARGA' : 'EXPEDIÇÃO PRONTA'}
             </Badge>
           </div>
         </div>
