@@ -1,6 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, CheckCircle2, XCircle, Info } from "lucide-react";
+import { AlertCircle, CheckCircle2, XCircle, Info, Binary } from "lucide-react";
 
 interface DrillingInspectorProps {
   drillings: any[];
@@ -40,15 +40,24 @@ export function DrillingInspector({ drillings }: DrillingInspectorProps) {
                   <TableCell>{d.x.toFixed(2)}</TableCell>
                   <TableCell>{d.y.toFixed(2)}</TableCell>
                   <TableCell>{d.diametro}mm</TableCell>
-                  <TableCell>{d.profundidade}mm</TableCell>
-                  <TableCell className="uppercase">{d.face}</TableCell>
+                  <TableCell>{d.profundidade > 0 ? `${d.profundidade}mm` : <span className="text-amber-600 italic">Não conf.</span>}</TableCell>
+                  <TableCell className="uppercase">{d.face || "Indefinida"}</TableCell>
                   <TableCell>
-                    <Badge variant="outline">{d.origem}</Badge>
+                    <div className="flex flex-col gap-1">
+                      <Badge variant="outline">{d.origem}</Badge>
+                      {d.regra_aplicada && (
+                        <span className="text-[10px] text-muted-foreground italic">
+                          Regra: {d.regra_aplicada}
+                        </span>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>
                     {d.status === 'confirmada' && <CheckCircle2 className="h-4 w-4 text-green-500" />}
+                    {d.status === 'calculada' && <Binary className="h-4 w-4 text-blue-500" />}
                     {d.status === 'conflitante' && <XCircle className="h-4 w-4 text-red-500" />}
                     {d.status === 'inferida' && <AlertCircle className="h-4 w-4 text-amber-500" />}
+                    {d.status === 'ausente' && <Info className="h-4 w-4 text-slate-400" />}
                   </TableCell>
                 </TableRow>
               ))

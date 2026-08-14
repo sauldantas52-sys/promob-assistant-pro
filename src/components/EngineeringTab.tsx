@@ -302,11 +302,12 @@ export function EngineeringTab({ projectId, parts }: EngineeringTabProps) {
                 ))}
               </div>
 
-              <Alert>
-                <Binary className="h-4 w-4" />
-                <AlertTitle>Matriz de Correspondência XML (amanda_111.xml)</AlertTitle>
-                <AlertDescription className="text-xs">
-                  Relacionando bitolas nominais aos códigos reais e tolerâncias permitidas pelo motor Promob.
+              <Alert variant="destructive" className="border-red-200 bg-red-50">
+                <Binary className="h-4 w-4 text-red-600" />
+                <AlertTitle className="text-red-900 font-bold">MATRIZ DE AUDITORIA CRÍTICA</AlertTitle>
+                <AlertDescription className="text-xs text-red-800">
+                  Relacionando bitolas nominais aos códigos reais e tolerâncias permitidas. 
+                  <strong> A liberação de usinagem exige conformidade 100% com a matriz abaixo.</strong>
                 </AlertDescription>
               </Alert>
 
@@ -315,7 +316,7 @@ export function EngineeringTab({ projectId, parts }: EngineeringTabProps) {
                   <TableRow>
                     <TableHead>Peça</TableHead>
                     <TableHead>Bitola Real</TableHead>
-                    <TableHead>Padrão Promob</TableHead>
+                    <TableHead>Padrão / Origem</TableHead>
                     <TableHead>Tolerância</TableHead>
                     <TableHead>Usinagem</TableHead>
                   </TableRow>
@@ -329,7 +330,16 @@ export function EngineeringTab({ projectId, parts }: EngineeringTabProps) {
                       <TableRow key={part.id}>
                         <TableCell className="text-xs font-medium">{part.name}</TableCell>
                         <TableCell className="text-xs">{part.thickness_mm}mm</TableCell>
-                        <TableCell className="text-xs">{rule ? `${rule.bitola}mm` : 'Não identificado'}</TableCell>
+                        <TableCell className="text-xs">
+                          {rule ? (
+                            <div className="flex flex-col">
+                              <span>{rule.bitola}mm</span>
+                              <span className="text-[10px] text-muted-foreground italic">{rule.origem_regra}</span>
+                            </div>
+                          ) : (
+                            <span className="text-red-600 font-bold">Não identificado</span>
+                          )}
+                        </TableCell>
                         <TableCell className="text-xs">{rule ? `±${rule.tolerancia_mm}mm` : '-'}</TableCell>
                         <TableCell>
                           {part.machining_blocked ? (

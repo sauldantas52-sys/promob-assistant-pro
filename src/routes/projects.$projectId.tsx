@@ -450,7 +450,7 @@ function ProjectDetail() {
         <Metric icon={Layers} label="Peças / chapas" value={String(panels.length)} />
         <Metric icon={Wrench} label="Ferragens / Acessórios" value={String(hardware.length)} />
         <Metric icon={AlertTriangle} label="Itens sem módulo" value={String(allParts.filter(p => !p.module_id).length)} />
-        <Metric icon={HardHat} label="Valid. Engenharia" value="Pendente" />
+        <Metric icon={HardHat} label="Valid. Engenharia" value={allParts.some(p => p.machining_blocked && (p.kind === 'peca' || p.kind === 'chapa')) ? "BLOQUEADO" : "LIBERADO"} />
         <Metric icon={FileText} label="Área de chapa (m²)" value={totalArea.toFixed(2)} />
       </div>
 
