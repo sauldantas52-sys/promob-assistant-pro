@@ -53,11 +53,11 @@ export function DrillingInspector({ drillings }: DrillingInspectorProps) {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {d.status === 'confirmada' && <CheckCircle2 className="h-4 w-4 text-green-500" title="Lida da fonte técnica" />}
-                    {d.status === 'calculada' && <Binary className="h-4 w-4 text-blue-500" title="Calculada por regra" />}
-                    {d.status === 'conflitante' && <XCircle className="h-4 w-4 text-red-500" title="Conflito de dados" />}
-                    {d.status === 'inferida' && <AlertCircle className="h-4 w-4 text-amber-500" title="Inferência sem prova" />}
-                    {d.status === 'ausente' && <Info className="h-4 w-4 text-slate-400" title="Não encontrada" />}
+                    {d.status === 'confirmada' && <CheckCircle2 className="h-4 w-4 text-green-500" />}
+                    {d.status === 'calculada' && <Binary className="h-4 w-4 text-blue-500" />}
+                    {d.status === 'conflitante' && <XCircle className="h-4 w-4 text-red-500" />}
+                    {d.status === 'inferida' && <AlertCircle className="h-4 w-4 text-amber-500" />}
+                    {d.status === 'ausente' && <Info className="h-4 w-4 text-slate-400" />}
                   </TableCell>
                 </TableRow>
               ))
