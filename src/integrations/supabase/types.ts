@@ -32,6 +32,113 @@ export type Database = {
         }
         Relationships: []
       }
+      modules: {
+        Row: {
+          created_at: string
+          depth_mm: number | null
+          environment: string | null
+          height_mm: number | null
+          id: string
+          name: string
+          project_id: string
+          quantity: number
+          width_mm: number | null
+        }
+        Insert: {
+          created_at?: string
+          depth_mm?: number | null
+          environment?: string | null
+          height_mm?: number | null
+          id?: string
+          name: string
+          project_id: string
+          quantity?: number
+          width_mm?: number | null
+        }
+        Update: {
+          created_at?: string
+          depth_mm?: number | null
+          environment?: string | null
+          height_mm?: number | null
+          id?: string
+          name?: string
+          project_id?: string
+          quantity?: number
+          width_mm?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modules_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      parts: {
+        Row: {
+          created_at: string
+          edge_banding: string | null
+          id: string
+          kind: string
+          length_mm: number | null
+          material: string | null
+          module_id: string | null
+          name: string
+          project_id: string
+          quantity: number
+          thickness_mm: number | null
+          unit: string | null
+          width_mm: number | null
+        }
+        Insert: {
+          created_at?: string
+          edge_banding?: string | null
+          id?: string
+          kind?: string
+          length_mm?: number | null
+          material?: string | null
+          module_id?: string | null
+          name: string
+          project_id: string
+          quantity?: number
+          thickness_mm?: number | null
+          unit?: string | null
+          width_mm?: number | null
+        }
+        Update: {
+          created_at?: string
+          edge_banding?: string | null
+          id?: string
+          kind?: string
+          length_mm?: number | null
+          material?: string | null
+          module_id?: string | null
+          name?: string
+          project_id?: string
+          quantity?: number
+          thickness_mm?: number | null
+          unit?: string | null
+          width_mm?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parts_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           company_id: string | null
@@ -61,30 +168,77 @@ export type Database = {
           },
         ]
       }
+      project_files: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_type: string | null
+          id: string
+          project_id: string
+          size_bytes: number | null
+          summary: Json | null
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_type?: string | null
+          id?: string
+          project_id: string
+          size_bytes?: number | null
+          summary?: Json | null
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_type?: string | null
+          id?: string
+          project_id?: string
+          size_bytes?: number | null
+          summary?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_files_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           client_name: string | null
           company_id: string
           created_at: string | null
+          environment: string | null
           id: string
           name: string
+          notes: string | null
           status: string | null
+          updated_at: string
         }
         Insert: {
           client_name?: string | null
           company_id: string
           created_at?: string | null
+          environment?: string | null
           id?: string
           name: string
+          notes?: string | null
           status?: string | null
+          updated_at?: string
         }
         Update: {
           client_name?: string | null
           company_id?: string
           created_at?: string | null
+          environment?: string | null
           id?: string
           name?: string
+          notes?: string | null
           status?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
@@ -119,6 +273,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      current_company_id: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
