@@ -10,6 +10,8 @@ export type ParsedPart = {
   edge_banding?: string | null;
   data_source?: string;
   visibility_type?: "visivel" | "oculta" | "avulsa" | "ausente" | "nao_confirmada";
+  cutting_edge_released?: boolean;
+  machining_blocked?: boolean;
 };
 
 export type ParsedModule = {
@@ -154,6 +156,8 @@ function parsePartNode(p: Element): ParsedPart {
     edge_banding: attr(p, ["EDGE", "BORDER"]),
     data_source: "XML",
     visibility_type: visibility,
+    cutting_edge_released: false,
+    machining_blocked: true,
   };
 }
 
