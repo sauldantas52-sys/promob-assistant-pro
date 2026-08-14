@@ -430,32 +430,34 @@ function ProjectDetail() {
   }
 
   return (
-    <AppShell>
-      <div className="space-y-8 p-4 md:p-10 max-w-[1600px] mx-auto">
-        <header className="flex flex-col gap-6">
-          <Link to="/projects" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 hover:text-blue-600 transition-colors">
-            <ArrowLeft className="h-4 w-4" /> Voltar para Projetos
-          </Link>
+    <div className="space-y-12 p-8 md:p-16 max-w-[1800px] mx-auto animate-in fade-in duration-700">
+      <header className="flex flex-col gap-8">
+        <Link to="/projects" className="inline-flex items-center gap-4 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 hover:text-blue-600 transition-all duration-300 group">
+          <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-2" /> Voltar para o Centro de Comando
+        </Link>
 
-          <div className="flex flex-wrap items-end justify-between gap-10">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-600">Ficha Técnica do Projeto</p>
-                <span className="h-1.5 w-1.5 rounded-full bg-blue-600 animate-pulse" />
+        <div className="flex flex-wrap items-end justify-between gap-12">
+          <div className="space-y-6">
+            <div className="flex items-center gap-4">
+              <span className="h-2 w-10 bg-blue-600 rounded-full" />
+              <p className="text-[12px] font-black uppercase tracking-[0.6em] text-blue-600">Dossiê Técnico Industrial</p>
+              <div className="h-3 w-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
+            </div>
+            <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-slate-900 uppercase leading-[0.8]">
+              {project.data?.name}
+            </h1>
+            <div className="flex flex-wrap items-center gap-8 pt-4">
+              <Badge className={cn("px-8 py-3.5 text-[11px] font-black shadow-2xl uppercase tracking-[0.3em] border-none rounded-[1.5rem] transition-all duration-500 hover:scale-105", statusTone(project.data?.status || "novo"))}>
+                {statusLabel(project.data?.status || "novo")}
+              </Badge>
+              <div className="flex items-center gap-4 border-l-4 border-slate-200 pl-8">
+                <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.4em]">Proprietário</p>
+                <p className="text-xl font-black text-slate-900 uppercase tracking-tighter">
+                  {project.data?.client_name || "CLIENTE ANÔNIMO"}
+                </p>
               </div>
-              <h1 className="text-4xl md:text-7xl font-black tracking-tighter text-slate-900 uppercase leading-none">
-                {project.data?.name}
-              </h1>
-              <div className="flex flex-wrap items-center gap-6">
-                <Badge className={cn("px-6 py-2.5 text-[10px] font-black shadow-lg uppercase tracking-[0.2em] border-none rounded-full", statusTone(project.data?.status || "novo"))}>
-                  {statusLabel(project.data?.status || "novo")}
-                </Badge>
-                <div className="flex items-center gap-3">
-                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
-                    {project.data?.client_name || "Sem cliente"}
-                  </p>
-                  <span className="h-1 w-1 rounded-full bg-slate-300" />
-                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
+            </div>
+          </div>
                     {project.data?.environment || "Ambiente Geral"}
                   </p>
                 </div>

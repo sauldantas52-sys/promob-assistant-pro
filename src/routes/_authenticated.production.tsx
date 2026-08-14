@@ -75,38 +75,40 @@ function ProductionContent() {
   const queue = (projects.data ?? []).filter((p) => p.status !== "concluido");
 
   return (
-    <div className="space-y-10 p-6 md:p-12 max-w-[1600px] mx-auto">
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-        <div className="space-y-2">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-600">Fila Industrial</p>
-          <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-slate-900 uppercase leading-none">Painel de Produção</h1>
-          <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-2">Controle de fábrica, corte, usinagem e borda.</p>
+    <div className="space-y-16 p-8 md:p-16 max-w-[1800px] mx-auto animate-in fade-in duration-700">
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-10">
+        <div className="space-y-6">
+          <div className="flex items-center gap-4">
+            <span className="h-2 w-10 bg-blue-600 rounded-full" />
+            <p className="text-[12px] font-black uppercase tracking-[0.5em] text-blue-600">Fila Industrial de Precisão</p>
+          </div>
+          <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-slate-900 uppercase leading-[0.8] mb-4">Pipeline</h1>
+          <p className="text-base font-black text-slate-500 uppercase tracking-[0.4em]">Controle central de corte, borda e usinagem CNC.</p>
         </div>
-        <div className="flex items-center gap-4">
-          <Badge className="bg-blue-900 text-white border-none font-black uppercase tracking-[0.2em] text-[10px] px-6 py-3 rounded-full shadow-lg shadow-blue-900/20 flex items-center gap-2">
-            <Tv className="h-4 w-4" /> TV Mode Ready
+        <div className="flex items-center gap-6">
+          <Badge className="bg-slate-900 text-blue-400 border-none font-black uppercase tracking-[0.3em] text-[11px] px-8 py-5 rounded-[2rem] shadow-2xl flex items-center gap-4">
+            <Tv className="h-6 w-6" /> Status da Linha: Ativo
           </Badge>
         </div>
       </header>
 
       {queue.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center gap-2 py-12 text-center">
-            <Factory className="h-10 w-10 text-muted-foreground" />
-            <p className="font-medium">Nenhum projeto na fila</p>
-            <p className="text-sm text-muted-foreground">Projetos criados aparecem aqui automaticamente.</p>
+        <Card className="border-[4px] border-dashed border-slate-200 rounded-[4rem] bg-slate-50/50">
+          <CardContent className="flex flex-col items-center gap-6 py-32 text-center">
+            <Factory className="h-24 w-24 text-slate-200" />
+            <p className="text-2xl font-black uppercase tracking-[0.4em] text-slate-400">Pátio de Produção Vazio</p>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-12 md:grid-cols-2 xl:grid-cols-3">
           {queue.map((project) => {
             const step = flow[project.status ?? "novo"];
             return (
-              <Card key={project.id} className="border-none shadow-[0_20px_50px_-15px_rgba(0,0,0,0.06)] hover:shadow-[0_30px_70px_-15px_rgba(0,0,0,0.12)] transition-all duration-500 rounded-[3rem] overflow-hidden group bg-white">
-                <CardHeader className="pb-4 pt-10 px-10 bg-slate-50/50">
-                  <div className="flex items-start justify-between gap-4">
-                    <CardTitle className="text-2xl font-black text-slate-900 tracking-tighter leading-none uppercase group-hover:text-blue-600 transition-colors">{project.name}</CardTitle>
-                    <Badge className={cn("px-5 py-2 text-[10px] font-black uppercase tracking-[0.2em] border-none rounded-full shadow-sm", statusTone(project.status))}>
+              <Card key={project.id} className="border-none shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] hover:shadow-[0_60px_100px_-20px_rgba(0,0,0,0.15)] transition-all duration-700 rounded-[4rem] overflow-hidden group bg-white">
+                <CardHeader className="pb-8 pt-12 px-12 bg-slate-50/30 border-b border-slate-100">
+                  <div className="flex items-start justify-between gap-6">
+                    <CardTitle className="text-4xl font-black text-slate-900 tracking-tighter leading-none uppercase group-hover:text-blue-600 transition-colors duration-500">{project.name}</CardTitle>
+                    <Badge className={cn("px-6 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] border-none rounded-full shadow-lg", statusTone(project.status))}>
                       {statusLabel(project.status)}
                     </Badge>
                   </div>

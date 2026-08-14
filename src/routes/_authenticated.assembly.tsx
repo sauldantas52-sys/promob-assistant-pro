@@ -90,23 +90,21 @@ function AssemblyContent() {
   const list = projects.data ?? [];
 
   return (
-    <div className="space-y-10 p-6 md:p-12 max-w-[1600px] mx-auto">
-      <header className="flex flex-col gap-3">
-        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-600">Montagem Externa</p>
-        <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-slate-900 uppercase leading-none">Casa do Cliente</h1>
-        <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-2">
-          Roteiro técnico, sequência de montagem e checklists mobile.
-        </p>
+    <div className="space-y-16 p-8 md:p-16 max-w-[1800px] mx-auto animate-in fade-in duration-700">
+      <header className="flex flex-col gap-6">
+        <div className="flex items-center gap-4">
+          <span className="h-2 w-10 bg-emerald-600 rounded-full" />
+          <p className="text-[12px] font-black uppercase tracking-[0.5em] text-emerald-600">Protocolo de Instalação</p>
+        </div>
+        <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-slate-900 uppercase leading-[0.8] mb-4">Montagem</h1>
+        <p className="text-base font-black text-slate-500 uppercase tracking-[0.4em]">Guia técnico mobile para montadores especializados.</p>
       </header>
 
       {list.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center gap-2 py-12 text-center">
-            <Wrench className="h-10 w-10 text-muted-foreground" />
-            <p className="font-medium">Nada liberado para montagem</p>
-            <p className="text-sm text-muted-foreground">
-              Assim que a fábrica liberar um projeto, ele aparece aqui.
-            </p>
+        <Card className="border-[4px] border-dashed border-slate-200 rounded-[4rem] bg-slate-50/50">
+          <CardContent className="flex flex-col items-center gap-6 py-32 text-center">
+            <Wrench className="h-24 w-24 text-slate-200" />
+            <p className="text-2xl font-black uppercase tracking-[0.4em] text-slate-400">Sem Montagens Agendadas</p>
           </CardContent>
         </Card>
       ) : (
