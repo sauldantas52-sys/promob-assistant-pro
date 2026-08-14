@@ -1,7 +1,7 @@
-# Monta AI Bridge para SketchUp
+# Monta AI Bridge para SketchUp (Beta v0.1.0)
 
 ## Visão Geral
-Este plugin conecta o SketchUp ao ecossistema Monta AI, permitindo que projetos 3D sejam convertidos em dados industriais para fabricação e montagem.
+Este plugin conecta o SketchUp ao ecossistema Monta AI, permitindo que projetos 3D sejam convertidos em dados industriais para fabricação e montagem. Esta é uma versão **BETA** para testes controlados.
 
 ## Funcionalidades
 - Menu **Monta AI** no SketchUp.
