@@ -857,7 +857,9 @@ function MaintenanceTab({
           urgency: urgency as any,
           module_id: selectedModule === "none" ? null : selectedModule,
           part_id: selectedPart === "none" ? null : selectedPart,
-          status: "aberto"
+          status: "aberto",
+          photos: photoUrls,
+          deadline: deadline || null
         });
       if (error) throw error;
     },
@@ -865,18 +867,69 @@ function MaintenanceTab({
       toast.success("Chamado de assistência aberto.");
       setIsAdding(false);
       setDescription("");
+      setPhotoUrls([]);
+      setDeadline("");
       void queryClient.invalidateQueries({ queryKey: ["maintenance_requests", projectId] });
     },
     onError: (err: Error) => toast.error(err.message),
   });
 
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    try {
+      const newUrls: string[] = [...photoUrls];
+      for (const file of Array.from(files)) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `${projectId}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('maintenance_photos')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('maintenance_photos')
+          .getPublicUrl(filePath);
+
+        newUrls.push(publicUrl);
+      }
+      setPhotoUrls(newUrls);
+      toast.success("Fotos anexadas.");
+    } catch (error) {
+      toast.error("Erro ao subir fotos.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const updateStatus = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const { error } = await supabase
+    mutationFn: async ({ id, oldStatus, newStatus }: { id: string; oldStatus: string; newStatus: string }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Não autenticado");
+
+      const { error: updateError } = await supabase
         .from("maintenance_requests")
-        .update({ status: status as any })
+        .update({ status: newStatus as any })
         .eq("id", id);
-      if (error) throw error;
+      
+      if (updateError) throw updateError;
+
+      const { error: historyError } = await supabase
+        .from("maintenance_history")
+        .insert({
+          request_id: id,
+          created_by: user.id,
+          old_status: oldStatus as any,
+          new_status: newStatus as any,
+          notes: `Status alterado de ${oldStatus} para ${newStatus}`
+        });
+      
+      if (historyError) throw historyError;
     },
     onSuccess: () => {
       toast.success("Status da assistência atualizado.");
