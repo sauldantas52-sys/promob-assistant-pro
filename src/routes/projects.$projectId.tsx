@@ -16,8 +16,10 @@ import {
   Clock,
   Camera,
   CheckCircle2,
+  HardHat,
 } from "lucide-react";
 import { Parser } from "@json2csv/plainjs";
+import { EngineeringTab } from "@/components/EngineeringTab";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -438,11 +440,12 @@ function ProjectDetail() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
         <Metric icon={Boxes} label="Módulos" value={String(modules.data?.length ?? 0)} />
         <Metric icon={Layers} label="Peças / chapas" value={String(panels.length)} />
         <Metric icon={Wrench} label="Ferragens / Acessórios" value={String(hardware.length)} />
         <Metric icon={AlertTriangle} label="Itens sem módulo" value={String(allParts.filter(p => !p.module_id).length)} />
+        <Metric icon={HardHat} label="Valid. Engenharia" value="Pendente" />
         <Metric icon={FileText} label="Área de chapa (m²)" value={totalArea.toFixed(2)} />
       </div>
 
@@ -452,6 +455,7 @@ function ProjectDetail() {
           <TabsTrigger value="parts" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Lista Técnica</TabsTrigger>
           <TabsTrigger value="loose" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Itens sem Módulo</TabsTrigger>
           <TabsTrigger value="audit" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Auditoria Técnica</TabsTrigger>
+          <TabsTrigger value="engineering" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Engenharia</TabsTrigger>
           <TabsTrigger value="production" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Produção / Fábrica</TabsTrigger>
           <TabsTrigger value="maintenance" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Assistência</TabsTrigger>
           <TabsTrigger value="files" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Arquivos</TabsTrigger>
@@ -743,6 +747,10 @@ function ProjectDetail() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="engineering" className="mt-6">
+          <EngineeringTab projectId={projectId} parts={allParts} />
         </TabsContent>
 
         <TabsContent value="production" className="mt-6">
@@ -1227,7 +1235,7 @@ function Metric({
   label,
   value,
 }: {
-  icon: typeof Boxes;
+  icon: any;
   label: string;
   value: string;
 }) {

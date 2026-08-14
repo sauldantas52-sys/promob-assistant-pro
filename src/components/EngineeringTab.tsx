@@ -1,0 +1,239 @@
+import { useState } from "react";
+import { 
+  FileSearch, 
+  Ruler, 
+  CircleDot, 
+  AlertCircle, 
+  CheckCircle2, 
+  ChevronRight,
+  Database,
+  FileCode,
+  AlertTriangle
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { parseDXF, DXFGeometry } from "@/lib/dxf-parser";
+import { parseExecutivePDF, CriticalDimension } from "@/lib/pdf-parser";
+import { toast } from "sonner";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
+interface EngineeringTabProps {
+  projectId: string;
+  parts: any[];
+}
+
+
+export function EngineeringTab({ projectId, parts }: EngineeringTabProps) {
+  const [pdfData, setPdfData] = useState<CriticalDimension[]>([]);
+  const [dxfData, setDxfData] = useState<DXFGeometry[]>([]);
+  const [activeView, setActiveView] = useState<'drillings' | 'comparison' | 'inspect'>('comparison');
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'pdf' | 'dxf') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      if (type === 'pdf') {
+        const dims = await parseExecutivePDF(file);
+        setPdfData(dims);
+        toast.success(`PDF processado: ${dims.length} cotas detectadas.`);
+      } else {
+        const text = await file.text();
+        const geometry = parseDXF(text);
+        setDxfData(geometry);
+        toast.success(`DXF processado: ${geometry.length} entidades detectadas.`);
+      }
+    } catch (err) {
+      toast.error(`Falha ao processar arquivo ${type.toUpperCase()}`);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Alert variant="destructive" className="bg-amber-50 border-amber-200 text-amber-900">
+        <AlertTriangle className="h-4 w-4 text-amber-600" />
+        <AlertTitle className="text-amber-800 font-bold">PROTOCOLO DE ENGENHARIA ATIVO</AlertTitle>
+        <AlertDescription>
+          A visualização 3D está suspensa até a validação das cotas críticas via PDF e furações via DXF. 
+          <strong> Nunca deduza medidas ou posições.</strong>
+        </AlertDescription>
+      </Alert>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <FileSearch className="h-4 w-4" /> PDF Executivo (Cotas)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <input 
+              type="file" 
+              accept=".pdf" 
+              className="text-xs" 
+              onChange={(e) => handleFileUpload(e, 'pdf')} 
+            />
+            {pdfData.length > 0 && (
+              <div className="mt-4 text-xs text-muted-foreground">
+                {pdfData.length} cotas críticas extraídas para comparação.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <FileCode className="h-4 w-4" /> DXF ASCII (Furação/Geometria)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <input 
+              type="file" 
+              accept=".dxf" 
+              className="text-xs" 
+              onChange={(e) => handleFileUpload(e, 'dxf')} 
+            />
+            {dxfData.length > 0 && (
+              <div className="mt-4 text-xs text-muted-foreground">
+                {dxfData.length} pontos geométricos mapeados.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="flex gap-2">
+        <Button 
+          variant={activeView === 'comparison' ? 'default' : 'outline'} 
+          size="sm"
+          onClick={() => setActiveView('comparison')}
+        >
+          Comparação XML × PDF × DXF
+        </Button>
+        <Button 
+          variant={activeView === 'drillings' ? 'default' : 'outline'} 
+          size="sm"
+          onClick={() => setActiveView('drillings')}
+        >
+          Tela de Furação
+        </Button>
+      </div>
+
+      {activeView === 'comparison' && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Ruler className="h-5 w-5" /> Matriz de Comparação Técnica
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Peça / Dimensão</TableHead>
+                  <TableHead>Promob (XML)</TableHead>
+                  <TableHead>Executivo (PDF)</TableHead>
+                  <TableHead>Projeto (DXF)</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {parts.filter(p => p.kind === 'peca').map((part) => {
+                  // Simulação de busca de correspondência (Match heurístico)
+                  const pdfMatch = pdfData.find(d => 
+                    Math.abs(d.value - (part.width_mm || 0)) < 1 || 
+                    Math.abs(d.value - (part.length_mm || 0)) < 1
+                  );
+                  
+                  const isMatched = !!pdfMatch;
+
+                  return (
+                    <TableRow key={part.id}>
+                      <TableCell className="font-medium">{part.name}</TableCell>
+                      <TableCell>{part.width_mm} × {part.length_mm} mm</TableCell>
+                      <TableCell>
+                        {pdfMatch ? (
+                          <span className="text-green-600 font-medium">{pdfMatch.value} {pdfMatch.unit}</span>
+                        ) : (
+                          <span className="text-muted-foreground italic">Não detectado</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">Aguardando DXF...</TableCell>
+                      <TableCell>
+                        {isMatched ? (
+                          <Badge className="bg-green-100 text-green-700 border-green-200">
+                            <CheckCircle2 className="h-3 w-3 mr-1" /> Validado
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-amber-600 border-amber-200">
+                            <AlertCircle className="h-3 w-3 mr-1" /> Pendente
+                          </Badge>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
+
+      {activeView === 'drillings' && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <CircleDot className="h-5 w-5" /> Mapa de Furação e Usinagem
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-6 md:grid-cols-3">
+              <div className="md:col-span-1 space-y-4">
+                <h3 className="text-sm font-semibold">Peças Fabricáveis</h3>
+                <ScrollArea className="h-[400px] border rounded-md">
+                  <div className="p-2 space-y-1">
+                    {parts.filter(p => p.kind === 'peca').map(part => (
+                      <button 
+                        key={part.id}
+                        className="w-full text-left p-2 text-xs rounded hover:bg-muted flex items-center justify-between group"
+                      >
+                        <span>{part.name}</span>
+                        <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </button>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+
+              <div className="md:col-span-2 space-y-4">
+                <div className="aspect-square bg-muted/50 rounded-lg flex items-center justify-center border-2 border-dashed border-muted-foreground/20">
+                  <div className="text-center">
+                    <Database className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground font-medium">Selecione uma peça para ver o mapa de furação</p>
+                    <p className="text-xs text-muted-foreground/60 mt-1">Origem DXF e Confirmação Técnica exigida</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-3 border rounded-lg bg-amber-50/50">
+                    <p className="text-[10px] uppercase font-bold text-amber-600 mb-1">Grau de Confirmação</p>
+                    <p className="text-lg font-bold">0%</p>
+                    <p className="text-[10px] text-amber-600 mt-1">Aguardando validação DXF</p>
+                  </div>
+                  <div className="p-3 border rounded-lg bg-blue-50/50">
+                    <p className="text-[10px] uppercase font-bold text-blue-600 mb-1">Origem do Dado</p>
+                    <p className="text-sm font-bold italic">Nenhum arquivo</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
