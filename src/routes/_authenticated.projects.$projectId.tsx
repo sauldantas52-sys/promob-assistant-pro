@@ -537,24 +537,34 @@ function ProjectDetail() {
                 <span className="text-[10px] font-black uppercase tracking-widest">Protocolo de Rastreabilidade Ativo</span>
               </div>
             </div>
-            <input
-              ref={fileInput}
-              type="file"
-              accept=".xml,.pdf,.dxf"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) void handleImport(file);
-              }}
-            />
-            <div className="flex flex-wrap gap-6">
-              <Button className="h-20 px-12 rounded-[1.5rem] bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-[0.2em] text-[12px] shadow-2xl shadow-blue-600/30 gap-4 transition-all duration-500 active:scale-95 group" disabled={importing} onClick={() => fileInput.current?.click()}>
-                {importing ? <Loader2 className="h-6 w-6 animate-spin" /> : <FileUp className="h-7 w-7 transition-transform group-hover:-translate-y-1" />}
-                Importar Arquivo Promob
-              </Button>
+            <div className="grid gap-12">
+              <PilotValidationChecklist 
+                projectId={projectId} 
+                isMachiningBlocked={project.data?.machining_blocked ?? true} 
+              />
+              
+              <div className="space-y-6">
+                <input
+                  ref={fileInput}
+                  type="file"
+                  accept=".xml,.pdf,.dxf"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) void handleImport(file);
+                  }}
+                />
+                <div className="flex flex-wrap gap-6">
+                  <Button className="h-20 px-12 rounded-[1.5rem] bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-[0.2em] text-[12px] shadow-2xl shadow-blue-600/30 gap-4 transition-all duration-500 active:scale-95 group" disabled={importing} onClick={() => fileInput.current?.click()}>
+                    {importing ? <Loader2 className="h-6 w-6 animate-spin" /> : <FileUp className="h-7 w-7 transition-transform group-hover:-translate-y-1" />}
+                    Importar Arquivo Promob
+                  </Button>
+                </div>
+              </div>
             </div>
 
             {warnings.length > 0 && (
+
               <div className="space-y-4 rounded-[2rem] border-2 border-red-100 bg-red-50/50 p-8 mt-6">
                 <div className="flex items-center gap-3 mb-2">
                   <AlertTriangle className="h-6 w-6 text-red-600" />
