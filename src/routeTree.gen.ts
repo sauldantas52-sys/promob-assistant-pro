@@ -11,11 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
-import { Route as FactoryWallboardRouteImport } from './routes/factory-wallboard'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as PickingRouteImport } from './routes/picking'
 import { Route as AuthenticatedAssemblyRouteImport } from './routes/_authenticated.assembly'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
+import { Route as AuthenticatedFactoryWallboardRouteImport } from './routes/_authenticated.factory-wallboard'
+import { Route as AuthenticatedPickingRouteImport } from './routes/_authenticated.picking'
 import { Route as AuthenticatedProductionRouteImport } from './routes/_authenticated.production'
 import { Route as AuthenticatedShippingRouteImport } from './routes/_authenticated.shipping'
 import { Route as AuthenticatedProjectsIndexRouteImport } from './routes/_authenticated.projects.index'
@@ -30,19 +30,9 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FactoryWallboardRoute = FactoryWallboardRouteImport.update({
-  id: '/factory-wallboard',
-  path: '/factory-wallboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PickingRoute = PickingRouteImport.update({
-  id: '/picking',
-  path: '/picking',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAssemblyRoute = AuthenticatedAssemblyRouteImport.update({
@@ -53,6 +43,17 @@ const AuthenticatedAssemblyRoute = AuthenticatedAssemblyRouteImport.update({
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedFactoryWallboardRoute =
+  AuthenticatedFactoryWallboardRouteImport.update({
+    id: '/factory-wallboard',
+    path: '/factory-wallboard',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedPickingRoute = AuthenticatedPickingRouteImport.update({
+  id: '/picking',
+  path: '/picking',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedProductionRoute = AuthenticatedProductionRouteImport.update({
@@ -80,11 +81,11 @@ const AuthenticatedProjectsProjectIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/factory-wallboard': typeof FactoryWallboardRoute
   '/login': typeof LoginRoute
-  '/picking': typeof PickingRoute
   '/assembly': typeof AuthenticatedAssemblyRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/factory-wallboard': typeof AuthenticatedFactoryWallboardRoute
+  '/picking': typeof AuthenticatedPickingRoute
   '/production': typeof AuthenticatedProductionRoute
   '/shipping': typeof AuthenticatedShippingRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
@@ -92,11 +93,11 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/factory-wallboard': typeof FactoryWallboardRoute
   '/login': typeof LoginRoute
-  '/picking': typeof PickingRoute
   '/assembly': typeof AuthenticatedAssemblyRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/factory-wallboard': typeof AuthenticatedFactoryWallboardRoute
+  '/picking': typeof AuthenticatedPickingRoute
   '/production': typeof AuthenticatedProductionRoute
   '/shipping': typeof AuthenticatedShippingRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
@@ -106,11 +107,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
-  '/factory-wallboard': typeof FactoryWallboardRoute
   '/login': typeof LoginRoute
-  '/picking': typeof PickingRoute
   '/_authenticated/assembly': typeof AuthenticatedAssemblyRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/factory-wallboard': typeof AuthenticatedFactoryWallboardRoute
+  '/_authenticated/picking': typeof AuthenticatedPickingRoute
   '/_authenticated/production': typeof AuthenticatedProductionRoute
   '/_authenticated/shipping': typeof AuthenticatedShippingRoute
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
@@ -120,11 +121,11 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/factory-wallboard'
     | '/login'
-    | '/picking'
     | '/assembly'
     | '/dashboard'
+    | '/factory-wallboard'
+    | '/picking'
     | '/production'
     | '/shipping'
     | '/projects/$projectId'
@@ -132,11 +133,11 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/factory-wallboard'
     | '/login'
-    | '/picking'
     | '/assembly'
     | '/dashboard'
+    | '/factory-wallboard'
+    | '/picking'
     | '/production'
     | '/shipping'
     | '/projects/$projectId'
@@ -145,11 +146,11 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
-    | '/factory-wallboard'
     | '/login'
-    | '/picking'
     | '/_authenticated/assembly'
     | '/_authenticated/dashboard'
+    | '/_authenticated/factory-wallboard'
+    | '/_authenticated/picking'
     | '/_authenticated/production'
     | '/_authenticated/shipping'
     | '/_authenticated/projects/$projectId'
@@ -159,9 +160,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
-  FactoryWallboardRoute: typeof FactoryWallboardRoute
   LoginRoute: typeof LoginRoute
-  PickingRoute: typeof PickingRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -180,25 +179,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/factory-wallboard': {
-      id: '/factory-wallboard'
-      path: '/factory-wallboard'
-      fullPath: '/factory-wallboard'
-      preLoaderRoute: typeof FactoryWallboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/picking': {
-      id: '/picking'
-      path: '/picking'
-      fullPath: '/picking'
-      preLoaderRoute: typeof PickingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/assembly': {
@@ -213,6 +198,20 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/factory-wallboard': {
+      id: '/_authenticated/factory-wallboard'
+      path: '/factory-wallboard'
+      fullPath: '/factory-wallboard'
+      preLoaderRoute: typeof AuthenticatedFactoryWallboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/picking': {
+      id: '/_authenticated/picking'
+      path: '/picking'
+      fullPath: '/picking'
+      preLoaderRoute: typeof AuthenticatedPickingRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/production': {
@@ -249,6 +248,8 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteChildren {
   AuthenticatedAssemblyRoute: typeof AuthenticatedAssemblyRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedFactoryWallboardRoute: typeof AuthenticatedFactoryWallboardRoute
+  AuthenticatedPickingRoute: typeof AuthenticatedPickingRoute
   AuthenticatedProductionRoute: typeof AuthenticatedProductionRoute
   AuthenticatedShippingRoute: typeof AuthenticatedShippingRoute
   AuthenticatedProjectsProjectIdRoute: typeof AuthenticatedProjectsProjectIdRoute
@@ -258,6 +259,8 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAssemblyRoute: AuthenticatedAssemblyRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedFactoryWallboardRoute: AuthenticatedFactoryWallboardRoute,
+  AuthenticatedPickingRoute: AuthenticatedPickingRoute,
   AuthenticatedProductionRoute: AuthenticatedProductionRoute,
   AuthenticatedShippingRoute: AuthenticatedShippingRoute,
   AuthenticatedProjectsProjectIdRoute: AuthenticatedProjectsProjectIdRoute,
@@ -271,9 +274,7 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
-  FactoryWallboardRoute: FactoryWallboardRoute,
   LoginRoute: LoginRoute,
-  PickingRoute: PickingRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
