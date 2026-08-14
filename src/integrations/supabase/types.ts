@@ -14,32 +14,161 @@ export type Database = {
   }
   public: {
     Tables: {
+      assembly_group_hardware: {
+        Row: {
+          created_at: string | null
+          group_id: string
+          id: string
+          part_id: string
+          quantity_confirmed: number | null
+          quantity_required: number
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          group_id: string
+          id?: string
+          part_id: string
+          quantity_confirmed?: number | null
+          quantity_required: number
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          group_id?: string
+          id?: string
+          part_id?: string
+          quantity_confirmed?: number | null
+          quantity_required?: number
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assembly_group_hardware_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "assembly_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assembly_group_hardware_part_id_fkey"
+            columns: ["part_id"]
+            isOneToOne: false
+            referencedRelation: "parts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assembly_group_items_log: {
+        Row: {
+          group_id: string
+          id: string
+          item_id: string
+          item_type: string
+          location: string | null
+          scanned_at: string | null
+          scanned_by: string | null
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          item_id: string
+          item_type: string
+          location?: string | null
+          scanned_at?: string | null
+          scanned_by?: string | null
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          item_id?: string
+          item_type?: string
+          location?: string | null
+          scanned_at?: string | null
+          scanned_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assembly_group_items_log_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "assembly_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assembly_groups: {
         Row: {
           code: string
+          color: string | null
+          conference_status: string | null
           created_at: string | null
           description: string | null
+          exception_authorized_by: string | null
+          exception_justification: string | null
           id: string
+          is_locked: boolean | null
+          loading_status: string | null
+          lock_reason: string | null
+          module_id: string | null
           name: string | null
           project_id: string
+          sealed_at: string | null
+          sealed_by: string | null
+          separation_status: string | null
+          storage_location: string | null
+          updated_at: string | null
         }
         Insert: {
           code: string
+          color?: string | null
+          conference_status?: string | null
           created_at?: string | null
           description?: string | null
+          exception_authorized_by?: string | null
+          exception_justification?: string | null
           id?: string
+          is_locked?: boolean | null
+          loading_status?: string | null
+          lock_reason?: string | null
+          module_id?: string | null
           name?: string | null
           project_id: string
+          sealed_at?: string | null
+          sealed_by?: string | null
+          separation_status?: string | null
+          storage_location?: string | null
+          updated_at?: string | null
         }
         Update: {
           code?: string
+          color?: string | null
+          conference_status?: string | null
           created_at?: string | null
           description?: string | null
+          exception_authorized_by?: string | null
+          exception_justification?: string | null
           id?: string
+          is_locked?: boolean | null
+          loading_status?: string | null
+          lock_reason?: string | null
+          module_id?: string | null
           name?: string | null
           project_id?: string
+          sealed_at?: string | null
+          sealed_by?: string | null
+          separation_status?: string | null
+          storage_location?: string | null
+          updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "assembly_groups_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "assembly_groups_project_id_fkey"
             columns: ["project_id"]
