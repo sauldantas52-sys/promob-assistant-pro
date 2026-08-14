@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { 
   Box, 
   Layers, 
@@ -18,7 +19,8 @@ import {
   CheckCircle,
   XCircle,
   FileText,
-  Clock
+  Clock,
+  Loader2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -28,6 +30,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { processSkpPackage } from "@/lib/sketchup-bridge.functions";
 
 interface SketchUpBridgeTabProps {
   projectId: string;
@@ -46,7 +49,11 @@ const statusSteps = [
 
 export function SketchUpBridgeTab({ projectId }: SketchUpBridgeTabProps) {
   const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
   const [activeTab, setActiveTab] = useState<"versions" | "review" | "tags" | "comparativo" | "api">("versions");
+  
+  const processPackage = useServerFn(processSkpPackage);
 
   const versions = useQuery({
     queryKey: ["project_versions", projectId],
@@ -63,18 +70,37 @@ export function SketchUpBridgeTab({ projectId }: SketchUpBridgeTabProps) {
 
   const currentVersion = versions.data?.[0];
 
-  const comparisons = useQuery({
-    queryKey: ["project_comparisons", currentVersion?.id],
-    enabled: !!currentVersion,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("project_comparisons" as any)
-        .select("*")
-        .eq("version_id", currentVersion?.id);
-      if (error) throw error;
-      return data as any[];
-    },
-  });
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const text = await file.text();
+      const manifest = JSON.parse(text);
+      
+      const result = await processPackage({
+        data: {
+          projectId,
+          manifest
+        }
+      });
+
+      toast.success("Versão importada com sucesso!", {
+        description: `${result.itemCount} itens processados e ${result.validationCount} validações registradas.`
+      });
+      
+      void queryClient.invalidateQueries({ queryKey: ["project_versions", projectId] });
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Falha ao importar manifesto", {
+        description: error instanceof Error ? error.message : "Arquivo JSON inválido ou erro no servidor."
+      });
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   const updateVersionStatus = useMutation({
     mutationFn: async ({ versionId, status }: { versionId: string, status: string }) => {
@@ -92,6 +118,14 @@ export function SketchUpBridgeTab({ projectId }: SketchUpBridgeTabProps) {
 
   return (
     <div className="space-y-8">
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileUpload}
+        accept=".json"
+        className="hidden"
+      />
+
       {/* Header Operational */}
       <div className="flex flex-wrap items-center justify-between gap-6 bg-slate-900 p-8 rounded-[2rem] border border-slate-800 shadow-2xl">
         <div className="flex items-center gap-6">
@@ -108,11 +142,17 @@ export function SketchUpBridgeTab({ projectId }: SketchUpBridgeTabProps) {
           <Button variant="outline" className="rounded-full border-slate-700 bg-slate-800 text-white hover:bg-slate-700 font-black uppercase text-[10px] tracking-widest px-8 h-12">
             <Download className="mr-2 h-4 w-4" /> Download SKP
           </Button>
-          <Button className="rounded-full bg-amber-600 text-white hover:bg-amber-500 font-black uppercase text-[10px] tracking-widest px-8 h-12 shadow-xl shadow-amber-600/20">
-            <FileUp className="mr-2 h-4 w-4" /> Nova Versão
+          <Button 
+            className="rounded-full bg-amber-600 text-white hover:bg-amber-500 font-black uppercase text-[10px] tracking-widest px-8 h-12 shadow-xl shadow-amber-600/20"
+            disabled={uploading}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileUp className="mr-2 h-4 w-4" />}
+            Nova Versão
           </Button>
         </div>
       </div>
+
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Sidebar Nav */}
