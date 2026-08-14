@@ -61,9 +61,10 @@ function ForcePasswordChangePage() {
       await supabase.from("production_logs").insert({
         project_id: null, 
         step: "acesso_seguro",
-        notes: `Troca de senha concluída para ${user?.email ?? 'usuário'}.${isWeak ? ' [Aviso: Senha abaixo de 8 caracteres]' : ''}`,
+        notes: `Troca de senha concluída para ${user?.email ?? 'usuário'}.${isWeak ? ' [Aviso: Senha abaixo de 12 caracteres]' : ''}`,
         status: "concluido"
       } as any); 
+
 
 
 
