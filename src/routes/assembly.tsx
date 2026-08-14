@@ -177,7 +177,7 @@ function AssemblyContent() {
                           </span>
                         </div>
                         <div className="space-y-2">
-                          {project.parts?.filter(p => p.kind === 'peca' && (p.name.toLowerCase().includes('prateleira') || p.name.toLowerCase().includes('fundo') || p.name.toLowerCase().includes('travessa'))).map(p => (
+                          {(project.parts || []).filter(p => p.kind === 'peca' && (p.name.toLowerCase().includes('prateleira') || p.name.toLowerCase().includes('fundo') || p.name.toLowerCase().includes('travessa'))).map((p: any) => (
                             <div key={p.id} className="text-xs flex flex-col gap-0.5 border-b border-muted last:border-0 pb-1">
                               <div className="flex justify-between">
                                 <span>{p.name}</span>
