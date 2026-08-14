@@ -821,7 +821,7 @@ function ProjectDetail() {
                       <div className="flex items-center justify-between">
                         <Label className="text-xs font-bold">1. CORTE E BORDA</Label>
                         <Badge className={project.data?.is_cutting_edge_released ? "bg-green-500" : "bg-amber-500"}>
-                          {!!project.data?.is_cutting_edge_released ? "LIBERADO" : "PENDENTE"}
+                          {project.data?.is_cutting_edge_released ? "LIBERADO" : "PENDENTE"}
                         </Badge>
                       </div>
                       <p className="text-[10px] text-amber-700 leading-tight">
@@ -831,7 +831,7 @@ function ProjectDetail() {
                         size="sm" 
                         variant={project.data?.is_cutting_edge_released ? "outline" : "default"}
                         className="w-full h-8 text-[10px]"
-                        disabled={project.data?.is_cutting_edge_released}
+                        disabled={!!project.data?.is_cutting_edge_released}
                         onClick={async () => {
                           const { error } = await supabase
                             .from("projects")
