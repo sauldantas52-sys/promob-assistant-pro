@@ -308,7 +308,16 @@ function ProjectDetail() {
         </div>
         <div className="flex items-center gap-3">
           <Badge className={statusTone(project.data?.status || "novo")}>{statusLabel(project.data?.status || "novo")}</Badge>
-          <Select value={project.data?.status ?? "novo"} onValueChange={(v) => updateStatus.mutate(v)}>
+          <Select 
+            value={project.data?.status ?? "novo"} 
+            onValueChange={(v) => {
+              if (v === "producao" && allParts.some(p => (!p.width_mm || !p.length_mm) && p.kind !== 'ferragem' && p.kind !== 'acessorio' && !p.name.toLowerCase().includes("processo"))) {
+                toast.error("Bloqueio: Existem peças sem medida confirmada. Não é possível liberar para produção.");
+                return;
+              }
+              updateStatus.mutate(v);
+            }}
+          >
             <SelectTrigger className="h-11 w-44">
               <SelectValue />
             </SelectTrigger>
