@@ -14,6 +14,7 @@ export const Route = createFileRoute('/_authenticated')({
       });
     }
     
+    // Obter dados do perfil e função
     const { data: roleData, error: roleError } = await supabase
       .from('user_roles')
       .select('role, companies(id, name)')
@@ -22,6 +23,11 @@ export const Route = createFileRoute('/_authenticated')({
 
     if (roleError) console.error("RBAC Fetch Error:", roleError);
 
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', session.user.id)
+      .maybeSingle();
 
     return {
       session,
@@ -29,6 +35,7 @@ export const Route = createFileRoute('/_authenticated')({
       companyId: (roleData?.companies as any)?.id || null,
       companyName: (roleData?.companies as any)?.name || null,
       role: (roleData?.role as any) || null,
+      fullName: profile?.full_name || session.user.email,
     };
   },
 });
