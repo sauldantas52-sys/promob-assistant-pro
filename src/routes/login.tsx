@@ -57,7 +57,9 @@ function LoginPage() {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [countdown]);
+
 
 
   useEffect(() => {
@@ -243,10 +245,15 @@ function LoginPage() {
                       </div>
                     )}
 
-                    <Button type="submit" className="h-12 w-full text-base" disabled={busy}>
-
-                      {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Criar conta
+                    <Button 
+                      type="submit" 
+                      className="h-12 w-full text-base" 
+                      disabled={busy || countdown > 0}
+                    >
+                      {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} 
+                      {countdown > 0 ? `Aguarde ${countdown}s` : "Criar conta"}
                     </Button>
+
                   </form>
                 </TabsContent>
               </Tabs>
