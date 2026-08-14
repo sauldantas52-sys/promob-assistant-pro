@@ -77,7 +77,7 @@ export function parsePromobXml(fileName: string, sizeBytes: number, xmlText: str
     const quantity = num(attr(node, ["QUANTITY", "quantity", "qtd", "QTD"])) ?? 1;
     const environment = attr(node, ["ENVIRONMENT", "environment", "ambiente", "GROUP"]);
 
-    const partNodes = Array.from(node.querySelectorAll("PIECE, Piece, piece, PART, Part, COMPONENT"));
+    const partNodes = Array.from(node.querySelectorAll("PIECE, Piece, piece, PART, Part, COMPONENT, ITEM[DESCRIPTION]:not([COMPONENTS])"));
     const parts: ParsedPart[] = partNodes.map((p) => {
       partsMark(p, seen);
       return {
