@@ -3,28 +3,29 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const itemSchema = z.object({
-  environment_id: z.string().optional(),
+  environment_id: z.string().optional().nullable(),
   module_id: z.string(),
-  group_code: z.string().optional(),
-  module_name: z.string().optional(),
-  material: z.string().optional(),
-  color: z.string().optional(),
-  thickness_mm: z.number().optional(),
-  width_mm: z.number().optional(),
-  height_mm: z.number().optional(),
-  depth_mm: z.number().optional(),
-  position_x: z.number().optional(),
-  position_y: z.number().optional(),
-  position_z: z.number().optional(),
-  tags: z.array(z.string()).optional(),
+  group_code: z.string().optional().nullable(),
+  module_name: z.string().optional().nullable(),
+  material: z.string().optional().nullable(),
+  color: z.string().optional().nullable(),
+  thickness_mm: z.number().optional().nullable(),
+  width_mm: z.number().optional().nullable(),
+  height_mm: z.number().optional().nullable(),
+  depth_mm: z.number().optional().nullable(),
+  position_x: z.number().optional().nullable(),
+  position_y: z.number().optional().nullable(),
+  position_z: z.number().optional().nullable(),
+  tags: z.array(z.string()).optional().nullable(),
 });
 
 const manifestSchema = z.object({
   plugin_version: z.string(),
-  project_id: z.string(),
+  project_id: z.string().optional().nullable(),
   version_number: z.number(),
   items: z.array(itemSchema),
 });
+
 
 export const processSkpPackage = createServerFn({ method: "POST" })
   .inputValidator((data: any) => z.object({
