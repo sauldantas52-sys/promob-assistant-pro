@@ -422,6 +422,74 @@ export type Database = {
           },
         ]
       }
+      operator_login_logs: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          id: string
+          operator_code: string | null
+          profile_id: string | null
+          status: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          operator_code?: string | null
+          profile_id?: string | null
+          status: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          operator_code?: string | null
+          profile_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operator_login_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "operator_login_logs_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      operator_secrets: {
+        Row: {
+          created_at: string | null
+          profile_id: string
+          secret_password: string
+        }
+        Insert: {
+          created_at?: string | null
+          profile_id: string
+          secret_password: string
+        }
+        Update: {
+          created_at?: string | null
+          profile_id?: string
+          secret_password?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operator_secrets_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       part_drillings: {
         Row: {
           created_at: string | null
@@ -685,26 +753,38 @@ export type Database = {
         Row: {
           company_id: string | null
           created_at: string | null
+          failed_attempts: number | null
           first_login_at: string | null
           full_name: string | null
           id: string
+          locked_until: string | null
           must_change_password: boolean | null
+          operator_code: string | null
+          pin_hash: string | null
         }
         Insert: {
           company_id?: string | null
           created_at?: string | null
+          failed_attempts?: number | null
           first_login_at?: string | null
           full_name?: string | null
           id: string
+          locked_until?: string | null
           must_change_password?: boolean | null
+          operator_code?: string | null
+          pin_hash?: string | null
         }
         Update: {
           company_id?: string | null
           created_at?: string | null
+          failed_attempts?: number | null
           first_login_at?: string | null
           full_name?: string | null
           id?: string
+          locked_until?: string | null
           must_change_password?: boolean | null
+          operator_code?: string | null
+          pin_hash?: string | null
         }
         Relationships: [
           {
