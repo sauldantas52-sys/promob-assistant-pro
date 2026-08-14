@@ -155,28 +155,39 @@ export async function syncPendingExceptions(): Promise<{ synced: number; remaini
   let synced = 0;
   for (const event of queue) {
     try {
+      // 1. Revalidar integridade básica antes de persistir
+      if (!event.projectId || !event.kind || !event.id) {
+        console.warn("Evento corrompido na fila offline, descartando:", event);
+        continue;
+      }
+
       await persist(event);
       synced += 1;
-    } catch {
+    } catch (error) {
+      console.error("Falha ao sincronizar evento:", error);
       remaining.push(event);
     }
   }
   writeQueue(remaining);
 
-  if (synced > 0 && remaining.length === 0) {
+  if (synced > 0) {
     const first = queue[0];
     if (first) {
       try {
         await persist({
+          id: crypto.randomUUID(),
           projectId: first.projectId,
           groupId: first.groupId ?? null,
           kind: "sincronizacao",
-          reason: `${synced} exceção(ões) registradas offline foram sincronizadas.`,
+          reason: `${synced} evento(s) sincronizados. Revalidação manual obrigatória.`,
           statusTo: "sincronizado",
-          metadata: { synced },
+          metadata: { 
+            synced_count: synced,
+            requires_manual_audit: true
+          },
         });
-      } catch {
-        /* o resumo é informativo; os eventos já foram gravados */
+      } catch (e) {
+        console.error("Erro ao registrar log de sincronização:", e);
       }
     }
   }

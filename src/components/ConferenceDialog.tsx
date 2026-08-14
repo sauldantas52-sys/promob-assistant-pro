@@ -142,7 +142,20 @@ export function ConferenceDialog({
       const { synced, remaining } = await syncPendingExceptions();
       setPending(remaining);
       if (synced > 0) {
-        toast.success(`Conexão restabelecida: ${synced} exceção(ões) sincronizadas.`);
+        toast.success(`Conexão restabelecida: ${synced} evento(s) sincronizados.`);
+        
+        // After sync, we update the group status to "sincronizado" to force manual re-validation
+        if (groupId) {
+          await supabase
+            .from("assembly_groups")
+            .update({ 
+              conference_status: "sincronizado",
+              lock_reason: "Dados sincronizados offline. Revalidação manual obrigatória." 
+            })
+            .eq("id", groupId);
+          void queryClient.invalidateQueries({ queryKey: ["assembly-projects"] });
+        }
+        
         void queryClient.invalidateQueries({ queryKey: ["conference-exceptions"] });
       }
     };
@@ -156,7 +169,7 @@ export function ConferenceDialog({
       window.removeEventListener("online", goOnline);
       window.removeEventListener("offline", goOffline);
     };
-  }, [queryClient]);
+  }, [queryClient, groupId]);
 
   const hwRows = hardware.data ?? [];
   const confirmedParts = parts.filter((p) => p.is_completed).length;
@@ -394,21 +407,31 @@ export function ConferenceDialog({
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={online ? "secondary" : "destructive"} className="gap-1">
-              {online ? <CheckCircle2 className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
-              {online ? "Online" : "Offline"}
-            </Badge>
-            {pending > 0 && (
-              <Badge variant="outline" className="gap-1 border-amber-400 text-amber-700">
-                <AlertTriangle className="h-3 w-3" /> {pending} pendente(s) de sincronização
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant={online ? "secondary" : "destructive"} className="gap-1">
+                {online ? <CheckCircle2 className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
+                {online ? "Online" : "Offline"}
               </Badge>
+              {pending > 0 && (
+                <Badge variant="outline" className="gap-1 border-amber-400 text-amber-700">
+                  <AlertTriangle className="h-3 w-3" /> {pending} pendente(s) de sincronização
+                </Badge>
+              )}
+              {sealed && (
+                <Badge className="gap-1">
+                  <Lock className="h-3 w-3" /> Selado
+                </Badge>
+              )}
+            </div>
+            
+            {statusToDisplay && (
+              <div className="flex items-center gap-2 rounded-md bg-amber-50 p-2 text-[11px] font-medium text-amber-800 border border-amber-200">
+                <ShieldAlert className="h-3.5 w-3.5" />
+                {statusToDisplay}
+              </div>
             )}
-            {sealed && (
-              <Badge className="gap-1">
-                <Lock className="h-3 w-3" /> Selado
-              </Badge>
-            )}
+          </div>
             {pending > 0 && online && (
               <Button
                 size="sm"
@@ -473,6 +496,8 @@ export function ConferenceDialog({
                     if (error) {
                       await register("offline", `Falha ao gravar conferência de ${p.name}: ${error.message}`, {
                         part_id: p.id,
+                        action_type: "check_part",
+                        value: !!val
                       });
                     }
                     void queryClient.invalidateQueries({ queryKey: ["assembly-projects"] });
