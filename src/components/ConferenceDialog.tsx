@@ -431,21 +431,20 @@ export function ConferenceDialog({
                 {statusToDisplay}
               </div>
             )}
-          </div>
-            {pending > 0 && online && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={async () => {
-                  const { synced, remaining } = await syncPendingExceptions();
-                  setPending(remaining);
-                  toast.success(`${synced} exceção(ões) sincronizadas.`);
-                  void logs.refetch();
-                }}
-              >
-                Sincronizar agora
-              </Button>
-            )}
+          {pending > 0 && online && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={async () => {
+                const { synced, remaining } = await syncPendingExceptions();
+                setPending(remaining);
+                toast.success(`${synced} exceção(ões) sincronizadas.`);
+                void logs.refetch();
+              }}
+            >
+              Sincronizar agora
+            </Button>
+          )}
           </div>
 
           <div className="space-y-1">
