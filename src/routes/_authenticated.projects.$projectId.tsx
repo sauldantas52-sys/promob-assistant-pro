@@ -466,6 +466,11 @@ function ProjectDetail() {
               disabled={!hasPermission(role, "projects", "approve")}
               onValueChange={async (v) => {
                 if (["corte", "borda", "usinagem"].includes(v)) {
+                  if (!project.data?.is_validated) {
+                    toast.error("Bloqueio Industrial: O Checklist de Validação Piloto deve estar 100% concluído antes de iniciar a produção.");
+                    return;
+                  }
+
                   const unconfirmedParts = allParts.filter(p => 
                     (!p.width_mm || !p.length_mm || !p.thickness_mm || !p.material) && 
                     p.kind !== 'ferragem' && 
@@ -479,6 +484,7 @@ function ProjectDetail() {
                     return;
                   }
                 }
+
 
                 const oldStatus = project.data?.status || "novo";
                 updateStatus.mutate(v, {
