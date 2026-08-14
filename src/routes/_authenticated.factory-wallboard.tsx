@@ -19,7 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
-export const Route = createFileRoute("/factory-wallboard")({
+export const Route = createFileRoute("/_authenticated/factory-wallboard")({
   head: () => ({
     meta: [
       { title: "Painel da Fábrica | Monta AI" },
