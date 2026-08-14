@@ -56,7 +56,7 @@ function DashboardContent() {
   const stats = [
     { label: "Projetos ativos", value: list.length, icon: FolderKanban },
     { label: "Em corte", value: count("corte"), icon: Factory },
-    { label: "Em borda", value: count("corte"), icon: ClipboardCheck },
+    { label: "Em borda", value: count("borda"), icon: ClipboardCheck },
     { label: "Em usinagem", value: count("usinagem"), icon: Factory },
     { label: "Em montagem", value: count("montagem"), icon: Wrench },
     { label: "Assistência", value: count("assistencia"), icon: AlertTriangle },

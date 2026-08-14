@@ -13,6 +13,7 @@ import {
   PackageCheck,
   Truck,
   Users,
+  AlertTriangle,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +28,7 @@ const navItems = [
   { to: "/picking", label: "Separação", icon: PackageCheck, roles: ["admin", "fabrica", "montador", "auditor"] },
   { to: "/assembly", label: "Montagem", icon: Wrench, roles: ["admin", "montador", "auditor"] },
   { to: "/shipping", label: "Expedição", icon: Truck, roles: ["admin", "fabrica", "auditor"] },
+  { to: "/technical-assistance", label: "Assistência", icon: AlertTriangle, roles: ["admin", "escritorio", "montador", "auditor"] },
   { to: "/settings/users", label: "Usuários", icon: Users, roles: ["admin", "escritorio"] },
 ];
 
