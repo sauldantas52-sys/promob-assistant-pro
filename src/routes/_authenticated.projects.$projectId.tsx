@@ -1037,7 +1037,6 @@ function ProjectDetail() {
             </CardContent>
           </Card>
         </TabsContent>
-        </TabsContent>
       </Tabs>
     </div>
     </AppShell>
