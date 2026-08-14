@@ -171,7 +171,7 @@ function ProjectShippingCard({ project }: { project: any }) {
       const newVolumes = pendingSealedGroups.map((g: any) => ({
         project_id: project.id,
         group_id: g.id,
-        code: `VOL-${project.id.slice(0,4)}-${g.code}`,
+        code: `VOL-${project.id.slice(0, 4)}-${g.code}`,
         name: `Volume: ${g.code} - ${g.name}`,
         status: 'aguardando'
       }));

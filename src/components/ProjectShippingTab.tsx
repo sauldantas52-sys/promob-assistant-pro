@@ -63,7 +63,7 @@ export function ProjectShippingTab({ projectId }: { projectId: string }) {
       const newVolumes = sealedGroups.map((g: any) => ({
         project_id: projectId,
         group_id: g.id,
-        code: `VOL-${projectId.slice(0,4)}-${g.code}`,
+        code: `VOL-${projectId.slice(0, 4)}-${g.code}`,
         name: `Volume: ${g.code} - ${g.name}`,
         status: 'aguardando'
       }));
