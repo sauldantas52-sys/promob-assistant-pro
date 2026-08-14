@@ -120,7 +120,6 @@ export function mapDxfToDrillings(dxfGeometries: any[], part: any): DrillingCoor
         regra_aplicada: rule?.origem_regra
       };
       return drilling;
-      };
     });
 }
 
