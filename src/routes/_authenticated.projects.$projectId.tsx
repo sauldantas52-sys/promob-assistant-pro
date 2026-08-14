@@ -898,8 +898,13 @@ function ProjectDetail() {
         </TabsContent>
 
         <TabsContent value="engineering" className="mt-6">
-          <EngineeringTab projectId={projectId} parts={allParts} />
+          <EngineeringTab 
+            projectId={projectId} 
+            parts={allParts} 
+            isValidated={project.data?.is_validated}
+          />
         </TabsContent>
+
 
         <TabsContent value="sketchup" className="mt-6">
           <SketchUpBridgeTab projectId={projectId} />
