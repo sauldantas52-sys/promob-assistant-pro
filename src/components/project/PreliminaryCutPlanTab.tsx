@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Scissors, Maximize, AlertCircle } from "lucide-react";
+import { Scissors, Maximize, AlertCircle, ShieldCheck } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -69,11 +69,11 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
 
   return (
     <div className="space-y-6">
-      <Alert className="bg-amber-50 border-amber-200 text-amber-800 rounded-2xl">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle className="font-black uppercase tracking-tight text-xs">Aviso de Estimativa</AlertTitle>
+      <Alert className="bg-blue-50 border-blue-200 text-blue-800 rounded-2xl">
+        <ShieldCheck className="h-4 w-4" />
+        <AlertTitle className="font-black uppercase tracking-tight text-xs">Conformidade Industrial 4.0</AlertTitle>
         <AlertDescription className="text-sm">
-          Este plano de corte é **preliminar** para fins de orçamento. O plano de corte real de produção será gerado apenas após a engenharia final no Promob.
+          Este plano de corte é uma **estimativa local**. A produção industrial requer a importação do resultado oficial do **Cut Pro** para garantir a precisão de furação e fitagem.
         </AlertDescription>
       </Alert>
 
@@ -122,8 +122,8 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
             </CardContent>
           </Card>
 
-          <Button className="w-full h-14 rounded-2xl bg-slate-900 text-white font-black uppercase tracking-widest gap-2 shadow-lg">
-            <Maximize className="h-4 w-4" /> Abrir no Otimizador
+          <Button className="w-full h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest gap-2 shadow-lg">
+            <Maximize className="h-4 w-4" /> Importar Oficial (Cut Pro)
           </Button>
         </div>
       </div>
