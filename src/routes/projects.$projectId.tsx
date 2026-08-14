@@ -818,7 +818,10 @@ function MaintenanceTab({
   const [urgency, setUrgency] = useState("baixa");
   const [selectedModule, setSelectedModule] = useState<string>("none");
   const [selectedPart, setSelectedPart] = useState<string>("none");
+  const [deadline, setDeadline] = useState("");
+  const [photoUrls, setPhotoUrls] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   const { data: requests, isLoading } = useQuery({
     queryKey: ["maintenance_requests", projectId],
