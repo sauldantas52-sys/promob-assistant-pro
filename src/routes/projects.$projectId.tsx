@@ -234,7 +234,7 @@ function ProjectDetail() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.setAttribute("href", url);
-      link.setAttribute("download", `lista-tecnica-${project.data.name}.csv`);
+      link.setAttribute("download", `lista-tecnica-${project.data?.name || 'projeto'}.csv`);
       link.style.visibility = "hidden";
       document.body.appendChild(link);
       link.click();
