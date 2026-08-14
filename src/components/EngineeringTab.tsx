@@ -53,6 +53,15 @@ export function EngineeringTab({ projectId, parts }: EngineeringTabProps) {
 
   return (
     <div className="space-y-6">
+      <Alert variant="destructive" className="bg-amber-50 border-amber-200 text-amber-900">
+        <AlertTriangle className="h-4 w-4 text-amber-600" />
+        <AlertTitle className="text-amber-800 font-bold">PROTOCOLO DE ENGENHARIA ATIVO</AlertTitle>
+        <AlertDescription>
+          A visualização 3D está suspensa até a validação das cotas críticas via PDF e furações via DXF. 
+          <strong> Nunca deduza medidas ou posições.</strong>
+        </AlertDescription>
+      </Alert>
+
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader className="pb-3">
