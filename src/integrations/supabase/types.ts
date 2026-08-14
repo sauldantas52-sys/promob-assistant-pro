@@ -67,6 +67,64 @@ export type Database = {
         }
         Relationships: []
       }
+      engineering_validations: {
+        Row: {
+          created_at: string | null
+          file_id: string | null
+          file_type: string
+          id: string
+          notes: string | null
+          part_id: string | null
+          project_id: string
+          updated_at: string | null
+          validation_status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          file_id?: string | null
+          file_type: string
+          id?: string
+          notes?: string | null
+          part_id?: string | null
+          project_id: string
+          updated_at?: string | null
+          validation_status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          file_id?: string | null
+          file_type?: string
+          id?: string
+          notes?: string | null
+          part_id?: string | null
+          project_id?: string
+          updated_at?: string | null
+          validation_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "engineering_validations_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "project_files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "engineering_validations_part_id_fkey"
+            columns: ["part_id"]
+            isOneToOne: false
+            referencedRelation: "parts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "engineering_validations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       maintenance_history: {
         Row: {
           created_at: string | null
@@ -228,6 +286,66 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "modules_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      part_drillings: {
+        Row: {
+          created_at: string | null
+          diameter_mm: number
+          face: string
+          id: string
+          is_confirmed: boolean | null
+          origin: string | null
+          part_id: string
+          project_id: string
+          updated_at: string | null
+          x_mm: number
+          y_mm: number
+          z_mm: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          diameter_mm: number
+          face: string
+          id?: string
+          is_confirmed?: boolean | null
+          origin?: string | null
+          part_id: string
+          project_id: string
+          updated_at?: string | null
+          x_mm: number
+          y_mm: number
+          z_mm?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          diameter_mm?: number
+          face?: string
+          id?: string
+          is_confirmed?: boolean | null
+          origin?: string | null
+          part_id?: string
+          project_id?: string
+          updated_at?: string | null
+          x_mm?: number
+          y_mm?: number
+          z_mm?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "part_drillings_part_id_fkey"
+            columns: ["part_id"]
+            isOneToOne: false
+            referencedRelation: "parts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "part_drillings_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
