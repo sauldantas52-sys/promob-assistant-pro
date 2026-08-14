@@ -615,8 +615,12 @@ export type Database = {
           client_name: string | null
           company_id: string
           created_at: string | null
+          cutting_status: string | null
           environment: string | null
           id: string
+          is_cutting_edge_released: boolean | null
+          is_machining_assembly_blocked: boolean | null
+          machining_status: string | null
           name: string
           notes: string | null
           status: string | null
@@ -626,8 +630,12 @@ export type Database = {
           client_name?: string | null
           company_id: string
           created_at?: string | null
+          cutting_status?: string | null
           environment?: string | null
           id?: string
+          is_cutting_edge_released?: boolean | null
+          is_machining_assembly_blocked?: boolean | null
+          machining_status?: string | null
           name: string
           notes?: string | null
           status?: string | null
@@ -637,8 +645,12 @@ export type Database = {
           client_name?: string | null
           company_id?: string
           created_at?: string | null
+          cutting_status?: string | null
           environment?: string | null
           id?: string
+          is_cutting_edge_released?: boolean | null
+          is_machining_assembly_blocked?: boolean | null
+          machining_status?: string | null
           name?: string
           notes?: string | null
           status?: string | null
