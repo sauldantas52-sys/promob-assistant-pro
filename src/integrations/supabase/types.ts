@@ -499,6 +499,7 @@ export type Database = {
           name: string
           project_id: string
           quantity: number
+          storage_location: string | null
           thickness_mm: number | null
           unit: string | null
           visibility_type: string | null
@@ -520,6 +521,7 @@ export type Database = {
           name: string
           project_id: string
           quantity?: number
+          storage_location?: string | null
           thickness_mm?: number | null
           unit?: string | null
           visibility_type?: string | null
@@ -541,6 +543,7 @@ export type Database = {
           name?: string
           project_id?: string
           quantity?: number
+          storage_location?: string | null
           thickness_mm?: number | null
           unit?: string | null
           visibility_type?: string | null
@@ -747,6 +750,8 @@ export type Database = {
       }
       projects: {
         Row: {
+          assembly_notes: string | null
+          assembly_photos: Json | null
           client_name: string | null
           company_id: string
           created_at: string | null
@@ -762,6 +767,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          assembly_notes?: string | null
+          assembly_photos?: Json | null
           client_name?: string | null
           company_id: string
           created_at?: string | null
@@ -777,6 +784,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          assembly_notes?: string | null
+          assembly_photos?: Json | null
           client_name?: string | null
           company_id?: string
           created_at?: string | null

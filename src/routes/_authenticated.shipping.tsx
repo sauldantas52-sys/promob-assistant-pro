@@ -73,7 +73,7 @@ function ShippingPage() {
           ),
           shipping_volumes(*)
         `)
-        .in("status", ["conferencia", "expedicao", "montagem"])
+        .in("status", ["separacao", "montagem", "concluido"])
         .order("updated_at", { ascending: false });
       if (error) throw error;
       return data || [];
@@ -333,17 +333,20 @@ function VolumeRow({ volume, project }: { volume: any, project: any }) {
               <Dialog>
                 <DialogTrigger asChild>
                   <Button size="lg" className="h-12 px-8 rounded-[1.25rem] bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-[0.2em] text-[10px] border-none shadow-xl shadow-indigo-600/20 transition-all active:scale-95">
-                    <Truck className="mr-3 h-5 w-5" /> Carregar
+                    <Truck className="mr-3 h-5 w-5" /> Registrar Carga
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="rounded-[3rem] border-none shadow-2xl p-12">
+                <DialogContent className="rounded-[3rem] border-none shadow-2xl p-12 max-w-2xl">
                   <DialogHeader className="mb-8">
-                    <DialogTitle className="text-3xl font-black text-slate-900 tracking-tighter uppercase">Carregamento Logístico</DialogTitle>
+                    <DialogTitle className="text-3xl font-black text-slate-900 tracking-tighter uppercase">Manifesto de Carregamento</DialogTitle>
                     <DialogDescription className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em] mt-2">
-                      Informe os dados do veículo para o volume {volume.code}.
+                      Identificação do transportador para o volume {volume.code}.
                     </DialogDescription>
                   </DialogHeader>
-                  <LoadingForm onSubmit={(data) => updateStatus('carregado', data)} />
+                  <LoadingForm 
+                    initialData={{ driver_name: volume.driver_name, vehicle_plate: volume.vehicle_plate }}
+                    onSubmit={(data) => updateStatus('carregado', data)} 
+                  />
                 </DialogContent>
               </Dialog>
             )}
@@ -427,9 +430,9 @@ function VolumeRow({ volume, project }: { volume: any, project: any }) {
   );
 }
 
-function LoadingForm({ onSubmit }: { onSubmit: (data: any) => void }) {
-  const [plate, setPlate] = useState("");
-  const [driver, setDriver] = useState("");
+function LoadingForm({ onSubmit, initialData }: { onSubmit: (data: any) => void, initialData?: { driver_name?: string | null, vehicle_plate?: string | null } }) {
+  const [plate, setPlate] = useState(initialData?.vehicle_plate || "");
+  const [driver, setDriver] = useState(initialData?.driver_name || "");
   const [weight, setWeight] = useState("");
 
   return (
