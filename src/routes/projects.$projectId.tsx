@@ -89,7 +89,7 @@ function ProjectDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
-        .select("id, name, client_name, environment, status, notes, created_at, company_id")
+        .select("id, name, client_name, environment, status, notes, created_at, company_id, cutting_status, machining_status, is_cutting_edge_released, is_machining_assembly_blocked")
         .eq("id", projectId)
         .maybeSingle();
       if (error) throw error;
@@ -115,7 +115,7 @@ function ProjectDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("parts")
-        .select("id, module_id, kind, name, material, thickness_mm, width_mm, length_mm, quantity, unit, edge_banding, is_completed, data_source, visibility_type")
+        .select("id, module_id, kind, name, material, thickness_mm, width_mm, length_mm, quantity, unit, edge_banding, is_completed, data_source, visibility_type, cutting_edge_released, machining_blocked")
         .eq("project_id", projectId)
         .order("created_at");
       if (error) throw error;
@@ -355,6 +355,7 @@ function ProjectDetail() {
             value={project.data?.status ?? "novo"} 
             onValueChange={async (v) => {
               if (v === "producao") {
+                // Bloqueio rigoroso: nada entra em produção se não houver dados técnicos básicos
                 const unconfirmedParts = allParts.filter(p => 
                   (!p.width_mm || !p.length_mm || !p.thickness_mm || !p.material) && 
                   p.kind !== 'ferragem' && 
