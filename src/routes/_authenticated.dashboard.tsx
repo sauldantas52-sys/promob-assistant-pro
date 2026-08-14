@@ -62,18 +62,26 @@ function DashboardContent() {
   ];
 
   return (
-    <div className="space-y-6 p-4 md:p-8 max-w-7xl mx-auto">
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
+    <div className="space-y-10 p-6 md:p-12 max-w-[1600px] mx-auto">
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-2">
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-600">
+            Painel Operacional 4.0
+          </p>
+          <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-slate-900 uppercase leading-none">
             Olá, {fullName?.split(" ")[0] ?? "bem-vindo"}!
           </h1>
-          <p className="text-lg text-slate-500 mt-1">
-            {role ? roleLabels[role] : "Perfil não definido"} · Monta AI — Aprovado para piloto controlado
-          </p>
+          <div className="flex items-center gap-3 mt-4">
+            <Badge className="px-4 py-1.5 text-[10px] font-black shadow-sm uppercase tracking-[0.2em] border-none rounded-full bg-slate-900 text-white">
+              {role ? roleLabels[role] : "Perfil não definido"}
+            </Badge>
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+              Aprovado para piloto controlado
+            </span>
+          </div>
         </div>
         <div className="hidden md:block text-right">
-          <p className="text-sm font-medium text-slate-400 uppercase tracking-widest">{new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
         </div>
       </header>
 
