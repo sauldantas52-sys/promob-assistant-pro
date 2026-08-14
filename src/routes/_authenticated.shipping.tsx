@@ -189,22 +189,24 @@ function ProjectShippingCard({ project }: { project: any }) {
   };
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="bg-muted/30 border-b pb-4">
-        <div className="flex flex-wrap items-start justify-between gap-4">
+    <Card className="overflow-hidden border-none shadow-sm rounded-2xl">
+      <CardHeader className="bg-slate-50 border-b border-slate-200 py-6 px-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <CardTitle className="text-lg">{project.name}</CardTitle>
-            <CardDescription>{project.client_name} · {project.environment}</CardDescription>
+            <CardTitle className="text-xl font-black text-slate-900 tracking-tight">{project.name}</CardTitle>
+            <CardDescription className="text-slate-500 font-bold uppercase text-[10px] tracking-widest mt-1">
+              {project.client_name} · {project.environment}
+            </CardDescription>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-3">
             {pendingSealedGroups.length > 0 && (
-              <Button size="sm" onClick={generateVolumes} disabled={isGenerating}>
+              <Button size="sm" className="h-10 font-bold rounded-xl shadow-lg shadow-blue-600/20" onClick={generateVolumes} disabled={isGenerating}>
                 {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <QrCode className="mr-2 h-4 w-4" />}
-                Gerar QR de Volumes ({pendingSealedGroups.length})
+                Gerar Volumes ({pendingSealedGroups.length})
               </Button>
             )}
-            <Badge className={project.status === 'expedicao' ? 'bg-blue-500' : 'bg-green-500'}>
-              {project.status.toUpperCase()}
+            <Badge className={cn("px-4 py-1.5 text-xs font-black uppercase tracking-widest border shadow-sm", project.status === 'expedicao' ? 'bg-blue-600 text-white' : 'bg-green-600 text-white')}>
+              {project.status}
             </Badge>
           </div>
         </div>
