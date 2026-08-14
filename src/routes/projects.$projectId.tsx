@@ -170,9 +170,14 @@ function ProjectDetail() {
         },
       });
 
-      const allInsertedParts: { id: string; module_id: string | null; kind: string }[] = [];
+      const allInsertedParts: { id: string; module_id: string | null; kind: string; quantity: number }[] = [];
+      const moduleColors = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#06B6D4", "#F97316"];
 
-      for (const parsedModule of result.modules) {
+      for (let i = 0; i < result.modules.length; i++) {
+        const parsedModule = result.modules[i];
+        const color = moduleColors[i % moduleColors.length];
+        
+        // 1. Criar Módulo
         const { data: created, error } = await supabase
           .from("modules")
           .insert({
@@ -189,11 +194,30 @@ function ProjectDetail() {
           .single();
         if (error) throw error;
 
+        // 2. Criar Grupo de Montagem automaticamente para o módulo
+        const { data: group, error: groupError } = await supabase
+          .from("assembly_groups")
+          .insert({
+            project_id: projectId,
+            module_id: created.id,
+            code: `M${(i + 1).toString().padStart(2, '0')}`,
+            name: parsedModule.name,
+            color: color,
+            separation_status: 'pendente',
+            conference_status: 'pendente',
+            is_locked: true,
+            lock_reason: 'Aguardando separação de peças e ferragens'
+          })
+          .select("id")
+          .single();
+        if (groupError) throw groupError;
+
         if (parsedModule.parts.length > 0) {
           const { data: insertedParts, error: partsError } = await supabase.from("parts").insert(
             parsedModule.parts.map((part) => ({
               project_id: projectId,
               module_id: created.id,
+              assembly_group_id: group.id,
               kind: part.kind,
               name: part.name,
               material: part.material ?? null,
@@ -208,9 +232,25 @@ function ProjectDetail() {
               cutting_edge_released: false,
               machining_blocked: true,
             })),
-          ).select("id, module_id, kind");
+          ).select("id, module_id, kind, quantity");
           if (partsError) throw partsError;
-          if (insertedParts) allInsertedParts.push(...insertedParts);
+          if (insertedParts) {
+            allInsertedParts.push(...insertedParts.map(p => ({ ...p, quantity: Number(p.quantity) })));
+            
+            // 3. Criar Kit de Ferragens automaticamente
+            const hardwareItems = insertedParts.filter(p => p.kind === 'ferragem' || p.kind === 'acessorio');
+            if (hardwareItems.length > 0) {
+              await supabase.from('assembly_group_hardware').insert(
+                hardwareItems.map(h => ({
+                  group_id: group.id,
+                  part_id: h.id,
+                  quantity_required: h.quantity,
+                  quantity_confirmed: 0,
+                  status: 'pendente'
+                }))
+              );
+            }
+          }
         }
       }
 
@@ -233,9 +273,9 @@ function ProjectDetail() {
             cutting_edge_released: false,
             machining_blocked: true,
           })),
-        ).select("id, module_id, kind");
+        ).select("id, module_id, kind, quantity");
         if (looseError) throw looseError;
-        if (insertedLoose) allInsertedParts.push(...insertedLoose);
+        if (insertedLoose) allInsertedParts.push(...insertedLoose.map(p => ({ ...p, quantity: Number(p.quantity) })));
       }
 
       // Gerar etapas de produção automaticamente
@@ -256,7 +296,7 @@ function ProjectDetail() {
       setWarnings(result.warnings);
       toast.success(
         result.modules.length > 0
-          ? `${result.modules.length} módulo(s) importado(s).`
+          ? `${result.modules.length} módulo(s) importado(s) com rastreabilidade 4.0.`
           : "Arquivo registrado no projeto.",
       );
       void queryClient.invalidateQueries({ queryKey: ["modules", projectId] });
