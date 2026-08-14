@@ -1,5 +1,5 @@
 -- Tabela de Versões de Projetos (Extensão)
-CREATE TABLE public.project_versions (
+CREATE TABLE IF NOT EXISTS public.project_versions (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     project_id uuid REFERENCES public.projects(id) ON DELETE CASCADE NOT NULL,
     version_number integer NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE public.project_versions (
 );
 
 -- Tabela de Tags/Layers Padronizadas
-CREATE TABLE public.project_tags (
+CREATE TABLE IF NOT EXISTS public.project_tags (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     version_id uuid REFERENCES public.project_versions(id) ON DELETE CASCADE NOT NULL,
     name text NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE public.project_tags (
 );
 
 -- Tabela de Comparações SketchUp x Promob
-CREATE TABLE public.project_comparisons (
+CREATE TABLE IF NOT EXISTS public.project_comparisons (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     version_id uuid REFERENCES public.project_versions(id) ON DELETE CASCADE NOT NULL,
     module_id_xml text,
@@ -42,7 +42,53 @@ CREATE TABLE public.project_comparisons (
     company_id uuid REFERENCES public.companies(id) NOT NULL
 );
 
--- Permissões
+-- Nova Tabela: Itens da Versão (necessária para processSkpPackage)
+CREATE TABLE IF NOT EXISTS public.project_version_items (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    version_id uuid REFERENCES public.project_versions(id) ON DELETE CASCADE NOT NULL,
+    project_id uuid REFERENCES public.projects(id) ON DELETE CASCADE NOT NULL,
+    environment_id text,
+    module_id text NOT NULL,
+    group_code text,
+    module_name text,
+    material text,
+    color text,
+    thickness_mm numeric,
+    width_mm numeric,
+    height_mm numeric,
+    depth_mm numeric,
+    position_x numeric,
+    position_y numeric,
+    position_z numeric,
+    plugin_version text,
+    engineering_status text DEFAULT 'não_confirmado',
+    validation_notes text,
+    tags text[],
+    company_id uuid REFERENCES public.companies(id) NOT NULL
+);
+
+-- Nova Tabela: Validações de Pacote
+CREATE TABLE IF NOT EXISTS public.project_package_validations (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    version_id uuid REFERENCES public.project_versions(id) ON DELETE CASCADE NOT NULL,
+    status text,
+    error_code text,
+    message text,
+    item_id text,
+    company_id uuid REFERENCES public.companies(id) NOT NULL
+);
+
+-- Nova Tabela: Arquivos da Versão
+CREATE TABLE IF NOT EXISTS public.project_version_files (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    version_id uuid REFERENCES public.project_versions(id) ON DELETE CASCADE NOT NULL,
+    file_type text,
+    file_url text,
+    file_name text,
+    company_id uuid REFERENCES public.companies(id) NOT NULL
+);
+
+-- Permissões (ESSENCIAL)
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.project_versions TO authenticated;
 GRANT ALL ON public.project_versions TO service_role;
 
@@ -52,43 +98,27 @@ GRANT ALL ON public.project_tags TO service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.project_comparisons TO authenticated;
 GRANT ALL ON public.project_comparisons TO service_role;
 
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.project_version_items TO authenticated;
+GRANT ALL ON public.project_version_items TO service_role;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.project_package_validations TO authenticated;
+GRANT ALL ON public.project_package_validations TO service_role;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.project_version_files TO authenticated;
+GRANT ALL ON public.project_version_files TO service_role;
+
 -- RLS
 ALTER TABLE public.project_versions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.project_tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.project_comparisons ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.project_version_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.project_package_validations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.project_version_files ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can manage versions of their company" ON public.project_versions
-    FOR ALL TO authenticated USING (company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid()));
-
-CREATE POLICY "Users can manage tags of their company" ON public.project_tags
-    FOR ALL TO authenticated USING (company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid()));
-
-CREATE POLICY "Users can manage comparisons of their company" ON public.project_comparisons
-    FOR ALL TO authenticated USING (company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid()));
-
--- Registro inicial de tags padronizadas (Helper)
-CREATE OR REPLACE FUNCTION public.seed_default_tags(v_id uuid, c_id uuid)
-RETURNS void LANGUAGE plpgsql AS $$
-BEGIN
-    INSERT INTO public.project_tags (version_id, company_id, code, name) VALUES
-    (v_id, c_id, '00', 'REFERENCIAS'),
-    (v_id, c_id, '01', 'AMBIENTES'),
-    (v_id, c_id, '02', 'MODULOS'),
-    (v_id, c_id, '03', 'G1'),
-    (v_id, c_id, '04', 'G2'),
-    (v_id, c_id, '05', 'G3'),
-    (v_id, c_id, '06', 'AV'),
-    (v_id, c_id, '07', 'PORTAS_FRENTES'),
-    (v_id, c_id, '08', 'ESTRUTURA'),
-    (v_id, c_id, '09', 'INTERNOS'),
-    (v_id, c_id, '10', 'FERRAGENS_VISUAIS'),
-    (v_id, c_id, '11', 'COTAS'),
-    (v_id, c_id, '12', 'MATERIAIS'),
-    (v_id, c_id, '13', 'NAO_FABRICAVEL'),
-    (v_id, c_id, '14', 'PROCESSO_CORTE'),
-    (v_id, c_id, '15', 'PROCESSO_BORDA'),
-    (v_id, c_id, '16', 'PROCESSO_USINAGEM'),
-    (v_id, c_id, '17', 'PROCESSO_SEPARACAO'),
-    (v_id, c_id, '18', 'MONTAGEM');
-END;
-$$;
+-- Políticas
+CREATE POLICY "Users can manage versions of their company" ON public.project_versions FOR ALL TO authenticated USING (company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid()));
+CREATE POLICY "Users can manage tags of their company" ON public.project_tags FOR ALL TO authenticated USING (company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid()));
+CREATE POLICY "Users can manage comparisons of their company" ON public.project_comparisons FOR ALL TO authenticated USING (company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid()));
+CREATE POLICY "Users can manage version items of their company" ON public.project_version_items FOR ALL TO authenticated USING (company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid()));
+CREATE POLICY "Users can manage package validations of their company" ON public.project_package_validations FOR ALL TO authenticated USING (company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid()));
+CREATE POLICY "Users can manage version files of their company" ON public.project_version_files FOR ALL TO authenticated USING (company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid()));
