@@ -221,16 +221,19 @@ function StepMetric({ icon: Icon, label, stats }: { icon: any, label: string, st
   const percent = stats.total > 0 ? (stats.done / stats.total) * 100 : 0;
   
   return (
-    <div className={`p-2 rounded-lg border flex flex-col items-center justify-center text-center ${stats.blocked > 0 ? 'bg-destructive/5 border-destructive/20' : 'bg-card'}`}>
-      <Icon className={`h-4 w-4 mb-1 ${stats.blocked > 0 ? 'text-destructive' : 'text-primary'}`} />
-      <p className="text-[10px] uppercase font-medium text-muted-foreground">{label}</p>
-      <div className="mt-1 flex items-baseline gap-1">
-        <span className="text-sm font-bold">{stats.done}</span>
-        <span className="text-[10px] text-muted-foreground">/ {stats.total}</span>
+    <div className={cn(
+      "p-4 rounded-2xl border transition-all flex flex-col items-center justify-center text-center",
+      stats.blocked ? "bg-red-500/10 border-red-500/30 text-red-400" : "bg-slate-800/50 border-slate-700 text-slate-300"
+    )}>
+      <Icon className={cn("h-6 w-6 mb-2", stats.blocked ? "text-red-500" : "text-blue-500")} />
+      <p className="text-[10px] uppercase font-black tracking-widest opacity-60">{label}</p>
+      <div className="mt-2 flex items-baseline gap-1">
+        <span className="text-2xl font-black">{stats.done}</span>
+        <span className="text-xs font-bold opacity-40">/ {stats.total}</span>
       </div>
-      <div className="w-full bg-muted h-1 rounded-full mt-2 overflow-hidden">
+      <div className="w-full bg-slate-900 h-2 rounded-full mt-3 overflow-hidden">
         <div 
-          className={`h-full transition-all ${stats.blocked > 0 ? 'bg-destructive' : 'bg-primary'}`} 
+          className={cn("h-full transition-all", stats.blocked ? "bg-red-600" : "bg-blue-600")} 
           style={{ width: `${percent}%` }}
         />
       </div>
