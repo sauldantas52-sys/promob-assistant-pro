@@ -242,7 +242,7 @@ export interface KitGuardInput {
 }
 
 /** Decide se o kit pode ser finalizado. Nunca libera silenciosamente. */
-export function canFinalizeKit(input: KitGuardInput): { allowed: boolean; reasons: string[] } {
+export function canFinalizeKit(input: KitGuardInput): { allowed: boolean; reasons: string[]; conference_status: "concluida" | "com_excecao" | "sincronizado" } {
   const reasons: string[] = [];
   if (input.totalParts === 0) reasons.push("Kit sem peças vinculadas.");
   if (input.confirmedParts < input.totalParts)
@@ -251,7 +251,11 @@ export function canFinalizeKit(input: KitGuardInput): { allowed: boolean; reason
     reasons.push(`${input.totalHardware - input.confirmedHardware} ferragem(ns) não conferida(s).`);
   if (input.openExceptions > 0)
     reasons.push(`${input.openExceptions} exceção(ões) bloqueante(s) em aberto.`);
-  return { allowed: reasons.length === 0, reasons };
+  
+  let status: "concluida" | "com_excecao" | "sincronizado" = "concluida";
+  if (reasons.length > 0) status = "com_excecao";
+  
+  return { allowed: reasons.length === 0, reasons, conference_status: status };
 }
 
 /** Expedição só é liberada com kit selado e sem exceção bloqueante. */
