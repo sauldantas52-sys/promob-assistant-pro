@@ -215,7 +215,7 @@ function AssemblyContent() {
                             <Boxes className="h-3 w-3" /> Acessórios e Componentes
                           </h4>
                           <div className="grid gap-2">
-                            {project.parts?.filter(p => p.kind === 'acessorio').map(p => (
+                            {(project.parts || []).filter(p => p.kind === 'acessorio').map((p: any) => (
                               <div key={p.id} className="text-xs flex justify-between bg-card p-2 rounded border">
                                 <span>{p.name}</span>
                                 <Badge variant="outline" className="h-5">{p.quantity} {p.unit}</Badge>
