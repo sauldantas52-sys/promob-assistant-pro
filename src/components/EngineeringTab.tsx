@@ -250,7 +250,9 @@ export function EngineeringTab({ projectId, parts }: EngineeringTabProps) {
               <div className="md:col-span-2 space-y-4">
                 {selectedPart ? (
                   <div className="space-y-6">
-                    <DrillingInspector drillings={[]} />
+                    <DrillingInspector 
+                      drillings={selectedPartId ? mapDxfToDrillings(dxfData, selectedPartId) : []} 
+                    />
                     <div className="grid grid-cols-2 gap-4">
                       <div className="p-3 border rounded-lg bg-amber-50/50">
                         <p className="text-[10px] uppercase font-bold text-amber-600 mb-1">Grau de Confirmação</p>
