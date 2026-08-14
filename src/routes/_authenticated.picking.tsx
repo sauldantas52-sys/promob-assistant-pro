@@ -112,21 +112,27 @@ function PickingPage() {
                 <CardContent className="p-0">
                   <div className="divide-y">
                     {pickingItems.map(item => (
-                      <div key={item.id} className="p-4 flex items-center justify-between gap-4">
-                        <div className="flex items-start gap-3">
+                      <div key={item.id} className="px-16 py-10 flex items-center justify-between gap-8 transition-all hover:bg-slate-50 border-b border-slate-50 last:border-b-0">
+                        <div className="flex items-center gap-8">
                           <Button 
                             variant={item.is_completed ? "default" : "outline"}
                             size="icon"
-                            className="h-10 w-10 shrink-0"
+                            className={cn(
+                              "h-16 w-16 shrink-0 rounded-[1.5rem] transition-all duration-300 border-2",
+                              item.is_completed ? "bg-emerald-600 border-emerald-600 shadow-xl shadow-emerald-600/20" : "bg-white border-slate-200 shadow-sm"
+                            )}
                             onClick={() => updatePart.mutate({ id: item.id, is_completed: !item.is_completed })}
                           >
-                            {item.is_completed ? <CheckCircle2 className="h-6 w-6" /> : <div className="h-6 w-6 rounded-full border-2" />}
+                            {item.is_completed ? <CheckCircle2 className="h-8 w-8 text-white" /> : <div className="h-8 w-8 rounded-full border-4 border-slate-100" />}
                           </Button>
                           <div>
-                            <p className={`font-medium ${item.is_completed ? "text-muted-foreground line-through" : ""}`}>
+                            <p className={cn(
+                              "text-xl font-black tracking-tighter uppercase leading-none mb-2 transition-all",
+                              item.is_completed ? "text-slate-400 line-through" : "text-slate-900"
+                            )}>
                               {item.name}
                             </p>
-                            <p className="text-xs text-muted-foreground">Quantidade: {item.quantity} {item.unit}</p>
+                            <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em]">Quantidade: {item.quantity} {item.unit}</p>
                           </div>
                         </div>
                         <div className="flex gap-2">
