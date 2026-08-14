@@ -250,21 +250,21 @@ function ShippingMetric({ volumes }: { volumes: any[] }) {
   if (total === 0) return null;
 
   return (
-    <div className="p-2 rounded-lg border bg-purple-500/5 border-purple-200 flex flex-col items-center justify-center text-center">
-      <Truck className="h-4 w-4 mb-1 text-purple-600" />
-      <p className="text-[10px] uppercase font-medium text-muted-foreground">Expedição</p>
-      <div className="mt-1 flex items-baseline gap-1">
-        <span className="text-sm font-bold text-purple-700">{loaded}</span>
-        <span className="text-[10px] text-muted-foreground">/ {total}</span>
+    <div className="p-4 rounded-2xl border bg-purple-600/10 border-purple-500/30 text-purple-300 flex flex-col items-center justify-center text-center">
+      <Truck className="h-6 w-6 mb-2 text-purple-500" />
+      <p className="text-[10px] uppercase font-black tracking-widest opacity-60">Expedição</p>
+      <div className="mt-2 flex items-baseline gap-1">
+        <span className="text-2xl font-black">{loaded}</span>
+        <span className="text-xs font-bold opacity-40">/ {total}</span>
       </div>
-      <div className="w-full bg-muted h-1 rounded-full mt-2 overflow-hidden">
+      <div className="w-full bg-slate-900 h-2 rounded-full mt-3 overflow-hidden">
         <div 
-          className="h-full bg-purple-600 transition-all" 
+          className="h-full bg-purple-600 transition-all shadow-[0_0_10px_rgba(147,51,234,0.5)]" 
           style={{ width: `${percent}%` }}
         />
       </div>
       {delivered === total && total > 0 && (
-        <p className="text-[8px] font-bold text-green-600 mt-1 uppercase">Entregue</p>
+        <p className="text-[10px] font-black text-green-500 mt-2 uppercase tracking-widest">Entregue</p>
       )}
     </div>
   );
