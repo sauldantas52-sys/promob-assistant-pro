@@ -248,7 +248,7 @@ function ProjectDetail() {
                   part_id: h.id,
                   quantity_required: h.quantity,
                   quantity_confirmed: 0,
-                  status: 'pendente'
+                  is_verified: false
                 }))
               );
             }
@@ -257,27 +257,60 @@ function ProjectDetail() {
       }
 
       if (result.looseParts.length > 0) {
-        const { data: insertedLoose, error: looseError } = await supabase.from("parts").insert(
-          result.looseParts.map((part) => ({
+        const { data: looseGroup, error: looseGroupError } = await supabase
+          .from("assembly_groups")
+          .insert({
             project_id: projectId,
-            module_id: null,
-            kind: part.kind,
-            name: part.name,
-            material: part.material ?? null,
-            thickness_mm: part.thickness_mm ?? null,
-            width_mm: part.width_mm ?? null,
-            length_mm: part.length_mm ?? null,
-            quantity: part.quantity,
-            unit: part.unit ?? "un",
-            edge_banding: part.edge_banding ?? null,
-            data_source: part.data_source || 'XML',
-            visibility_type: part.visibility_type || 'visivel',
-            cutting_edge_released: false,
-            machining_blocked: true,
-          })),
-        ).select("id, module_id, kind, quantity");
-        if (looseError) throw looseError;
-        if (insertedLoose) allInsertedParts.push(...insertedLoose.map(p => ({ ...p, quantity: Number(p.quantity) })));
+            code: 'AV',
+            name: 'Itens Avulsos',
+            color: '#94a3b8',
+            separation_status: 'pendente',
+            conference_status: 'pendente',
+            is_locked: true,
+            lock_reason: 'Aguardando conferência de itens avulsos'
+          })
+          .select("id")
+          .single();
+        
+        if (!looseGroupError && looseGroup) {
+          const { data: insertedLoose, error: looseError } = await supabase.from("parts").insert(
+            result.looseParts.map((part) => ({
+              project_id: projectId,
+              module_id: null,
+              assembly_group_id: looseGroup.id,
+              kind: part.kind,
+              name: part.name,
+              material: part.material ?? null,
+              thickness_mm: part.thickness_mm ?? null,
+              width_mm: part.width_mm ?? null,
+              length_mm: part.length_mm ?? null,
+              quantity: part.quantity,
+              unit: part.unit ?? "un",
+              edge_banding: part.edge_banding ?? null,
+              data_source: part.data_source || 'XML',
+              visibility_type: part.visibility_type || 'visivel',
+              cutting_edge_released: false,
+              machining_blocked: true,
+            })),
+          ).select("id, module_id, kind, quantity");
+          
+          if (!looseError && insertedLoose) {
+            allInsertedParts.push(...insertedLoose.map(p => ({ ...p, quantity: Number(p.quantity) })));
+            
+            const looseHardware = insertedLoose.filter(p => p.kind === 'ferragem' || p.kind === 'acessorio');
+            if (looseHardware.length > 0) {
+              await supabase.from('assembly_group_hardware').insert(
+                looseHardware.map(h => ({
+                  group_id: looseGroup.id,
+                  part_id: h.id,
+                  quantity_required: h.quantity,
+                  quantity_confirmed: 0,
+                  is_verified: false
+                }))
+              );
+            }
+          }
+        }
       }
 
       // Gerar etapas de produção automaticamente
