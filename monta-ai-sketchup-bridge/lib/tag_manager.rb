@@ -7,11 +7,16 @@ module MontaAI
         layers = model.layers
         
         tags = [
-          "00_REFERENCIAS", "01_AMBIENTES", "02_MODULOS", "03_G1", "04_G2", 
-          "05_G3", "06_AV", "07_PORTAS_FRENTES", "08_ESTRUTURA", "09_INTERNOS", 
-          "10_FERRAGENS_VISUAIS", "11_COTAS", "12_MATERIAIS", "13_NAO_FABRICAVEL", 
-          "14_PROCESSO_CORTE", "15_PROCESSO_BORDA", "16_PROCESSO_USINAGEM", 
-          "17_PROCESSO_SEPARACAO", "18_MONTAGEM"
+          "00_REFERENCIAS",
+          "01_AMBIENTES",
+          "02_PAREDES",
+          "03_PORTAS_JANELAS",
+          "04_MODULOS",
+          "05_COTAS",
+          "06_MATERIAIS",
+          "07_PORTAS_FRENTES",
+          "08_REVISAO",
+          "09_NAO_FABRICAVEL"
         ]
         
         model.start_operation('Criar Tags Monta AI', true)
