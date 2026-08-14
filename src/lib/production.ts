@@ -65,7 +65,8 @@ export async function updateStepStatus(
   if (error) throw error;
 
   // Registrar log de auditoria
-  await supabase.from('production_logs').insert({
+  // Usamos casting para 'any' para evitar erros de tipo até que o gerador de tipos do Supabase atualize
+  await (supabase.from('production_logs') as any).insert({
     project_id: step.project_id,
     user_id: user.id,
     action: `Alteração de status da etapa: ${status}`,
