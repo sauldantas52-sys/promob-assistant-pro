@@ -116,12 +116,13 @@ export function EngineeringTab({ projectId, parts }: EngineeringTabProps) {
         </Card>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button 
           variant={activeView === 'comparison' ? 'default' : 'outline'} 
           size="sm"
           onClick={() => setActiveView('comparison')}
         >
+          <Ruler className="h-4 w-4 mr-2" />
           Comparação XML × PDF × DXF
         </Button>
         <Button 
@@ -129,7 +130,16 @@ export function EngineeringTab({ projectId, parts }: EngineeringTabProps) {
           size="sm"
           onClick={() => setActiveView('drillings')}
         >
+          <CircleDot className="h-4 w-4 mr-2" />
           Tela de Furação
+        </Button>
+        <Button 
+          variant={activeView === 'report' ? 'default' : 'outline'} 
+          size="sm"
+          onClick={() => setActiveView('report')}
+        >
+          <ClipboardList className="h-4 w-4 mr-2" />
+          Relatório de Bitolas
         </Button>
       </div>
 
