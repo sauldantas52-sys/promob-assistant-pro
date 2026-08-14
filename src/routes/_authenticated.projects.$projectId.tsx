@@ -27,6 +27,7 @@ import {
   ShieldCheck,
   Scissors,
   ArrowRightLeft,
+  CheckSquare,
 } from "lucide-react";
 import { Parser } from "@json2csv/plainjs";
 import { EngineeringTab } from "@/components/EngineeringTab";
@@ -35,6 +36,7 @@ import { PilotValidationChecklist } from "@/components/PilotValidationChecklist"
 import { BudgetTab } from "@/components/project/BudgetTab";
 import { PreliminaryCutPlanTab } from "@/components/project/PreliminaryCutPlanTab";
 import { VisualEstimateTab } from "@/components/project/VisualEstimateTab";
+import { AuditIntegrationTab } from "@/components/project/AuditIntegrationTab";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
