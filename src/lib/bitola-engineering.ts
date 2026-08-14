@@ -101,7 +101,7 @@ export function mapDxfToDrillings(dxfGeometries: any[], part: any): DrillingCoor
         Math.abs((part.thickness_mm || 0) - r.bitola) <= r.tolerancia_mm
       );
 
-      return {
+      const drilling: DrillingCoordinate = {
         part_id: part.id,
         module_name: part.module_name || "Sem módulo",
         group: part.group || (part.kind === 'peca' ? 'G1' : 'G2'),
@@ -118,6 +118,8 @@ export function mapDxfToDrillings(dxfGeometries: any[], part: any): DrillingCoor
         origem: "DXF",
         status: "confirmada",
         regra_aplicada: rule?.origem_regra
+      };
+      return drilling;
       };
     });
 }
