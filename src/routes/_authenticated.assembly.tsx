@@ -184,16 +184,17 @@ function AssemblyContent() {
                           const [confDialogOpen, setConfDialogOpen] = useState(false);
                         
                         return (
-                          <Card key={m.id} className={cn("overflow-hidden border-2", group?.is_locked ? "border-amber-200" : "border-green-200")}>
-                            <div className="h-2" style={{ backgroundColor: group?.color || "#ccc" }} />
-                            <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between">
+                          <Card key={m.id} className={cn("overflow-hidden border-2 shadow-sm rounded-2xl transition-all", group?.is_locked ? "border-amber-100 bg-amber-50/20" : "border-green-100 bg-green-50/20")}>
+                            <div className="h-3 w-full" style={{ backgroundColor: group?.color || "#cbd5e1" }} />
+                            <CardHeader className="p-5 pb-3 flex flex-row items-center justify-between">
                               <div>
-                                <CardTitle className="text-sm font-bold flex items-center gap-2">
-                                  {group?.code} - {m.name}
-                                  {group?.is_locked ? <Lock className="h-3 w-3 text-amber-500" /> : <Unlock className="h-3 w-3 text-green-500" />}
+                                <CardTitle className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
+                                  <span className="px-2 py-0.5 bg-slate-900 text-white rounded text-xs font-black uppercase">{group?.code}</span>
+                                  {m.name}
+                                  {group?.is_locked ? <Lock className="h-4 w-4 text-amber-600" /> : <Unlock className="h-4 w-4 text-green-600" />}
                                 </CardTitle>
                               </div>
-                              <Badge variant={group?.is_locked ? "outline" : "default"}>
+                              <Badge className={cn("px-3 py-1 text-[10px] font-black uppercase tracking-widest", group?.is_locked ? "bg-amber-100 text-amber-700 border-amber-200" : "bg-green-600 text-white")}>
                                 {group?.is_locked ? "Bloqueado" : "Liberado"}
                               </Badge>
                             </CardHeader>
