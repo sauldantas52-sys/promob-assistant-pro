@@ -1,4 +1,5 @@
 export type ParsedPart = {
+  id_xml?: string | null;
   kind: "peca" | "chapa" | "ferragem" | "acessorio";
   name: string;
   material?: string | null;
@@ -15,6 +16,7 @@ export type ParsedPart = {
 };
 
 export type ParsedModule = {
+  id_xml?: string | null;
   name: string;
   environment?: string | null;
   width_mm?: number | null;
@@ -84,6 +86,7 @@ export function parsePromobXml(fileName: string, sizeBytes: number, xmlText: str
     // Se for um item da raiz (-2) e tiver filhos, tratamos como Módulo
     if (parentId === "-2" && hasChildren) {
       const name = attr(node, ["DESCRIPTION", "name", "REFERENCE"]) ?? "Módulo";
+      const idXml = attr(node, ["UNIQUEID", "ID"]);
       const width = num(attr(node, ["WIDTH", "L"]));
       const height = num(attr(node, ["HEIGHT", "A"]));
       const depth = num(attr(node, ["DEPTH", "P"]));
@@ -105,7 +108,7 @@ export function parsePromobXml(fileName: string, sizeBytes: number, xmlText: str
         }
       }
 
-      modules.push({ name, environment, width_mm: width, height_mm: height, depth_mm: depth, quantity, parts, data_source: "XML" });
+      modules.push({ id_xml: idXml ?? null, name, environment, width_mm: width, height_mm: height, depth_mm: depth, quantity, parts, data_source: "XML" });
       seen.add(node);
     }
   }
@@ -141,10 +144,12 @@ function parsePartNode(p: Element): ParsedPart {
   let length = num(attr(p, ["LENGTH", "HEIGHT", "C"]));
   const thickness = num(attr(p, ["THICKNESS", "E"]));
 
+  const idXml = attr(p, ["UNIQUEID", "ID"]);
   const isVisible = attr(p, ["VISIBLE"])?.toLowerCase() !== "false";
   const visibility: ParsedPart["visibility_type"] = isVisible ? "visivel" : "oculta";
 
   return {
+    id_xml: idXml ?? null,
     kind: classifyKind(rawType, description),
     name: description,
     material: attr(p, ["MATERIAL", "COLOR", "REFERENCE"]),

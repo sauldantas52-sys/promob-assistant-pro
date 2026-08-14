@@ -1,16 +1,47 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Wrench, Boxes, Ruler, CheckCircle2, Factory } from "lucide-react";
+import { 
+  Wrench, 
+  Boxes, 
+  Ruler, 
+  CheckCircle2, 
+  Factory, 
+  Scan, 
+  AlertTriangle, 
+  Lock, 
+  Unlock, 
+  ChevronRight,
+  Info,
+  CheckCircle,
+  PackageCheck,
+  History,
+  ClipboardList
+} from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger,
+  DialogDescription,
+  DialogFooter
+} from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { statusLabel, statusTone } from "@/lib/project-status";
 import { toast } from "sonner";
+import { useState } from "react";
+import { AssemblyLabel } from "@/components/AssemblyLabel";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/assembly")({
   head: () => ({
@@ -45,7 +76,8 @@ function AssemblyContent() {
         .select(`
           id, name, client_name, environment, status, 
           modules(id, name, environment, width_mm, height_mm, depth_mm, quantity, is_completed, data_source),
-          parts(id, name, kind, quantity, unit, is_completed, material, thickness_mm, width_mm, length_mm, assembly_group_id, visibility_type, data_source)
+          parts(id, name, kind, quantity, unit, is_completed, material, thickness_mm, width_mm, length_mm, assembly_group_id, visibility_type, data_source),
+          assembly_groups(id, module_id, code, name, color, is_locked, lock_reason)
         `)
         .in("status", ["montagem", "conferencia", "assistencia"])
         .order("created_at", { ascending: false });
@@ -94,7 +126,7 @@ function AssemblyContent() {
                 <Tabs defaultValue="modules">
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="modules">Módulos</TabsTrigger>
-                    <TabsTrigger value="groups">Grupos G1/G2</TabsTrigger>
+                    <TabsTrigger value="groups">Módulos/Grupos</TabsTrigger>
                     <TabsTrigger value="hardware">Caderno</TabsTrigger>
                   </TabsList>
                   
@@ -138,55 +170,104 @@ function AssemblyContent() {
                   </TabsContent>
 
                   <TabsContent value="groups" className="space-y-4 mt-4">
-                    <div className="bg-muted/30 p-3 rounded-lg border border-dashed text-center">
-                      <p className="text-xs text-muted-foreground">
-                        Sequência lógica para facilitar a montagem na casa do cliente.
-                      </p>
-                    </div>
-                    <div className="space-y-3">
-                      {/* Grupo G1: Estruturas, Bases e Laterais */}
-                      <div className="p-3 border rounded-lg bg-card border-primary/20">
-                        <div className="flex justify-between items-center mb-2">
-                          <Badge className="bg-primary/10 text-primary border-primary/20">G1 - Estruturas Base</Badge>
-                          <span className="text-[10px] text-muted-foreground">
-                            {(project.parts || []).filter(p => p.kind === 'peca' && (p.name.toLowerCase().includes('base') || p.name.toLowerCase().includes('lateral'))).length} itens
-                          </span>
-                        </div>
-                        <div className="space-y-2">
-                          {(project.parts || []).filter(p => p.kind === 'peca' && (p.name.toLowerCase().includes('base') || p.name.toLowerCase().includes('lateral'))).map((p: any) => (
-                            <div key={p.id} className="text-xs flex flex-col gap-0.5 border-b border-muted last:border-0 pb-1">
-                              <div className="flex justify-between font-medium">
-                                <span>{p.name}</span>
-                                <span className="text-primary">{p.width_mm}x{p.length_mm} mm</span>
+                    <div className="grid gap-4">
+                      {(project.modules ?? []).map((m) => {
+                        const group = ((project as any).assembly_groups ?? []).find((g: any) => g.module_id === m.id);
+                        const parts = (project.parts ?? []).filter(p => p.assembly_group_id === group?.id);
+                        const completed = parts.filter(p => p.is_completed).length;
+                        const total = parts.length;
+                        const progress = total > 0 ? (completed / total) * 100 : 0;
+                        
+                        return (
+                          <Card key={m.id} className={cn("overflow-hidden border-2", group?.is_locked ? "border-amber-200" : "border-green-200")}>
+                            <div className="h-2" style={{ backgroundColor: group?.color || "#ccc" }} />
+                            <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between">
+                              <div>
+                                <CardTitle className="text-sm font-bold flex items-center gap-2">
+                                  {group?.code} - {m.name}
+                                  {group?.is_locked ? <Lock className="h-3 w-3 text-amber-500" /> : <Unlock className="h-3 w-3 text-green-500" />}
+                                </CardTitle>
                               </div>
-                              <div className="flex justify-between text-[10px] text-muted-foreground">
-                                <span>ID: {p.id ? p.id.split('-')[0].toUpperCase() : 'N/A'}</span>
-                                <span>{p.material} {p.thickness_mm}mm</span>
+                              <Badge variant={group?.is_locked ? "outline" : "default"}>
+                                {group?.is_locked ? "Bloqueado" : "Liberado"}
+                              </Badge>
+                            </CardHeader>
+                            <CardContent className="p-4 pt-0 space-y-3">
+                              <div className="space-y-1">
+                                <div className="flex justify-between text-xs text-muted-foreground">
+                                  <span>Progresso ({completed}/{total})</span>
+                                  <span>{Math.round(progress)}%</span>
+                                </div>
+                                <Progress value={progress} />
                               </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Grupo G2: Prateleiras, Fundos e Travessas */}
-                      <div className="p-3 border rounded-lg bg-card">
-                        <div className="flex justify-between items-center mb-2">
-                          <Badge variant="secondary">G2 - Internos e Travas</Badge>
-                          <span className="text-[10px] text-muted-foreground">
-                            {(project.parts || []).filter(p => p.kind === 'peca' && (p.name.toLowerCase().includes('prateleira') || p.name.toLowerCase().includes('fundo') || p.name.toLowerCase().includes('travessa'))).length} itens
-                          </span>
-                        </div>
-                        <div className="space-y-2">
-                          {(project.parts || []).filter(p => p.kind === 'peca' && (p.name.toLowerCase().includes('prateleira') || p.name.toLowerCase().includes('fundo') || p.name.toLowerCase().includes('travessa'))).map((p: any) => (
-                            <div key={p.id} className="text-xs flex flex-col gap-0.5 border-b border-muted last:border-0 pb-1">
-                              <div className="flex justify-between">
-                                <span>{p.name}</span>
-                                <span>{p.width_mm}x{p.length_mm} mm</span>
+                              
+                              <div className="flex gap-2">
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Button variant="outline" size="sm" className="flex-1 gap-2">
+                                      <Scan className="h-4 w-4" /> Conferir
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent className="max-h-[90vh] overflow-y-auto">
+                                    <DialogHeader>
+                                      <DialogTitle>Conferência: {group?.code} - {m.name}</DialogTitle>
+                                      <DialogDescription>
+                                        Escanear ou marcar itens do módulo.
+                                      </DialogDescription>
+                                    </DialogHeader>
+                                    <div className="space-y-4">
+                                      {parts.map(p => (
+                                        <div key={p.id} className="flex items-center gap-2 border-b pb-2">
+                                          <Checkbox 
+                                            checked={p.is_completed ?? false}
+                                            onCheckedChange={async (val) => {
+                                              await supabase.from('parts').update({ is_completed: !!val }).eq('id', p.id);
+                                              queryClient.invalidateQueries({ queryKey: ["assembly-projects"] });
+                                            }}
+                                          />
+                                          <span className={cn("text-sm", p.is_completed && "line-through text-muted-foreground")}>{p.name} ({p.quantity} {p.unit})</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                    <DialogFooter className="flex-col gap-2 sm:flex-row">
+                                      <Button variant="ghost" className="text-xs">Reportar Dano</Button>
+                                      <Button variant="secondary" className="text-xs">Exceção Autorizada</Button>
+                                      <Button className="w-full sm:w-auto">Finalizar Kit</Button>
+                                    </DialogFooter>
+                                  </DialogContent>
+                                </Dialog>
+                                
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Button variant="secondary" size="icon">
+                                      <Info className="h-4 w-4" />
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent>
+                                    <DialogHeader>
+                                      <DialogTitle>Etiquetas do Grupo</DialogTitle>
+                                    </DialogHeader>
+                                    <div className="flex flex-col items-center gap-4">
+                                      {parts.map(p => (
+                                        <AssemblyLabel 
+                                          key={p.id}
+                                          moduleCode={group?.code ?? "???"}
+                                          moduleName={m.name}
+                                          color={group?.color ?? "#000"}
+                                          partName={p.name}
+                                          dimensions={`${p.width_mm}x${p.length_mm}mm`}
+                                          qrValue={p.id}
+                                          projectId={project.id}
+                                        />
+                                      ))}
+                                    </div>
+                                  </DialogContent>
+                                </Dialog>
                               </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
                     </div>
                   </TabsContent>
 
