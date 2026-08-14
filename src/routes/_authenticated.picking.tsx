@@ -62,17 +62,19 @@ function PickingPage() {
 
   return (
     <AppShell>
-      <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto">
-        <header className="flex flex-col gap-2">
-          <Link to="/dashboard" className="text-sm font-bold text-slate-500 flex items-center gap-2 hover:text-blue-600 transition-colors uppercase tracking-widest">
-            <ArrowLeft className="h-4 w-4" /> Voltar ao Painel
+      <div className="space-y-16 p-8 md:p-16 max-w-[1800px] mx-auto animate-in fade-in duration-700">
+        <header className="flex flex-col gap-8 mb-10">
+          <Link to="/dashboard" className="inline-flex items-center gap-4 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 hover:text-blue-600 transition-all duration-300 group">
+            <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-2" /> Voltar ao Painel
           </Link>
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase flex items-center gap-3">
-                <PackageCheck className="h-8 w-8 text-blue-600" /> Separação e Conferência
-              </h1>
-              <p className="text-base text-slate-500 font-medium mt-1">Ferragens, acessórios e peças por grupos G1, G2 e G3.</p>
+          <div className="flex flex-wrap items-center justify-between gap-10">
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <span className="h-2 w-10 bg-blue-600 rounded-full" />
+                <p className="text-[12px] font-black uppercase tracking-[0.5em] text-blue-600">Gestão de Insumos e Ferragens</p>
+              </div>
+              <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-slate-900 uppercase leading-[0.8] mb-4">Separação</h1>
+              <p className="text-base font-black text-slate-500 uppercase tracking-[0.4em]">Ferragens, acessórios e peças por grupos G1, G2 e G3.</p>
             </div>
           </div>
         </header>
