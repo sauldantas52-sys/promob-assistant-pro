@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { Wrench, Boxes, Ruler } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Wrench, Boxes, Ruler, CheckCircle2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { statusLabel, statusTone } from "@/lib/project-status";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/assembly")({
   head: () => ({
@@ -31,6 +33,7 @@ export const Route = createFileRoute("/assembly")({
 
 function AssemblyContent() {
   const { companyId } = useAuth();
+  const queryClient = useQueryClient();
 
   const projects = useQuery({
     queryKey: ["assembly-projects", companyId],
@@ -38,7 +41,7 @@ function AssemblyContent() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
-        .select("id, name, client_name, environment, status, modules(id, name, environment, width_mm, height_mm, depth_mm, quantity)")
+        .select("id, name, client_name, environment, status, modules(id, name, environment, width_mm, height_mm, depth_mm, quantity, is_completed)")
         .in("status", ["montagem", "conferencia", "assistencia"])
         .order("created_at", { ascending: false });
       if (error) throw error;
