@@ -16,7 +16,9 @@ import {
 import { toast } from "sonner";
 import { useAuth, roleLabels, type AppRole } from "@/lib/auth";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { InfoIcon } from "lucide-react";
+import { InfoIcon, ShieldAlert } from "lucide-react";
+import { AUTH_CONFIG, isValidPasswordLength, isPasswordStrong } from "@/lib/auth-config";
+
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -71,7 +73,13 @@ function LoginPage() {
     e.preventDefault();
     setBusy(true);
     try {
+      if (!isValidPasswordLength(password)) {
+        toast.error(`A senha deve ter entre ${AUTH_CONFIG.MIN_PASSWORD_LENGTH} e ${AUTH_CONFIG.MAX_PASSWORD_LENGTH} caracteres.`);
+        setBusy(false);
+        return;
+      }
       await signUp({ email, password, fullName, companyName, role });
+
       toast.success("Conta criada com sucesso!");
       navigate({ to: "/dashboard" });
     } catch (error) {
@@ -202,7 +210,16 @@ function LoginPage() {
                       value={password}
                       onChange={setPassword}
                     />
+                    {password.length > 0 && !isPasswordStrong(password) && (
+                      <div className="flex items-center gap-2 rounded-lg bg-amber-50 p-2 border border-amber-100 mt-2">
+                        <ShieldAlert className="h-4 w-4 text-amber-600" />
+                        <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">
+                          Senha Curta (Modo Piloto) - Recomendado: 8+ caracteres
+                        </span>
+                      </div>
+                    )}
                     <Button type="submit" className="h-12 w-full text-base" disabled={busy}>
+
                       {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Criar conta
                     </Button>
                   </form>
