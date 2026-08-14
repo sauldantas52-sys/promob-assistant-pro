@@ -1460,13 +1460,17 @@ function Metric({
   value: string;
 }) {
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle>
-        <Icon className="h-4 w-4 text-primary" />
+    <Card className="border-none shadow-[0_20px_50px_-15px_rgba(0,0,0,0.06)] hover:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.12)] transition-all duration-700 rounded-[3rem] group bg-white overflow-hidden">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6 p-10">
+        <CardTitle className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-400">
+          {label}
+        </CardTitle>
+        <div className="p-4 rounded-3xl bg-slate-50 transition-all duration-700 group-hover:scale-110 group-hover:rotate-12">
+          <Icon className="h-7 w-7 text-blue-600" />
+        </div>
       </CardHeader>
-      <CardContent>
-        <p className="text-2xl font-bold">{value}</p>
+      <CardContent className="p-10 pt-0">
+        <p className="text-6xl font-black tracking-tighter leading-none text-slate-900">{value}</p>
       </CardContent>
     </Card>
   );
