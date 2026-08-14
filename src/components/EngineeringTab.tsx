@@ -7,7 +7,8 @@ import {
   CheckCircle2, 
   ChevronRight,
   Database,
-  FileCode
+  FileCode,
+  AlertTriangle
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,11 +18,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { parseDXF, DXFGeometry } from "@/lib/dxf-parser";
 import { parseExecutivePDF, CriticalDimension } from "@/lib/pdf-parser";
 import { toast } from "sonner";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface EngineeringTabProps {
   projectId: string;
   parts: any[];
 }
+
 
 export function EngineeringTab({ projectId, parts }: EngineeringTabProps) {
   const [pdfData, setPdfData] = useState<CriticalDimension[]>([]);
