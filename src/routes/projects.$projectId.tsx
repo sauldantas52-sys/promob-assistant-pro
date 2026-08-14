@@ -11,6 +11,7 @@ import {
   Wrench,
   FileText,
   Download,
+  Factory,
 } from "lucide-react";
 import { Parser } from "@json2csv/plainjs";
 import { Button } from "@/components/ui/button";
@@ -385,6 +386,7 @@ function ProjectDetail() {
           <TabsTrigger value="parts" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Lista Técnica</TabsTrigger>
           <TabsTrigger value="loose" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Itens sem Módulo</TabsTrigger>
           <TabsTrigger value="audit" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Auditoria Técnica</TabsTrigger>
+          <TabsTrigger value="production" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Produção / Fábrica</TabsTrigger>
           <TabsTrigger value="files" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Arquivos</TabsTrigger>
         </TabsList>
 
@@ -674,6 +676,84 @@ function ProjectDetail() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="production" className="mt-6">
+          <div className="grid gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg">Ordem de Produção</CardTitle>
+                  <p className="text-sm text-muted-foreground">Detalhamento para a fábrica e montagem</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-medium text-muted-foreground uppercase">Versão XML</p>
+                  <p className="text-sm font-bold">{files.data?.[0]?.file_name || "v1.0"}</p>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="rounded-lg border bg-muted/30 p-4">
+                    <h3 className="mb-3 font-semibold text-sm flex items-center gap-2">
+                      <Factory className="h-4 w-4" /> Caderno de Fábrica
+                    </h3>
+                    <ul className="space-y-2 text-xs">
+                      <li className="flex justify-between border-b pb-1">
+                        <span>Peças Fabricáveis:</span>
+                        <span className="font-bold">{allParts.filter(p => p.width_mm && p.length_mm && !p.name.toLowerCase().includes("processo")).length} un</span>
+                      </li>
+                      <li className="flex justify-between border-b pb-1">
+                        <span>Corte por Material:</span>
+                        <span className="font-bold">{Array.from(new Set(allParts.map(p => p.material))).filter(Boolean).length} tipos</span>
+                      </li>
+                      <li className="flex justify-between border-b pb-1">
+                        <span>Ferragens Totais:</span>
+                        <span className="font-bold">{hardware.length} un</span>
+                      </li>
+                    </ul>
+                    <Button variant="outline" className="mt-4 w-full h-9 text-xs" onClick={exportCSV}>
+                      Gerar Lista de Corte (CSV)
+                    </Button>
+                  </div>
+
+                  <div className="rounded-lg border bg-primary/5 p-4">
+                    <h3 className="mb-3 font-semibold text-sm flex items-center gap-2 text-primary">
+                      <Wrench className="h-4 w-4" /> Guia do Montador
+                    </h3>
+                    <ul className="space-y-2 text-xs">
+                      <li className="flex justify-between border-b pb-1">
+                        <span>Módulos no Ambiente:</span>
+                        <span className="font-bold">{modules.data?.length ?? 0} un</span>
+                      </li>
+                      <li className="flex justify-between border-b pb-1">
+                        <span>Itens Avulsos/Acessórios:</span>
+                        <span className="font-bold">{allParts.filter(p => !p.module_id).length} un</span>
+                      </li>
+                    </ul>
+                    <Button asChild className="mt-4 w-full h-9 text-xs">
+                      <Link to="/assembly">Abrir Visualização Mobile</Link>
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+                  <h4 className="text-xs font-bold text-amber-800 uppercase flex items-center gap-2">
+                    <AlertTriangle className="h-3.5 w-3.5" /> Pontos de Atenção (Bloqueios)
+                  </h4>
+                  <ul className="mt-2 space-y-1 text-[11px] text-amber-700">
+                    <li>• Itens sem furação confirmada dependem de conferência visual nos anexos (PDF/DXF).</li>
+                    <li>• Conferir cota de rodapé e tamponamento in loco antes da montagem final.</li>
+                    <li>• Peças marcadas como "Não confirmado" estão bloqueadas para liberação automática.</li>
+                  </ul>
+                </div>
+
+                <div className="text-[10px] text-muted-foreground pt-2 border-t flex justify-between">
+                  <span>Aprovado em: {new Date().toLocaleDateString('pt-BR')}</span>
+                  <span>Responsável: Sistema Monta AI</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="files">
