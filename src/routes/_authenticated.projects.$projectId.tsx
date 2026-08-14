@@ -901,6 +901,14 @@ function ProjectDetail() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="commercial" className="mt-6">
+          <BudgetTab projectId={projectId} />
+        </TabsContent>
+
+        <TabsContent value="cutplan" className="mt-6">
+          <PreliminaryCutPlanTab projectId={projectId} />
+        </TabsContent>
+
         <TabsContent value="engineering" className="mt-6">
           <EngineeringTab 
             projectId={projectId} 
@@ -908,7 +916,6 @@ function ProjectDetail() {
             isValidated={project.data?.is_validated}
           />
         </TabsContent>
-
 
         <TabsContent value="sketchup" className="mt-6">
           <SketchUpBridgeTab projectId={projectId} />
