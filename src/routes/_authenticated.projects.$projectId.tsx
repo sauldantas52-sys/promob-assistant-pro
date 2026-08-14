@@ -1397,8 +1397,45 @@ function MaintenanceTab({
             Nenhuma assistência registrada para este projeto.
           </div>
         )}
+        </Tabs>
+      </div>
+    </AppShell>
+  );
+}
+
+function ProjectMetric({
+  icon: Icon,
+  label,
+  value,
+  color = "text-blue-600",
+}: {
+  icon: any;
+  label: string;
+  value: string;
+  color?: string;
+}) {
+  return (
+    <div className="bg-white rounded-[2rem] p-6 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] border border-slate-100 flex flex-col gap-4">
+      <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center bg-slate-50", color.replace('text-', 'bg-').replace('-600', '-50'))}>
+        <Icon className={cn("h-6 w-6", color)} />
+      </div>
+      <div className="space-y-1">
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{label}</p>
+        <p className="text-xl font-black text-slate-900 leading-none">{value}</p>
       </div>
     </div>
+  );
+}
+
+function TabTrigger({ value, icon: Icon, label }: { value: string; icon: any; label: string }) {
+  return (
+    <TabsTrigger 
+      value={value} 
+      className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm rounded-[1.5rem] px-6 transition-all duration-300 gap-2 font-black uppercase tracking-widest text-[10px] h-full"
+    >
+      <Icon className="h-4 w-4" />
+      <span className="hidden lg:inline">{label}</span>
+    </TabsTrigger>
   );
 }
 
