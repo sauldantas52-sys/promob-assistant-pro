@@ -33,7 +33,13 @@ interface EngineeringTabProps {
 export function EngineeringTab({ projectId, parts }: EngineeringTabProps) {
   const [pdfData, setPdfData] = useState<CriticalDimension[]>([]);
   const [dxfData, setDxfData] = useState<DXFGeometry[]>([]);
-  const [activeView, setActiveView] = useState<'drillings' | 'comparison' | 'inspect'>('comparison');
+  const [activeView, setActiveView] = useState<'drillings' | 'comparison' | 'inspect' | 'report'>('comparison');
+  const [selectedPartId, setSelectedPartId] = useState<string | null>(null);
+  
+  const selectedPart = useMemo(() => 
+    parts.find(p => p.id === selectedPartId),
+    [parts, selectedPartId]
+  );
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'pdf' | 'dxf') => {
     const file = e.target.files?.[0];
