@@ -1,4 +1,4 @@
-import { DxfParser } from 'dxf-parser';
+import DxfParser from 'dxf-parser';
 
 export interface DXFGeometry {
   type: string;
@@ -11,6 +11,7 @@ export interface DXFGeometry {
 }
 
 export function parseDXF(content: string): DXFGeometry[] {
+  // O construtor é o export default no dxf-parser
   const parser = new DxfParser();
   try {
     const dxf = parser.parseSync(content);
@@ -19,7 +20,6 @@ export function parseDXF(content: string): DXFGeometry[] {
     if (!dxf || !dxf.entities) return [];
 
     dxf.entities.forEach((entity: any) => {
-      // Mapeamento básico de geometrias DXF para o Monta AI
       const base = {
         type: entity.type,
         layer: entity.layer,

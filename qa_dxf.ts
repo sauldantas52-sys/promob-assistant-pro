@@ -1,7 +1,5 @@
-import { parseDXF } from './src/lib/dxf-parser.js';
-import fs from 'fs';
+import { parseDXF } from './src/lib/dxf-parser';
 
-// Mock de um arquivo DXF ASCII simplificado
 const mockDxf = `
   0
 SECTION
@@ -38,7 +36,12 @@ EOF
 try {
     const geometry = parseDXF(mockDxf);
     console.log('DXF Test Success:', geometry.length, 'entities found');
-    console.log('Circle found at:', geometry.find(g => g.type === 'CIRCLE')?.center);
+    const circle = geometry.find(g => g.type === 'CIRCLE');
+    if (circle && circle.center) {
+        console.log('Circle found at:', circle.center.x, ',', circle.center.y);
+    } else {
+        throw new Error('Circle not found or invalid');
+    }
 } catch (err) {
     console.error('DXF Test Failed:', err);
     process.exit(1);
