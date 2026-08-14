@@ -324,23 +324,23 @@ function VolumeRow({ volume, project }: { volume: any, project: any }) {
         ) : (
           <div className="flex items-center gap-3">
             {volume.status === 'aguardando' && (
-              <Button size="sm" variant="outline" onClick={() => updateStatus('conferido')} disabled={busy}>
-                <Scan className="mr-2 h-4 w-4" /> Conferir
+              <Button size="lg" className="h-12 px-8 rounded-[1.25rem] bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-[0.2em] text-[10px] border-none shadow-xl shadow-blue-600/20 transition-all active:scale-95" onClick={() => updateStatus('conferido')} disabled={busy}>
+                <Scan className="mr-3 h-5 w-5" /> Conferir
               </Button>
             )}
             
             {volume.status === 'conferido' && (
-               <Dialog>
+              <Dialog>
                 <DialogTrigger asChild>
-                  <Button size="sm" variant="default" disabled={busy}>
-                    <Truck className="mr-2 h-4 w-4" /> Carregar
+                  <Button size="lg" className="h-12 px-8 rounded-[1.25rem] bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-[0.2em] text-[10px] border-none shadow-xl shadow-indigo-600/20 transition-all active:scale-95">
+                    <Truck className="mr-3 h-5 w-5" /> Carregar
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Carregamento de Volume</DialogTitle>
-                    <DialogDescription>
-                      Informe os dados logísticos para o volume {volume.code}.
+                <DialogContent className="rounded-[3rem] border-none shadow-2xl p-12">
+                  <DialogHeader className="mb-8">
+                    <DialogTitle className="text-3xl font-black text-slate-900 tracking-tighter uppercase">Carregamento Logístico</DialogTitle>
+                    <DialogDescription className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em] mt-2">
+                      Informe os dados do veículo para o volume {volume.code}.
                     </DialogDescription>
                   </DialogHeader>
                   <LoadingForm onSubmit={(data) => updateStatus('carregado', data)} />
@@ -349,14 +349,14 @@ function VolumeRow({ volume, project }: { volume: any, project: any }) {
             )}
 
             {volume.status === 'carregado' && (
-              <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => updateStatus('entregue')} disabled={busy}>
-                <CheckCircle2 className="mr-2 h-4 w-4" /> Entregar
+              <Button size="lg" className="h-12 px-8 rounded-[1.25rem] bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-[0.2em] text-[10px] border-none shadow-xl shadow-emerald-600/20 transition-all active:scale-95" onClick={() => updateStatus('entregue')} disabled={busy}>
+                <CheckCircle2 className="mr-3 h-5 w-5" /> Entregar
               </Button>
             )}
             
             {volume.status === 'entregue' && (
-              <div className="flex items-center gap-2 text-primary font-bold text-xs px-3 py-1 bg-primary/5 rounded-full border border-primary/20">
-                <ShieldCheck className="h-3.5 w-3.5" />
+              <div className="flex items-center gap-4 text-emerald-600 font-black text-[10px] px-8 py-3 bg-emerald-50 rounded-full border border-emerald-100 uppercase tracking-[0.2em] shadow-sm">
+                <ShieldCheck className="h-4 w-4" />
                 ENTREGUE
               </div>
             )}
