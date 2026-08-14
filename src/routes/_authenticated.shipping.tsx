@@ -315,14 +315,14 @@ function VolumeRow({ volume, project }: { volume: any, project: any }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4">
         {isLocked ? (
-          <div className="flex items-center gap-2 text-destructive px-3 py-1 bg-destructive/10 rounded-full text-xs font-bold animate-pulse">
-            <Lock className="h-3 w-3" />
+          <div className="flex items-center gap-4 text-destructive px-8 py-3 bg-destructive/10 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-destructive/5 ring-1 ring-destructive/20">
+            <Lock className="h-4 w-4" />
             <span>BLOQUEADO: {lockReason}</span>
           </div>
         ) : (
-          <>
+          <div className="flex items-center gap-3">
             {volume.status === 'aguardando' && (
               <Button size="sm" variant="outline" onClick={() => updateStatus('conferido')} disabled={busy}>
                 <Scan className="mr-2 h-4 w-4" /> Conferir
