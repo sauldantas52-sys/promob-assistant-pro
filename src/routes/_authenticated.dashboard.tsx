@@ -61,25 +61,34 @@ function DashboardContent() {
   ];
 
   return (
-    <div className="space-y-6 p-4 md:p-8">
-      <header>
-        <h1 className="text-2xl font-bold md:text-3xl">Olá, {fullName?.split(" ")[0] ?? "bem-vindo"}!</h1>
-        <p className="text-sm text-muted-foreground">
-          {role ? roleLabels[role] : "Perfil não definido"} · Monta AI — Promob Assistant Pro
-        </p>
+    <div className="space-y-6 p-4 md:p-8 max-w-7xl mx-auto">
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
+            Olá, {fullName?.split(" ")[0] ?? "bem-vindo"}!
+          </h1>
+          <p className="text-lg text-slate-500 mt-1">
+            {role ? roleLabels[role] : "Perfil não definido"} · Monta AI — Promob Assistant Pro
+          </p>
+        </div>
+        <div className="hidden md:block text-right">
+          <p className="text-sm font-medium text-slate-400 uppercase tracking-widest">{new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+        </div>
       </header>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {stats.map((stat) => (
-          <Card key={stat.label} className="border-primary/10">
+          <Card key={stat.label} className="border-none shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs font-medium text-muted-foreground md:text-sm">
+              <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500">
                 {stat.label}
               </CardTitle>
-              <stat.icon className="h-4 w-4 text-primary" />
+              <div className="p-2 bg-blue-50 rounded-lg">
+                <stat.icon className="h-5 w-5 text-blue-600" />
+              </div>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{stat.value}</p>
+              <p className="text-3xl font-black text-slate-900">{stat.value}</p>
             </CardContent>
           </Card>
         ))}
