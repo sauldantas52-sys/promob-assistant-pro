@@ -82,9 +82,10 @@ function AssemblyContent() {
           id, name, client_name, environment, status, 
           modules(id, name, environment, width_mm, height_mm, depth_mm, quantity, is_completed, data_source),
           parts(id, name, kind, quantity, unit, is_completed, material, thickness_mm, width_mm, length_mm, edge_banding, storage_location, assembly_group_id, visibility_type, data_source),
-          assembly_groups(id, module_id, code, name, color, is_locked, lock_reason, conference_status, sealed_at)
+          assembly_groups(id, module_id, code, name, color, is_locked, lock_reason, conference_status, sealed_at),
+          maintenance_requests(*)
         `)
-        .in("status", ["separacao", "montagem", "assistencia"])
+        .in("status", ["separacao", "conferencia", "expedicao", "montagem", "assistencia"])
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -362,12 +363,23 @@ function AssemblyContent() {
                     </div>
                   </TabsContent>
                 </Tabs>
-                <Button asChild className="h-20 w-full px-12 rounded-[2rem] bg-slate-900 hover:bg-black text-white font-black uppercase tracking-[0.3em] text-[12px] shadow-2xl shadow-slate-900/40 gap-6 transition-all duration-500 active:scale-95 group mt-10">
-                  <Link to="/projects/$projectId" params={{ projectId: project.id }}>
-                    <ClipboardList className="h-7 w-7 text-blue-400 transition-transform group-hover:scale-110" />
-                    Abrir Dossiê Técnico
-                  </Link>
-                </Button>
+                
+                <div className="flex flex-col sm:flex-row gap-4 mt-10">
+                  <Button asChild className="h-20 flex-1 px-12 rounded-[2rem] bg-slate-900 hover:bg-black text-white font-black uppercase tracking-[0.3em] text-[12px] shadow-2xl shadow-slate-900/40 gap-6 transition-all duration-500 active:scale-95 group">
+                    <Link to="/projects/$projectId" params={{ projectId: project.id }}>
+                      <ClipboardList className="h-7 w-7 text-blue-400 transition-transform group-hover:scale-110" />
+                      Abrir Dossiê Técnico
+                    </Link>
+                  </Button>
+                  
+                  <Button 
+                    className="h-20 flex-1 px-12 rounded-[2rem] bg-purple-600 hover:bg-purple-700 text-white font-black uppercase tracking-[0.3em] text-[12px] shadow-2xl shadow-purple-600/40 gap-6 transition-all duration-500 active:scale-95 group"
+                    onClick={() => navigate({ to: "/technical-assistance" })}
+                  >
+                    <AlertTriangle className="h-7 w-7 text-white" />
+                    Chamado de Assistência ({project.maintenance_requests?.length || 0})
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}

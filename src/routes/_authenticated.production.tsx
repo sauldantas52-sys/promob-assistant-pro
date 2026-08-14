@@ -12,7 +12,8 @@ import {
   CheckCircle2,
   AlertOctagon,
   Lock,
-  LayoutDashboard
+  LayoutDashboard,
+  Truck
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -56,7 +57,9 @@ const flow: Record<string, { next: string; action: string; color: string; icon: 
   corte: { next: "borda", action: "Enviar para borda", color: "bg-red-200", icon: Square },
   borda: { next: "usinagem", action: "Liberar usinagem", color: "bg-amber-200", icon: Drill },
   usinagem: { next: "separacao", action: "Enviar para separação", color: "bg-purple-200", icon: Boxes },
-  separacao: { next: "montagem", action: "Liberar para montagem", color: "bg-indigo-200", icon: PackageCheck },
+  separacao: { next: "conferencia", action: "Enviar para conferência", color: "bg-blue-200", icon: PackageCheck },
+  conferencia: { next: "expedicao", action: "Liberar para expedição", color: "bg-indigo-200", icon: CheckCircle2 },
+  expedicao: { next: "montagem", action: "Enviar para montagem", color: "bg-slate-900", icon: Truck },
   montagem: { next: "concluido", action: "Concluir entrega", color: "bg-emerald-200", icon: CheckCircle2 },
 };
 
@@ -76,7 +79,7 @@ function ProductionContent() {
           is_machining_assembly_blocked,
           parts(id, is_completed, kind)
         `)
-        .in("status", ["corte", "borda", "usinagem"])
+        .in("status", ["corte", "borda", "usinagem", "separacao", "conferencia", "expedicao"])
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;

@@ -41,7 +41,7 @@ function PickingPage() {
           id, name, client_name, environment, status,
           parts(id, name, kind, quantity, unit, is_completed, storage_location, assembly_group_id)
         `)
-        .in("status", ["usinagem", "separacao"])
+        .in("status", ["usinagem", "separacao", "conferencia"])
         .order("updated_at", { ascending: false });
       if (error) throw error;
       return data;
