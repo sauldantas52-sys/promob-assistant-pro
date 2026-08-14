@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { 
   Tv, 
