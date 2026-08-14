@@ -1,4 +1,6 @@
 import { useState, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   FileSearch, 
   Ruler, 
@@ -36,6 +38,24 @@ interface EngineeringTabProps {
 
 
 export function EngineeringTab({ projectId, parts, isValidated }: EngineeringTabProps) {
+  const queryClient = useQueryClient();
+  const { data: checks } = useQuery({
+    queryKey: ["validation-checks", projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("validation_checks")
+        .select("*")
+        .eq("project_id", projectId);
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  const gate2Items = ['documentacao_tecnica', 'cotas_furacao', 'bitolas', 'tags_skp'];
+  const gate2Ok = gate2Items.every(id => 
+    checks?.find(c => c.check_type === id)?.is_completed
+  );
+
   const [pdfData, setPdfData] = useState<CriticalDimension[]>([]);
   const [dxfData, setDxfData] = useState<DXFGeometry[]>([]);
   const [activeView, setActiveView] = useState<'drillings' | 'comparison' | 'inspect' | 'report'>('comparison');
@@ -83,18 +103,18 @@ export function EngineeringTab({ projectId, parts, isValidated }: EngineeringTab
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-1">Status de Validação Técnica</p>
             <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter">
-              {isValidated ? "Projeto Aprovado para Piloto" : "Validação Pendente no Dashboard"}
+              {gate2Ok ? "Protocolo de Usinagem Validado" : "Gate 2: Usinagem Pendente"}
             </h3>
             <p className="text-xs font-medium text-slate-500 mt-1">
-              {isValidated 
-                ? "Todos os protocolos de engenharia foram confirmados." 
-                : "A liberação de usinagem individual exige o checklist 100% concluído."}
+              {gate2Ok 
+                ? "Documentação técnica confirmada. Liberação manual permitida." 
+                : "A liberação individual exige o Gate 2 do checklist concluído."}
             </p>
           </div>
         </div>
-        {!isValidated && (
+        {!gate2Ok && (
           <Badge className="bg-red-600 text-white font-black uppercase tracking-widest px-6 py-2 rounded-full border-none animate-pulse">
-            Bloqueio Ativo
+            Bloqueio CNC Ativo
           </Badge>
         )}
       </div>
