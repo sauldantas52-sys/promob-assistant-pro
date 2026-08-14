@@ -111,7 +111,7 @@ function LoginPage() {
             <Boxes className="h-10 w-10" />
           </div>
           <h1 className="text-4xl font-black text-slate-900 uppercase tracking-tighter">Monta AI</h1>
-          <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-1">Promob Assistant Pro</p>
+          <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-1">Aprovado para piloto controlado</p>
         </div>
 
         {mode === "forgot" ? (

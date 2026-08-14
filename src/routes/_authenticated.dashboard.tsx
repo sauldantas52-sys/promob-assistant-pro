@@ -69,7 +69,7 @@ function DashboardContent() {
             Olá, {fullName?.split(" ")[0] ?? "bem-vindo"}!
           </h1>
           <p className="text-lg text-slate-500 mt-1">
-            {role ? roleLabels[role] : "Perfil não definido"} · Monta AI — Promob Assistant Pro
+            {role ? roleLabels[role] : "Perfil não definido"} · Monta AI — Aprovado para piloto controlado
           </p>
         </div>
         <div className="hidden md:block text-right">

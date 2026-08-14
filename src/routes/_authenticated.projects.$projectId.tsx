@@ -58,7 +58,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_authenticated/projects/$projectId")({
   head: () => ({
     meta: [
-      { title: "Detalhes do projeto | Monta AI" },
+      { title: "Detalhes do projeto | Monta AI — Piloto Controlado" },
       {
         name: "description",
         content:
