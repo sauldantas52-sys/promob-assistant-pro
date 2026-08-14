@@ -205,6 +205,8 @@ function ProjectDetail() {
               edge_banding: part.edge_banding ?? null,
               data_source: part.data_source || 'XML',
               visibility_type: part.visibility_type || 'visivel',
+              cutting_edge_released: false,
+              machining_blocked: true,
             })),
           ).select("id, module_id, kind");
           if (partsError) throw partsError;
@@ -228,6 +230,8 @@ function ProjectDetail() {
             edge_banding: part.edge_banding ?? null,
             data_source: part.data_source || 'XML',
             visibility_type: part.visibility_type || 'visivel',
+            cutting_edge_released: false,
+            machining_blocked: true,
           })),
         ).select("id, module_id, kind");
         if (looseError) throw looseError;
