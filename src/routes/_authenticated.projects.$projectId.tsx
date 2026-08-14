@@ -1091,6 +1091,18 @@ function ProjectDetail() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="estimate" className="mt-6">
+          <VisualEstimateTab projectId={projectId} />
+        </TabsContent>
+
+        <TabsContent value="budget" className="mt-6">
+          <BudgetTab projectId={projectId} />
+        </TabsContent>
+
+        <TabsContent value="cutting_beta" className="mt-6">
+          <PreliminaryCutPlanTab projectId={projectId} />
+        </TabsContent>
       </Tabs>
     </div>
   );
