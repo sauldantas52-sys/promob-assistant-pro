@@ -1035,10 +1035,38 @@ function MaintenanceTab({
               </div>
 
               <div className="space-y-2">
+                <Label>Prazo de Reposição (Opcional)</Label>
+                <Input 
+                  type="date" 
+                  value={deadline}
+                  onChange={(e) => setDeadline(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
                 <Label>Fotos / Evidências</Label>
-                <div className="flex aspect-video w-full flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50 text-muted-foreground">
-                  <Camera className="mb-2 h-8 w-8" />
-                  <p className="text-xs">Clique para anexar fotos (Em breve)</p>
+                <input 
+                  type="file" 
+                  ref={photoInputRef}
+                  className="hidden" 
+                  accept="image/*" 
+                  multiple
+                  onChange={handlePhotoUpload}
+                />
+                <div 
+                  className="flex aspect-video w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed bg-muted/50 text-muted-foreground hover:bg-muted"
+                  onClick={() => photoInputRef.current?.click()}
+                >
+                  {uploading ? (
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                  ) : (
+                    <>
+                      <Camera className="mb-2 h-8 w-8" />
+                      <p className="text-xs">
+                        {photoUrls.length > 0 ? `${photoUrls.length} fotos anexadas` : "Clique para anexar fotos"}
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
 
