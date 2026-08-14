@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -120,6 +121,16 @@ export function PilotValidationChecklist({ projectId, isMachiningBlocked }: Pilo
   });
 
   const allCompleted = CHECK_ITEMS.every(item => 
+    checks?.find(c => c.check_type === item.id)?.is_completed
+  );
+
+  const gate1Items = GATES.find(g => g.id === 'corte_borda')?.items || [];
+  const gate1Completed = gate1Items.every(item => 
+    checks?.find(c => c.check_type === item.id)?.is_completed
+  );
+
+  const gate2Items = GATES.find(g => g.id === 'usinagem')?.items || [];
+  const isGate2Done = gate2Items.every(item => 
     checks?.find(c => c.check_type === item.id)?.is_completed
   );
 
