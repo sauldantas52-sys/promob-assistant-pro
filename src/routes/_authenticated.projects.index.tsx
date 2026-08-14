@@ -172,33 +172,31 @@ function ProjectsContent() {
         </div>
       </header>
 
-      <div className="flex flex-col gap-8 sm:flex-row sm:items-center bg-white p-8 rounded-[3rem] border border-slate-100 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.06)]">
+      <div className="flex flex-col gap-6 p-10 bg-white rounded-[4rem] border border-slate-100 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.08)]">
         <div className="relative flex-1">
-          <Search className="absolute left-8 top-1/2 h-6 w-6 -translate-y-1/2 text-slate-400" />
+          <Search className="absolute left-10 top-1/2 h-8 w-8 -translate-y-1/2 text-slate-300" />
           <Input
-            placeholder="Buscar por nome do projeto ou cliente..."
-            className="h-16 pl-18 rounded-[1.5rem] border-none bg-slate-50 text-base font-black uppercase tracking-widest placeholder:text-slate-400 placeholder:font-bold"
+            placeholder="Buscar por nome ou cliente..."
+            className="h-24 pl-24 rounded-[2rem] border-none bg-slate-50 text-xl font-black uppercase tracking-widest placeholder:text-slate-400"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
         <div className="flex gap-4">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="h-16 w-full sm:w-[260px] rounded-[1.5rem] border-none bg-slate-900 text-white font-black uppercase tracking-[0.2em] text-[10px] shadow-xl shadow-slate-900/20 hover:bg-slate-800 transition-all duration-300">
-              <div className="flex items-center gap-4">
-                <Filter className="h-4 w-4 text-blue-400" />
+            <SelectTrigger className="h-20 w-full sm:w-[320px] rounded-[2rem] border-none bg-slate-900 text-white font-black uppercase tracking-[0.2em] text-[12px] shadow-2xl shadow-slate-900/20 hover:bg-slate-800 transition-all duration-500">
+              <div className="flex items-center gap-6">
+                <Filter className="h-6 w-6 text-blue-400" />
                 <SelectValue placeholder="Status" />
               </div>
             </SelectTrigger>
-            <SelectContent className="rounded-2xl border-2">
-              <SelectItem value="all" className="font-black uppercase text-[10px] tracking-widest py-3">Todos os status</SelectItem>
-              <SelectItem value="novo" className="font-black uppercase text-[10px] tracking-widest py-3">Novo</SelectItem>
-              <SelectItem value="orcamento" className="font-black uppercase text-[10px] tracking-widest py-3">Orçamento</SelectItem>
-              <SelectItem value="producao" className="font-black uppercase text-[10px] tracking-widest py-3">Produção</SelectItem>
-              <SelectItem value="conferencia" className="font-black uppercase text-[10px] tracking-widest py-3">Conferência</SelectItem>
-              <SelectItem value="montagem" className="font-black uppercase text-[10px] tracking-widest py-3">Montagem</SelectItem>
-              <SelectItem value="assistencia" className="font-black uppercase text-[10px] tracking-widest py-3">Assistência</SelectItem>
-              <SelectItem value="concluido" className="font-black uppercase text-[10px] tracking-widest py-3">Concluído</SelectItem>
+            <SelectContent className="rounded-[2rem] border-2 p-4">
+              <SelectItem value="all" className="font-black uppercase text-[12px] tracking-widest py-4">Todos os Status</SelectItem>
+              <SelectItem value="novo" className="font-black uppercase text-[12px] tracking-widest py-4">Novo</SelectItem>
+              <SelectItem value="producao" className="font-black uppercase text-[12px] tracking-widest py-4 text-orange-600">Produção</SelectItem>
+              <SelectItem value="conferencia" className="font-black uppercase text-[12px] tracking-widest py-4 text-blue-600">Conferência</SelectItem>
+              <SelectItem value="montagem" className="font-black uppercase text-[12px] tracking-widest py-4 text-emerald-600">Montagem</SelectItem>
+              <SelectItem value="concluido" className="font-black uppercase text-[12px] tracking-widest py-4 text-slate-500">Concluído</SelectItem>
             </SelectContent>
           </Select>
         </div>
