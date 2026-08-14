@@ -126,7 +126,7 @@ function AssemblyContent() {
                 <Tabs defaultValue="modules">
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="modules">Módulos</TabsTrigger>
-                    <TabsTrigger value="groups">Grupos G1/G2</TabsTrigger>
+                    <TabsTrigger value="groups">Módulos/Grupos</TabsTrigger>
                     <TabsTrigger value="hardware">Caderno</TabsTrigger>
                   </TabsList>
                   
