@@ -8,6 +8,7 @@ import { AppShell } from "@/components/AppShell";
 import { useAuth, roleLabels } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { statusLabel, statusTone } from "@/lib/project-status";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -110,12 +111,14 @@ function DashboardContent() {
               className="flex items-center justify-between gap-3 p-4 hover:bg-muted/50"
             >
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium">{project.name}</p>
-                <p className="truncate text-xs text-muted-foreground">
+                <p className="truncate text-sm font-black text-slate-900 uppercase tracking-tight">{project.name}</p>
+                <p className="truncate text-xs font-medium text-slate-500">
                   {project.client_name || "Sem cliente"} · {project.environment || "—"}
                 </p>
               </div>
-              <Badge className={statusTone(project.status)}>{statusLabel(project.status)}</Badge>
+              <Badge className={cn("px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border", statusTone(project.status))}>
+                {statusLabel(project.status)}
+              </Badge>
             </Link>
           ))}
           {list.length === 0 && (
