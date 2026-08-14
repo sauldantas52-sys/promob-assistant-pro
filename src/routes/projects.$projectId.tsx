@@ -978,6 +978,10 @@ function ProjectDetail() {
           </div>
         </TabsContent>
 
+        <TabsContent value="shipping" className="mt-6">
+          <ProjectShippingTab projectId={projectId} />
+        </TabsContent>
+
         <TabsContent value="maintenance" className="mt-6">
           <MaintenanceTab projectId={projectId} companyId={project.data?.company_id} allModules={modules.data || []} allParts={allParts} />
         </TabsContent>
