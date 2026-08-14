@@ -905,12 +905,12 @@ export type Database = {
       user_roles: {
         Row: {
           id: string
-          role: any
+          role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
           id?: string
-          role: any
+          role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
@@ -928,7 +928,7 @@ export type Database = {
       current_company_id: { Args: never; Returns: string }
       has_role: {
         Args: {
-          _role: any
+          _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean

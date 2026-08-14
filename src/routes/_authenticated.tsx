@@ -25,6 +25,7 @@ export const Route = createFileRoute('/_authenticated')({
       userRole: (roleData?.role as any) || null,
       companyId: (roleData?.companies as any)?.id || null,
       companyName: (roleData?.companies as any)?.name || null,
+      role: (roleData?.role as any) || null,
     };
   },
 });

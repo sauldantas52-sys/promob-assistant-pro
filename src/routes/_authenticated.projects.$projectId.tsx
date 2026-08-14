@@ -51,6 +51,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { ProjectShippingTab } from "@/components/ProjectShippingTab";
 import { parseProjectFile } from "@/lib/promob-import";
 import { projectStatuses, statusLabel, statusTone } from "@/lib/project-status";
+import { useAuth } from "@/lib/auth";
+import { hasPermission } from "@/lib/permissions";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId")({
   head: () => ({
@@ -78,6 +80,7 @@ function ProjectDetailPage() {
 
 function ProjectDetail() {
   const { projectId } = Route.useParams();
+  const { role } = useAuth();
   const queryClient = useQueryClient();
   const fileInput = useRef<HTMLInputElement>(null);
   const [importing, setImporting] = useState(false);
@@ -433,6 +436,7 @@ function ProjectDetail() {
           <Badge className={statusTone(project.data?.status || "novo")}>{statusLabel(project.data?.status || "novo")}</Badge>
           <Select 
             value={project.data?.status ?? "novo"} 
+            disabled={!hasPermission(role, "projects", "approve")}
             onValueChange={async (v) => {
               if (v === "producao") {
                 // Bloqueio rigoroso: nada entra em produção se não houver dados técnicos básicos
