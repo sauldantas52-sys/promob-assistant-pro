@@ -922,6 +922,12 @@ export type Database = {
         | "erro_montagem"
         | "outros"
       maintenance_urgency: "baixa" | "media" | "alta" | "critica"
+      shipping_status:
+        | "aguardando"
+        | "conferido"
+        | "bloqueado"
+        | "carregado"
+        | "entregue"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1065,6 +1071,13 @@ export const Constants = {
         "outros",
       ],
       maintenance_urgency: ["baixa", "media", "alta", "critica"],
+      shipping_status: [
+        "aguardando",
+        "conferido",
+        "bloqueado",
+        "carregado",
+        "entregue",
+      ],
     },
   },
 } as const
