@@ -8,6 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { AUTH_CONFIG, isValidPasswordLength, isPasswordStrong } from "@/lib/auth-config";
+import { ShieldAlert } from "lucide-react";
+
 
 export const Route = createFileRoute("/_authenticated/force-password-change")({
   component: ForcePasswordChangePage,
@@ -27,10 +30,11 @@ function ForcePasswordChangePage() {
       return;
     }
 
-    if (password.length < 8) {
-      toast.error("A senha deve ter pelo menos 8 caracteres.");
+    if (!isValidPasswordLength(password)) {
+      toast.error(`A senha deve ter entre ${AUTH_CONFIG.MIN_PASSWORD_LENGTH} e ${AUTH_CONFIG.MAX_PASSWORD_LENGTH} caracteres.`);
       return;
     }
+
 
     setBusy(true);
     try {
@@ -53,12 +57,14 @@ function ForcePasswordChangePage() {
       if (profileError) throw profileError;
 
       // 3. Registrar no log
+      const isWeak = !isPasswordStrong(password);
       await supabase.from("production_logs").insert({
-        project_id: "", 
+        project_id: null, 
         step: "acesso_seguro",
-        notes: `Primeiro acesso e troca de senha concluída para ${user?.email ?? 'usuário'}`,
+        notes: `Troca de senha concluída para ${user?.email ?? 'usuário'}.${isWeak ? ' [Aviso: Senha abaixo de 8 caracteres]' : ''}`,
         status: "concluido"
       } as any); 
+
 
 
 
@@ -99,8 +105,17 @@ function ForcePasswordChangePage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   className="h-12 rounded-xl"
-                  placeholder="Mínimo 8 caracteres"
+                  placeholder={`Mínimo ${AUTH_CONFIG.MIN_PASSWORD_LENGTH} caracteres`}
                 />
+                {password.length > 0 && !isPasswordStrong(password) && (
+                  <div className="flex items-center gap-2 rounded-lg bg-amber-50 p-2 border border-amber-100">
+                    <ShieldAlert className="h-4 w-4 text-amber-600" />
+                    <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">
+                      Senha Curta (Modo Piloto)
+                    </span>
+                  </div>
+                )}
+
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
