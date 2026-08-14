@@ -33,7 +33,7 @@ interface EngineeringTabProps {
 
 
 
-export function EngineeringTab({ projectId, parts }: EngineeringTabProps) {
+export function EngineeringTab({ projectId, parts, isValidated }: EngineeringTabProps) {
   const [pdfData, setPdfData] = useState<CriticalDimension[]>([]);
   const [dxfData, setDxfData] = useState<DXFGeometry[]>([]);
   const [activeView, setActiveView] = useState<'drillings' | 'comparison' | 'inspect' | 'report'>('comparison');
