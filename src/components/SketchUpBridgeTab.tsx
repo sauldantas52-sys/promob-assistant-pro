@@ -12,7 +12,13 @@ import {
   ArrowRightLeft,
   ChevronRight,
   History,
-  Info
+  Info,
+  Package,
+  Search,
+  CheckCircle,
+  XCircle,
+  FileText,
+  Clock
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -40,7 +46,7 @@ const statusSteps = [
 
 export function SketchUpBridgeTab({ projectId }: SketchUpBridgeTabProps) {
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<"versions" | "review" | "tags">("versions");
+  const [activeTab, setActiveTab] = useState<"versions" | "review" | "tags" | "comparativo">("versions");
 
   const versions = useQuery({
     queryKey: ["project_versions", projectId],
@@ -114,7 +120,9 @@ export function SketchUpBridgeTab({ projectId }: SketchUpBridgeTabProps) {
           {[
             { id: "versions", label: "Projetos para Fábrica", icon: Box },
             { id: "review", label: "Revisão do Projetista", icon: Eye },
+            { id: "comparativo", label: "Comparação Promob", icon: ArrowRightLeft },
             { id: "tags", label: "Estrutura de Tags", icon: Layers },
+
           ].map((tab) => (
             <button
               key={tab.id}
@@ -286,7 +294,63 @@ export function SketchUpBridgeTab({ projectId }: SketchUpBridgeTabProps) {
             </div>
           )}
 
+          {activeTab === "comparativo" && (
+            <Card className="rounded-[2.5rem] border-none shadow-xl overflow-hidden">
+              <CardHeader className="p-8 border-b border-slate-50 flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-[14px] font-black text-slate-900 uppercase tracking-[0.3em]">Auditoria de Convergência Geométrica</CardTitle>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Versão SKP v2 vs XML Promob v1</p>
+                </div>
+                <Badge className="bg-amber-600 text-white border-none uppercase text-[9px] font-black px-3 py-1">2 DIVERGÊNCIAS</Badge>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader className="bg-slate-50/50">
+                    <TableRow className="border-none">
+                      <TableHead className="text-[10px] font-black uppercase tracking-[0.2em] h-14 px-8">Módulo (SKP)</TableHead>
+                      <TableHead className="text-[10px] font-black uppercase tracking-[0.2em]">Item (Promob)</TableHead>
+                      <TableHead className="text-[10px] font-black uppercase tracking-[0.2em]">Comparação</TableHead>
+                      <TableHead className="text-[10px] font-black uppercase tracking-[0.2em]">Diferença</TableHead>
+                      <TableHead className="text-[10px] font-black uppercase tracking-[0.2em] text-right px-8">Audit</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow className="border-b border-red-50 bg-red-50/20">
+                      <TableCell className="px-8 font-bold text-slate-900">BALCAO_PIA_800</TableCell>
+                      <TableCell className="text-slate-500 font-medium">BALCAO 2P 800</TableCell>
+                      <TableCell className="text-[10px] font-bold uppercase text-slate-400">Largura</TableCell>
+                      <TableCell><Badge className="bg-red-200 text-red-700 border-none text-[9px] font-black">+5mm</Badge></TableCell>
+                      <TableCell className="text-right px-8"><AlertTriangle className="ml-auto h-4 w-4 text-red-500" /></TableCell>
+                    </TableRow>
+                    <TableRow className="border-b border-amber-50 bg-amber-50/20">
+                      <TableCell className="px-8 font-bold text-slate-900">PAINEL_TAMPON_18</TableCell>
+                      <TableCell className="text-slate-500 font-medium">TAMPONAMENTO 18</TableCell>
+                      <TableCell className="text-[10px] font-bold uppercase text-slate-400">Material</TableCell>
+                      <TableCell><Badge className="bg-amber-200 text-amber-700 border-none text-[9px] font-black">Ref Divergente</Badge></TableCell>
+                      <TableCell className="text-right px-8"><AlertTriangle className="ml-auto h-4 w-4 text-amber-500" /></TableCell>
+                    </TableRow>
+                    <TableRow className="border-b border-emerald-50 bg-emerald-50/20">
+                      <TableCell className="px-8 font-bold text-slate-900">AEREO_1P_400</TableCell>
+                      <TableCell className="text-slate-500 font-medium">AEREO 1 PORTA</TableCell>
+                      <TableCell className="text-[10px] font-bold uppercase text-slate-400">Tudo OK</TableCell>
+                      <TableCell><span className="text-emerald-600 text-[9px] font-black">MATCH 100%</span></TableCell>
+                      <TableCell className="text-right px-8"><CheckCircle2 className="ml-auto h-4 w-4 text-emerald-500" /></TableCell>
+                    </TableRow>
+                    <TableRow className="border-b border-slate-50 opacity-40">
+                      <TableCell className="px-8 font-bold text-slate-900">DECOR_VASO</TableCell>
+                      <TableCell className="text-slate-500 font-medium">—</TableCell>
+                      <TableCell className="text-[10px] font-bold uppercase text-slate-400">Exclusivo SKP</TableCell>
+                      <TableCell><span className="text-slate-400 text-[9px] font-black">NÃO FABRICÁVEL</span></TableCell>
+                      <TableCell className="text-right px-8"><Info className="ml-auto h-4 w-4 text-slate-400" /></TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )}
+
           {activeTab === "tags" && (
+
             <Card className="rounded-[2.5rem] border-none shadow-xl overflow-hidden">
               <CardHeader className="bg-slate-900 p-8 border-b border-slate-800">
                 <CardTitle className="text-[14px] font-black text-white uppercase tracking-[0.3em] flex items-center gap-3">
@@ -334,6 +398,47 @@ export function SketchUpBridgeTab({ projectId }: SketchUpBridgeTabProps) {
           )}
         </div>
       </div>
+
+      {/* Package Details Panel */}
+      {currentVersion && activeTab === "versions" && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <Card className="rounded-[2.5rem] border-none shadow-xl p-8 space-y-4">
+            <h4 className="text-[12px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+              <Package className="h-4 w-4 text-amber-600" /> Resumo do Pacote
+            </h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-slate-50 rounded-[1.5rem]">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Módulos</p>
+                <p className="text-xl font-black text-slate-900">24</p>
+              </div>
+              <div className="p-4 bg-slate-50 rounded-[1.5rem]">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Ambientes</p>
+                <p className="text-xl font-black text-slate-900">3</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="rounded-[2.5rem] border-none shadow-xl p-8 space-y-4 md:col-span-2">
+            <h4 className="text-[12px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-emerald-600" /> Validações de Integridade
+            </h4>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-emerald-50 rounded-[1rem] border border-emerald-100">
+                <span className="text-[10px] font-bold text-emerald-700 uppercase">Campos obrigatórios preenchidos</span>
+                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-red-50 rounded-[1rem] border border-red-100">
+                <span className="text-[10px] font-bold text-red-700 uppercase">Divergência de medidas detectada (G2)</span>
+                <AlertTriangle className="h-4 w-4 text-red-600" />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-amber-50 rounded-[1rem] border border-amber-100">
+                <span className="text-[10px] font-bold text-amber-700 uppercase">Módulos sem ambiente (AV)</span>
+                <Badge className="bg-amber-200 text-amber-700 border-none text-[8px] font-black">2 ITENS</Badge>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
 
       {/* Safety Locks Panel */}
       <div className="bg-blue-50/50 rounded-[2rem] p-8 border border-blue-100 flex items-start gap-6">

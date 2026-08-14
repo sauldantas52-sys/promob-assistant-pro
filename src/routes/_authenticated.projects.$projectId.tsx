@@ -584,8 +584,10 @@ function ProjectDetail() {
             <TabTrigger value="engineering" icon={Settings} label="Usinagem" />
             <TabTrigger value="sketchup" icon={ArrowRightLeft} label="Ponte SKP" />
             <TabTrigger value="shipping" icon={Truck} label="Logística" />
+            <TabTrigger value="maintenance" icon={HardHat} label="Assistência" />
             <TabTrigger value="audit" icon={History} label="Auditoria" />
             <TabTrigger value="files" icon={FileUp} label="Arquivos" />
+
           </TabsList>
 
           <TabsContent value="modules" className="mt-6">
@@ -1028,6 +1030,10 @@ function ProjectDetail() {
           </div>
         </TabsContent>
 
+        <TabsContent value="sketchup" className="mt-6">
+          <SketchUpBridgeTab projectId={projectId} />
+        </TabsContent>
+
         <TabsContent value="shipping" className="mt-6">
           <ProjectShippingTab projectId={projectId} />
         </TabsContent>
@@ -1035,6 +1041,8 @@ function ProjectDetail() {
         <TabsContent value="maintenance" className="mt-6">
           <MaintenanceTab projectId={projectId} companyId={project.data?.company_id} allModules={modules.data || []} allParts={allParts} />
         </TabsContent>
+
+
 
         <TabsContent value="files">
           <Card>
