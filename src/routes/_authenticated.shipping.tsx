@@ -92,17 +92,23 @@ function ShippingPage() {
 
   return (
     <AppShell>
-      <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto">
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-10 mb-10">
-          <div className="space-y-4">
-            <Link to="/dashboard" className="text-[10px] font-black text-slate-400 flex items-center gap-2 hover:text-blue-600 transition-colors uppercase tracking-[0.3em]">
-              <ArrowLeft className="h-4 w-4" /> Voltar ao Painel
-            </Link>
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-600">Expedição e Logística</p>
-            <h1 className="text-4xl md:text-7xl font-black tracking-tighter text-slate-900 uppercase leading-none">Carga e Envio</h1>
-            <p className="text-base font-bold text-slate-500 uppercase tracking-widest mt-2">
-              Gestão de volumes, romaneios e status de carregamento.
-            </p>
+      <div className="space-y-16 p-8 md:p-16 max-w-[1800px] mx-auto animate-in fade-in duration-700">
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-10">
+          <div className="space-y-6">
+            <Button 
+              variant="ghost" 
+              onClick={() => window.location.href = '/dashboard'} 
+              className="rounded-full px-4 text-slate-400 hover:text-blue-600 gap-2 mb-2"
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              <span className="text-[10px] font-black uppercase tracking-widest">Dashboard</span>
+            </Button>
+            <div className="flex items-center gap-4">
+              <span className="h-2 w-10 bg-indigo-600 rounded-full" />
+              <p className="text-[12px] font-black uppercase tracking-[0.5em] text-indigo-600">Expedição e Logística</p>
+            </div>
+            <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-slate-900 uppercase leading-[0.8] mb-4">Expedição</h1>
+            <p className="text-base font-black text-slate-500 uppercase tracking-[0.4em]">Gestão de volumes, romaneios e status de carregamento.</p>
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-6 w-full md:w-auto">
              <div className="relative w-full sm:w-80">
