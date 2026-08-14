@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Boxes, Loader2 } from "lucide-react";
+import { Boxes, Loader2, HardHat, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,8 +16,9 @@ import {
 import { toast } from "sonner";
 import { useAuth, roleLabels, type AppRole } from "@/lib/auth";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { InfoIcon, ShieldAlert } from "lucide-react";
+import { InfoIcon, ShieldAlert, KeyRound } from "lucide-react";
 import { AUTH_CONFIG, isValidPasswordLength, isPasswordStrong, isNumeric } from "@/lib/auth-config";
+import { authenticateOperator } from "@/lib/operator-auth.functions";
 
 
 export const Route = createFileRoute("/login")({
