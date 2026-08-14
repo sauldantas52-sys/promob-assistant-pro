@@ -46,7 +46,7 @@ const statusSteps = [
 
 export function SketchUpBridgeTab({ projectId }: SketchUpBridgeTabProps) {
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<"versions" | "review" | "tags">("versions");
+  const [activeTab, setActiveTab] = useState<"versions" | "review" | "tags" | "comparativo">("versions");
 
   const versions = useQuery({
     queryKey: ["project_versions", projectId],
