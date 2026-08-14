@@ -456,31 +456,37 @@ export function ConferenceDialog({
             <Progress value={progress} />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="scan-code" className="text-xs">
-              Leitura de QR Code / etiqueta
-            </Label>
-            <div className="flex gap-2">
-              <Input
-                id="scan-code"
-                inputMode="text"
-                autoComplete="off"
-                placeholder="montaai://projeto/peça ou id da peça"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") void handleScan();
-                }}
-                className="h-11"
-              />
-              <Button className="h-11 gap-2" onClick={() => void handleScan()} disabled={!code.trim()}>
-                <ScanLine className="h-4 w-4" /> Ler
-              </Button>
+          <div className="space-y-4 p-4 bg-slate-50 rounded-2xl border border-slate-200">
+            <div className="space-y-2">
+              <Label htmlFor="scan-code" className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                <ScanLine className="h-4 w-4 text-blue-600" /> Leitura de QR Code / Etiqueta
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  id="scan-code"
+                  inputMode="text"
+                  autoComplete="off"
+                  placeholder="Aproxime o leitor ou digite o código"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") void handleScan();
+                  }}
+                  className="h-14 text-lg font-mono rounded-xl border-slate-300 focus:ring-2 focus:ring-blue-500 shadow-sm"
+                />
+                <Button 
+                  className="h-14 px-6 gap-2 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest rounded-xl shadow-lg shadow-blue-600/20" 
+                  onClick={() => void handleScan()} 
+                  disabled={!code.trim()}
+                >
+                  Ler
+                </Button>
+              </div>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <p className="text-[11px] font-bold uppercase text-muted-foreground">Peças do kit</p>
+          <div className="space-y-3">
+            <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest border-b border-slate-100 pb-2">Sequência de Montagem / Peças do kit</p>
             {parts.map((p) => (
               <div key={p.id} className="flex items-center gap-2 border-b pb-2">
                 <Checkbox

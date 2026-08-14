@@ -76,9 +76,14 @@ function ProductionContent() {
 
   return (
     <div className="space-y-6 p-4 md:p-8 max-w-7xl mx-auto">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Fila de Produção</h1>
-        <p className="text-base text-slate-500 font-medium">Controle de fábrica, corte, usinagem e borda.</p>
+      <header className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Painel de Produção</h1>
+          <p className="text-base text-slate-500 font-medium">Controle de fábrica, corte, usinagem e borda.</p>
+        </div>
+        <div className="flex items-center gap-2 mt-2 sm:mt-0">
+          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 font-bold uppercase tracking-wider text-[10px] px-3">TV Mode Ready</Badge>
+        </div>
       </header>
 
       {queue.length === 0 ? (

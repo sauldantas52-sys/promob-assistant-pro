@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { AppShell } from "@/components/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/picking")({
   head: () => ({
@@ -61,15 +62,19 @@ function PickingPage() {
 
   return (
     <AppShell>
-      <div className="p-4 md:p-8 space-y-6 max-w-5xl mx-auto">
+      <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto">
         <header className="flex flex-col gap-2">
-          <Link to="/dashboard" className="text-sm text-muted-foreground flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4" /> Voltar
+          <Link to="/dashboard" className="text-sm font-bold text-slate-500 flex items-center gap-2 hover:text-blue-600 transition-colors uppercase tracking-widest">
+            <ArrowLeft className="h-4 w-4" /> Voltar ao Painel
           </Link>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <PackageCheck className="h-6 w-6 text-primary" /> Conferência de Separação
-          </h1>
-          <p className="text-sm text-muted-foreground">Ferragens, acessórios e peças para montagem.</p>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase flex items-center gap-3">
+                <PackageCheck className="h-8 w-8 text-blue-600" /> Separação e Conferência
+              </h1>
+              <p className="text-base text-slate-500 font-medium mt-1">Ferragens, acessórios e peças por grupos G1, G2 e G3.</p>
+            </div>
+          </div>
         </header>
 
         <div className="grid gap-6">
@@ -82,20 +87,20 @@ function PickingPage() {
             const progress = total > 0 ? (done / total) * 100 : 0;
 
             return (
-              <Card key={project.id}>
-                <CardHeader className="pb-3 border-b">
+              <Card key={project.id} className="border-none shadow-sm rounded-2xl overflow-hidden">
+                <CardHeader className="pb-4 pt-6 px-6 bg-slate-50 border-b border-slate-200">
                   <div className="flex justify-between items-start gap-4">
                     <div>
-                      <CardTitle className="text-base">{project.name}</CardTitle>
-                      <p className="text-xs text-muted-foreground">{project.client_name}</p>
+                      <CardTitle className="text-xl font-black text-slate-900 tracking-tight uppercase">{project.name}</CardTitle>
+                      <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mt-1">{project.client_name} · {project.environment}</p>
                     </div>
-                    <Badge variant="outline" className={progress === 100 ? "bg-green-500/10 text-green-600 border-green-200" : ""}>
-                      {done} / {total} itens
+                    <Badge className={cn("px-4 py-1.5 text-xs font-black uppercase tracking-widest border shadow-sm", progress === 100 ? "bg-green-600 text-white border-green-500" : "bg-blue-600 text-white border-blue-500")}>
+                      {done} / {total} ITENS
                     </Badge>
                   </div>
-                  <div className="mt-4 w-full bg-muted h-2 rounded-full overflow-hidden">
+                  <div className="mt-6 w-full bg-slate-200 h-2.5 rounded-full overflow-hidden shadow-inner">
                     <div 
-                      className="h-full bg-primary transition-all" 
+                      className="h-full bg-blue-600 transition-all shadow-[0_0_8px_rgba(37,99,235,0.4)]" 
                       style={{ width: `${progress}%` }} 
                     />
                   </div>
