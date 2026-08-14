@@ -66,6 +66,37 @@ export function EngineeringTab({ projectId, parts, isValidated }: EngineeringTab
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4 p-6 bg-white border-2 border-slate-100 rounded-[2rem] shadow-sm">
+        <div className="flex items-center gap-6">
+          <div className={cn(
+            "h-16 w-16 rounded-2xl flex items-center justify-center shadow-lg",
+            isValidated ? "bg-emerald-600 shadow-emerald-600/20" : "bg-amber-600 shadow-amber-600/20"
+          )}>
+            {isValidated ? (
+              <ShieldCheck className="h-8 w-8 text-white" />
+            ) : (
+              <AlertTriangle className="h-8 w-8 text-white" />
+            )}
+          </div>
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-1">Status de Validação Técnica</p>
+            <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter">
+              {isValidated ? "Projeto Aprovado para Piloto" : "Validação Pendente no Dashboard"}
+            </h3>
+            <p className="text-xs font-medium text-slate-500 mt-1">
+              {isValidated 
+                ? "Todos os protocolos de engenharia foram confirmados." 
+                : "A liberação de usinagem individual exige o checklist 100% concluído."}
+            </p>
+          </div>
+        </div>
+        {!isValidated && (
+          <Badge className="bg-red-600 text-white font-black uppercase tracking-widest px-6 py-2 rounded-full border-none animate-pulse">
+            Bloqueio Ativo
+          </Badge>
+        )}
+      </div>
+
       <Alert className="bg-amber-50 border-2 border-amber-200 text-amber-900 rounded-2xl p-6 shadow-sm">
         <AlertTriangle className="h-6 w-6 text-amber-600" />
         <AlertTitle className="text-amber-800 font-black text-lg tracking-tight mb-2 uppercase">Protocolo de Engenharia Ativo</AlertTitle>
@@ -74,6 +105,7 @@ export function EngineeringTab({ projectId, parts, isValidated }: EngineeringTab
           <span className="block mt-2 font-black text-amber-700 underline">Nunca deduza medidas ou posições. A precisão técnica é absoluta.</span>
         </AlertDescription>
       </Alert>
+
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
