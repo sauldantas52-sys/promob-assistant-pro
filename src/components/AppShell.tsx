@@ -17,13 +17,13 @@ import { Button } from "@/components/ui/button";
 import { useAuth, roleLabels } from "@/lib/auth";
 
 const navItems = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/projects", label: "Projetos", icon: FolderKanban },
-  { to: "/production", label: "Produção", icon: Factory },
-  { to: "/factory-wallboard", label: "Painel TV", icon: Tv },
-  { to: "/picking", label: "Separação", icon: PackageCheck },
-  { to: "/assembly", label: "Montagem", icon: Wrench },
-  { to: "/shipping", label: "Expedição", icon: Truck },
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["admin", "escritorio", "fabrica", "montador", "auditor"] },
+  { to: "/projects", label: "Projetos", icon: FolderKanban, roles: ["admin", "escritorio", "auditor"] },
+  { to: "/production", label: "Produção", icon: Factory, roles: ["admin", "fabrica", "auditor"] },
+  { to: "/factory-wallboard", label: "Painel TV", icon: Tv, roles: ["admin", "fabrica", "auditor"] },
+  { to: "/picking", label: "Separação", icon: PackageCheck, roles: ["admin", "fabrica", "montador", "auditor"] },
+  { to: "/assembly", label: "Montagem", icon: Wrench, roles: ["admin", "montador", "auditor"] },
+  { to: "/shipping", label: "Expedição", icon: Truck, roles: ["admin", "fabrica", "auditor"] },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -66,7 +66,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </button>
         </div>
         <nav className="space-y-1 p-3">
-          {navItems.map((item) => {
+          {navItems.filter(item => !role || item.roles.includes(role)).map((item) => {
             const active = pathname.startsWith(item.to);
             return (
               <Link
