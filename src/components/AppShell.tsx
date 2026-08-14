@@ -57,12 +57,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         }`}
       >
         <div className="flex h-20 items-center gap-3 border-b border-sidebar-border/30 px-6">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 shadow-lg shadow-blue-900/20">
-            <Boxes className="h-6 w-6 text-white" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 shadow-xl shadow-blue-600/20 ring-4 ring-blue-600/10">
+            <Boxes className="h-7 w-7 text-white" />
           </div>
           <div className="leading-tight">
-            <p className="text-base font-black tracking-tight uppercase">Monta AI</p>
-            <p className="text-[10px] font-bold text-sidebar-foreground/50 uppercase tracking-widest">Piloto Controlado</p>
+            <p className="text-lg font-black tracking-tighter uppercase text-white">Monta AI</p>
+            <p className="text-[10px] font-black text-sidebar-foreground/40 uppercase tracking-[0.2em]">Industrial v4.0</p>
           </div>
           <button className="ml-auto lg:hidden" onClick={() => setOpen(false)} aria-label="Fechar menu">
             <X className="h-5 w-5" />
