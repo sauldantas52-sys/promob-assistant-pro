@@ -34,6 +34,7 @@ module MontaAI
         
         # Conectar callbacks
         dialog.add_action_callback("export_project") { |action_context, data| self.export_project_data }
+        dialog.add_action_callback("export_validation_report") { |action_context, data| self.export_validation_report }
         
         dialog.show
       end
