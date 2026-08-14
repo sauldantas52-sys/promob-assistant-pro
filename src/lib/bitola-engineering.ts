@@ -12,6 +12,12 @@ export interface BitolaRule {
 
 export interface DrillingCoordinate {
   part_id: string;
+  module_name?: string;
+  group?: string; // G1/G2
+  material?: string;
+  thickness_mm?: number;
+  ferragem_relacionada?: string;
+  bitola_aplicada?: number;
   x: number;
   y: number;
   z: number;
@@ -31,6 +37,7 @@ export interface EngineeringReport {
   blocked_machining: number;
   conflicts: string[];
   evidence_log: string[];
+  is_simulation?: boolean;
 }
 
 /**
@@ -85,22 +92,34 @@ export const PROMOB_BITOLA_RULES: BitolaRule[] = [
  * Mapeia entidades DXF para coordenadas de furação de forma rigorosa.
  * Apenas entidades CIRCLE e ARC são consideradas furações nativas.
  */
-export function mapDxfToDrillings(dxfGeometries: any[], partId: string): DrillingCoordinate[] {
+export function mapDxfToDrillings(dxfGeometries: any[], part: any): DrillingCoordinate[] {
   // Filtro rigoroso: Apenas furações explícitas (círculos/arcos)
-  // Ignoramos POLYLINE/VERTEX para evitar transformar contornos em furações
   return dxfGeometries
     .filter(g => (g.type === 'CIRCLE' || g.type === 'ARC') && g.radius > 0)
-    .map(g => ({
-      part_id: partId,
-      x: g.center.x,
-      y: g.center.y,
-      z: 0, 
-      diametro: g.radius * 2,
-      profundidade: 0, // Não confirmada sem Z ou layer técnica
-      face: "não confirmada",
-      origem: "DXF",
-      status: "confirmada" // Lida diretamente da fonte técnica
-    }));
+    .map(g => {
+      const rule = PROMOB_BITOLA_RULES.find(r => 
+        Math.abs((part.thickness_mm || 0) - r.bitola) <= r.tolerancia_mm
+      );
+
+      return {
+        part_id: part.id,
+        module_name: part.module_name || "Sem módulo",
+        group: part.group || (part.kind === 'peca' ? 'G1' : 'G2'),
+        material: part.material,
+        thickness_mm: part.thickness_mm,
+        bitola_aplicada: rule?.bitola,
+        ferragem_relacionada: rule?.ferragem_associada || "Não identificada",
+        x: g.center.x,
+        y: g.center.y,
+        z: 0, 
+        diametro: g.radius * 2,
+        profundidade: 0, 
+        face: "não confirmada",
+        origem: "DXF",
+        status: "confirmada",
+        regra_aplicada: rule?.origem_regra
+      };
+    });
 }
 
 /**

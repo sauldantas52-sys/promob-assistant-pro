@@ -251,7 +251,7 @@ export function EngineeringTab({ projectId, parts }: EngineeringTabProps) {
                 {selectedPart ? (
                   <div className="space-y-6">
                     <DrillingInspector 
-                      drillings={selectedPartId ? mapDxfToDrillings(dxfData, selectedPartId) : []} 
+                      drillings={selectedPart ? mapDxfToDrillings(dxfData, selectedPart) : []} 
                     />
                     <div className="grid grid-cols-2 gap-4">
                       <div className="p-3 border rounded-lg bg-amber-50/50">
