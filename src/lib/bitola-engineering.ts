@@ -12,12 +12,12 @@ export interface BitolaRule {
 
 export interface DrillingCoordinate {
   part_id: string;
-  module_name?: string;
-  group?: string; // G1/G2
-  material?: string;
-  thickness_mm?: number;
-  ferragem_relacionada?: string;
-  bitola_aplicada?: number;
+  module_name?: string | undefined;
+  group?: string | undefined; // G1/G2
+  material?: string | undefined;
+  thickness_mm?: number | undefined;
+  ferragem_relacionada?: string | undefined;
+  bitola_aplicada?: number | undefined;
   x: number;
   y: number;
   z: number;
@@ -26,7 +26,7 @@ export interface DrillingCoordinate {
   face: string;
   origem: "XML" | "DXF" | "PDF" | "REGRA_BITOLA" | "INFERIDO";
   status: "confirmada" | "calculada" | "inferida" | "ausente" | "conflitante";
-  regra_aplicada?: string;
+  regra_aplicada?: string | undefined;
 }
 
 export interface EngineeringReport {
