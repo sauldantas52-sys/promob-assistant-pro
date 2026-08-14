@@ -502,13 +502,17 @@ Payload: {
 
                   <div className="flex flex-wrap gap-4 pt-4 border-t border-slate-800">
                     <Button variant="outline" asChild className="rounded-full border-slate-700 bg-slate-800 text-white hover:bg-slate-700 font-black uppercase text-[10px]">
-                      <a href="/monta-ai-sketchup-bridge.zip" download><Download className="mr-2 h-4 w-4" /> Plugin SketchUp (ZIP)</a>
+                      <a href="/MontaAI_Sketchup_Bridge_v0.1.0-beta.rbz" download>
+                        <Download className="mr-2 h-4 w-4" /> Plugin Beta (RBZ)
+                      </a>
+                    </Button>
+                    <Button variant="outline" asChild className="rounded-full border-slate-700 bg-slate-800 text-white hover:bg-slate-700 font-black uppercase text-[10px]">
+                      <a href="/monta-ai-sketchup-bridge.zip" download>
+                        <Download className="mr-2 h-4 w-4" /> Fonte (ZIP)
+                      </a>
                     </Button>
                     <Button variant="outline" asChild className="rounded-full border-slate-700 bg-slate-800 text-white hover:bg-slate-700 font-black uppercase text-[10px]">
                       <a href="/manifest_valid_example.json" download><Download className="mr-2 h-4 w-4" /> Exemplo Válido</a>
-                    </Button>
-                    <Button variant="outline" asChild className="rounded-full border-slate-700 bg-slate-800 text-white hover:bg-slate-700 font-black uppercase text-[10px]">
-                      <a href="/manifest_invalid_example.json" download><Download className="mr-2 h-4 w-4" /> Exemplo Inválido</a>
                     </Button>
                   </div>
                 </div>
