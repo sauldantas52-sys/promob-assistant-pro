@@ -85,22 +85,22 @@ function DashboardContent() {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
         {stats.map((stat, i) => (
           <Card key={stat.label} className={cn(
-            "border-none shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] transition-all duration-300 rounded-[2rem]",
+            "border-none shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] hover:shadow-[0_30px_70px_-12px_rgba(0,0,0,0.15)] transition-all duration-500 rounded-[2.5rem] group overflow-hidden",
             i === 0 ? "bg-blue-600 text-white" : "bg-white"
           )}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-6">
-              <CardTitle className={cn("text-[10px] font-black uppercase tracking-[0.2em]", i === 0 ? "text-blue-100" : "text-slate-400")}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-8">
+              <CardTitle className={cn("text-[10px] font-black uppercase tracking-[0.3em]", i === 0 ? "text-blue-100" : "text-slate-400")}>
                 {stat.label}
               </CardTitle>
-              <div className={cn("p-2 rounded-xl", i === 0 ? "bg-blue-500/50" : "bg-slate-50")}>
-                <stat.icon className={cn("h-5 w-5", i === 0 ? "text-white" : "text-blue-600")} />
+              <div className={cn("p-3 rounded-2xl transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6", i === 0 ? "bg-blue-500/50" : "bg-slate-50")}>
+                <stat.icon className={cn("h-6 w-6", i === 0 ? "text-white" : "text-blue-600")} />
               </div>
             </CardHeader>
-            <CardContent className="p-6 pt-0">
-              <p className={cn("text-4xl font-black tracking-tighter", i === 0 ? "text-white" : "text-slate-900")}>{stat.value}</p>
+            <CardContent className="p-8 pt-0">
+              <p className={cn("text-5xl font-black tracking-tighter", i === 0 ? "text-white" : "text-slate-900")}>{stat.value}</p>
             </CardContent>
           </Card>
         ))}
@@ -113,27 +113,35 @@ function DashboardContent() {
             <Link to="/projects" className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 hover:underline">Ver Todos</Link>
           </div>
           
-          <div className="grid gap-4">
+          <div className="grid gap-6">
             {list.slice(0, 5).map((project) => (
               <Link
                 key={project.id}
                 to="/projects/$projectId"
                 params={{ projectId: project.id }}
-                className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 bg-white border border-slate-100 rounded-[2rem] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] transition-all duration-300"
+                className="group flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-8 bg-white border border-slate-100 rounded-[2.5rem] shadow-[0_15px_50px_-15px_rgba(0,0,0,0.06)] hover:shadow-[0_25px_70px_-15px_rgba(0,0,0,0.12)] transition-all duration-500"
               >
-                <div className="space-y-1">
-                  <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight group-hover:text-blue-600 transition-colors">
+                <div className="space-y-2">
+                  <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight group-hover:text-blue-600 transition-colors">
                     {project.name}
                   </h3>
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">
-                    {project.client_name || "Sem cliente"} <span className="mx-2 text-slate-300">|</span> {project.environment || "Ambiente Geral"}
-                  </p>
+                  <div className="flex items-center gap-3">
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
+                      {project.client_name || "Sem cliente"}
+                    </p>
+                    <span className="h-1 w-1 rounded-full bg-slate-300" />
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
+                      {project.environment || "Ambiente Geral"}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <Badge className={cn("px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] border-none rounded-full", statusTone(project.status))}>
+                <div className="flex items-center gap-6">
+                  <Badge className={cn("px-6 py-2 text-[10px] font-black uppercase tracking-[0.2em] border-none rounded-full shadow-sm", statusTone(project.status))}>
                     {statusLabel(project.status)}
                   </Badge>
-                  <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+                  <div className="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
+                    <ChevronRight className="h-6 w-6 text-slate-300 group-hover:text-blue-600 group-hover:translate-x-1 transition-all duration-500" />
+                  </div>
                 </div>
               </Link>
             ))}

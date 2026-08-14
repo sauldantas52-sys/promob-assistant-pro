@@ -68,41 +68,41 @@ export function AppShell({ children }: { children: ReactNode }) {
             <X className="h-5 w-5" />
           </button>
         </div>
-        <nav className="space-y-1.5 p-4">
+        <nav className="space-y-2 p-4">
           {navItems.filter(item => !role || item.roles.includes(role)).map((item) => {
             const active = pathname.startsWith(item.to);
             return (
               <Link
                 key={item.to}
                 to={item.to}
-                className={`flex items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-bold tracking-tight transition-all duration-200 ${
+                className={`flex items-center gap-3 rounded-[1.25rem] px-5 py-4 text-sm font-black uppercase tracking-widest transition-all duration-300 ${
                   active
-                    ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20 translate-x-1"
-                    : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground hover:translate-x-1"
+                    ? "bg-blue-600 text-white shadow-xl shadow-blue-600/20 translate-x-2"
+                    : "text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-foreground hover:translate-x-1"
                 }`}
               >
-                <item.icon className={`h-5 w-5 transition-transform ${active ? "scale-110" : ""}`} />
+                <item.icon className={`h-5 w-5 transition-transform duration-300 ${active ? "scale-110" : "opacity-70"}`} />
                 {item.label}
               </Link>
             );
           })}
         </nav>
-        <div className="absolute bottom-0 w-full border-t border-sidebar-border/30 p-6 bg-sidebar/50 backdrop-blur-sm">
-          <div className="flex flex-col gap-1">
-            <p className="truncate text-sm font-black text-white">{fullName ?? user.email}</p>
-            <Badge variant="outline" className="w-fit border-sidebar-border text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/60">
+        <div className="absolute bottom-0 w-full border-t border-sidebar-border/30 p-8 bg-sidebar/80 backdrop-blur-xl">
+          <div className="flex flex-col gap-1.5">
+            <p className="truncate text-base font-black text-white uppercase tracking-tight">{fullName ?? user.email}</p>
+            <Badge variant="outline" className="w-fit border-sidebar-border/50 bg-sidebar-accent/50 text-[9px] font-black uppercase tracking-[0.2em] text-sidebar-foreground/50 py-1 px-3">
               {role ? (roleLabels[role] || role) : "Sem perfil"}
             </Badge>
           </div>
           <Button
             variant="ghost"
-            className="mt-5 w-full justify-start rounded-xl px-4 py-6 text-sm font-bold text-sidebar-foreground/70 hover:bg-red-500/10 hover:text-red-400 transition-colors"
+            className="mt-6 w-full justify-start rounded-2xl px-5 py-7 text-xs font-black uppercase tracking-[0.2em] text-sidebar-foreground/50 hover:bg-red-500/10 hover:text-red-400 transition-all duration-300 group"
             onClick={async () => {
               await signOut();
               navigate({ to: "/login" });
             }}
           >
-            <LogOut className="mr-3 h-5 w-5" /> Sair do sistema
+            <LogOut className="mr-3 h-5 w-5 transition-transform group-hover:-translate-x-1" /> Sair do sistema
           </Button>
         </div>
       </aside>
