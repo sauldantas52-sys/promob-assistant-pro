@@ -440,11 +440,12 @@ function ProjectDetail() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
         <Metric icon={Boxes} label="Módulos" value={String(modules.data?.length ?? 0)} />
         <Metric icon={Layers} label="Peças / chapas" value={String(panels.length)} />
         <Metric icon={Wrench} label="Ferragens / Acessórios" value={String(hardware.length)} />
         <Metric icon={AlertTriangle} label="Itens sem módulo" value={String(allParts.filter(p => !p.module_id).length)} />
+        <Metric icon={HardHat} label="Valid. Engenharia" value="Pendente" />
         <Metric icon={FileText} label="Área de chapa (m²)" value={totalArea.toFixed(2)} />
       </div>
 
@@ -1234,7 +1235,7 @@ function Metric({
   label,
   value,
 }: {
-  icon: typeof Boxes;
+  icon: any;
   label: string;
   value: string;
 }) {
