@@ -685,20 +685,26 @@ export type Database = {
         Row: {
           company_id: string | null
           created_at: string | null
+          first_login_at: string | null
           full_name: string | null
           id: string
+          must_change_password: boolean | null
         }
         Insert: {
           company_id?: string | null
           created_at?: string | null
+          first_login_at?: string | null
           full_name?: string | null
           id: string
+          must_change_password?: boolean | null
         }
         Update: {
           company_id?: string | null
           created_at?: string | null
+          first_login_at?: string | null
           full_name?: string | null
           id?: string
+          must_change_password?: boolean | null
         }
         Relationships: [
           {
@@ -934,6 +940,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_must_change_password: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
       current_company_id: { Args: never; Returns: string }
       has_role: {
         Args: {
