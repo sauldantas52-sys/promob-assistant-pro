@@ -8,8 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, UserPlus, Mail, Shield, UserCheck, Trash2 } from "lucide-react";
+import { Loader2, UserPlus, Mail, Shield, UserCheck, Trash2, KeyRound, HardHat } from "lucide-react";
 import { inviteUser } from "@/lib/user-management.functions";
+import { setOperatorCredentials } from "@/lib/operator-auth.functions";
+import { AUTH_CONFIG } from "@/lib/auth-config";
 
 export const Route = createFileRoute('/_authenticated/settings/users')({
 
@@ -29,6 +31,13 @@ function UsersManagementPage() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [inviting, setInviting] = useState(false);
+  const [configuringOperator, setConfiguringOperator] = useState<UserProfile | null>(null);
+  
+  // Operator config state
+  const [opCode, setOpCode] = useState("");
+  const [opPin, setOpPin] = useState("");
+  const [opRealPass, setOpRealPass] = useState("");
+  const [settingOp, setSettingOp] = useState(false);
   
   // Form state
   const [email, setEmail] = useState("");
@@ -87,6 +96,32 @@ function UsersManagementPage() {
       setInviting(false);
     }
 
+  };
+
+  const handleSetOperator = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!configuringOperator) return;
+    setSettingOp(true);
+    try {
+      await setOperatorCredentials({
+        data: {
+          profileId: configuringOperator.id,
+          operatorCode: opCode,
+          pin: opPin,
+          realPassword: opRealPass
+        }
+      });
+      toast.success("Credenciais operacionais configuradas!");
+      setConfiguringOperator(null);
+      setOpCode("");
+      setOpPin("");
+      setOpRealPass("");
+      fetchUsers();
+    } catch (error) {
+      toast.error("Erro ao configurar operador.");
+    } finally {
+      setSettingOp(false);
+    }
   };
 
   if (currentRole !== 'admin' && currentRole !== 'escritorio') {
@@ -190,6 +225,17 @@ function UsersManagementPage() {
                       </div>
                     </div>
                     <div className="flex gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-12 w-12 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50"
+                        onClick={() => {
+                          setConfiguringOperator(u);
+                          setOpCode(`OP-${u.full_name?.split(' ')[0].toUpperCase() || 'USR'}`);
+                        }}
+                      >
+                        <KeyRound className="h-5 w-5" />
+                      </Button>
                       <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50">
                         <Trash2 className="h-5 w-5" />
                       </Button>
@@ -201,6 +247,74 @@ function UsersManagementPage() {
           </CardContent>
         </Card>
       </div>
+
+      {configuringOperator && (
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+          <Card className="w-full max-w-md border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden">
+            <CardHeader className="pt-10 px-10 border-b border-slate-50">
+              <div className="flex items-center gap-3 mb-2">
+                <HardHat className="h-6 w-6 text-blue-600" />
+                <CardTitle className="text-2xl font-black uppercase tracking-tight">Configurar Operador</CardTitle>
+              </div>
+              <CardDescription>
+                Defina as credenciais simplificadas para <strong>{configuringOperator.full_name}</strong>.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-10">
+              <form onSubmit={handleSetOperator} className="space-y-6">
+                <div className="space-y-2">
+                  <Label>Código do Operador</Label>
+                  <Input 
+                    value={opCode} 
+                    onChange={(e) => setOpCode(e.target.value)} 
+                    placeholder="Ex: OP-01" 
+                    className="h-12 rounded-xl"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>PIN Numérico (6-20 dígitos)</Label>
+                  <Input 
+                    type="password"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={opPin} 
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === "" || /^\d+$/.test(v)) setOpPin(v);
+                    }} 
+                    placeholder="Apenas números" 
+                    className="h-12 rounded-xl"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Senha Supabase (Interna)</Label>
+                  <Input 
+                    type="password"
+                    value={opRealPass} 
+                    onChange={(e) => setOpRealPass(e.target.value)} 
+                    placeholder="Senha de 8+ caracteres" 
+                    className="h-12 rounded-xl"
+                    required
+                  />
+                  <p className="text-[10px] text-slate-400">
+                    Esta senha será usada automaticamente pelo sistema no login via PIN.
+                  </p>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button type="button" variant="ghost" className="flex-1 h-12 rounded-xl" onClick={() => setConfiguringOperator(null)}>
+                    Cancelar
+                  </Button>
+                  <Button type="submit" className="flex-1 h-12 rounded-xl bg-blue-600 hover:bg-blue-700 font-black uppercase tracking-widest" disabled={settingOp}>
+                    {settingOp ? <Loader2 className="animate-spin" /> : "Salvar"}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
