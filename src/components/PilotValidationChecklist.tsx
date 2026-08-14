@@ -9,7 +9,11 @@ import {
   Ruler,
   CircleDot,
   LayoutGrid,
-  ClipboardList
+  ClipboardList,
+  Scissors,
+  Boxes,
+  Lock,
+  History
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,13 +27,44 @@ interface PilotValidationChecklistProps {
   isMachiningBlocked: boolean;
 }
 
-const CHECK_ITEMS = [
-  { id: 'bitola', label: 'Audit de Bitolas Nominais', icon: ClipboardList, description: 'MDF 6, 15, 18, 25, 36mm validados' },
-  { id: 'medidas', label: 'Medidas Críticas (PDF)', icon: Ruler, description: 'Conformidade com PDF Executivo' },
-  { id: 'furacao', label: 'Furação Técnica (DXF)', icon: CircleDot, description: 'Geometria de furos confirmada' },
-  { id: 'tags', label: 'Tags Industriais (00-18)', icon: FileSearch, description: 'Identidade visual Bridge SKP' },
-  { id: 'hierarquia', label: 'Estrutura G1-G3', icon: LayoutGrid, description: 'Módulos físicos organizados' },
+const GATES = [
+  {
+    id: 'corte_borda',
+    title: 'Gate 1: Corte e Borda',
+    description: 'Requisitos para liberação do plano de corte e nesting',
+    items: [
+      { id: 'xml_valido', label: 'XML Promob Válido', icon: ClipboardList, description: 'Estrutura de dados íntegra' },
+      { id: 'lista_corte', label: 'Lista de Corte Validada', icon: Scissors, description: 'Dimensões brutas confirmadas' },
+      { id: 'nesting_dxf', label: 'DXF de Nesting', icon: LayoutGrid, description: 'Aproveitamento de chapa' },
+      { id: 'materiais', label: 'Materiais e Espessuras', icon: Boxes, description: 'Estoque físico conferido' },
+    ]
+  },
+  {
+    id: 'usinagem',
+    title: 'Gate 2: Usinagem',
+    description: 'Requisitos para liberação do controle CNC',
+    items: [
+      { id: 'documentacao_tecnica', label: 'PDF ou DXF Técnico', icon: Ruler, description: 'Individual por peça' },
+      { id: 'cotas_furacao', label: 'Cotas e Furações', icon: CircleDot, description: 'Geometria confirmada' },
+      { id: 'bitolas', label: 'Validação de Bitolas', icon: ClipboardList, description: 'MDF 6/15/18/25/36mm' },
+      { id: 'tags_skp', label: 'Tags Industriais (00-18)', icon: FileSearch, description: 'Bridge SketchUp' },
+    ]
+  },
+  {
+    id: 'montagem',
+    title: 'Gate 3: Montagem',
+    description: 'Requisitos para liberação do caderno mobile',
+    items: [
+      { id: 'usinagem_liberada', label: 'Usinagem Liberada', icon: ShieldCheck, description: 'Status técnico OK' },
+      { id: 'pecas_conferidas', label: 'Peças Conferidas', icon: CheckCircle2, description: 'Conferência de saída' },
+      { id: 'ferragens_conferidas', label: 'Ferragens Conferidas', icon: Boxes, description: 'Kit de acessórios completo' },
+      { id: 'grupos_completos', label: 'Grupos G1/G2/G3/AV', icon: LayoutGrid, description: 'Estrutura física completa' },
+    ]
+  }
 ];
+
+// Flat items for easy lookup
+const CHECK_ITEMS = GATES.flatMap(g => g.items);
 
 export function PilotValidationChecklist({ projectId, isMachiningBlocked }: PilotValidationChecklistProps) {
   const queryClient = useQueryClient();
@@ -113,56 +148,83 @@ export function PilotValidationChecklist({ projectId, isMachiningBlocked }: Pilo
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="p-8 space-y-6">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {CHECK_ITEMS.map((item) => {
-            const isDone = checks?.find(c => c.check_type === item.id)?.is_completed;
-            const Icon = item.icon;
-            
+      <CardContent className="p-8 space-y-10">
+        <div className="grid gap-10">
+          {GATES.map((gate) => {
+            const gateItems = gate.items;
+            const gateCompletedCount = checks?.filter(c => 
+              gateItems.some(i => i.id === c.check_type) && c.is_completed
+            ).length || 0;
+            const isGateDone = gateCompletedCount === gateItems.length;
+
             return (
-              <div 
-                key={item.id}
-                className={cn(
-                  "relative group p-6 rounded-3xl border-2 transition-all duration-300 cursor-pointer hover:scale-[1.02]",
-                  isDone 
-                    ? "bg-white border-emerald-100 shadow-lg shadow-emerald-600/5" 
-                    : "bg-white border-slate-100 hover:border-amber-200 shadow-sm"
-                )}
-                onClick={() => toggleCheck.mutate({ type: item.id, completed: !isDone })}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="space-y-3">
-                    <div className={cn(
-                      "p-3 rounded-2xl w-fit transition-colors",
-                      isDone ? "bg-emerald-50 text-emerald-600" : "bg-slate-50 text-slate-400 group-hover:bg-amber-50 group-hover:text-amber-600"
-                    )}>
-                      <Icon className="h-6 w-6" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className={cn(
-                        "text-[11px] font-black uppercase tracking-widest",
-                        isDone ? "text-emerald-700" : "text-slate-900"
-                      )}>
-                        {item.label}
-                      </p>
-                      <p className="text-[10px] text-slate-400 font-medium leading-relaxed">
-                        {item.description}
-                      </p>
-                    </div>
+              <div key={gate.id} className="space-y-6">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-black uppercase tracking-widest text-slate-900 flex items-center gap-2">
+                      <div className={cn(
+                        "h-2 w-2 rounded-full",
+                        isGateDone ? "bg-emerald-500" : "bg-amber-500"
+                      )} />
+                      {gate.title}
+                    </h4>
+                    <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">
+                      {gate.description}
+                    </p>
                   </div>
-                  <Checkbox 
-                    checked={isDone || false} 
-                    className={cn(
-                      "h-6 w-6 rounded-lg transition-all",
-                      isDone ? "bg-emerald-600 border-emerald-600 text-white" : "border-slate-200"
-                    )}
-                  />
+                  <Badge variant="outline" className={cn(
+                    "text-[9px] font-black tracking-widest px-3",
+                    isGateDone ? "text-emerald-600 border-emerald-200 bg-emerald-50" : "text-amber-600 border-amber-200 bg-amber-50"
+                  )}>
+                    {gateCompletedCount} / {gateItems.length}
+                  </Badge>
                 </div>
-                {isDone && (
-                  <div className="absolute top-2 right-2">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-500 opacity-20" />
-                  </div>
-                )}
+
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                  {gateItems.map((item) => {
+                    const isDone = checks?.find(c => c.check_type === item.id)?.is_completed;
+                    const Icon = item.icon;
+                    
+                    return (
+                      <div 
+                        key={item.id}
+                        className={cn(
+                          "relative group p-5 rounded-2xl border-2 transition-all duration-300 cursor-pointer hover:scale-[1.02]",
+                          isDone 
+                            ? "bg-white border-emerald-100 shadow-md" 
+                            : "bg-white border-slate-50 hover:border-amber-200 shadow-sm"
+                        )}
+                        onClick={() => toggleCheck.mutate({ type: item.id, completed: !isDone })}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="space-y-3">
+                            <div className={cn(
+                              "p-2.5 rounded-xl w-fit transition-colors",
+                              isDone ? "bg-emerald-50 text-emerald-600" : "bg-slate-50 text-slate-400 group-hover:bg-amber-50 group-hover:text-amber-600"
+                            )}>
+                              <Icon className="h-5 w-5" />
+                            </div>
+                            <div className="space-y-1">
+                              <p className={cn(
+                                "text-[10px] font-black uppercase tracking-wider leading-tight",
+                                isDone ? "text-emerald-700" : "text-slate-900"
+                              )}>
+                                {item.label}
+                              </p>
+                            </div>
+                          </div>
+                          <Checkbox 
+                            checked={isDone || false} 
+                            className={cn(
+                              "h-5 w-5 rounded-md transition-all",
+                              isDone ? "bg-emerald-600 border-emerald-600 text-white" : "border-slate-200"
+                            )}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             );
           })}
