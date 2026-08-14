@@ -171,31 +171,48 @@ export function EngineeringTab({ projectId, parts }: EngineeringTabProps) {
                   
                   const isMatched = !!pdfMatch;
 
-                  return (
-                    <TableRow key={part.id}>
-                      <TableCell className="font-medium">{part.name}</TableCell>
-                      <TableCell>{part.width_mm} × {part.length_mm} mm</TableCell>
-                      <TableCell>
-                        {pdfMatch ? (
-                          <span className="text-green-600 font-medium">{pdfMatch.value} {pdfMatch.unit}</span>
-                        ) : (
-                          <span className="text-muted-foreground italic">Não detectado</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">Aguardando DXF...</TableCell>
-                      <TableCell>
-                        {isMatched ? (
-                          <Badge className="bg-green-100 text-green-700 border-green-200">
-                            <CheckCircle2 className="h-3 w-3 mr-1" /> Validado
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="text-amber-600 border-amber-200">
-                            <AlertCircle className="h-3 w-3 mr-1" /> Pendente
-                          </Badge>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
+                    const rule = PROMOB_BITOLA_RULES.find(r => 
+                      Math.abs((part.thickness_mm || 0) - r.bitola) <= r.tolerancia_mm
+                    );
+
+                    return (
+                      <TableRow key={part.id}>
+                        <TableCell className="font-medium">
+                          {part.name}
+                          {rule && (
+                            <div className="text-[10px] text-muted-foreground uppercase mt-1">
+                              Bitola Promob: {rule.bitola}mm ({rule.description})
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell>{part.width_mm} × {part.length_mm} mm</TableCell>
+                        <TableCell>
+                          {pdfMatch ? (
+                            <span className="text-green-600 font-medium">{pdfMatch.value} {pdfMatch.unit}</span>
+                          ) : (
+                            <span className="text-muted-foreground italic">Não detectado</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {dxfData.length > 0 ? (
+                            <span className="text-blue-600 font-medium">Extraído via DXF</span>
+                          ) : (
+                            "Aguardando DXF..."
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {isMatched && rule ? (
+                            <Badge className="bg-green-100 text-green-700 border-green-200">
+                              <CheckCircle2 className="h-3 w-3 mr-1" /> Validado
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-amber-600 border-amber-200">
+                              <AlertCircle className="h-3 w-3 mr-1" /> {rule ? "Medida PDF?" : "Bitola Desconhecida"}
+                            </Badge>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
                 })}
               </TableBody>
             </Table>
