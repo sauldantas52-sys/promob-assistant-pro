@@ -814,9 +814,19 @@ function ProjectDetail() {
                   </ul>
                 </div>
 
-                <div className="text-[10px] text-muted-foreground pt-2 border-t flex justify-between">
-                  <span>Aprovado em: {new Date().toLocaleDateString('pt-BR')}</span>
-                  <span>Responsável: Sistema Monta AI</span>
+                <div className="text-[10px] text-muted-foreground pt-2 border-t flex flex-col gap-1">
+                  <div className="flex justify-between">
+                    <span>Aprovado em: {new Date().toLocaleDateString('pt-BR')}</span>
+                    <span>Responsável: Sistema Monta AI</span>
+                  </div>
+                  <div className="flex justify-between items-center bg-muted/50 p-1 rounded px-2">
+                    <span className="font-medium">Rastreabilidade 4.0:</span>
+                    <div className="flex gap-2">
+                      <Badge variant="outline" className="text-[8px] h-4">ID Único Ativo</Badge>
+                      <Badge variant="outline" className="text-[8px] h-4">Logs em Tempo Real</Badge>
+                      <Badge variant="outline" className="text-[8px] h-4">Integridade XML</Badge>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
