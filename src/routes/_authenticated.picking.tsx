@@ -98,9 +98,9 @@ function PickingPage() {
                       {done} / {total} ITENS
                     </Badge>
                   </div>
-                  <div className="mt-6 w-full bg-slate-200 h-2.5 rounded-full overflow-hidden shadow-inner">
+                  <div className="mt-6 w-full bg-slate-200 h-3 rounded-full overflow-hidden shadow-inner border border-slate-300/50">
                     <div 
-                      className="h-full bg-blue-600 transition-all shadow-[0_0_8px_rgba(37,99,235,0.4)]" 
+                      className="h-full bg-blue-600 transition-all duration-1000 shadow-[0_0_15px_rgba(37,99,235,0.4)]" 
                       style={{ width: `${progress}%` }} 
                     />
                   </div>

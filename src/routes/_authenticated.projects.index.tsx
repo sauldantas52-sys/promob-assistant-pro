@@ -106,20 +106,25 @@ function ProjectsContent() {
   });
 
   return (
-    <div className="space-y-6 p-4 md:p-8 max-w-7xl mx-auto">
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Projetos</h1>
-          <p className="text-base text-slate-500 font-medium">
-            Gestão técnica, importação Promob e acompanhamento 4.0.
+    <div className="space-y-10 p-6 md:p-12 max-w-[1600px] mx-auto">
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-2">
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-600">
+            Módulo de Projetos
+          </p>
+          <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-slate-900 uppercase leading-none">
+            Gestão Técnica 4.0
+          </h1>
+          <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-2">
+            Importação inteligente e controle industrial Promob
           </p>
         </div>
         <div className="flex gap-2">
           {hasPermission(role, "projects", "import") && (
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
-                <Button className="h-11">
-                  <Plus className="mr-2 h-4 w-4" /> Novo projeto
+                <Button className="h-14 px-8 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest text-[11px] shadow-lg shadow-blue-600/20 gap-3">
+                  <Plus className="h-5 w-5" /> Novo Projeto
                 </Button>
               </DialogTrigger>
               <DialogContent>
@@ -167,21 +172,21 @@ function ProjectsContent() {
         </div>
       </header>
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-6 sm:flex-row sm:items-center bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)]">
         <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+          <Search className="absolute left-6 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
           <Input
-            placeholder="Buscar projeto ou cliente..."
-            className="h-12 pl-12 rounded-xl border-slate-200 shadow-sm focus:ring-blue-600"
+            placeholder="Buscar por nome do projeto ou cliente..."
+            className="h-14 pl-14 rounded-2xl border-none bg-slate-50 font-bold placeholder:text-slate-400 placeholder:font-medium"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
         <div className="flex gap-2">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="h-11 w-full sm:w-[180px]">
-              <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4 text-muted-foreground" />
+            <SelectTrigger className="h-14 w-full sm:w-[220px] rounded-2xl border-none bg-slate-50 font-black uppercase tracking-widest text-[10px]">
+              <div className="flex items-center gap-3">
+                <Filter className="h-4 w-4 text-blue-600" />
                 <SelectValue placeholder="Status" />
               </div>
             </SelectTrigger>
@@ -213,14 +218,14 @@ function ProjectsContent() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
           {filteredProjects.map((project) => (
             <Link key={project.id} to="/projects/$projectId" params={{ projectId: project.id }}>
-              <Card className="h-full border-none shadow-sm hover:shadow-md transition-all rounded-2xl overflow-hidden group">
+              <Card className="h-full border-none shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] transition-all duration-300 rounded-[2.5rem] overflow-hidden group bg-white">
                 <CardHeader className="pb-3 pt-6 px-6">
                   <div className="flex items-start justify-between gap-2">
                     <CardTitle className="text-lg font-black text-slate-900 tracking-tight leading-tight group-hover:text-blue-600 transition-colors">{project.name}</CardTitle>
-                    <Badge className={cn("px-3 py-1 text-[10px] font-bold uppercase tracking-wider border", statusTone(project.status))}>
+                    <Badge className={cn("px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] border-none rounded-full", statusTone(project.status))}>
                       {statusLabel(project.status)}
                     </Badge>
                   </div>

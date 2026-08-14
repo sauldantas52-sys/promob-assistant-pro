@@ -184,8 +184,8 @@ function AssemblyContent() {
                           const [confDialogOpen, setConfDialogOpen] = useState(false);
                         
                         return (
-                          <Card key={m.id} className={cn("overflow-hidden border-2 shadow-sm rounded-2xl transition-all", group?.is_locked ? "border-amber-100 bg-amber-50/20" : "border-green-100 bg-green-50/20")}>
-                            <div className="h-3 w-full" style={{ backgroundColor: group?.color || "#cbd5e1" }} />
+                          <Card key={m.id} className={cn("overflow-hidden border-2 shadow-sm rounded-2xl transition-all", group?.is_locked ? "border-red-100 bg-red-50/20" : "border-emerald-100 bg-emerald-50/20")}>
+                            <div className="h-3 w-full" style={{ backgroundColor: group?.is_locked ? "#EF4444" : "#10B981" }} />
                             <CardHeader className="p-5 pb-3 flex flex-row items-center justify-between">
                               <div>
                                 <CardTitle className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
@@ -194,7 +194,7 @@ function AssemblyContent() {
                                   {group?.is_locked ? <Lock className="h-4 w-4 text-amber-600" /> : <Unlock className="h-4 w-4 text-green-600" />}
                                 </CardTitle>
                               </div>
-                              <Badge className={cn("px-3 py-1 text-[10px] font-black uppercase tracking-widest", group?.is_locked ? "bg-amber-100 text-amber-700 border-amber-200" : "bg-green-600 text-white")}>
+                              <Badge className={cn("px-3 py-1 text-[10px] font-black uppercase tracking-widest", group?.is_locked ? "bg-red-100 text-red-700 border-red-200" : "bg-emerald-600 text-white")}>
                                 {group?.is_locked ? "Bloqueado" : "Liberado"}
                               </Badge>
                             </CardHeader>
@@ -204,7 +204,7 @@ function AssemblyContent() {
                                   <span>Progresso ({completed}/{total})</span>
                                   <span>{Math.round(progress)}%</span>
                                 </div>
-                                <Progress value={progress} />
+                                <Progress value={progress} className={cn(group?.is_locked ? "bg-red-100" : "bg-emerald-100")} indicatorClassName={cn(group?.is_locked ? "bg-red-600" : "bg-emerald-600")} />
                               </div>
                               
                               <div className="flex gap-2">

@@ -45,33 +45,41 @@
 :root {
   --radius: 0.75rem;
   /* Paleta Industrial Moderna - Monta AI */
-  --background: #F5F7FA;
-  --foreground: #17202A;
+  --background: #F8FAFC;
+  --foreground: #0F172A;
   --card: #FFFFFF;
-  --card-foreground: #17202A;
+  --card-foreground: #0F172A;
   --popover: #FFFFFF;
-  --popover-foreground: #17202A;
-  --primary: #2563EB; /* Azul Técnico */
-  --primary-foreground: #FFFFFF;
-  --secondary: #E2E8F0; /* Cinza de borda/suave */
-  --secondary-foreground: #64748B;
+  --popover-foreground: #0F172A;
+  --primary: #0F4C5C; /* Azul Petróleo Industrial */
+  --primary-foreground: #F8FAFC;
+  --secondary: #F1F5F9;
+  --secondary-foreground: #475569;
   --muted: #F1F5F9;
   --muted-foreground: #64748B;
   --accent: #2563EB;
   --accent-foreground: #FFFFFF;
-  --destructive: #DC2626; /* Vermelho Bloqueio */
+  --destructive: #EF4444; 
   --destructive-foreground: #FFFFFF;
   --border: #E2E8F0;
   --input: #E2E8F0;
-  --ring: #2563EB;
+  --ring: #0F4C5C;
   
-  /* Cores Temáticas de Status */
-  --success: #16A34A;
-  --warning: #D97706;
-  --technical: #0F4C5C; /* Azul Petróleo */
-  --maintenance: #7C3AED; /* Roxo Assistência */
+  /* Cores Operacionais - Design System */
+  --corte: #EF4444;
+  --borda: #F59E0B;
+  --usinagem: #8B5CF6;
+  --picking: #3B82F6;
+  --montagem: #10B981;
+  --expedicao: #6366 Indigo;
 
-  --sidebar: #0F4C5C; /* Azul Petróleo Industrial */
+  /* Grupos Físicos */
+  --g1: #0F4C5C;
+  --g2: #475569;
+  --g3: #4F46E5;
+  --av: #EA580C;
+
+  --sidebar: #0F4C5C;
   --sidebar-foreground: #F8FAFC;
   --sidebar-primary: #2563EB;
   --sidebar-primary-foreground: #FFFFFF;
@@ -82,32 +90,31 @@
 }
 
 .dark {
-  /* Mantendo consistência industrial mesmo no dark */
-  --background: #0F172A;
-  --foreground: #F1F5F9;
-  --card: #1E293B;
-  --card-foreground: #F1F5F9;
-  --popover: #1E293B;
-  --popover-foreground: #F1F5F9;
+  --background: #020617; /* Navy Profundo Industrial */
+  --foreground: #F8FAFC;
+  --card: #0F172A;
+  --card-foreground: #F8FAFC;
+  --popover: #0F172A;
+  --popover-foreground: #F8FAFC;
   --primary: #3B82F6;
   --primary-foreground: #FFFFFF;
-  --secondary: #334155;
+  --secondary: #1E293B;
   --secondary-foreground: #94A3B8;
-  --muted: #334155;
+  --muted: #1E293B;
   --muted-foreground: #94A3B8;
   --accent: #3B82F6;
   --accent-foreground: #FFFFFF;
   --destructive: #EF4444;
   --destructive-foreground: #FFFFFF;
-  --border: #334155;
-  --input: #334155;
+  --border: #1E293B;
+  --input: #1E293B;
   --ring: #3B82F6;
   --sidebar: #020617;
-  --sidebar-foreground: #F1F5F9;
+  --sidebar-foreground: #F8FAFC;
   --sidebar-primary: #3B82F6;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #1E293B;
-  --sidebar-accent-foreground: #F1F5F9;
+  --sidebar-accent: #0F172A;
+  --sidebar-accent-foreground: #F8FAFC;
   --sidebar-border: #1E293B;
   --sidebar-ring: #3B82F6;
 }
