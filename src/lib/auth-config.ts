@@ -1,8 +1,10 @@
 export const AUTH_CONFIG = {
   PILOT_MODE: false,
-  MIN_PASSWORD_LENGTH: 8, // Mantendo 8 para segurança do Supabase, mas com orientação numérica
+  MIN_PASSWORD_LENGTH: 8,
   RECOMMENDED_PASSWORD_LENGTH: 12,
-  MAX_PASSWORD_LENGTH: 20
+  MAX_PASSWORD_LENGTH: 20,
+  MIN_OPERATOR_PIN_LENGTH: 6,
+  MAX_OPERATOR_PIN_LENGTH: 20
 };
 
 export const isNumeric = (str: string) => {

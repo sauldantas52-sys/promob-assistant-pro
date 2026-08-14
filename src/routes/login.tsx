@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Boxes, Loader2 } from "lucide-react";
+import { Boxes, Loader2, HardHat, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,8 +16,9 @@ import {
 import { toast } from "sonner";
 import { useAuth, roleLabels, type AppRole } from "@/lib/auth";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { InfoIcon, ShieldAlert } from "lucide-react";
+import { InfoIcon, ShieldAlert, KeyRound } from "lucide-react";
 import { AUTH_CONFIG, isValidPasswordLength, isPasswordStrong, isNumeric } from "@/lib/auth-config";
+import { authenticateOperator } from "@/lib/operator-auth.functions";
 
 
 export const Route = createFileRoute("/login")({
@@ -43,7 +44,9 @@ function LoginPage() {
   const { user, signIn, signUp, resetPassword, role: userRole, loading } = useAuth();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
-  const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
+  const [mode, setMode] = useState<"signin" | "signup" | "forgot" | "operator">("operator");
+  const [operatorCode, setOperatorCode] = useState("");
+  const [pin, setPin] = useState("");
   const [countdown, setCountdown] = useState(0);
 
   const [email, setEmail] = useState("");
@@ -65,6 +68,37 @@ function LoginPage() {
   useEffect(() => {
     if (user) navigate({ to: "/dashboard" });
   }, [user, navigate]);
+
+  const handleOperatorSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!operatorCode) {
+      toast.error("Informe o código do operador.");
+      return;
+    }
+    if (pin.length < AUTH_CONFIG.MIN_OPERATOR_PIN_LENGTH) {
+      toast.error(`O PIN deve ter no mínimo ${AUTH_CONFIG.MIN_OPERATOR_PIN_LENGTH} números.`);
+      return;
+    }
+
+    setBusy(true);
+    try {
+      const result = await authenticateOperator({ data: { operatorCode, pin } });
+      
+      if (!result.success) {
+        toast.error(result.error || "Falha na autenticação.");
+        return;
+      }
+
+      // Proceder com o login real no Supabase Auth usando as credenciais retornadas
+      await signIn(result.email!, result.password!);
+      toast.success("Acesso operacional concedido!");
+      navigate({ to: "/dashboard" });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Erro no login operacional.");
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -171,10 +205,65 @@ function LoginPage() {
             </CardHeader>
             <CardContent className="px-16 pb-16 pt-12">
               <Tabs value={mode} onValueChange={(v) => setMode(v as any)}>
-                <TabsList className="mb-12 grid w-full grid-cols-2 p-2 bg-slate-100 rounded-[2rem] h-20 border border-slate-200 shadow-sm">
-                  <TabsTrigger value="signin" className="rounded-[1.6rem] data-[state=active]:bg-white data-[state=active]:shadow-2xl font-black text-[12px] uppercase tracking-[0.2em]">Entrar</TabsTrigger>
-                  <TabsTrigger value="signup" className="rounded-[1.6rem] data-[state=active]:bg-white data-[state=active]:shadow-2xl font-black text-[12px] uppercase tracking-[0.2em]">Cadastrar</TabsTrigger>
+                <TabsList className="mb-12 grid w-full grid-cols-3 p-2 bg-slate-100 rounded-[2rem] h-20 border border-slate-200 shadow-sm">
+                  <TabsTrigger value="operator" className="rounded-[1.6rem] data-[state=active]:bg-white data-[state=active]:shadow-2xl font-black text-[10px] uppercase tracking-[0.1em]">Operador</TabsTrigger>
+                  <TabsTrigger value="signin" className="rounded-[1.6rem] data-[state=active]:bg-white data-[state=active]:shadow-2xl font-black text-[10px] uppercase tracking-[0.1em]">Admin</TabsTrigger>
+                  <TabsTrigger value="signup" className="rounded-[1.6rem] data-[state=active]:bg-white data-[state=active]:shadow-2xl font-black text-[10px] uppercase tracking-[0.1em]">Registro</TabsTrigger>
                 </TabsList>
+
+                <TabsContent value="operator">
+                  <form onSubmit={handleOperatorSignIn} className="space-y-6">
+                    <div className="flex flex-col items-center mb-6 text-blue-600">
+                      <HardHat className="h-12 w-12 mb-2" />
+                      <span className="text-[10px] font-black uppercase tracking-[0.3em]">Acesso Industrial</span>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="op-code">Código do Operador</Label>
+                        <div className="relative">
+                          <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                          <Input
+                            id="op-code"
+                            value={operatorCode}
+                            onChange={(e) => setOperatorCode(e.target.value)}
+                            placeholder="Ex: OP-123"
+                            className="h-14 pl-12 rounded-2xl bg-slate-50 border-slate-200 text-lg font-bold"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="op-pin">PIN Numérico</Label>
+                        <div className="relative">
+                          <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                          <Input
+                            id="op-pin"
+                            type="password"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            value={pin}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              if (v === "" || isNumeric(v)) setPin(v);
+                            }}
+                            placeholder="••••••"
+                            className="h-14 pl-12 rounded-2xl bg-slate-50 border-slate-200 text-2xl tracking-[0.5em] font-black"
+                            required
+                          />
+                        </div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center mt-2">
+                          Use de 6 a 20 números
+                        </p>
+                      </div>
+                    </div>
+
+                    <Button type="submit" className="h-16 w-full text-lg font-black uppercase tracking-widest rounded-2xl bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-600/20" disabled={busy}>
+                      {busy ? <Loader2 className="animate-spin" /> : "Iniciar Turno"}
+                    </Button>
+                  </form>
+                </TabsContent>
 
                 <TabsContent value="signin">
                   <form onSubmit={handleSignIn} className="space-y-4">
