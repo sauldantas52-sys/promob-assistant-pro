@@ -433,22 +433,32 @@ function ProjectDetail() {
     <AppShell>
       <div className="space-y-8 p-4 md:p-10 max-w-[1600px] mx-auto">
         <header className="flex flex-col gap-6">
-          <Link to="/projects" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-blue-600 transition-colors">
-            <ArrowLeft className="h-3.5 w-3.5" /> Voltar para Projetos
+          <Link to="/projects" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 hover:text-blue-600 transition-colors">
+            <ArrowLeft className="h-4 w-4" /> Voltar para Projetos
           </Link>
 
-          <div className="flex flex-wrap items-end justify-between gap-8">
-            <div className="space-y-3">
-              <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-slate-900 uppercase leading-none">
+          <div className="flex flex-wrap items-end justify-between gap-10">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-600">Ficha Técnica do Projeto</p>
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-600 animate-pulse" />
+              </div>
+              <h1 className="text-4xl md:text-7xl font-black tracking-tighter text-slate-900 uppercase leading-none">
                 {project.data?.name}
               </h1>
-              <div className="flex flex-wrap items-center gap-4">
-                <Badge className={cn("px-4 py-1.5 text-[10px] font-black shadow-sm uppercase tracking-[0.2em] border-none rounded-full", statusTone(project.data?.status || "novo"))}>
+              <div className="flex flex-wrap items-center gap-6">
+                <Badge className={cn("px-6 py-2.5 text-[10px] font-black shadow-lg uppercase tracking-[0.2em] border-none rounded-full", statusTone(project.data?.status || "novo"))}>
                   {statusLabel(project.data?.status || "novo")}
                 </Badge>
-                <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">
-                  {project.data?.client_name || "Sem cliente"} <span className="mx-2 text-slate-300">|</span> {project.data?.environment || "Ambiente Geral"}
-                </p>
+                <div className="flex items-center gap-3">
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
+                    {project.data?.client_name || "Sem cliente"}
+                  </p>
+                  <span className="h-1 w-1 rounded-full bg-slate-300" />
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
+                    {project.data?.environment || "Ambiente Geral"}
+                  </p>
+                </div>
               </div>
             </div>
 
