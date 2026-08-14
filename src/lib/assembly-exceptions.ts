@@ -84,6 +84,22 @@ async function persist(event: ExceptionEvent): Promise<void> {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("Usuário não autenticado");
 
+  // Prevent duplicates using the idempotent ID in metadata
+  if (event.id) {
+    const { data: existing } = await supabase
+      .from("production_logs")
+      .select("id")
+      .eq("project_id", event.projectId)
+      .eq("action", `excecao_montagem:${event.kind}`)
+      .contains("metadata", { event_id: event.id })
+      .maybeSingle();
+
+    if (existing) {
+      console.log(`Evento ${event.id} já processado. Ignorando duplicata.`);
+      return;
+    }
+  }
+
   const { error } = await supabase.from("production_logs").insert({
     project_id: event.projectId,
     user_id: user.id,
@@ -92,6 +108,7 @@ async function persist(event: ExceptionEvent): Promise<void> {
     status_from: event.statusFrom ?? null,
     status_to: event.statusTo ?? null,
     metadata: {
+      event_id: event.id ?? null,
       kind: event.kind,
       label: exceptionLabels[event.kind],
       blocking: blockingExceptions.includes(event.kind),
