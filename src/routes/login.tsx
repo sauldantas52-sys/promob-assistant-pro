@@ -397,8 +397,8 @@ function Field({
   pattern?: string;
 }) {
   return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
+    <div className="space-y-1.5 sm:space-y-2">
+      <Label htmlFor={id} className="text-xs sm:text-sm">{label}</Label>
       <Input
         id={id}
         type={type}
@@ -407,7 +407,7 @@ function Field({
         required
         inputMode={inputMode}
         pattern={pattern}
-        className="h-12"
+        className="h-10 sm:h-12 text-sm sm:text-base"
       />
     </div>
   );
