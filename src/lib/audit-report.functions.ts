@@ -7,12 +7,9 @@ export const generateAuditReport = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     console.log(`Gerando dossiê industrial consolidado para o projeto: ${data.projectId}`);
 
-    // Em um cenário real, aqui usaríamos o supabaseAdmin para buscar todos os dados
-    // e gerar um PDF usando uma biblioteca como 'jspdf' (cliente) ou 'pdf-lib' (servidor).
-    // Para o MVP, consolidamos os dados de auditoria e piloto físico.
-    
     try {
-      const sb = await supabaseAdmin();
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const sb = supabaseAdmin;
       
       const { data: project } = await sb
         .from("projects")

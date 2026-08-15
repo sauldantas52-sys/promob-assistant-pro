@@ -15,6 +15,9 @@ import {
   Users,
   AlertTriangle,
   Upload,
+  Bell,
+  CheckCircle2,
+  Info
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +25,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAuth, roleLabels } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { Bell, CheckCircle2, AlertTriangle, Info } from "lucide-react";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["admin", "escritorio", "fabrica", "montador", "auditor"] },
@@ -60,7 +62,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           filter: `company_id=eq.${companyId}`
         },
         (payload) => {
-          const newNotif = payload.new;
+          const newNotif = payload.new as any;
           setNotifications(prev => [newNotif, ...prev]);
           
           // Toast dinâmico baseado no tipo
