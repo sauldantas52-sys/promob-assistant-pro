@@ -15,19 +15,21 @@ export const Route = createFileRoute('/_authenticated')({
     }
     
     // Obter dados do perfil e função
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('full_name, must_change_password, company_id, companies(id, name)')
+      .eq('id', session.user.id)
+      .maybeSingle();
+
+    if (profileError) console.error("Profile Fetch Error:", profileError);
+
     const { data: roleData, error: roleError } = await supabase
       .from('user_roles')
-      .select('role, companies(id, name)')
+      .select('role')
       .eq('user_id', session.user.id)
       .maybeSingle();
 
     if (roleError) console.error("RBAC Fetch Error:", roleError);
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('full_name, must_change_password')
-      .eq('id', session.user.id)
-      .maybeSingle();
 
     // Bloqueio operacional se troca de senha for obrigatória
     if (profile?.must_change_password && location.pathname !== '/force-password-change') {
@@ -36,14 +38,14 @@ export const Route = createFileRoute('/_authenticated')({
       });
     }
 
-
     return {
       session,
       userRole: (roleData?.role as any) || null,
-      companyId: (roleData?.companies as any)?.id || null,
-      companyName: (roleData?.companies as any)?.name || null,
+      companyId: profile?.company_id || null,
+      companyName: (profile?.companies as any)?.name || null,
       role: (roleData?.role as any) || null,
       fullName: profile?.full_name || session.user.email,
     };
+
   },
 });
