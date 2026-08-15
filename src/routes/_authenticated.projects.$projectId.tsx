@@ -97,10 +97,12 @@ function ProjectDetailPage() {
 
 function ProjectDetail() {
   const { projectId } = Route.useParams();
+  const navigate = useNavigate();
   const { role } = useAuth();
   const queryClient = useQueryClient();
   const fileInput = useRef<HTMLInputElement>(null);
   const [importing, setImporting] = useState(false);
+
   const [warnings, setWarnings] = useState<string[]>([]);
   const [filterType, setFilterType] = useState<string>("all");
   const [searchPart, setSearchPart] = useState("");
