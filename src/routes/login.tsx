@@ -288,7 +288,7 @@ function LoginPage() {
                         Esqueceu sua senha?
                       </button>
                     </div>
-                    <Button type="submit" className="h-12 w-full text-base" disabled={busy}>
+                    <Button type="submit" className="h-12 w-full text-sm sm:text-base font-bold" disabled={busy}>
                       {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Entrar
                     </Button>
                   </form>
@@ -299,12 +299,12 @@ function LoginPage() {
                     <Field id="fullName" label="Seu nome" value={fullName} onChange={setFullName} />
                     <Field id="companyName" label="Empresa" value={companyName} onChange={setCompanyName} />
                     <div className="space-y-2">
-                      <Label>Perfil de acesso</Label>
+                      <Label className="text-xs sm:text-sm">Perfil de acesso</Label>
                       <Select value={role} onValueChange={(v) => {
                         console.log("Selected role:", v);
                         setRole(v as AppRole);
                       }}>
-                        <SelectTrigger className="h-12">
+                        <SelectTrigger className="h-10 sm:h-12 text-sm">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -318,7 +318,7 @@ function LoginPage() {
                       {role === "auditor" && (
                         <Alert className="mt-2 py-2">
                           <InfoIcon className="h-4 w-4" />
-                          <AlertDescription className="text-xs">
+                          <AlertDescription className="text-[10px] sm:text-xs">
                             Contas de auditor precisam ser validadas pelo administrador após o cadastro.
                           </AlertDescription>
                         </Alert>
@@ -338,30 +338,30 @@ function LoginPage() {
                     />
                     {password.length > 0 && !isValidPasswordLength(password) && (
                       <div className="flex items-center gap-2 rounded-lg bg-red-50 p-2 border border-red-100 mt-2">
-                        <ShieldAlert className="h-4 w-4 text-red-600" />
-                        <span className="text-[10px] font-bold text-red-700 uppercase tracking-wider">
+                        <ShieldAlert className="h-3 w-3 sm:h-4 sm:w-4 text-red-600" />
+                        <span className="text-[9px] sm:text-[10px] font-bold text-red-700 uppercase tracking-wider">
                           PIN Inválido: Use de 8 a 20 números.
                         </span>
                       </div>
                     )}
                     {password.length > 0 && !isNumeric(password) && (
                       <div className="flex items-center gap-2 rounded-lg bg-red-50 p-2 border border-red-100 mt-2">
-                        <ShieldAlert className="h-4 w-4 text-red-600" />
-                        <span className="text-[10px] font-bold text-red-700 uppercase tracking-wider">
+                        <ShieldAlert className="h-3 w-3 sm:h-4 sm:w-4 text-red-600" />
+                        <span className="text-[9px] sm:text-[10px] font-bold text-red-700 uppercase tracking-wider">
                           Use apenas números (0-9).
                         </span>
                       </div>
                     )}
                     <div className="flex items-center gap-2 rounded-lg bg-blue-50 p-2 border border-blue-100 mt-2">
-                      <InfoIcon className="h-4 w-4 text-blue-600" />
-                      <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider">
+                      <InfoIcon className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+                      <span className="text-[9px] sm:text-[10px] font-bold text-blue-700 uppercase tracking-wider">
                         Requisito: PIN numérico de 8 a 20 dígitos.
                       </span>
                     </div>
 
                     <Button 
                       type="submit" 
-                      className="h-12 w-full text-base" 
+                      className="h-12 w-full text-sm sm:text-base font-bold" 
                       disabled={busy || countdown > 0}
                     >
                       {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} 
