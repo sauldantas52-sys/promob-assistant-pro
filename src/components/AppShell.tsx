@@ -15,11 +15,16 @@ import {
   Users,
   AlertTriangle,
   Upload,
+  Bell,
+  CheckCircle2,
+  Info
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { useAuth, roleLabels } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["admin", "escritorio", "fabrica", "montador", "auditor"] },
@@ -36,10 +41,55 @@ const navItems = [
 
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { user, loading, signOut, fullName, role } = useAuth();
+  const { user, loading, signOut, fullName, role, companyId } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  useEffect(() => {
+    if (!companyId) return;
+
+    // Inscrição em tempo real para notificações
+    const channel = supabase
+      .channel('industrial-notifications')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `company_id=eq.${companyId}`
+        },
+        (payload) => {
+          const newNotif = payload.new as any;
+          setNotifications(prev => [newNotif, ...prev]);
+          
+          // Toast dinâmico baseado no tipo
+          if (newNotif.type === 'gate_completed') {
+            toast.success(newNotif.title, {
+              description: newNotif.message,
+              icon: <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+            });
+          } else if (newNotif.type === 'exception') {
+            toast.error(newNotif.title, {
+              description: newNotif.message,
+              icon: <AlertTriangle className="h-4 w-4 text-red-500" />
+            });
+          } else {
+            toast.info(newNotif.title, {
+              description: newNotif.message,
+              icon: <Info className="h-4 w-4 text-blue-500" />
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [companyId]);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
