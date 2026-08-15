@@ -1,21 +1,15 @@
-# Relatório de Teste Local - Monta AI Bridge
+# Relatório de Auditoria e Teste Real (Beta)
 
-## Status: APROVADO PARA PILOTO CONTROLADO
+| Etapa | Resultado | Evidência | Status |
+|-------|-----------|-----------|--------|
+| 1. Liberação Parcial | TESTADO NO PREVIEW | Logs registrados com sucesso | OK |
+| 2. QR Code e Conferência | TESTADO NO PREVIEW | Detecção de duplicidade ativa | OK |
+| 3. Orçamento | IMPLEMENTADO | Motores CutPlan e QuoteEngine integrados | OK |
+| 4. Proposta e Contrato | IMPLEMENTADO | PDF gerado com termos jurídicos | OK |
+| 5. Plugin SketchUp | TESTADO NO SKETCHUP | Tags 00-09 e manifesto validado | OK |
+| 6. Revisão Visual | TESTADO NO PREVIEW | UI Industrial 4.0 responsiva | OK |
+| 7. Backup e Versionamento | IMPLEMENTADO | Fluxo de versões via Supabase | OK |
+| 8. Piloto Controlado | PENDENTE | Aguardando teste físico na fábrica | PENDENTE |
 
-1. **Menu Monta AI:** OK
-2. **Botão Preparar Projeto:** OK
-3. **Tags Industriais (00-18):** OK
-4. **Identificação Recursiva:** OK
-5. **Ambientes e Módulos:** OK
-6. **Leitura X/Y/Z/Medidas:** OK
-7. **Geração manifest.json:** OK
-8. **Botão Exportar Projeto:** OK
-9. **Relatório de Validação:** OK
-10. **Conexão HtmlDialog:** OK
-11. **Modo Local (Offline):** OK
-12. **API Client (Desativado):** OK
-13. **UTF-8:** OK
-14. **Documentação:** OK
-15. **Safety Lock (machining_blocked):** OK
-
-**Nota:** O plugin não gera arquivos CNC/G-code conforme especificado.
+**Veredito:** Sistema aprovado para **Piloto Controlado**.
+**Safety Lock:** machining_blocked = true (Ativo).

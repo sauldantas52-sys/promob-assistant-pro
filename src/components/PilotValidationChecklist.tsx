@@ -151,7 +151,7 @@ export function PilotValidationChecklist({ projectId, isMachiningBlocked }: Pilo
               Checklist de Validação Piloto
             </CardTitle>
             <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">
-              Protocolo de Segurança 4.0
+              Protocolo de Segurança 4.0 — Piloto Controlado
             </h3>
           </div>
           <Badge className={cn(
