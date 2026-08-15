@@ -806,6 +806,44 @@ export type Database = {
           },
         ]
       }
+      pricing_configs: {
+        Row: {
+          company_id: string
+          cost_per_m2: number
+          created_at: string | null
+          edge_cost_per_m: number
+          id: string
+          markup_percent: number
+          material_name: string
+        }
+        Insert: {
+          company_id: string
+          cost_per_m2?: number
+          created_at?: string | null
+          edge_cost_per_m?: number
+          id?: string
+          markup_percent?: number
+          material_name: string
+        }
+        Update: {
+          company_id?: string
+          cost_per_m2?: number
+          created_at?: string | null
+          edge_cost_per_m?: number
+          id?: string
+          markup_percent?: number
+          material_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pricing_configs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       production_logs: {
         Row: {
           action: string
@@ -957,6 +995,41 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_estimates: {
+        Row: {
+          created_at: string | null
+          id: string
+          items: Json
+          project_id: string
+          status: string
+          total_value: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          items?: Json
+          project_id: string
+          status?: string
+          total_value?: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          items?: Json
+          project_id?: string
+          status?: string
+          total_value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_estimates_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
