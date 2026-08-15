@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState, useMemo } from "react";
 import {
@@ -97,10 +97,12 @@ function ProjectDetailPage() {
 
 function ProjectDetail() {
   const { projectId } = Route.useParams();
+  const navigate = useNavigate();
   const { role } = useAuth();
   const queryClient = useQueryClient();
   const fileInput = useRef<HTMLInputElement>(null);
   const [importing, setImporting] = useState(false);
+
   const [warnings, setWarnings] = useState<string[]>([]);
   const [filterType, setFilterType] = useState<string>("all");
   const [searchPart, setSearchPart] = useState("");
@@ -174,199 +176,9 @@ function ProjectDetail() {
   });
 
   const handleImport = async (file: File) => {
-    setImporting(true);
-    setWarnings([]);
-    try {
-      const result = await parseProjectFile(file);
-
-      await supabase.from("project_files").insert({
-        project_id: projectId,
-        file_name: result.fileName,
-        file_type: result.fileType,
-        size_bytes: result.sizeBytes,
-        summary: {
-          modules: result.modules.length,
-          parts: result.modules.reduce((total, m) => total + m.parts.length, 0) + result.looseParts.length,
-          looseParts: result.looseParts.length,
-          warnings: result.warnings,
-        },
-      });
-
-      const allInsertedParts: { id: string; module_id: string | null; kind: string; quantity: number }[] = [];
-      const moduleColors = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#06B6D4", "#F97316"];
-
-      for (let i = 0; i < result.modules.length; i++) {
-        const parsedModule = result.modules[i];
-        if (!parsedModule) continue;
-
-        const color = moduleColors[i % moduleColors.length];
-        
-        // 1. Criar Módulo
-        const { data: created, error } = await supabase
-          .from("modules")
-          .insert({
-            project_id: projectId,
-            name: parsedModule.name,
-            environment: parsedModule.environment ?? null,
-            width_mm: parsedModule.width_mm ?? null,
-            height_mm: parsedModule.height_mm ?? null,
-            depth_mm: parsedModule.depth_mm ?? null,
-            quantity: parsedModule.quantity,
-            data_source: parsedModule.data_source || 'XML',
-          })
-          .select("id")
-          .single();
-        if (error) throw error;
-
-        // 2. Criar Grupo de Montagem automaticamente para o módulo
-        const { data: group, error: groupError } = await supabase
-          .from("assembly_groups")
-          .insert({
-            project_id: projectId,
-            module_id: created.id,
-            code: `M${(i + 1).toString().padStart(2, '0')}`,
-            name: parsedModule.name,
-            color: color ?? null,
-            separation_status: 'pendente',
-            conference_status: 'pendente',
-            is_locked: true,
-            lock_reason: 'Aguardando separação de peças e ferragens'
-          })
-          .select("id")
-          .single();
-        if (groupError) throw groupError;
-
-        if (parsedModule.parts.length > 0) {
-          const { data: insertedParts, error: partsError } = await supabase.from("parts").insert(
-            parsedModule.parts.map((part) => ({
-              project_id: projectId,
-              module_id: created.id,
-              assembly_group_id: group.id,
-              kind: part.kind,
-              name: part.name,
-              material: part.material ?? null,
-              thickness_mm: part.thickness_mm ?? null,
-              width_mm: part.width_mm ?? null,
-              length_mm: part.length_mm ?? null,
-              quantity: part.quantity,
-              unit: part.unit ?? "un",
-              edge_banding: part.edge_banding ?? null,
-              data_source: part.data_source || 'XML',
-              visibility_type: part.visibility_type || 'visivel',
-              cutting_edge_released: false,
-              machining_blocked: true,
-            })),
-          ).select("id, module_id, kind, quantity");
-          if (partsError) throw partsError;
-          if (insertedParts) {
-            allInsertedParts.push(...insertedParts.map(p => ({ ...p, quantity: Number(p.quantity) })));
-            
-            // 3. Criar Kit de Ferragens automaticamente
-            const hardwareItems = insertedParts.filter(p => p.kind === 'ferragem' || p.kind === 'acessorio');
-            if (hardwareItems.length > 0) {
-              await (supabase.from('assembly_group_hardware') as any).insert(
-                hardwareItems.map(h => ({
-                  group_id: group.id,
-                  part_id: h.id,
-                  quantity_required: h.quantity,
-                  quantity_confirmed: 0,
-                  is_verified: false
-                }))
-              );
-            }
-          }
-        }
-      }
-
-      if (result.looseParts.length > 0) {
-        const { data: looseGroup, error: looseGroupError } = await supabase
-          .from("assembly_groups")
-          .insert({
-            project_id: projectId,
-            code: 'AV',
-            name: 'Itens Avulsos',
-            color: '#94a3b8',
-            separation_status: 'pendente',
-            conference_status: 'pendente',
-            is_locked: true,
-            lock_reason: 'Aguardando conferência de itens avulsos'
-          })
-          .select("id")
-          .single();
-        
-        if (!looseGroupError && looseGroup) {
-          const { data: insertedLoose, error: looseError } = await supabase.from("parts").insert(
-            result.looseParts.map((part) => ({
-              project_id: projectId,
-              module_id: null,
-              assembly_group_id: looseGroup.id,
-              kind: part.kind,
-              name: part.name,
-              material: part.material ?? null,
-              thickness_mm: part.thickness_mm ?? null,
-              width_mm: part.width_mm ?? null,
-              length_mm: part.length_mm ?? null,
-              quantity: part.quantity,
-              unit: part.unit ?? "un",
-              edge_banding: part.edge_banding ?? null,
-              data_source: part.data_source || 'XML',
-              visibility_type: part.visibility_type || 'visivel',
-              cutting_edge_released: false,
-              machining_blocked: true,
-            })),
-          ).select("id, module_id, kind, quantity");
-          
-          if (!looseError && insertedLoose) {
-            allInsertedParts.push(...insertedLoose.map(p => ({ ...p, quantity: Number(p.quantity) })));
-            
-            const looseHardware = insertedLoose.filter(p => p.kind === 'ferragem' || p.kind === 'acessorio');
-            if (looseHardware.length > 0) {
-              await (supabase.from('assembly_group_hardware') as any).insert(
-                looseHardware.map(h => ({
-                  group_id: looseGroup.id,
-                  part_id: h.id,
-                  quantity_required: h.quantity,
-                  quantity_confirmed: 0,
-                  is_verified: false
-                }))
-              );
-            }
-          }
-        }
-      }
-
-      // Gerar etapas de produção automaticamente
-      if (allInsertedParts.length > 0) {
-        const stepsToCreate = [];
-        for (const p of allInsertedParts) {
-          if (p.kind === 'peca' || p.kind === 'chapa') {
-            stepsToCreate.push({ project_id: projectId, part_id: p.id, module_id: p.module_id, step_type: 'corte', status: 'pendente' });
-            stepsToCreate.push({ project_id: projectId, part_id: p.id, module_id: p.module_id, step_type: 'usinagem', status: 'pendente' });
-            stepsToCreate.push({ project_id: projectId, part_id: p.id, module_id: p.module_id, step_type: 'borda', status: 'pendente' });
-          } else {
-            stepsToCreate.push({ project_id: projectId, part_id: p.id, module_id: p.module_id, step_type: 'separacao', status: 'pendente' });
-          }
-        }
-        await supabase.from('production_steps').insert(stepsToCreate);
-      }
-
-      setWarnings(result.warnings);
-      toast.success(
-        result.modules.length > 0
-          ? `${result.modules.length} módulo(s) importado(s) com rastreabilidade 4.0.`
-          : "Arquivo registrado no projeto.",
-      );
-      void queryClient.invalidateQueries({ queryKey: ["modules", projectId] });
-      void queryClient.invalidateQueries({ queryKey: ["parts", projectId] });
-      void queryClient.invalidateQueries({ queryKey: ["project_files", projectId] });
-      void queryClient.invalidateQueries({ queryKey: ["factory-projects"] });
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Falha na importação.");
-    } finally {
-      setImporting(false);
-      if (fileInput.current) fileInput.current.value = "";
-    }
+    navigate({ to: "/projects/import" });
   };
+
 
   const allParts = parts.data ?? [];
   const panels = allParts.filter((p) => p.kind === "peca" || p.kind === "chapa");
