@@ -377,7 +377,7 @@ function ImportPage() {
           cleanupFailed = !!cleanupError;
         }
         if (cleanupFailed) {
-          const { error: trackingError } = await supabase.rpc("mark_import_cleanup_required", {
+          const { error: trackingError } = await supabase.rpc("mark_import_cleanup_required" as any, {
             _session_id: projectId,
           });
           if (trackingError)
