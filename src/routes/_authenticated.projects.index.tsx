@@ -138,7 +138,7 @@ function ProjectsContent() {
               <Upload className="h-10 w-10 text-white transition-transform group-hover:-translate-y-2" /> Importar Promob
             </Button>
           )}
-          {hasPermission(role, "projects", "create") && (
+          {hasPermission(role, "projects", "edit") && (
             <Button 
               variant="outline"
               className="h-28 px-14 rounded-[2.5rem] border-4 border-slate-900 bg-transparent text-slate-900 font-black uppercase tracking-[0.3em] text-[14px] gap-6 transition-all duration-500 active:scale-95 group hover:bg-slate-900 hover:text-white"
