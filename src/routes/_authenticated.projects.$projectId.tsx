@@ -935,6 +935,10 @@ function ProjectDetail() {
           />
         </TabsContent>
 
+        <TabsContent value="physical-pilot" className="mt-6">
+          <PhysicalChecklistFlow projectId={projectId} />
+        </TabsContent>
+
         <TabsContent value="integration_audit" className="mt-6">
           <AuditIntegrationTab projectId={projectId} />
         </TabsContent>
