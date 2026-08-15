@@ -321,7 +321,7 @@ function ImportPage() {
 
         rpcAttempted = true;
         const { data: importedProjectId, error: importError } = await supabase.rpc(
-          "import_client_project",
+          "import_client_project" as any,
           {
             _project_id: projectId,
             _project: {
