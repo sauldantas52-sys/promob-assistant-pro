@@ -102,14 +102,35 @@ export function PhysicalChecklistFlow({ projectId }: PhysicalChecklistFlowProps)
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4 mb-8">
-        <div className="h-12 w-12 rounded-2xl bg-slate-900 flex items-center justify-center shadow-lg">
-          <ShieldCheck className="h-6 w-6 text-white" />
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+        <div className="flex items-center gap-4">
+          <div className="h-12 w-12 rounded-2xl bg-slate-900 flex items-center justify-center shadow-lg">
+            <ShieldCheck className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h2 className="text-xl font-black uppercase tracking-tighter">Fluxo de Teste Físico</h2>
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-widest">Evidências de fábrica — Piloto Controlado</p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-xl font-black uppercase tracking-tighter">Fluxo de Teste Físico</h2>
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-widest">Evidências de fábrica — Piloto Controlado</p>
-        </div>
+
+        <Button
+          variant="outline"
+          className="rounded-xl text-[10px] font-black uppercase tracking-widest border-2 hover:bg-slate-900 hover:text-white transition-all h-12"
+          onClick={async () => {
+            try {
+              const { generateAuditReport } = await import("@/lib/audit-report.functions");
+              const result = await generateAuditReport({ data: { projectId } });
+              if (result.success) {
+                toast.success("Dossiê Industrial consolidado!");
+              }
+            } catch (err) {
+              toast.error("Falha ao gerar dossiê.");
+            }
+          }}
+        >
+          <FileText className="h-4 w-4 mr-2" />
+          Gerar Dossiê do Piloto
+        </Button>
       </div>
 
       <div className="grid gap-6">

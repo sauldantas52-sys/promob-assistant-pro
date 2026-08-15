@@ -111,6 +111,25 @@ export function PilotValidationChecklist({ projectId, isMachiningBlocked }: Pilo
         status_to: completed ? 'concluido' : 'pendente',
         notes: `Checklist industrial: ${type} ${completed ? 'validado' : 'reaberto'}`
       });
+
+      // Notify completion
+      if (completed) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('company_id')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile) {
+          await supabase.from('notifications').insert({
+            project_id: projectId,
+            type: 'gate_completed',
+            title: `Checklist Piloto: ${type.replace(/_/g, ' ').toUpperCase()}`,
+            message: `Item de validação técnica concluído no projeto.`,
+            company_id: profile.company_id
+          } as any);
+        }
+      }
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["validation-checks", projectId] });
