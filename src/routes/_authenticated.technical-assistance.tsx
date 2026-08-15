@@ -10,7 +10,8 @@ import {
   History,
   FileText,
   Search,
-  LayoutDashboard
+  LayoutDashboard,
+  Bell
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +51,22 @@ function TechnicalAssistancePage() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [isNewTicketOpen, setIsNewTicketOpen] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  const { data: notifications } = useQuery({
+    queryKey: ["notifications", companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("company_id", companyId)
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (error) throw error;
+      return data || [];
+    }
+  });
 
   const { data: tickets, isLoading } = useQuery({
     queryKey: ["maintenance-requests", companyId],
@@ -110,11 +127,46 @@ function TechnicalAssistancePage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
+            <Button 
+              variant="outline"
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="h-20 w-20 rounded-[2rem] bg-white border-none shadow-xl flex items-center justify-center relative group"
+            >
+              <Bell className="h-6 w-6 text-slate-400 group-hover:text-blue-600 transition-colors" />
+              {notifications && notifications.length > 0 && (
+                <span className="absolute top-6 right-6 h-3 w-3 bg-red-500 rounded-full border-2 border-white" />
+              )}
+            </Button>
             <Button onClick={() => setIsNewTicketOpen(true)} className="h-20 px-12 rounded-[2rem] bg-slate-900 hover:bg-black text-white font-black uppercase tracking-[0.3em] text-[12px] shadow-2xl shadow-slate-900/40 gap-6 transition-all duration-500 active:scale-95 group">
               <Plus className="h-8 w-8 text-blue-400 transition-transform group-hover:rotate-90" /> Novo Chamado
             </Button>
           </div>
         </header>
+
+        {showNotifications && (
+          <div className="grid gap-6 animate-in slide-in-from-top-4 duration-500">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 px-4">Alertas de Auditoria em Tempo Real</h3>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {notifications?.map((n: any) => (
+                <Card key={n.id} className="border-none shadow-lg rounded-[2rem] bg-white overflow-hidden border-l-4 border-l-blue-600">
+                  <CardContent className="p-6 flex items-start gap-4">
+                    <div className="p-3 rounded-2xl bg-blue-50 text-blue-600">
+                      {n.type === 'gate_completed' ? <CheckCircle2 className="h-5 w-5" /> : <AlertTriangle className="h-5 w-5" />}
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-900">{n.title}</p>
+                      <p className="text-xs font-medium text-slate-500 leading-tight">{n.message}</p>
+                      <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest pt-1">{new Date(n.created_at).toLocaleTimeString()}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              {(!notifications || notifications.length === 0) && (
+                <p className="text-xs font-black uppercase tracking-widest text-slate-300 p-8">Sem alertas recentes.</p>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="grid gap-12 md:grid-cols-2 xl:grid-cols-3">
           {filteredTickets.map((ticket) => (
