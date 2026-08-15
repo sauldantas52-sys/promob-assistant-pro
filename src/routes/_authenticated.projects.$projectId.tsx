@@ -1346,7 +1346,7 @@ function MaintenanceTab({
       oldStatus: string;
       newStatus: Enums<"maintenance_status">;
     }) => {
-      const { error } = await supabase.rpc("record_maintenance_transition", {
+      const { error } = await supabase.rpc("record_maintenance_transition" as any, {
         _request_id: id,
         _new_status: newStatus,
         _notes: `Status alterado de ${oldStatus} para ${newStatus}`,
