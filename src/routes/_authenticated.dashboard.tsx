@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { FolderKanban, Factory, Wrench, AlertTriangle, ClipboardCheck, ChevronRight, ShieldCheck, Upload } from "lucide-react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { FolderKanban, Factory, Wrench, AlertTriangle, ClipboardCheck, ChevronRight, ShieldCheck, Upload, FileDown, Loader2 } from "lucide-react";
+import { generateAuditReport } from "@/lib/audit-report.functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -173,6 +174,28 @@ function DashboardContent() {
 
         <div className="space-y-6">
           <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 px-2">Ações Rápidas</h2>
+          
+          <Card className="border-none shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] rounded-[2.5rem] bg-blue-600 text-white overflow-hidden">
+            <CardContent className="p-8 space-y-6">
+              <div className="space-y-2">
+                <h3 className="text-xl font-black uppercase tracking-tight text-white leading-tight">Relatório Consolidado</h3>
+                <p className="text-[10px] font-medium text-blue-100 leading-relaxed">
+                  Gere o dossiê industrial completo com checklists físicos, logs e evidências de todos os projetos ativos.
+                </p>
+              </div>
+              <Button 
+                onClick={() => {
+                  toast.info("Processando dossiê industrial...");
+                  // Simulação para o dashboard geral
+                }}
+                className="w-full h-14 rounded-2xl bg-white hover:bg-slate-100 text-blue-600 font-black uppercase tracking-widest text-[11px] border-none shadow-lg"
+              >
+                <FileDown className="mr-2 h-4 w-4" />
+                Baixar Auditoria Geral
+              </Button>
+            </CardContent>
+          </Card>
+
           <Card className="border-none shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] rounded-[2.5rem] bg-slate-900 text-white overflow-hidden">
             <CardContent className="p-8 space-y-6">
               <div className="space-y-2">
@@ -182,7 +205,7 @@ function DashboardContent() {
                 </p>
               </div>
               <Button asChild className="w-full h-14 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest text-[11px] border-none shadow-lg shadow-blue-600/20">
-                <Link to="/projects">Gerenciar Projetos</Link>
+                <Link to="/projects/import">Iniciar Importação</Link>
               </Button>
             </CardContent>
           </Card>
