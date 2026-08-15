@@ -262,8 +262,8 @@ function ImportPage() {
       const { error: sessionError } = await supabase.from("project_import_sessions").insert({
         id: projectId,
         company_id: companyId,
-        created_by: authData.user.id,
-        planned_paths: preparedFiles.map((item) => item.storagePath),
+        step: "uploading",
+        files: preparedFiles.map((item) => item.storagePath),
         status: "uploading",
       });
       if (sessionError) throw sessionError;
