@@ -49,18 +49,6 @@ export function PhysicalChecklistFlow({ projectId }: PhysicalChecklistFlowProps)
     },
   });
 
-  const { data: modules } = useQuery({
-    queryKey: ["modules", projectId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("modules")
-        .select("id, name")
-        .eq("project_id", projectId);
-      if (error) throw error;
-      return data || [];
-    },
-  });
-
   const submitCheck = useMutation({
     mutationFn: async (gateId: string) => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -74,7 +62,7 @@ export function PhysicalChecklistFlow({ projectId }: PhysicalChecklistFlowProps)
       
       if (!profile) throw new Error("Perfil não encontrado");
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("physical_pilot_checks")
         .insert({
           project_id: projectId,
@@ -85,7 +73,7 @@ export function PhysicalChecklistFlow({ projectId }: PhysicalChecklistFlowProps)
           status: 'concluido',
           validated_by: user.id,
           company_id: profile.company_id
-        });
+        } as any);
 
       if (error) throw error;
 
@@ -230,7 +218,10 @@ export function PhysicalChecklistFlow({ projectId }: PhysicalChecklistFlowProps)
       </div>
 
       {!pilotChecks?.some(c => c.gate_id === 'gate2' && c.status === 'concluido') && (
-        <AlertTriangle className="h-5 w-5 text-amber-500 inline-block mr-2" />
+        <div className="flex items-center gap-2 p-4 rounded-xl bg-amber-50 border border-amber-100 text-amber-700 text-xs font-bold uppercase tracking-widest">
+          <AlertTriangle className="h-4 w-4" />
+          Atenção: Gate 2 físico pendente — CNC Bloqueado
+        </div>
       )}
     </div>
   );
