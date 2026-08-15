@@ -226,7 +226,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   {fullName?.split(" ")[0] || "User"}
                 </p>
                 <p className="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">
-                  {role ? roleLabels[role] || role : "Operador"}
+                  {role ? roleLabels[role] || role : "Acesso não configurado"}
                 </p>
               </div>
             </div>
