@@ -80,7 +80,8 @@ function UsersManagementPage() {
       if (role === 'fabrica' || role === 'montador') {
         const pin = Math.random().toString().slice(2, 8); // temporary random pin
         const internalPass = Math.random().toString(36).slice(-16) + "A1!";
-        const opCode = `OP-${fullName.split(' ')[0].toUpperCase()}-${Math.floor(Math.random() * 1000)}`;
+        const firstPart = fullName?.split(' ')[0] || 'OP';
+        const opCode = `OP-${firstPart.toUpperCase()}-${Math.floor(Math.random() * 1000)}`;
         
         await createOperator({
           data: {
