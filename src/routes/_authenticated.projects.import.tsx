@@ -388,7 +388,7 @@ function ImportPage() {
             `${error instanceof Error ? error.message : "Falha na importação."} Limpeza automática pendente para auditoria.`,
           );
         }
-        const { error: discardError } = await supabase.rpc("discard_import_session", {
+        const { error: discardError } = await supabase.rpc("discard_import_session" as any, {
           _session_id: projectId,
         });
         if (discardError)
