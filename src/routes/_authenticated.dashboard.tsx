@@ -1,12 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { FolderKanban, Factory, Wrench, AlertTriangle, ClipboardCheck, ChevronRight, ShieldCheck } from "lucide-react";
+import { FolderKanban, Factory, Wrench, AlertTriangle, ClipboardCheck, ChevronRight, ShieldCheck, Upload } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AppShell } from "@/components/AppShell";
 import { useAuth, roleLabels, type AppRole } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import { hasPermission } from "@/lib/permissions";
 import { statusLabel, statusTone } from "@/lib/project-status";
 import { cn } from "@/lib/utils";
 
@@ -85,6 +86,16 @@ function DashboardContent() {
             </span>
           </div>
         </div>
+        
+        {hasPermission(role, "projects", "import") && (
+          <Button asChild className="h-20 px-12 rounded-[2rem] bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-[0.3em] text-[12px] shadow-2xl shadow-blue-600/40 gap-6 transition-all duration-500 active:scale-95 group">
+            <Link to="/projects/import">
+              <Upload className="h-6 w-6 text-white group-hover:scale-110 transition-transform" />
+              Importar Projeto
+            </Link>
+          </Button>
+        )}
+
         <div className="hidden md:block text-right border-l-4 border-slate-200 pl-8">
           <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.4em] mb-1">Status do Turno</p>
           <p className="text-xl font-black text-slate-900 uppercase tracking-tighter">{new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>

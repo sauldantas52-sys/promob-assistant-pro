@@ -110,7 +110,7 @@ function AssemblyContent() {
             <span className="h-2 w-10 bg-emerald-600 rounded-full" />
             <p className="text-[12px] font-black uppercase tracking-[0.5em] text-emerald-600">Protocolo de Instalação</p>
           </div>
-          <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-slate-900 uppercase leading-[0.8] mb-4">Montagem</h1>
+          <h1 className="text-5xl md:text-8xl font-black tracking-tighter text-slate-900 uppercase leading-[0.9] mb-4">Montagem</h1>
           <p className="text-base font-black text-slate-500 uppercase tracking-[0.4em]">Guia técnico mobile para montadores especializados.</p>
         </div>
       </header>

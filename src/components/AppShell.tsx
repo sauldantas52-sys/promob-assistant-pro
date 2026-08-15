@@ -14,6 +14,7 @@ import {
   Truck,
   Users,
   AlertTriangle,
+  Upload,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,7 @@ import { useAuth, roleLabels } from "@/lib/auth";
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["admin", "escritorio", "fabrica", "montador", "auditor"] },
   { to: "/projects", label: "Projetos", icon: FolderKanban, roles: ["admin", "escritorio", "auditor"] },
+  { to: "/projects/import", label: "Nova Importação", icon: Upload, roles: ["admin", "escritorio"] },
   { to: "/production", label: "Produção", icon: Factory, roles: ["admin", "fabrica", "auditor"] },
   { to: "/factory-wallboard", label: "Painel TV", icon: Tv, roles: ["admin", "fabrica", "auditor"] },
   { to: "/picking", label: "Separação", icon: PackageCheck, roles: ["admin", "fabrica", "montador", "auditor"] },

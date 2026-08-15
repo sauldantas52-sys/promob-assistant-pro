@@ -80,7 +80,7 @@ function PickingPage() {
               <span className="h-2 w-10 bg-indigo-600 rounded-full" />
               <p className="text-[12px] font-black uppercase tracking-[0.5em] text-indigo-600">Gestão de Itens e Volumes</p>
             </div>
-            <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-slate-900 uppercase leading-[0.8] mb-4">Separação</h1>
+            <h1 className="text-5xl md:text-8xl font-black tracking-tighter text-slate-900 uppercase leading-[0.9] mb-4">Separação</h1>
             <p className="text-base font-black text-slate-500 uppercase tracking-[0.4em]">Conferência física de ferragens e peças especiais.</p>
           </div>
         </header>

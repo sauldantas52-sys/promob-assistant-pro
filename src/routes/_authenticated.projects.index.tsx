@@ -131,53 +131,12 @@ function ProjectsContent() {
         </div>
         <div className="flex gap-4">
           {hasPermission(role, "projects", "import") && (
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild>
-                <Button className="h-24 px-12 rounded-[2rem] bg-slate-900 hover:bg-black text-white font-black uppercase tracking-[0.3em] text-[12px] shadow-2xl shadow-slate-900/40 gap-6 transition-all duration-500 active:scale-95 group">
-                  <Plus className="h-8 w-8 text-blue-400 transition-transform group-hover:rotate-90" /> Novo Dossiê
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Novo projeto</DialogTitle>
-                  <DialogDescription>Depois de criar, importe o arquivo do Promob.</DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="p-name">Nome do projeto</Label>
-                    <Input id="p-name" className="h-11" value={name} onChange={(e) => setName(e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="p-client">Cliente</Label>
-                    <Input
-                      id="p-client"
-                      className="h-11"
-                      value={clientName}
-                      onChange={(e) => setClientName(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="p-env">Ambiente principal</Label>
-                    <Input
-                      id="p-env"
-                      className="h-11"
-                      placeholder="Cozinha, dormitório, closet…"
-                      value={environment}
-                      onChange={(e) => setEnvironment(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button
-                    className="h-11 w-full"
-                    disabled={!name || createProject.isPending}
-                    onClick={() => createProject.mutate()}
-                  >
-                    {createProject.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Criar projeto
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <Button 
+              className="h-24 px-12 rounded-[2rem] bg-slate-900 hover:bg-black text-white font-black uppercase tracking-[0.3em] text-[12px] shadow-2xl shadow-slate-900/40 gap-6 transition-all duration-500 active:scale-95 group"
+              onClick={() => navigate({ to: "/projects/import" })}
+            >
+              <Plus className="h-8 w-8 text-blue-400 transition-transform group-hover:rotate-90" /> Importar Projeto
+            </Button>
           )}
         </div>
       </header>
