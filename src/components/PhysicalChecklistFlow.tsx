@@ -74,7 +74,7 @@ export function PhysicalChecklistFlow({ projectId }: PhysicalChecklistFlowProps)
       
       if (!profile) throw new Error("Perfil não encontrado");
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("physical_pilot_checks")
         .insert({
           project_id: projectId,
@@ -96,7 +96,7 @@ export function PhysicalChecklistFlow({ projectId }: PhysicalChecklistFlowProps)
         title: `Piloto Físico: ${gateId.toUpperCase()} Concluído`,
         message: `O operador ${operatorName} finalizou a validação física do ${gateId}.`,
         company_id: profile.company_id
-      });
+      } as any);
     },
     onSuccess: () => {
       toast.success("Validação física registrada.");

@@ -37,6 +37,8 @@ import { BudgetTab } from "@/components/project/BudgetTab";
 import { PreliminaryCutPlanTab } from "@/components/project/PreliminaryCutPlanTab";
 import { VisualEstimateTab } from "@/components/project/VisualEstimateTab";
 import { AuditIntegrationTab } from "@/components/project/AuditIntegrationTab";
+import { PhysicalChecklistFlow } from "@/components/PhysicalChecklistFlow";
+
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
