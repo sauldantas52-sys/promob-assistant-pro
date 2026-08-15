@@ -15,7 +15,6 @@ import {
   Users,
   AlertTriangle,
   Upload,
-  Bell,
   CheckCircle2,
   Info
 } from "lucide-react";
@@ -99,6 +98,20 @@ export function AppShell({ children }: { children: ReactNode }) {
     setOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [open]);
+
   if (loading || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background text-muted-foreground">
@@ -108,13 +121,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50 flex-col lg:flex-row">
+    <div className="flex min-h-dvh w-full flex-col overflow-x-hidden bg-slate-50 lg:flex-row">
       {/* Top Lime Bar */}
       <div className="fixed top-0 left-0 right-0 h-1.5 bg-[var(--lime-industrial)] z-50" />
 
       {/* Sidebar Industrial Drawer/Fixed */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 transform bg-[var(--sidebar-industrial)] text-white transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${
+        id="app-navigation"
+        className={`fixed inset-y-0 left-0 z-40 h-dvh w-[min(16rem,calc(100vw-2rem))] shrink-0 transform overflow-hidden bg-[var(--sidebar-industrial)] text-white transition-transform duration-300 ease-in-out lg:sticky lg:top-0 lg:w-64 lg:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -132,7 +146,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto px-3 py-6 space-y-1 custom-scrollbar">
             {navItems.filter(item => !role || item.roles.includes(role)).map((item) => {
-              const active = pathname.startsWith(item.to);
+              const active = pathname === item.to || pathname.startsWith(`${item.to}/`);
               return (
                 <Link
                   key={item.to}
@@ -186,8 +200,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         {/* Mobile Close Button */}
         {open && (
           <button 
+            type="button"
             className="absolute top-4 -right-12 p-2 bg-slate-900 text-white rounded-r-lg lg:hidden"
             onClick={() => setOpen(false)}
+            aria-label="Fechar menu"
           >
             <X className="h-6 w-6" />
           </button>
@@ -196,17 +212,26 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* Overlay for mobile */}
       {open && (
-        <div 
-          className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm lg:hidden" 
-          onClick={() => setOpen(false)} 
+        <button
+          type="button"
+          className="fixed inset-0 z-30 cursor-default bg-black/50 backdrop-blur-sm lg:hidden"
+          onClick={() => setOpen(false)}
+          aria-label="Fechar menu"
         />
       )}
 
       {/* Main Content Area */}
       <div className="flex min-w-0 flex-1 flex-col pt-1.5">
         {/* Mobile Header */}
-        <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-6 lg:hidden">
-          <button onClick={() => setOpen(true)} className="p-2 -ml-2 hover:bg-slate-100 rounded-lg">
+        <header className="sticky top-1.5 z-20 flex h-16 items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur-xl lg:hidden">
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="p-2 -ml-2 hover:bg-slate-100 rounded-lg"
+            aria-label="Abrir menu"
+            aria-controls="app-navigation"
+            aria-expanded={open}
+          >
             <Menu className="h-6 w-6 text-slate-600" />
           </button>
           <div className="flex items-center gap-2">
@@ -217,7 +242,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </header>
 
         {/* Content */}
-        <main className="min-w-0 flex-1 overflow-x-hidden pt-0 lg:pt-0">
+        <main className="min-w-0 w-full flex-1 overflow-x-hidden">
           {children}
         </main>
       </div>

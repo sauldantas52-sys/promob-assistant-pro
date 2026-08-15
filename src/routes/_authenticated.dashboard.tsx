@@ -62,7 +62,7 @@ function DashboardContent() {
   return (
     <div className="flex flex-col min-h-full">
       {/* Technical Header */}
-      <div className="bg-white border-b border-slate-200 px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white border-b border-slate-200 px-4 sm:px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Fábrica em Movimento</h1>
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
@@ -71,13 +71,13 @@ function DashboardContent() {
         </div>
         
         {hasPermission(role, "projects", "import") && (
-          <Button asChild className="h-10 px-6 rounded-md bg-[var(--lime-industrial)] hover:bg-lime-600 text-slate-900 font-bold uppercase tracking-wider text-[11px] shadow-sm transition-all active:scale-95">
+          <Button asChild className="h-10 w-full sm:w-auto px-6 rounded-md bg-[var(--lime-industrial)] hover:bg-lime-600 text-slate-900 font-bold uppercase tracking-wider text-[11px] shadow-sm transition-all active:scale-95">
             <Link to="/projects/import">Novo Projeto</Link>
           </Button>
         )}
       </div>
 
-      <div className="p-6 space-y-6 max-w-[1600px] mx-auto w-full">
+      <div className="p-4 sm:p-6 space-y-6 max-w-[1600px] mx-auto w-full">
         {/* Top Summary Panels */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Fluxo Atual - Dark Panel */}
@@ -89,7 +89,7 @@ function DashboardContent() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
-              <div className="flex items-end justify-between">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="text-5xl font-black tracking-tighter">{activeCount}</p>
                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1">Projetos em Operação</p>
@@ -117,7 +117,7 @@ function DashboardContent() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
-              <div className="flex items-end justify-between">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="text-5xl font-black tracking-tighter text-slate-900">{decisionRequired}</p>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">Alertas de Engenharia</p>
