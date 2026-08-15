@@ -212,32 +212,32 @@ function LoginPage() {
                 </TabsList>
 
                 <TabsContent value="operator">
-                  <form onSubmit={handleOperatorSignIn} className="space-y-6">
-                    <div className="flex flex-col items-center mb-6 text-blue-600">
-                      <HardHat className="h-12 w-12 mb-2" />
-                      <span className="text-[10px] font-black uppercase tracking-[0.3em]">Acesso Industrial</span>
+                  <form onSubmit={handleOperatorSignIn} className="space-y-4 sm:space-y-6">
+                    <div className="flex flex-col items-center mb-4 sm:mb-6 text-blue-600">
+                      <HardHat className="h-8 w-8 sm:h-12 sm:w-12 mb-2" />
+                      <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em]">Acesso Industrial</span>
                     </div>
                     
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="op-code">Código do Operador</Label>
+                    <div className="space-y-3 sm:space-y-4">
+                      <div className="space-y-1.5 sm:space-y-2">
+                        <Label htmlFor="op-code" className="text-xs sm:text-sm">Código do Operador</Label>
                         <div className="relative">
-                          <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                          <User className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-slate-400" />
                           <Input
                             id="op-code"
                             value={operatorCode}
                             onChange={(e) => setOperatorCode(e.target.value)}
                             placeholder="Ex: OP-123"
-                            className="h-14 pl-12 rounded-2xl bg-slate-50 border-slate-200 text-lg font-bold"
+                            className="h-12 sm:h-14 pl-10 sm:pl-12 rounded-xl sm:rounded-2xl bg-slate-50 border-slate-200 text-base sm:text-lg font-bold"
                             required
                           />
                         </div>
                       </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="op-pin">PIN Numérico</Label>
+                      <div className="space-y-1.5 sm:space-y-2">
+                        <Label htmlFor="op-pin" className="text-xs sm:text-sm">PIN Numérico</Label>
                         <div className="relative">
-                          <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                          <KeyRound className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-slate-400" />
                           <Input
                             id="op-pin"
                             type="password"
@@ -249,17 +249,17 @@ function LoginPage() {
                               if (v === "" || isNumeric(v)) setPin(v);
                             }}
                             placeholder="••••••"
-                            className="h-14 pl-12 rounded-2xl bg-slate-50 border-slate-200 text-2xl tracking-[0.5em] font-black"
+                            className="h-12 sm:h-14 pl-10 sm:pl-12 rounded-xl sm:rounded-2xl bg-slate-50 border-slate-200 text-xl sm:text-2xl tracking-[0.3em] sm:tracking-[0.5em] font-black"
                             required
                           />
                         </div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center mt-2">
+                        <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center mt-1 sm:mt-2">
                           Use de 4 a 20 números
                         </p>
                       </div>
                     </div>
 
-                    <Button type="submit" className="h-16 w-full text-lg font-black uppercase tracking-widest rounded-2xl bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-600/20" disabled={busy}>
+                    <Button type="submit" className="h-14 sm:h-16 w-full text-base sm:text-lg font-black uppercase tracking-widest rounded-xl sm:rounded-2xl bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-600/20" disabled={busy}>
                       {busy ? <Loader2 className="animate-spin" /> : "Iniciar Turno"}
                     </Button>
                   </form>
