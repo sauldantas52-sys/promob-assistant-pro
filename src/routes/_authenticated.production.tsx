@@ -141,7 +141,7 @@ function ProductionContent() {
             <span className="h-2 w-10 bg-blue-600 rounded-full" />
             <p className="text-[12px] font-black uppercase tracking-[0.5em] text-blue-600">Fila Industrial de Precisão</p>
           </div>
-          <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-slate-900 uppercase leading-[0.8] mb-4">Pipeline</h1>
+          <h1 className="text-5xl md:text-8xl font-black tracking-tighter text-slate-900 uppercase leading-[0.9] mb-4">Pipeline</h1>
           <p className="text-base font-black text-slate-500 uppercase tracking-[0.4em]">Controle central de corte, borda e usinagem CNC.</p>
         </div>
         <div className="flex items-center gap-6">
