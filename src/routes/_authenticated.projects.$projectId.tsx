@@ -37,6 +37,8 @@ import { BudgetTab } from "@/components/project/BudgetTab";
 import { PreliminaryCutPlanTab } from "@/components/project/PreliminaryCutPlanTab";
 import { VisualEstimateTab } from "@/components/project/VisualEstimateTab";
 import { AuditIntegrationTab } from "@/components/project/AuditIntegrationTab";
+import { PhysicalChecklistFlow } from "@/components/PhysicalChecklistFlow";
+
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -613,6 +615,7 @@ function ProjectDetail() {
             <TabTrigger value="maintenance" icon={HardHat} label="Assistência" />
             <TabTrigger value="audit" icon={History} label="Auditoria" />
             <TabTrigger value="validation" icon={ShieldCheck} label="Checklist Piloto" />
+            <TabTrigger value="physical-pilot" icon={Boxes} label="Teste Físico (Fábrica)" />
             <TabTrigger value="integration_audit" icon={CheckSquare} label="Motores IA" />
             <TabTrigger value="files" icon={FileUp} label="Arquivos" />
           </TabsList>
@@ -930,6 +933,10 @@ function ProjectDetail() {
             projectId={projectId} 
             isMachiningBlocked={!!allParts.some(p => p.machining_blocked)} 
           />
+        </TabsContent>
+
+        <TabsContent value="physical-pilot" className="mt-6">
+          <PhysicalChecklistFlow projectId={projectId} />
         </TabsContent>
 
         <TabsContent value="integration_audit" className="mt-6">

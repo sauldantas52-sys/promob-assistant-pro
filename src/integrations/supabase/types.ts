@@ -469,6 +469,60 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          metadata: Json | null
+          project_id: string | null
+          title: string
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          metadata?: Json | null
+          project_id?: string | null
+          title: string
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          metadata?: Json | null
+          project_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       operator_login_logs: {
         Row: {
           company_id: string | null
@@ -681,6 +735,70 @@ export type Database = {
           },
           {
             foreignKeyName: "parts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      physical_pilot_checks: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          evidence_url: string | null
+          gate_id: string
+          id: string
+          module_id: string | null
+          notes: string | null
+          operator_name: string
+          project_id: string
+          status: string | null
+          validated_by: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          evidence_url?: string | null
+          gate_id: string
+          id?: string
+          module_id?: string | null
+          notes?: string | null
+          operator_name: string
+          project_id: string
+          status?: string | null
+          validated_by?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          evidence_url?: string | null
+          gate_id?: string
+          id?: string
+          module_id?: string | null
+          notes?: string | null
+          operator_name?: string
+          project_id?: string
+          status?: string | null
+          validated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "physical_pilot_checks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "physical_pilot_checks_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "physical_pilot_checks_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
