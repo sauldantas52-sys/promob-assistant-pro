@@ -81,6 +81,8 @@ function ImportPage() {
       
       for (let i = 0; i < result.modules.length; i++) {
         const m = result.modules[i];
+        if (!m) continue;
+
         const color = moduleColors[i % moduleColors.length];
         
         const { data: mod, error: mErr } = await supabase
@@ -88,10 +90,10 @@ function ImportPage() {
           .insert({
             project_id: project.id,
             name: m.name,
-            environment: m.environment || data.env,
-            width_mm: m.width_mm,
-            height_mm: m.height_mm,
-            depth_mm: m.depth_mm,
+            environment: m.environment || data.env || null,
+            width_mm: m.width_mm ?? null,
+            height_mm: m.height_mm ?? null,
+            depth_mm: m.depth_mm ?? null,
             quantity: m.quantity,
             data_source: "XML",
           })
@@ -108,7 +110,7 @@ function ImportPage() {
             module_id: mod.id,
             code: `M${(i + 1).toString().padStart(2, '0')}`,
             name: m.name,
-            color,
+            color: color ?? null,
             separation_status: 'pendente',
             conference_status: 'pendente',
             is_locked: true,
@@ -126,13 +128,13 @@ function ImportPage() {
               assembly_group_id: group.id,
               kind: p.kind,
               name: p.name,
-              material: p.material,
-              thickness_mm: p.thickness_mm,
-              width_mm: p.width_mm,
-              length_mm: p.length_mm,
+              material: p.material ?? null,
+              thickness_mm: p.thickness_mm ?? null,
+              width_mm: p.width_mm ?? null,
+              length_mm: p.length_mm ?? null,
               quantity: p.quantity,
               unit: p.unit || "un",
-              edge_banding: p.edge_banding,
+              edge_banding: p.edge_banding ?? null,
               data_source: "XML",
               machining_blocked: true,
             }))
@@ -140,6 +142,7 @@ function ImportPage() {
           if (ptsErr) throw ptsErr;
         }
       }
+
 
       return project.id;
     },
