@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, UserPlus, Mail, Shield, UserCheck, Trash2, KeyRound, HardHat } from "lucide-react";
 import { inviteUser } from "@/lib/user-management.functions";
-import { setOperatorCredentials } from "@/lib/operator-auth.functions";
+import { setOperatorCredentials, createOperator } from "@/lib/operator-auth.functions";
 import { AUTH_CONFIG } from "@/lib/auth-config";
 
 export const Route = createFileRoute('/_authenticated/settings/users')({
@@ -77,21 +77,36 @@ function UsersManagementPage() {
     setInviting(true);
     
     try {
-      await inviteUser({
-        data: {
-          email,
-          fullName,
-          role,
-          companyId
-        }
-      });
+      if (role === 'fabrica' || role === 'montador') {
+        const pin = Math.random().toString().slice(2, 8); // temporary random pin
+        const internalPass = Math.random().toString(36).slice(-16) + "A1!";
+        const firstPart = fullName?.split(' ')[0] || 'OP';
+        const opCode = `OP-${firstPart.toUpperCase()}-${Math.floor(Math.random() * 1000)}`;
+        
+        await createOperator({
+          data: {
+            email,
+            fullName,
+            role,
+            companyId,
+            operatorCode: opCode,
+            pin,
+            internalPassword: internalPass
+          }
+        });
+        toast.success(`Operador criado: Código ${opCode}, PIN temporário: ${pin}`);
+      } else {
+        await inviteUser({
+          data: { email, fullName, role, companyId }
+        });
+        toast.success(`Convite registrado para ${email}`);
+      }
       
-      toast.success(`Convite registrado para ${email}`);
       setEmail("");
       setFullName("");
       fetchUsers();
     } catch (error) {
-      toast.error("Erro ao registrar convite.");
+      toast.error("Erro ao registrar usuário.");
     } finally {
       setInviting(false);
     }
@@ -273,7 +288,7 @@ function UsersManagementPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>PIN Numérico (6-20 dígitos)</Label>
+                  <Label>PIN Numérico (4-20 dígitos)</Label>
                   <Input 
                     type="password"
                     inputMode="numeric"
