@@ -25,5 +25,5 @@ grant all on public.project_estimates to service_role;
 alter table public.pricing_configs enable row level security;
 alter table public.project_estimates enable row level security;
 
-create policy "Acesso por empresa" on public.pricing_configs for all to authenticated using (company_id = (select company_id from public.profiles where user_id = auth.uid()));
-create policy "Acesso por empresa" on public.project_estimates for all to authenticated using (project_id in (select id from public.projects where company_id = (select company_id from public.profiles where user_id = auth.uid())));
+create policy "Acesso por empresa" on public.pricing_configs for all to authenticated using (company_id = (select company_id from public.profiles where id = auth.uid()));
+create policy "Acesso por empresa" on public.project_estimates for all to authenticated using (project_id in (select id from public.projects where company_id = (select company_id from public.profiles where id = auth.uid())));

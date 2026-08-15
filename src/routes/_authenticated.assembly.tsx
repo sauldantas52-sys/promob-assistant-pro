@@ -1,63 +1,85 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { 
-  Wrench, 
-  Boxes, 
-  Ruler, 
-  CheckCircle2, 
-  Factory, 
-  Scan, 
-  AlertTriangle, 
-  Lock, 
-  Unlock, 
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  AlertTriangle,
+  Boxes,
+  CheckCircle2,
   ChevronRight,
-  Info,
-  CheckCircle,
-  PackageCheck,
-  History,
+  ClipboardCheck,
   ClipboardList,
-  Camera,
-  Image as ImageIcon,
-  LayoutDashboard
+  Info,
+  LayoutDashboard,
+  Lock,
+  PackageCheck,
+  Ruler,
+  ScanLine,
+  ShieldCheck,
+  Unlock,
+  Wrench,
 } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger,
-  DialogDescription,
-  DialogFooter
-} from "@/components/ui/dialog";
-import { Progress } from "@/components/ui/progress";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { AppShell } from "@/components/AppShell";
-import { useAuth } from "@/lib/auth";
-import { supabase } from "@/integrations/supabase/client";
-import { statusLabel, statusTone } from "@/lib/project-status";
-import { toast } from "sonner";
 import { useState } from "react";
 import { AssemblyLabel } from "@/components/AssemblyLabel";
+import { AppShell } from "@/components/AppShell";
 import { ConferenceDialog } from "@/components/ConferenceDialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
+import { useAuth } from "@/lib/auth";
+import { statusLabel, statusTone } from "@/lib/project-status";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { hasPermission } from "@/lib/permissions";
+
+type AssemblyGroup = Pick<
+  Database["public"]["Tables"]["assembly_groups"]["Row"],
+  | "id"
+  | "module_id"
+  | "code"
+  | "color"
+  | "is_locked"
+  | "lock_reason"
+  | "conference_status"
+  | "sealed_at"
+  | "sealed_by"
+>;
+type AssemblyModule = Pick<
+  Database["public"]["Tables"]["modules"]["Row"],
+  "id" | "name" | "width_mm" | "height_mm" | "depth_mm" | "quantity" | "is_completed"
+>;
+type AssemblyPart = Pick<
+  Database["public"]["Tables"]["parts"]["Row"],
+  | "id"
+  | "name"
+  | "kind"
+  | "quantity"
+  | "unit"
+  | "is_completed"
+  | "material"
+  | "thickness_mm"
+  | "width_mm"
+  | "length_mm"
+  | "edge_banding"
+  | "storage_location"
+  | "assembly_group_id"
+>;
+type AssemblyProject = { id: string; status: string | null; parts: AssemblyPart[] | null };
 
 export const Route = createFileRoute("/_authenticated/assembly")({
   head: () => ({
     meta: [
-      { title: "Montagem | Monta AI — Promob Assistant Pro" },
-      {
-        name: "description",
-        content:
-          "Tela do montador: módulos do ambiente, medidas, ferragens e conferência rápida direto no celular.",
-      },
-      { property: "og:title", content: "Montagem | Monta AI" },
-      { property: "og:description", content: "Roteiro de montagem por ambiente e módulo." },
+      { title: "Montagem | Monta AI - Promob Assistant Pro" },
+      { name: "description", content: "Operação de campo por kit, módulo e evidência." },
     ],
   }),
   component: () => (
@@ -68,7 +90,8 @@ export const Route = createFileRoute("/_authenticated/assembly")({
 });
 
 function AssemblyContent() {
-  const { companyId } = useAuth();
+  const { companyId, role } = useAuth();
+  const canEdit = hasPermission(role, "assembly", "edit");
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -78,13 +101,15 @@ function AssemblyContent() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
-        .select(`
-          id, name, client_name, environment, status, 
+        .select(
+          `
+          id, name, client_name, environment, status,
           modules(id, name, environment, width_mm, height_mm, depth_mm, quantity, is_completed, data_source),
           parts(id, name, kind, quantity, unit, is_completed, material, thickness_mm, width_mm, length_mm, edge_banding, storage_location, assembly_group_id, visibility_type, data_source),
-          assembly_groups(id, module_id, code, name, color, is_locked, lock_reason, conference_status, sealed_at),
+          assembly_groups(id, module_id, code, name, color, is_locked, lock_reason, conference_status, sealed_at, sealed_by),
           maintenance_requests(*)
-        `)
+        `,
+        )
         .in("status", ["separacao", "conferencia", "expedicao", "montagem", "assistencia"])
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -92,299 +117,517 @@ function AssemblyContent() {
     },
   });
 
+  async function toggleModule(
+    id: string,
+    isCompleted: boolean | null,
+    projectStatus: string | null,
+    isLocked: boolean,
+  ) {
+    if (!canEdit || projectStatus !== "montagem" || isLocked) {
+      toast.error("A conclusão exige etapa de montagem, kit desbloqueado e permissão operacional.");
+      return;
+    }
+    const { error } = await supabase
+      .from("modules")
+      .update({ is_completed: !isCompleted })
+      .eq("id", id);
+    if (error) toast.error(error.message);
+    else void queryClient.invalidateQueries({ queryKey: ["assembly-projects"] });
+  }
+
   const list = projects.data ?? [];
 
   return (
-    <div className="space-y-16 p-8 md:p-16 max-w-[1800px] mx-auto animate-in fade-in duration-700">
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-10">
-        <div className="space-y-6">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate({ to: "/dashboard" })} 
-            className="rounded-full px-4 text-slate-400 hover:text-blue-600 gap-2 mb-2"
-          >
-            <LayoutDashboard className="h-4 w-4" />
-            <span className="text-[10px] font-black uppercase tracking-widest">Dashboard</span>
-          </Button>
-          <div className="flex items-center gap-4">
-            <span className="h-2 w-10 bg-emerald-600 rounded-full" />
-            <p className="text-[12px] font-black uppercase tracking-[0.5em] text-emerald-600">Protocolo de Instalação</p>
+    <div className="mx-auto max-w-[1600px] space-y-5 p-3 sm:p-5 md:p-6 lg:p-8">
+      <header className="border-b-2 border-slate-900 pb-4">
+        <Button
+          variant="ghost"
+          onClick={() => navigate({ to: "/dashboard" })}
+          className="mb-3 h-8 px-2 text-[10px] font-bold uppercase tracking-widest text-slate-500"
+        >
+          <LayoutDashboard className="mr-2 h-3.5 w-3.5" /> Central
+        </Button>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <div className="mb-1 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">
+              <span className="h-2 w-2 bg-emerald-500" /> Operacao de campo
+            </div>
+            <h1 className="text-3xl font-black uppercase tracking-[-0.05em] text-slate-950 sm:text-4xl">
+              Montagem
+            </h1>
+            <p className="mt-1 text-xs font-medium text-slate-500">
+              Kits recebidos, checklist técnico e liberação por evidência.
+            </p>
           </div>
-          <h1 className="text-5xl md:text-8xl font-black tracking-tighter text-slate-900 uppercase leading-[0.9] mb-4">Montagem</h1>
-          <p className="text-base font-black text-slate-500 uppercase tracking-[0.4em]">Guia técnico mobile para montadores especializados.</p>
+          <div className="grid grid-cols-2 gap-px overflow-hidden rounded-md border border-slate-300 bg-slate-300 sm:w-64">
+            <Metric label="Obras em campo" value={list.length} />
+            <Metric
+              label="Chamados"
+              value={list.reduce((sum, p) => sum + (p.maintenance_requests?.length ?? 0), 0)}
+            />
+          </div>
         </div>
       </header>
 
       {list.length === 0 ? (
-        <Card className="border-[4px] border-dashed border-slate-200 rounded-[4rem] bg-slate-50/50">
-          <CardContent className="flex flex-col items-center gap-6 py-32 text-center">
-            <Wrench className="h-24 w-24 text-slate-200" />
-            <p className="text-2xl font-black uppercase tracking-[0.4em] text-slate-400">Sem Montagens Agendadas</p>
+        <Card className="rounded-md border-dashed shadow-none">
+          <CardContent className="flex min-h-52 flex-col items-center justify-center gap-3 text-center">
+            <Wrench className="h-10 w-10 text-slate-300" />
+            <p className="text-xs font-black uppercase tracking-widest text-slate-500">
+              Sem montagens agendadas
+            </p>
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
-          {list.map((project) => (
-            <Card key={project.id} className="border-none shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)] rounded-[4rem] overflow-hidden bg-white mb-12 transition-all duration-700 hover:shadow-[0_60px_120px_-20px_rgba(0,0,0,0.15)]">
-              <CardHeader className="pb-10 pt-16 px-16 bg-slate-50/30 border-b border-slate-100">
-                <div className="flex flex-wrap items-center justify-between gap-10">
-                  <div className="space-y-4">
-                    <CardTitle className="text-5xl font-black text-slate-900 tracking-tighter uppercase leading-[0.9]">{project.name}</CardTitle>
-                    <p className="text-[12px] font-black text-slate-500 uppercase tracking-[0.4em] flex items-center gap-3">
-                      {project.client_name || "CLIENTE ANÔNIMO"} <span className="h-1.5 w-1.5 rounded-full bg-slate-200" /> {project.environment || "AMBIENTE GERAL"}
-                    </p>
-                  </div>
-                  <Badge className={cn("px-8 py-3.5 text-[11px] font-black uppercase tracking-[0.3em] border-none rounded-[1.5rem] shadow-2xl", statusTone(project.status))}>
-                    {statusLabel(project.status)}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-12 p-16">
-                <Tabs defaultValue="modules" className="space-y-12">
-                  <TabsList className="grid w-full grid-cols-3 bg-slate-100 p-2 h-20 rounded-[2.5rem] border border-slate-200">
-                    <TabsTrigger value="modules" className="rounded-[2rem] data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-2xl font-black text-[11px] uppercase tracking-[0.3em]">Módulos</TabsTrigger>
-                    <TabsTrigger value="groups" className="rounded-[2rem] data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-2xl font-black text-[11px] uppercase tracking-[0.3em]">Grupos G1/G2</TabsTrigger>
-                    <TabsTrigger value="hardware" className="rounded-[2rem] data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-2xl font-black text-[11px] uppercase tracking-[0.3em]">Instruções</TabsTrigger>
-                    <TabsTrigger value="evidence" className="rounded-[2rem] data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-2xl font-black text-[11px] uppercase tracking-[0.3em]">Evidências</TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="modules" className="space-y-8 mt-10">
-                    <div className="grid gap-4">
-                      {(project.modules ?? []).map((m) => (
-                        <div key={m.id} className={cn(
-                          "rounded-[2.5rem] border-2 p-10 transition-all duration-500 flex flex-wrap items-center justify-between gap-10",
-                          m.is_completed ? "bg-emerald-50/30 border-emerald-100 shadow-xl shadow-emerald-600/5" : "bg-white border-slate-50 shadow-sm"
-                        )}>
-                          <div className="flex items-center gap-10">
-                            <Button 
-                              variant={m.is_completed ? "default" : "outline"}
-                              size="icon"
-                              className={cn(
-                                "h-16 w-16 shrink-0 rounded-[1.5rem] transition-all duration-300 border-2",
-                                m.is_completed ? "bg-emerald-600 border-emerald-600 shadow-xl shadow-emerald-600/20" : "bg-white border-slate-200 shadow-sm"
-                              )}
-                              onClick={async () => {
-                                const { error } = await supabase
-                                  .from("modules")
-                                  .update({ is_completed: !m.is_completed })
-                                  .eq("id", m.id);
-                                if (error) toast.error(error.message);
-                                else void queryClient.invalidateQueries({ queryKey: ["assembly-projects"] });
-                              }}
-                            >
-                              {m.is_completed ? <CheckCircle2 className="h-8 w-8 text-white" /> : <div className="h-8 w-8 rounded-full border-4 border-slate-100" />}
-                            </Button>
-                            <div className="space-y-2">
-                              <p className={cn(
-                                "text-2xl font-black tracking-tighter uppercase leading-none transition-all",
-                                m.is_completed ? "text-slate-400 line-through" : "text-slate-900"
-                              )}>
-                                {m.name}
-                              </p>
-                              <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-4">
-                                <Ruler className="h-4 w-4" />
-                                {m.width_mm ?? "?"} × {m.height_mm ?? "?"} × {m.depth_mm ?? "?"} mm
-                              </p>
-                            </div>
-                          </div>
-                          <Badge variant="outline" className="px-6 py-2 rounded-full border-2 border-slate-100 text-[11px] font-black uppercase tracking-widest text-slate-500">
-                            {m.quantity} UNIDADES
-                          </Badge>
-                        </div>
-                      ))}
-                      {(project.modules?.length ?? 0) === 0 && (
-                        <p className="text-sm text-muted-foreground py-4 text-center">
-                          Nenhum módulo importado.
-                        </p>
-                      )}
+        <div className="space-y-5">
+          {list.map((project) => {
+            const modules = project.modules ?? [];
+            const groups = project.assembly_groups ?? [];
+            const modulesDone = modules.filter((module) => module.is_completed).length;
+            const sealedKits = groups.filter((group) => group.sealed_at).length;
+            const lockedKits = groups.filter((group) => group.is_locked).length;
+            const progress = modules.length ? (modulesDone / modules.length) * 100 : 0;
+
+            return (
+              <Card
+                key={project.id}
+                className="overflow-hidden rounded-lg border-slate-300 shadow-sm"
+              >
+                <CardHeader className="border-b border-slate-200 bg-slate-950 p-4 text-white sm:p-5">
+                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div className="min-w-0">
+                      <div className="mb-2 flex flex-wrap items-center gap-2">
+                        <Badge
+                          className={cn(
+                            "rounded-sm border-0 px-2 py-0.5 text-[9px] font-black uppercase",
+                            statusTone(project.status),
+                          )}
+                        >
+                          {statusLabel(project.status)}
+                        </Badge>
+                        <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                          OS {project.id.slice(0, 8)}
+                        </span>
+                      </div>
+                      <CardTitle className="truncate text-xl font-black uppercase tracking-tight sm:text-2xl">
+                        {project.name}
+                      </CardTitle>
+                      <p className="mt-1 truncate text-[11px] font-medium text-slate-400">
+                        {project.client_name || "Cliente nao informado"} /{" "}
+                        {project.environment || "Ambiente geral"}
+                      </p>
                     </div>
-                  </TabsContent>
+                    <div className="grid grid-cols-3 gap-px overflow-hidden rounded border border-slate-700 bg-slate-700 md:w-[360px]">
+                      <DarkMetric label="Modulos" value={`${modulesDone}/${modules.length}`} />
+                      <DarkMetric label="Kits selados" value={`${sealedKits}/${groups.length}`} />
+                      <DarkMetric label="Bloqueios" value={lockedKits} alert={lockedKits > 0} />
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center gap-3">
+                    <Progress
+                      value={progress}
+                      className="h-2 bg-slate-700"
+                      indicatorClassName="bg-lime-400"
+                    />
+                    <span className="w-9 text-right text-[10px] font-black text-lime-400">
+                      {Math.round(progress)}%
+                    </span>
+                  </div>
+                </CardHeader>
 
-                  <TabsContent value="groups" className="space-y-4 mt-4">
-                    <div className="grid gap-4">
-                      {(project.modules ?? []).map((m) => {
-                        const group = ((project as any).assembly_groups ?? []).find((g: any) => g.module_id === m.id);
-                        const parts = (project.parts ?? []).filter(p => p.assembly_group_id === group?.id);
-                        const completed = parts.filter(p => p.is_completed).length;
-                        const total = parts.length;
-                        const progress = total > 0 ? (completed / total) * 100 : 0;
-                        
-                          const [confDialogOpen, setConfDialogOpen] = useState(false);
-                        
+                <CardContent className="p-3 sm:p-5">
+                  <Tabs defaultValue="kits" className="space-y-4">
+                    <TabsList className="grid h-auto w-full grid-cols-3 rounded-md bg-slate-100 p-1">
+                      <TabsTrigger
+                        value="kits"
+                        className="min-h-10 rounded-sm text-[9px] font-black uppercase tracking-wider"
+                      >
+                        Kits recebidos
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="modules"
+                        className="min-h-10 rounded-sm text-[9px] font-black uppercase tracking-wider"
+                      >
+                        Checklist
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="instructions"
+                        className="min-h-10 rounded-sm text-[9px] font-black uppercase tracking-wider"
+                      >
+                        Ferragens
+                      </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="kits" className="mt-0 space-y-3">
+                      {modules.map((module) => {
+                        const group = groups.find((item) => item.module_id === module.id);
+                        const parts = (project.parts ?? []).filter(
+                          (part) => part.assembly_group_id === group?.id,
+                        );
                         return (
-                          <Card key={m.id} className={cn("overflow-hidden border-none shadow-[0_15px_40px_-15px_rgba(0,0,0,0.08)] rounded-[2.5rem] transition-all", group?.is_locked ? "bg-red-50/30" : "bg-emerald-50/30")}>
-                            <div className="h-4 w-full" style={{ backgroundColor: group?.is_locked ? "#EF4444" : "#10B981" }} />
-                            <CardHeader className="p-8 pb-4 flex flex-row items-center justify-between">
-                              <div>
-                                <CardTitle className="text-xl font-black text-slate-900 tracking-tighter uppercase flex items-center gap-3">
-                                  <span className="px-3 py-1 bg-slate-900 text-white rounded-lg text-[10px] font-black uppercase tracking-widest">{group?.code}</span>
-                                  {m.name}
-                                  {group?.is_locked ? <Lock className="h-5 w-5 text-red-600" /> : <Unlock className="h-5 w-5 text-emerald-600" />}
-                                </CardTitle>
-                              </div>
-                              <Badge className={cn("px-5 py-2 text-[10px] font-black uppercase tracking-[0.2em] border-none rounded-full shadow-sm", group?.is_locked ? "bg-red-600 text-white" : "bg-emerald-600 text-white")}>
-                                {group?.is_locked ? "Bloqueado" : "Liberado"}
-                              </Badge>
-                            </CardHeader>
-                            <CardContent className="p-4 pt-0 space-y-3">
-                              <div className="space-y-1">
-                                <div className="flex justify-between text-xs text-muted-foreground">
-                                  <span>Progresso ({completed}/{total})</span>
-                                  <span>{Math.round(progress)}%</span>
-                                </div>
-                                <Progress value={progress} className={cn(group?.is_locked ? "bg-red-100" : "bg-emerald-100")} indicatorClassName={cn(group?.is_locked ? "bg-red-600" : "bg-emerald-600")} />
-                              </div>
-                              
-                              <div className="flex gap-2">
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  className="flex-1 gap-2"
-                                  onClick={() => setConfDialogOpen(true)}
-                                >
-                                  <Scan className="h-4 w-4" /> Conferir
-                                </Button>
-
-                                <ConferenceDialog
-                                  open={confDialogOpen}
-                                  onOpenChange={setConfDialogOpen}
-                                  projectId={project.id}
-                                  projectPartIds={project.parts?.map(p => p.id) || []}
-                                  moduleName={m.name}
-                                  group={group}
-                                  parts={parts}
-                                />
-                                
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                    <Button variant="secondary" size="icon">
-                                      <Info className="h-4 w-4" />
-                                    </Button>
-                                  </DialogTrigger>
-                                  <DialogContent>
-                                    <DialogHeader>
-                                      <DialogTitle>Etiquetas do Grupo</DialogTitle>
-                                    </DialogHeader>
-                                    <div className="flex flex-col items-center gap-4">
-                                      {parts.map(p => (
-                                        <AssemblyLabel 
-                                          key={p.id}
-                                          moduleCode={group?.code ?? "???"}
-                                          moduleName={m.name}
-                                            color={group?.color ?? "#000"}
-                                            partName={p.name}
-                                            dimensions={`${p.width_mm}x${p.length_mm}mm`}
-                                            material={p.material ?? null}
-                                            thickness={p.thickness_mm ?? null}
-                                            edgeBanding={p.edge_banding ?? null}
-                                            storageLocation={p.storage_location ?? null}
-                                            qrValue={`montaai://${project.id}/${p.id}`}
-                                            projectId={project.id}
-                                          />
-                                      ))}
-                                    </div>
-                                  </DialogContent>
-                                </Dialog>
-                              </div>
-                            </CardContent>
-                          </Card>
+                          <KitCard
+                            key={module.id}
+                            project={project}
+                            module={module}
+                            group={group}
+                            parts={parts}
+                            canEdit={canEdit}
+                          />
                         );
                       })}
-                    </div>
-                  </TabsContent>
+                      {modules.length === 0 && <EmptyRow text="Nenhum modulo importado." />}
+                    </TabsContent>
 
-                  <TabsContent value="hardware" className="space-y-4 mt-4">
-                    <Card className="bg-muted/10">
-                      <CardHeader className="py-3">
-                        <CardTitle className="text-sm">Caderno de Montagem Exaustivo</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4 px-3 pb-4">
-                        <div className="space-y-2">
-                          <h4 className="text-[10px] font-bold uppercase text-muted-foreground flex items-center gap-2">
-                            <Wrench className="h-3 w-3" /> Ferragens e Fixadores
-                          </h4>
-                          <div className="grid gap-2">
-                            {(project.parts || []).filter(p => p.kind === 'ferragem').map((p: any) => (
-                              <div key={p.id} className="text-xs flex justify-between bg-card p-2 rounded border">
-                                <span>{p.name}</span>
-                                <Badge variant="secondary" className="h-5">{p.quantity} {p.unit}</Badge>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <h4 className="text-[10px] font-bold uppercase text-muted-foreground flex items-center gap-2">
-                            <Boxes className="h-3 w-3" /> Acessórios e Componentes
-                          </h4>
-                          <div className="grid gap-2">
-                            {(project.parts || []).filter(p => p.kind === 'acessorio').map((p: any) => (
-                              <div key={p.id} className="text-xs flex justify-between bg-card p-2 rounded border">
-                                <span>{p.name}</span>
-                                <Badge variant="outline" className="h-5">{p.quantity} {p.unit}</Badge>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="bg-primary/5 p-3 rounded-lg border border-primary/20">
-                          <h4 className="text-[10px] font-bold uppercase text-primary mb-2">Ferramental Necessário</h4>
-                          <p className="text-[10px] text-muted-foreground leading-relaxed">
-                            Para este projeto, certifique-se de ter: Furadeira/Parafusadeira, Brocas (5mm, 8mm, 35mm), Nível Laser, Trena, Martelo de Borracha, Chave Philips e Allen.
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-                  <TabsContent value="evidence" className="space-y-6 mt-6">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <Button variant="outline" className="h-32 rounded-[2rem] border-dashed flex flex-col gap-3">
-                        <Camera className="h-8 w-8 text-blue-600" />
-                        <span className="text-[10px] font-black uppercase tracking-widest">Foto Antes</span>
-                      </Button>
-                      <Button variant="outline" className="h-32 rounded-[2rem] border-dashed flex flex-col gap-3">
-                        <Camera className="h-8 w-8 text-emerald-600" />
-                        <span className="text-[10px] font-black uppercase tracking-widest">Foto Depois</span>
-                      </Button>
-                      <div className="col-span-2 bg-slate-50 rounded-[2rem] p-6 border-2 border-slate-100 border-dashed flex flex-col justify-center items-center text-slate-400">
-                        <ImageIcon className="h-10 w-10 opacity-20 mb-2" />
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em]">Galeria de Montagem Vazia</p>
+                    <TabsContent value="modules" className="mt-0 space-y-2">
+                      <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-[11px] text-amber-950">
+                        Marque o módulo somente após nivelamento, fixação, regulagem e inspeção
+                        visual. Kits bloqueados devem ser tratados na conferência.
                       </div>
-                    </div>
-                    <div className="space-y-4">
-                      <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Notas de Instalação / Ocorrências</Label>
-                      <Textarea 
-                        placeholder="Descreva aqui qualquer detalhe relevante ou ocorrência durante a montagem..." 
-                        className="rounded-[1.5rem] border-slate-200 min-h-[120px]"
+                      {modules.map((module, index) => {
+                        const group = groups.find((item) => item.module_id === module.id);
+                        const canCompleteModule =
+                          canEdit && project.status === "montagem" && !group?.is_locked;
+                        return (
+                          <div
+                            key={module.id}
+                            className={cn(
+                              "grid gap-3 rounded-md border p-3 sm:grid-cols-[auto_1fr_auto] sm:items-center",
+                              module.is_completed
+                                ? "border-emerald-200 bg-emerald-50/50"
+                                : "border-slate-200 bg-white",
+                            )}
+                          >
+                            <Button
+                              aria-label={`${module.is_completed ? "Reabrir" : "Concluir"} ${module.name}`}
+                              variant="outline"
+                              size="icon"
+                              className={cn(
+                                "h-10 w-10 rounded-sm",
+                                module.is_completed &&
+                                  "border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-700",
+                              )}
+                              onClick={() =>
+                                void toggleModule(
+                                  module.id,
+                                  module.is_completed,
+                                  project.status,
+                                  !!group?.is_locked,
+                                )
+                              }
+                              disabled={!canCompleteModule}
+                            >
+                              {module.is_completed ? (
+                                <CheckCircle2 className="h-5 w-5" />
+                              ) : (
+                                <span className="font-mono text-xs font-black">
+                                  {String(index + 1).padStart(2, "0")}
+                                </span>
+                              )}
+                            </Button>
+                            <div className="min-w-0">
+                              <p
+                                className={cn(
+                                  "truncate text-sm font-black uppercase text-slate-900",
+                                  module.is_completed && "text-slate-500 line-through",
+                                )}
+                              >
+                                {module.name}
+                              </p>
+                              <p className="mt-1 flex items-center gap-1 text-[10px] font-medium text-slate-500">
+                                <Ruler className="h-3 w-3" /> {module.width_mm ?? "?"} x{" "}
+                                {module.height_mm ?? "?"} x {module.depth_mm ?? "?"} mm
+                              </p>
+                            </div>
+                            <Badge
+                              variant="outline"
+                              className="w-fit rounded-sm text-[9px] font-bold uppercase"
+                            >
+                              {module.quantity} un.
+                            </Badge>
+                          </div>
+                        );
+                      })}
+                    </TabsContent>
+
+                    <TabsContent value="instructions" className="mt-0 grid gap-3 lg:grid-cols-2">
+                      <PartsPanel
+                        icon={Wrench}
+                        title="Ferragens e fixadores"
+                        parts={(project.parts ?? []).filter((part) => part.kind === "ferragem")}
                       />
-                      <Button className="w-full h-14 rounded-[1rem] bg-slate-900 text-white font-black uppercase tracking-widest text-xs">
-                        Salvar Relatório de Campo
-                      </Button>
-                    </div>
-                  </TabsContent>
-                </Tabs>
-                
-                <div className="flex flex-col sm:flex-row gap-4 mt-10">
-                  <Button asChild className="h-20 flex-1 px-12 rounded-[2rem] bg-slate-900 hover:bg-black text-white font-black uppercase tracking-[0.3em] text-[12px] shadow-2xl shadow-slate-900/40 gap-6 transition-all duration-500 active:scale-95 group">
-                    <Link to="/projects/$projectId" params={{ projectId: project.id }}>
-                      <ClipboardList className="h-7 w-7 text-blue-400 transition-transform group-hover:scale-110" />
-                      Abrir Dossiê Técnico
-                    </Link>
-                  </Button>
-                  
-                  <Button 
-                    className="h-20 flex-1 px-12 rounded-[2rem] bg-purple-600 hover:bg-purple-700 text-white font-black uppercase tracking-[0.3em] text-[12px] shadow-2xl shadow-purple-600/40 gap-6 transition-all duration-500 active:scale-95 group"
-                    onClick={() => navigate({ to: "/technical-assistance" })}
-                  >
-                    <AlertTriangle className="h-7 w-7 text-white" />
-                    Chamado de Assistência ({project.maintenance_requests?.length || 0})
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                      <PartsPanel
+                        icon={Boxes}
+                        title="Acessorios e componentes"
+                        parts={(project.parts ?? []).filter((part) => part.kind === "acessorio")}
+                      />
+                      <div className="rounded-md border border-slate-300 bg-slate-50 p-3 lg:col-span-2">
+                        <p className="text-[10px] font-black uppercase tracking-wider text-slate-700">
+                          Ferramental de campo
+                        </p>
+                        <p className="mt-1 text-[11px] leading-relaxed text-slate-600">
+                          Furadeira/parafusadeira, brocas 5, 8 e 35 mm, nivel laser, trena, martelo
+                          de borracha, chaves Philips e Allen.
+                        </p>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+
+                  <div className="mt-4 grid gap-2 border-t border-slate-200 pt-4 sm:grid-cols-2">
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="h-11 rounded-md text-[10px] font-black uppercase tracking-wider"
+                    >
+                      <Link to="/projects/$projectId" params={{ projectId: project.id }}>
+                        <ClipboardList className="mr-2 h-4 w-4" /> Dossie tecnico
+                      </Link>
+                    </Button>
+                    <Button
+                      onClick={() => navigate({ to: "/technical-assistance" })}
+                      className="h-11 rounded-md bg-slate-900 text-[10px] font-black uppercase tracking-wider"
+                    >
+                      <AlertTriangle className="mr-2 h-4 w-4 text-amber-400" /> Assistencia (
+                      {project.maintenance_requests?.length ?? 0})
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
+    </div>
+  );
+}
+
+function KitCard({
+  project,
+  module,
+  group,
+  parts,
+  canEdit,
+}: {
+  project: AssemblyProject;
+  module: AssemblyModule;
+  group: AssemblyGroup | undefined;
+  parts: AssemblyPart[];
+  canEdit: boolean;
+}) {
+  const [conferenceOpen, setConferenceOpen] = useState(false);
+  const completed = parts.filter((part) => part.is_completed).length;
+  const progress = parts.length ? (completed / parts.length) * 100 : 0;
+  const sealed = !!group?.sealed_at;
+
+  return (
+    <div
+      className={cn(
+        "overflow-hidden rounded-md border",
+        group?.is_locked ? "border-red-300" : sealed ? "border-emerald-300" : "border-slate-300",
+      )}
+    >
+      <div className="grid gap-3 p-3 sm:grid-cols-[1fr_auto] sm:items-center sm:p-4">
+        <div className="flex min-w-0 gap-3">
+          <div
+            className={cn(
+              "flex h-10 w-10 shrink-0 items-center justify-center rounded-sm",
+              group?.is_locked
+                ? "bg-red-100 text-red-700"
+                : sealed
+                  ? "bg-emerald-100 text-emerald-700"
+                  : "bg-slate-100 text-slate-600",
+            )}
+          >
+            {group?.is_locked ? (
+              <Lock className="h-5 w-5" />
+            ) : sealed ? (
+              <PackageCheck className="h-5 w-5" />
+            ) : (
+              <Unlock className="h-5 w-5" />
+            )}
+          </div>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-sm bg-slate-900 px-1.5 py-0.5 font-mono text-[9px] font-black text-white">
+                {group?.code ?? "S/G"}
+              </span>
+              <p className="truncate text-sm font-black uppercase text-slate-900">{module.name}</p>
+            </div>
+            <p className="mt-1 text-[10px] text-slate-500">
+              {group?.is_locked
+                ? group.lock_reason || "Kit bloqueado para montagem"
+                : group?.sealed_at
+                  ? `Recebido e selado em ${new Date(group.sealed_at).toLocaleDateString("pt-BR")}`
+                  : "Aguardando conferencia e selo de recebimento"}
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            className="h-9 flex-1 rounded-sm text-[9px] font-black uppercase sm:flex-none"
+            onClick={() => setConferenceOpen(true)}
+            disabled={
+              !canEdit || !["conferencia", "expedicao", "montagem"].includes(project.status ?? "")
+            }
+          >
+            <ScanLine className="mr-2 h-3.5 w-3.5" /> Conferir
+          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-9 w-9 rounded-sm"
+                aria-label="Ver etiquetas"
+              >
+                <Info className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Etiquetas do grupo {group?.code}</DialogTitle>
+              </DialogHeader>
+              <div className="flex flex-col items-center gap-4">
+                {parts.map((part) => (
+                  <AssemblyLabel
+                    key={part.id}
+                    moduleCode={group?.code ?? "???"}
+                    moduleName={module.name}
+                    color={group?.color ?? "#000"}
+                    partName={part.name}
+                    dimensions={`${part.width_mm}x${part.length_mm}mm`}
+                    material={part.material ?? null}
+                    thickness={part.thickness_mm ?? null}
+                    edgeBanding={part.edge_banding ?? null}
+                    storageLocation={part.storage_location ?? null}
+                    qrValue={`montaai://${project.id}/${part.id}`}
+                    projectId={project.id}
+                  />
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+      <div className="grid gap-px border-t border-slate-200 bg-slate-200 sm:grid-cols-[1fr_1fr_1fr_auto]">
+        <Gate
+          icon={ClipboardCheck}
+          label="Pecas conferidas"
+          value={`${completed}/${parts.length}`}
+          ok={parts.length > 0 && completed === parts.length}
+        />
+        <Gate
+          icon={ShieldCheck}
+          label="Evidencias"
+          value={group?.conference_status ?? "pendente"}
+          ok={group?.conference_status === "concluida"}
+        />
+        <Gate
+          icon={PackageCheck}
+          label="Responsavel"
+          value={group?.sealed_by ? "registrado" : "pendente"}
+          ok={!!group?.sealed_by}
+        />
+        <div className="flex min-w-28 items-center gap-2 bg-white px-3 py-2">
+          <Progress value={progress} className="h-1.5" />
+          <span className="text-[9px] font-black">{Math.round(progress)}%</span>
+        </div>
+      </div>
+      <ConferenceDialog
+        open={conferenceOpen}
+        onOpenChange={setConferenceOpen}
+        projectId={project.id}
+        projectPartIds={project.parts?.map((part) => part.id) || []}
+        moduleName={module.name}
+        group={group ?? null}
+        parts={parts}
+      />
+    </div>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="bg-white p-2.5">
+      <p className="text-lg font-black text-slate-950">{value}</p>
+      <p className="text-[8px] font-bold uppercase tracking-wider text-slate-500">{label}</p>
+    </div>
+  );
+}
+function DarkMetric({
+  label,
+  value,
+  alert = false,
+}: {
+  label: string;
+  value: string | number;
+  alert?: boolean;
+}) {
+  return (
+    <div className="bg-slate-900 p-2.5">
+      <p className={cn("text-base font-black", alert ? "text-red-400" : "text-white")}>{value}</p>
+      <p className="text-[8px] font-bold uppercase tracking-wider text-slate-500">{label}</p>
+    </div>
+  );
+}
+function EmptyRow({ text }: { text: string }) {
+  return (
+    <div className="rounded-md border border-dashed p-8 text-center text-xs text-slate-500">
+      {text}
+    </div>
+  );
+}
+function Gate({
+  icon: Icon,
+  label,
+  value,
+  ok,
+}: {
+  icon: typeof CheckCircle2;
+  label: string;
+  value: string;
+  ok: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-2 bg-white px-3 py-2">
+      <Icon className={cn("h-3.5 w-3.5 shrink-0", ok ? "text-emerald-600" : "text-amber-600")} />
+      <div className="min-w-0">
+        <p className="text-[8px] font-bold uppercase tracking-wider text-slate-400">{label}</p>
+        <p className="truncate text-[10px] font-black uppercase text-slate-700">
+          {value.replaceAll("_", " ")}
+        </p>
+      </div>
+    </div>
+  );
+}
+function PartsPanel({
+  icon: Icon,
+  title,
+  parts,
+}: {
+  icon: typeof Wrench;
+  title: string;
+  parts: AssemblyPart[];
+}) {
+  return (
+    <div className="overflow-hidden rounded-md border border-slate-200">
+      <div className="flex items-center gap-2 border-b bg-slate-50 px-3 py-2">
+        <Icon className="h-3.5 w-3.5" />
+        <p className="text-[10px] font-black uppercase tracking-wider">{title}</p>
+      </div>
+      <div className="divide-y">
+        {parts.map((part) => (
+          <div key={part.id} className="flex items-center justify-between gap-3 px-3 py-2 text-xs">
+            <span className="truncate font-medium">{part.name}</span>
+            <Badge variant="outline" className="shrink-0 rounded-sm text-[9px]">
+              {part.quantity} {part.unit}
+            </Badge>
+          </div>
+        ))}
+        {parts.length === 0 && (
+          <p className="p-4 text-center text-[10px] text-slate-400">Nenhum item informado.</p>
+        )}
+      </div>
     </div>
   );
 }

@@ -16,7 +16,8 @@ import {
   AlertTriangle,
   Upload,
   CheckCircle2,
-  Info
+  Info,
+  Briefcase,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -24,26 +25,64 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useAuth, roleLabels } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
+
+type Notification = Database["public"]["Tables"]["notifications"]["Row"];
 
 const navItems = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["admin", "escritorio", "fabrica", "montador", "auditor"] },
-  { to: "/projects", label: "Projetos", icon: FolderKanban, roles: ["admin", "escritorio", "auditor"] },
-  { to: "/projects/import", label: "Nova Importação", icon: Upload, roles: ["admin", "escritorio"] },
+  {
+    to: "/dashboard",
+    label: "Comando",
+    icon: LayoutDashboard,
+    roles: ["admin", "escritorio", "fabrica", "montador", "auditor"],
+  },
+  {
+    to: "/projects",
+    label: "Projetos",
+    icon: FolderKanban,
+    roles: ["admin", "escritorio", "auditor"],
+  },
+  {
+    to: "/business",
+    label: "Negócio 360",
+    icon: Briefcase,
+    roles: ["admin", "escritorio", "auditor"],
+  },
+  {
+    to: "/projects/import",
+    label: "Pasta do Cliente",
+    icon: Upload,
+    roles: ["admin", "escritorio"],
+  },
   { to: "/production", label: "Produção", icon: Factory, roles: ["admin", "fabrica", "auditor"] },
-  { to: "/factory-wallboard", label: "Painel TV", icon: Tv, roles: ["admin", "fabrica", "auditor"] },
-  { to: "/picking", label: "Separação", icon: PackageCheck, roles: ["admin", "fabrica", "montador", "auditor"] },
+  {
+    to: "/factory-wallboard",
+    label: "Painel TV",
+    icon: Tv,
+    roles: ["admin", "fabrica", "auditor"],
+  },
+  {
+    to: "/picking",
+    label: "Separação",
+    icon: PackageCheck,
+    roles: ["admin", "fabrica", "montador", "auditor"],
+  },
   { to: "/assembly", label: "Montagem", icon: Wrench, roles: ["admin", "montador", "auditor"] },
   { to: "/shipping", label: "Expedição", icon: Truck, roles: ["admin", "fabrica", "auditor"] },
-  { to: "/technical-assistance", label: "Assistência", icon: AlertTriangle, roles: ["admin", "escritorio", "montador", "auditor"] },
+  {
+    to: "/technical-assistance",
+    label: "Assistência",
+    icon: AlertTriangle,
+    roles: ["admin", "escritorio", "montador", "auditor"],
+  },
   { to: "/settings/users", label: "Usuários", icon: Users, roles: ["admin", "escritorio"] },
 ];
-
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { user, loading, signOut, fullName, role, companyId } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
@@ -51,37 +90,37 @@ export function AppShell({ children }: { children: ReactNode }) {
 
     // Inscrição em tempo real para notificações
     const channel = supabase
-      .channel('industrial-notifications')
+      .channel("industrial-notifications")
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `company_id=eq.${companyId}`
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `company_id=eq.${companyId}`,
         },
         (payload) => {
-          const newNotif = payload.new as any;
-          setNotifications(prev => [newNotif, ...prev]);
-          
+          const newNotif = payload.new as Notification;
+          setNotifications((prev) => [newNotif, ...prev]);
+
           // Toast dinâmico baseado no tipo
-          if (newNotif.type === 'gate_completed') {
+          if (newNotif.type === "gate_completed") {
             toast.success(newNotif.title, {
               description: newNotif.message,
-              icon: <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+              icon: <CheckCircle2 className="h-4 w-4 text-emerald-500" />,
             });
-          } else if (newNotif.type === 'exception') {
+          } else if (newNotif.type === "exception") {
             toast.error(newNotif.title, {
               description: newNotif.message,
-              icon: <AlertTriangle className="h-4 w-4 text-red-500" />
+              icon: <AlertTriangle className="h-4 w-4 text-red-500" />,
             });
           } else {
             toast.info(newNotif.title, {
               description: newNotif.message,
-              icon: <Info className="h-4 w-4 text-blue-500" />
+              icon: <Info className="h-4 w-4 text-blue-500" />,
             });
           }
-        }
+        },
       )
       .subscribe();
 
@@ -120,6 +159,11 @@ export function AppShell({ children }: { children: ReactNode }) {
     );
   }
 
+  const visibleNavItems = role ? navItems.filter((item) => item.roles.includes(role)) : [];
+  const activeNavPath = visibleNavItems
+    .filter((item) => pathname === item.to || pathname.startsWith(`${item.to}/`))
+    .sort((left, right) => right.to.length - left.to.length)[0]?.to;
+
   return (
     <div className="flex min-h-dvh w-full flex-col overflow-x-hidden bg-slate-50 lg:flex-row">
       {/* Top Lime Bar */}
@@ -145,8 +189,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto px-3 py-6 space-y-1 custom-scrollbar">
-            {navItems.filter(item => !role || item.roles.includes(role)).map((item) => {
-              const active = pathname === item.to || pathname.startsWith(`${item.to}/`);
+            {visibleNavItems.map((item) => {
+              const active = item.to === activeNavPath;
               return (
                 <Link
                   key={item.to}
@@ -157,9 +201,13 @@ export function AppShell({ children }: { children: ReactNode }) {
                       : "text-slate-400 hover:bg-white/5 hover:text-white"
                   }`}
                 >
-                  <item.icon className={`h-4 w-4 ${active ? "text-[var(--lime-industrial)]" : ""}`} />
+                  <item.icon
+                    className={`h-4 w-4 ${active ? "text-[var(--lime-industrial)]" : ""}`}
+                  />
                   {item.label}
-                  {active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--lime-industrial)]" />}
+                  {active && (
+                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--lime-industrial)]" />
+                  )}
                 </Link>
               );
             })}
@@ -169,19 +217,25 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="p-4 bg-black/20 border-t border-white/5">
             <div className="flex items-center gap-3 mb-4">
               <div className="h-8 w-8 rounded-full bg-slate-800 flex items-center justify-center border border-white/10">
-                <span className="text-[10px] font-bold">{fullName?.charAt(0) || user?.email?.charAt(0) || '?'}</span>
+                <span className="text-[10px] font-bold">
+                  {fullName?.charAt(0) || user?.email?.charAt(0) || "?"}
+                </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-bold truncate uppercase">{fullName?.split(' ')[0] || 'User'}</p>
+                <p className="text-[11px] font-bold truncate uppercase">
+                  {fullName?.split(" ")[0] || "User"}
+                </p>
                 <p className="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">
-                  {role ? (roleLabels[role] || role) : "Operador"}
+                  {role ? roleLabels[role] || role : "Operador"}
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-2 mb-4 px-2 py-1 bg-emerald-500/10 rounded-md border border-emerald-500/20">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[9px] font-bold text-emerald-500 uppercase">Fábrica em Movimento</span>
+              <span className="text-[9px] font-bold text-emerald-500 uppercase">
+                Fábrica em Movimento
+              </span>
             </div>
 
             <Button
@@ -196,12 +250,12 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Button>
           </div>
         </div>
-        
+
         {/* Mobile Close Button */}
         {open && (
-          <button 
+          <button
             type="button"
-            className="absolute top-4 -right-12 p-2 bg-slate-900 text-white rounded-r-lg lg:hidden"
+            className="absolute right-3 top-4 rounded-lg bg-slate-900 p-2 text-white lg:hidden"
             onClick={() => setOpen(false)}
             aria-label="Fechar menu"
           >
@@ -242,9 +296,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </header>
 
         {/* Content */}
-        <main className="min-w-0 w-full flex-1 overflow-x-hidden">
-          {children}
-        </main>
+        <main className="min-w-0 w-full flex-1 overflow-x-hidden">{children}</main>
       </div>
     </div>
   );

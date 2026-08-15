@@ -1,5 +1,5 @@
 -- 1. Tabela de Itens da Versão SKP (Contrato de dados do plugin)
-CREATE TABLE public.project_version_items (
+CREATE TABLE IF NOT EXISTS public.project_version_items (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     version_id uuid REFERENCES public.project_versions(id) ON DELETE CASCADE NOT NULL,
     project_id uuid REFERENCES public.projects(id) ON DELETE CASCADE NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE public.project_version_items (
 );
 
 -- 2. Tabela de Arquivos do Pacote SKP (Manifest, Miniaturas, Planta, Cotas)
-CREATE TABLE public.project_version_files (
+CREATE TABLE IF NOT EXISTS public.project_version_files (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     version_id uuid REFERENCES public.project_versions(id) ON DELETE CASCADE NOT NULL,
     file_type text NOT NULL, -- 'manifest', 'planta', 'cota', 'perspectiva', 'miniatura', 'validacao', 'skp'
@@ -38,7 +38,7 @@ CREATE TABLE public.project_version_files (
 );
 
 -- 3. Tabela de Logs de Validação do Pacote
-CREATE TABLE public.project_package_validations (
+CREATE TABLE IF NOT EXISTS public.project_package_validations (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     version_id uuid REFERENCES public.project_versions(id) ON DELETE CASCADE NOT NULL,
     status text NOT NULL, -- 'sucesso', 'erro', 'aviso'
@@ -64,11 +64,14 @@ ALTER TABLE public.project_version_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.project_version_files ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.project_package_validations ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can manage version items of their company" ON public.project_version_items;
 CREATE POLICY "Users can manage version items of their company" ON public.project_version_items
     FOR ALL TO authenticated USING (company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid()));
 
+DROP POLICY IF EXISTS "Users can manage version files of their company" ON public.project_version_files;
 CREATE POLICY "Users can manage version files of their company" ON public.project_version_files
     FOR ALL TO authenticated USING (company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid()));
 
+DROP POLICY IF EXISTS "Users can manage validations of their company" ON public.project_package_validations;
 CREATE POLICY "Users can manage validations of their company" ON public.project_package_validations
     FOR ALL TO authenticated USING (company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid()));

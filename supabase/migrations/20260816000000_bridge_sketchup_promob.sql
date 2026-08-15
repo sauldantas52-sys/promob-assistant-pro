@@ -116,6 +116,12 @@ ALTER TABLE public.project_package_validations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.project_version_files ENABLE ROW LEVEL SECURITY;
 
 -- Políticas
+DROP POLICY IF EXISTS "Users can manage versions of their company" ON public.project_versions;
+DROP POLICY IF EXISTS "Users can manage tags of their company" ON public.project_tags;
+DROP POLICY IF EXISTS "Users can manage comparisons of their company" ON public.project_comparisons;
+DROP POLICY IF EXISTS "Users can manage version items of their company" ON public.project_version_items;
+DROP POLICY IF EXISTS "Users can manage package validations of their company" ON public.project_package_validations;
+DROP POLICY IF EXISTS "Users can manage version files of their company" ON public.project_version_files;
 CREATE POLICY "Users can manage versions of their company" ON public.project_versions FOR ALL TO authenticated USING (company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid()));
 CREATE POLICY "Users can manage tags of their company" ON public.project_tags FOR ALL TO authenticated USING (company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid()));
 CREATE POLICY "Users can manage comparisons of their company" ON public.project_comparisons FOR ALL TO authenticated USING (company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid()));

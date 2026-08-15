@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 
 /**
  * CommercialProposalService - Motor de propostas e contratos oficiais.
@@ -10,7 +11,7 @@ export const CommercialProposalService = {
   async createQuote(params: {
     projectId: string;
     companyId: string;
-    items: any[];
+    items: Json[];
     total: number;
   }) {
     const { data, error } = await supabase
@@ -18,9 +19,9 @@ export const CommercialProposalService = {
       .insert({
         project_id: params.projectId,
         company_id: params.companyId,
-        status: 'rascunho',
+        status: "rascunho",
         total_value: params.total,
-        data: { items: params.items }
+        data: { items: params.items },
       })
       .select()
       .single();
@@ -37,21 +38,20 @@ export const CommercialProposalService = {
     // 1. Marcar orçamento como aprovado
     const { error: qError } = await supabase
       .from("project_quotes")
-      .update({ status: 'aprovado', updated_at: new Date().toISOString() })
+      .update({ status: "aprovado", updated_at: new Date().toISOString() })
       .eq("id", quoteId);
-    
+
     if (qError) throw qError;
 
-    // 2. Liberar bloqueio comercial do projeto
+    // 2. Registrar a aprovação sem saltar os gates sequenciais da produção.
     const { error: pError } = await supabase
       .from("projects")
-      .update({ 
+      .update({
         commercial_approved: true,
-        status: 'producao', // Avança para produção se aprovado
-        updated_at: new Date().toISOString() 
+        updated_at: new Date().toISOString(),
       })
       .eq("id", projectId);
 
     if (pError) throw pError;
-  }
+  },
 };

@@ -50,10 +50,12 @@ ALTER TABLE public.assembly_group_hardware ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.assembly_group_items_log ENABLE ROW LEVEL SECURITY;
 
 -- Políticas
+DROP POLICY IF EXISTS "Users can manage hardware of their company groups" ON public.assembly_group_hardware;
 CREATE POLICY "Users can manage hardware of their company groups"
 ON public.assembly_group_hardware FOR ALL TO authenticated
 USING (EXISTS (SELECT 1 FROM public.assembly_groups g WHERE g.id = assembly_group_hardware.group_id));
 
+DROP POLICY IF EXISTS "Users can manage items log of their company groups" ON public.assembly_group_items_log;
 CREATE POLICY "Users can manage items log of their company groups"
 ON public.assembly_group_items_log FOR ALL TO authenticated
 USING (EXISTS (SELECT 1 FROM public.assembly_groups g WHERE g.id = assembly_group_items_log.group_id));

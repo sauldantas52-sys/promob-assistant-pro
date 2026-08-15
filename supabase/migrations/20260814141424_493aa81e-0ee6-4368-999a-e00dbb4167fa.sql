@@ -12,7 +12,7 @@ do $$ begin
 end $$;
 
 -- Create maintenance_requests table
-create table public.maintenance_requests (
+create table if not exists public.maintenance_requests (
     id uuid primary key default gen_random_uuid(),
     project_id uuid references public.projects(id) on delete cascade not null,
     module_id uuid references public.modules(id) on delete set null,
@@ -35,14 +35,17 @@ grant all on public.maintenance_requests to service_role;
 alter table public.maintenance_requests enable row level security;
 
 -- Policies
+drop policy if exists "Users can view maintenance of their company" on public.maintenance_requests;
 create policy "Users can view maintenance of their company" 
 on public.maintenance_requests for select to authenticated 
 using (company_id in (select company_id from public.profiles where id = auth.uid()));
 
+drop policy if exists "Users can insert maintenance for their company" on public.maintenance_requests;
 create policy "Users can insert maintenance for their company" 
 on public.maintenance_requests for insert to authenticated 
 with check (company_id in (select company_id from public.profiles where id = auth.uid()));
 
+drop policy if exists "Users can update maintenance of their company" on public.maintenance_requests;
 create policy "Users can update maintenance of their company" 
 on public.maintenance_requests for update to authenticated 
 using (company_id in (select company_id from public.profiles where id = auth.uid()));

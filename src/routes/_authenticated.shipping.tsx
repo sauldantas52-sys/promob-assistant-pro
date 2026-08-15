@@ -1,49 +1,82 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  Truck, 
-  ArrowLeft, 
-  CheckCircle2, 
-  AlertTriangle, 
-  XCircle,
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Truck,
+  CheckCircle2,
   PackageCheck,
   Scan,
-  Camera,
   History,
   Info,
   QrCode,
   Lock,
   Loader2,
   ShieldCheck,
-  MapPin,
   Calendar,
-  User,
   ShieldAlert,
   Search,
   Monitor,
-  LayoutDashboard
+  LayoutDashboard,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
   DialogTrigger,
   DialogDescription,
-  DialogFooter
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AppShell } from "@/components/AppShell";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 import { useState, useMemo } from "react";
+import type { LucideIcon } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
+import { hasPermission } from "@/lib/permissions";
+
+type AssemblyGroup = Pick<
+  Database["public"]["Tables"]["assembly_groups"]["Row"],
+  | "id"
+  | "code"
+  | "name"
+  | "color"
+  | "is_locked"
+  | "lock_reason"
+  | "conference_status"
+  | "sealed_at"
+  | "loading_status"
+>;
+type ShippingVolume = Database["public"]["Tables"]["shipping_volumes"]["Row"];
+type ShippingVolumeUpdate = Database["public"]["Tables"]["shipping_volumes"]["Update"];
+type ShippingStatus = Database["public"]["Enums"]["shipping_status"];
+type ShippingProject = Pick<
+  Database["public"]["Tables"]["projects"]["Row"],
+  "id" | "name" | "client_name" | "environment" | "status"
+> & {
+  assembly_groups: AssemblyGroup[] | null;
+  shipping_volumes: ShippingVolume[] | null;
+};
+type VolumeStatusMetadata = Partial<
+  Pick<ShippingVolumeUpdate, "driver_name" | "vehicle_plate" | "weight_kg">
+> & {
+  lock_reason?: string;
+};
+
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "object" && error !== null && "message" in error) {
+    return String(error.message);
+  }
+  return String(error);
+}
 
 export const Route = createFileRoute("/_authenticated/shipping")({
   head: () => ({
@@ -56,8 +89,8 @@ export const Route = createFileRoute("/_authenticated/shipping")({
 });
 
 function ShippingPage() {
-  const { companyId } = useAuth();
-  const queryClient = useQueryClient();
+  const { companyId, role } = useAuth();
+  const canEdit = hasPermission(role, "shipping", "edit");
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("volumes");
   const [searchQuery, setSearchQuery] = useState("");
@@ -68,13 +101,15 @@ function ShippingPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
-        .select(`
+        .select(
+          `
           id, name, client_name, environment, status,
           assembly_groups(
             id, code, name, color, is_locked, lock_reason, conference_status, sealed_at, loading_status
           ),
           shipping_volumes(*)
-        `)
+        `,
+        )
         .in("status", ["expedicao", "montagem", "concluido"])
         .order("updated_at", { ascending: false });
       if (error) throw error;
@@ -85,52 +120,72 @@ function ShippingPage() {
   const filteredProjects = useMemo(() => {
     if (!projects) return [];
     if (!searchQuery) return projects;
-    return projects.filter(p => 
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.client_name?.toLowerCase().includes(searchQuery.toLowerCase())
+    return projects.filter(
+      (p) =>
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.client_name?.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [projects, searchQuery]);
 
   return (
     <AppShell>
-      <div className="space-y-16 p-8 md:p-16 max-w-[1800px] mx-auto animate-in fade-in duration-700">
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-10">
-          <div className="space-y-6">
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate({ to: "/dashboard" })} 
-              className="rounded-full px-4 text-slate-400 hover:text-blue-600 gap-2 mb-2"
+      <div className="mx-auto max-w-[1600px] space-y-6 p-3 sm:p-5 lg:p-8 animate-in fade-in duration-500">
+        <header className="flex flex-col gap-5 border-b border-slate-200 pb-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="space-y-3">
+            <Button
+              variant="ghost"
+              onClick={() => navigate({ to: "/dashboard" })}
+              className="h-8 rounded-md px-2 text-slate-400 hover:text-blue-600 gap-2"
             >
               <LayoutDashboard className="h-4 w-4" />
               <span className="text-[10px] font-black uppercase tracking-widest">Dashboard</span>
             </Button>
-            <div className="flex items-center gap-4">
-              <span className="h-2 w-10 bg-indigo-600 rounded-full" />
-              <p className="text-[12px] font-black uppercase tracking-[0.5em] text-indigo-600">Expedição e Logística</p>
+            <div className="flex items-center gap-3">
+              <span className="h-1.5 w-8 bg-indigo-600 rounded-full" />
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-600">
+                Expedição e Logística
+              </p>
             </div>
-            <h1 className="text-5xl md:text-8xl font-black tracking-tighter text-slate-900 uppercase leading-[0.9] mb-4">Expedição</h1>
-            <p className="text-base font-black text-slate-500 uppercase tracking-[0.4em]">Gestão de volumes, romaneios e status de carregamento.</p>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tighter text-slate-900 uppercase leading-none">
+              Expedição
+            </h1>
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-[0.16em]">
+              Gestão de volumes, romaneios e status de carregamento.
+            </p>
           </div>
-          <div className="flex flex-col sm:flex-row items-center gap-6 w-full md:w-auto">
-             <div className="relative w-full sm:w-80">
-               <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-               <Input 
-                placeholder="Buscar projeto ou cliente..." 
-                className="w-full h-16 pl-14 rounded-[1.25rem] border-none bg-slate-50 text-sm font-black uppercase tracking-widest placeholder:text-slate-400"
+          <div className="flex w-full flex-col gap-2 sm:flex-row lg:w-auto">
+            <div className="relative w-full sm:w-72">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Input
+                placeholder="Buscar projeto ou cliente..."
+                className="h-11 w-full rounded-lg border-slate-200 bg-slate-50 pl-9 text-xs font-bold placeholder:text-slate-400"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-             </div>
-             <Button variant="outline" className="h-16 px-8 rounded-[1.25rem] border-2 border-slate-100 font-black uppercase tracking-[0.2em] text-[10px] gap-3 bg-white hover:bg-slate-50 shadow-xl shadow-slate-900/5 transition-all duration-300">
-               <Monitor className="h-5 w-5 text-indigo-600" /> Modo Logístico
-             </Button>
+            </div>
+            <Button
+              variant="outline"
+              className="h-11 rounded-lg border-slate-200 bg-white px-4 text-[9px] font-black uppercase tracking-wider gap-2 hover:bg-slate-50"
+            >
+              <Monitor className="h-4 w-4 text-indigo-600" /> Modo Logístico
+            </Button>
           </div>
         </header>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="flex w-fit bg-slate-100 p-2 h-20 rounded-[2.5rem] border border-slate-200 shadow-sm">
-            <TabsTrigger value="volumes" className="rounded-[2rem] px-8 data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-2xl font-black text-[11px] uppercase tracking-[0.2em] h-full transition-all duration-500">Volumes por Projeto</TabsTrigger>
-            <TabsTrigger value="active-loads" className="rounded-[2rem] px-8 data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-2xl font-black text-[11px] uppercase tracking-[0.2em] h-full transition-all duration-500">Cargas Ativas</TabsTrigger>
+          <TabsList className="grid h-auto w-full grid-cols-2 rounded-xl border border-slate-200 bg-slate-100 p-1 sm:w-fit">
+            <TabsTrigger
+              value="volumes"
+              className="h-10 rounded-lg px-2 data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm font-black text-[8px] uppercase tracking-wider sm:px-5 sm:text-[9px]"
+            >
+              Volumes por Projeto
+            </TabsTrigger>
+            <TabsTrigger
+              value="active-loads"
+              className="h-10 rounded-lg px-2 data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm font-black text-[8px] uppercase tracking-wider sm:px-5 sm:text-[9px]"
+            >
+              Cargas Ativas
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="volumes" className="space-y-6">
@@ -147,8 +202,8 @@ function ShippingPage() {
               </Card>
             ) : (
               <div className="grid gap-6">
-                {filteredProjects.map(project => (
-                  <ProjectShippingCard key={project.id} project={project} />
+                {filteredProjects.map((project) => (
+                  <ProjectShippingCard key={project.id} project={project} canEdit={canEdit} />
                 ))}
               </div>
             )}
@@ -159,7 +214,9 @@ function ShippingPage() {
               <CardContent className="py-20 text-center text-muted-foreground">
                 <History className="h-10 w-10 mx-auto mb-4 opacity-20" />
                 <p>Módulo de Logística em Carga Ativa está sendo sincronizado...</p>
-                <p className="text-xs">Utilize a aba "Volumes por Projeto" para gerenciar as expedições individuais.</p>
+                <p className="text-xs">
+                  Utilize a aba "Volumes por Projeto" para gerenciar as expedições individuais.
+                </p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -169,59 +226,84 @@ function ShippingPage() {
   );
 }
 
-function ProjectShippingCard({ project }: { project: any }) {
+function ProjectShippingCard({ project, canEdit }: { project: ShippingProject; canEdit: boolean }) {
   const queryClient = useQueryClient();
   const groups = project.assembly_groups || [];
   const volumes = project.shipping_volumes || [];
-  
+
   // A group needs a volume if it's sealed.
-  const pendingSealedGroups = groups.filter((g: any) => g.sealed_at && !volumes.some((v: any) => v.group_id === g.id));
-  
+  const pendingSealedGroups = groups.filter(
+    (g) => g.sealed_at && !volumes.some((v) => v.group_id === g.id),
+  );
+
   const [isGenerating, setIsGenerating] = useState(false);
 
   const generateVolumes = async () => {
+    if (!canEdit || project.status !== "expedicao") {
+      toast.error("Projeto fora da etapa de expedição ou perfil somente leitura.");
+      return;
+    }
     if (pendingSealedGroups.length === 0) return;
     setIsGenerating(true);
     try {
-      const newVolumes = pendingSealedGroups.map((g: any) => ({
+      const newVolumes = pendingSealedGroups.map((g) => ({
         project_id: project.id,
         group_id: g.id,
         code: `VOL-${project.id.slice(0, 4)}-${g.code}`,
         name: `Volume: ${g.code} - ${g.name}`,
-        status: 'aguardando'
+        status: "aguardando",
       }));
 
-      const { error } = await supabase.from('shipping_volumes').insert(newVolumes);
+      const { error } = await supabase.from("shipping_volumes").insert(newVolumes);
       if (error) throw error;
-      
+
       toast.success(`${newVolumes.length} volume(s) gerado(s) para o projeto.`);
       void queryClient.invalidateQueries({ queryKey: ["shipping-projects"] });
-    } catch (err: any) {
-      toast.error("Erro ao gerar volumes: " + err.message);
+    } catch (err: unknown) {
+      toast.error("Erro ao gerar volumes: " + getErrorMessage(err));
     } finally {
       setIsGenerating(false);
     }
   };
 
   return (
-    <Card className="border-none shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)] hover:shadow-[0_60px_120px_-20px_rgba(0,0,0,0.15)] transition-all duration-700 rounded-[4rem] overflow-hidden group bg-white mb-12">
-      <CardHeader className="pb-10 pt-16 px-16 bg-slate-50/30 border-b border-slate-100">
-        <div className="flex flex-wrap items-center justify-between gap-10">
-          <div className="space-y-4">
-            <CardTitle className="text-5xl font-black text-slate-900 tracking-tighter uppercase leading-[0.9] group-hover:text-indigo-600 transition-colors duration-500">{project.name}</CardTitle>
-            <CardDescription className="text-[12px] font-black text-slate-500 uppercase tracking-[0.4em] flex items-center gap-3">
-              {project.client_name} <span className="h-1.5 w-1.5 rounded-full bg-slate-200" /> {project.environment}
+    <Card className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <CardHeader className="border-b border-slate-100 bg-slate-50/70 p-4 sm:p-5">
+        <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
+          <div className="min-w-0 space-y-2">
+            <CardTitle className="break-words text-xl font-black leading-tight tracking-tight text-slate-900 uppercase sm:text-2xl">
+              {project.name}
+            </CardTitle>
+            <CardDescription className="flex flex-wrap items-center gap-2 text-[9px] font-black uppercase tracking-[0.18em] text-slate-500">
+              {project.client_name} <span className="h-1.5 w-1.5 rounded-full bg-slate-200" />{" "}
+              {project.environment}
             </CardDescription>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
             {pendingSealedGroups.length > 0 && (
-              <Button size="lg" className="h-16 px-10 rounded-[1.5rem] bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-[0.2em] text-[11px] border-none shadow-2xl shadow-indigo-600/20 transition-all active:scale-95" onClick={generateVolumes} disabled={isGenerating}>
-                {isGenerating ? <Loader2 className="mr-4 h-6 w-6 animate-spin" /> : <QrCode className="mr-4 h-6 w-6" />}
+              <Button
+                size="lg"
+                className="h-11 rounded-lg bg-indigo-600 px-4 text-[9px] font-black uppercase tracking-wider text-white hover:bg-indigo-700"
+                onClick={generateVolumes}
+                disabled={isGenerating || !canEdit || project.status !== "expedicao"}
+              >
+                {isGenerating ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <QrCode className="mr-2 h-4 w-4" />
+                )}
                 Gerar Volumes ({pendingSealedGroups.length})
               </Button>
             )}
-            <Badge className={cn("px-10 py-4 text-[11px] font-black uppercase tracking-[0.3em] border-none rounded-full shadow-2xl transition-all duration-500", project.status === 'expedicao' ? 'bg-blue-600 text-white' : 'bg-emerald-600 text-white')}>
-              {project.status === 'expedicao' ? 'LIBERAR CARGA' : 'EXPEDIÇÃO PRONTA'}
+            <Badge
+              className={cn(
+                "rounded-md border-none px-3 py-2 text-[9px] font-black uppercase tracking-wider",
+                project.status === "expedicao"
+                  ? "bg-blue-600 text-white"
+                  : "bg-emerald-600 text-white",
+              )}
+            >
+              {project.status === "expedicao" ? "EM EXPEDIÇÃO" : project.status!.toUpperCase()}
             </Badge>
           </div>
         </div>
@@ -229,8 +311,13 @@ function ProjectShippingCard({ project }: { project: any }) {
       <CardContent className="p-0">
         <div className="divide-y">
           {volumes.length > 0 ? (
-            volumes.map((vol: any) => (
-              <VolumeRow key={vol.id} volume={vol} project={project} />
+            volumes.map((vol) => (
+              <VolumeRow
+                key={vol.id}
+                volume={vol}
+                project={project}
+                canEdit={canEdit && project.status === "expedicao"}
+              />
             ))
           ) : (
             <div className="p-8 text-center text-sm text-muted-foreground">
@@ -243,75 +330,108 @@ function ProjectShippingCard({ project }: { project: any }) {
   );
 }
 
-function VolumeRow({ volume, project }: { volume: any, project: any }) {
+function VolumeRow({
+  volume,
+  project,
+  canEdit,
+}: {
+  volume: ShippingVolume;
+  project: ShippingProject;
+  canEdit: boolean;
+}) {
   const queryClient = useQueryClient();
   const [busy, setBusy] = useState(false);
-  
+
   const statusColors: Record<string, string> = {
     aguardando: "bg-slate-100 text-slate-700 border-slate-200",
     conferido: "bg-blue-100 text-blue-700 border-blue-200",
     bloqueado: "bg-destructive/10 text-destructive border-destructive/20",
     carregado: "bg-green-100 text-green-700 border-green-200",
-    entregue: "bg-primary/10 text-primary border-primary/20"
+    entregue: "bg-primary/10 text-primary border-primary/20",
   };
 
-  const group = project.assembly_groups?.find((g: any) => g.id === volume.group_id);
-  
-  // Logic locks
-  const isLocked = group?.is_locked || group?.conference_status === 'sincronizado';
-  const lockReason = group?.lock_reason || (group?.conference_status === 'sincronizado' ? "Conferência offline aguardando auditoria manual." : null);
+  const group = project.assembly_groups?.find((g) => g.id === volume.group_id);
 
-  const updateStatus = async (newStatus: string, metadata: any = {}) => {
+  // Logic locks
+  const isLocked = group?.is_locked || group?.conference_status === "sincronizado";
+  const lockReason =
+    group?.lock_reason ||
+    (group?.conference_status === "sincronizado"
+      ? "Conferência offline aguardando auditoria manual."
+      : null);
+
+  const updateStatus = async (newStatus: ShippingStatus, metadata: VolumeStatusMetadata = {}) => {
+    if (!canEdit) {
+      toast.error("Projeto fora da etapa de expedição ou perfil somente leitura.");
+      return;
+    }
     setBusy(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      const update: ShippingVolumeUpdate & VolumeStatusMetadata = {
+        status: newStatus,
+        scanned_at: newStatus === "conferido" ? new Date().toISOString() : volume.scanned_at,
+        loaded_at: newStatus === "carregado" ? new Date().toISOString() : volume.loaded_at,
+        delivered_at: newStatus === "entregue" ? new Date().toISOString() : volume.delivered_at,
+        ...(user ? { responsible_id: user.id } : {}),
+        ...metadata,
+      };
       const { error } = await supabase
-        .from('shipping_volumes')
-        .update({ 
-          status: newStatus as any,
-          scanned_at: newStatus === 'conferido' ? new Date().toISOString() : volume.scanned_at,
-          loaded_at: newStatus === 'carregado' ? new Date().toISOString() : volume.loaded_at,
-          delivered_at: newStatus === 'entregue' ? new Date().toISOString() : volume.delivered_at,
-          responsible_id: user?.id,
-          ...metadata
-        })
-        .eq('id', volume.id);
-      
+        .from("shipping_volumes")
+        .update(update as ShippingVolumeUpdate)
+        .eq("id", volume.id);
+
       if (error) throw error;
 
       // Log activity
-      await supabase.from('production_logs').insert({
+      const { error: logError } = await supabase.from("production_logs").insert({
         project_id: project.id,
         user_id: user?.id || null,
         action: `expedicao:${newStatus}`,
         notes: `Volume ${volume.code} alterado para ${newStatus}`,
-        metadata: { volume_id: volume.id, ...metadata } as any
+        metadata: { volume_id: volume.id, ...metadata },
       });
+      if (logError) throw logError;
 
       toast.success(`Status do volume atualizado: ${newStatus}`);
       void queryClient.invalidateQueries({ queryKey: ["shipping-projects"] });
-    } catch (err: any) {
-      toast.error("Erro: " + err.message);
+    } catch (err: unknown) {
+      toast.error("Erro: " + getErrorMessage(err));
     } finally {
       setBusy(false);
     }
   };
 
   return (
-    <div className={cn("px-16 py-10 flex flex-wrap items-center justify-between gap-8 transition-all hover:bg-slate-50", isLocked && "bg-destructive/5")}>
-      <div className="flex items-center gap-8 min-w-[320px]">
-        <div className="h-20 w-20 bg-slate-100 rounded-[1.5rem] flex items-center justify-center border-2 border-dashed border-slate-200 text-slate-400 shadow-inner">
-          <QrCode className="h-8 w-8" />
+    <div
+      className={cn(
+        "grid min-w-0 gap-3 px-4 py-4 transition-colors hover:bg-slate-50 sm:px-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center",
+        isLocked && "bg-destructive/5",
+      )}
+    >
+      <div className="flex min-w-0 items-start gap-3 sm:items-center">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border-2 border-dashed border-slate-200 bg-slate-100 text-slate-400">
+          <QrCode className="h-5 w-5" />
         </div>
-        <div>
-          <div className="flex items-center gap-4 mb-2">
-            <p className="text-xl font-black text-slate-900 tracking-tighter uppercase leading-none">{volume.name}</p>
-            <Badge variant="outline" className={cn("px-4 py-1 text-[9px] font-black uppercase tracking-[0.2em] border-none rounded-full shadow-sm", statusColors[volume.status])}>
+        <div className="min-w-0">
+          <div className="flex min-w-0 flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-2">
+            <p className="break-words text-sm font-black leading-tight tracking-tight text-slate-900 uppercase sm:text-base">
+              {volume.name}
+            </p>
+            <Badge
+              variant="outline"
+              className={cn(
+                "shrink-0 rounded-md border-none px-2 py-1 text-[8px] font-black uppercase tracking-wider",
+                statusColors[volume.status],
+              )}
+            >
               {volume.status.toUpperCase()}
             </Badge>
           </div>
-          <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-3">
+          <p className="mt-1 flex flex-wrap items-center gap-2 text-[9px] font-black uppercase tracking-wider text-slate-400">
             <span className="font-mono">{volume.code}</span>
             {volume.weight_kg && (
               <>
@@ -323,69 +443,97 @@ function VolumeRow({ volume, project }: { volume: any, project: any }) {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex min-w-0 flex-wrap items-center gap-2 lg:justify-end">
         {isLocked ? (
-          <div className="flex items-center gap-4 text-destructive px-8 py-3 bg-destructive/10 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-destructive/5 ring-1 ring-destructive/20">
-            <Lock className="h-4 w-4" />
-            <span>BLOQUEADO: {lockReason}</span>
+          <div className="flex min-w-0 items-start gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-[9px] font-black uppercase tracking-wider text-destructive ring-1 ring-destructive/20">
+            <Lock className="h-4 w-4 shrink-0" />
+            <span className="break-words">BLOQUEADO: {lockReason}</span>
           </div>
+        ) : !canEdit ? (
+          <Badge variant="outline" className="rounded-md text-[9px] font-black uppercase">
+            Somente leitura
+          </Badge>
         ) : (
-          <div className="flex items-center gap-3">
-            {volume.status === 'aguardando' && (
-              <Button size="lg" className="h-12 px-8 rounded-[1.25rem] bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-[0.2em] text-[10px] border-none shadow-xl shadow-blue-600/20 transition-all active:scale-95" onClick={() => updateStatus('conferido')} disabled={busy}>
-                <Scan className="mr-3 h-5 w-5" /> Conferir
+          <div className="flex flex-wrap items-center gap-2">
+            {volume.status === "aguardando" && (
+              <Button
+                size="lg"
+                className="h-10 rounded-lg bg-blue-600 px-4 text-[9px] font-black uppercase tracking-wider text-white hover:bg-blue-700"
+                onClick={() => updateStatus("conferido")}
+                disabled={busy}
+              >
+                <Scan className="mr-2 h-4 w-4" /> Conferir
               </Button>
             )}
-            
-            {volume.status === 'conferido' && (
+
+            {volume.status === "conferido" && (
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button size="lg" className="h-12 px-8 rounded-[1.25rem] bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-[0.2em] text-[10px] border-none shadow-xl shadow-indigo-600/20 transition-all active:scale-95">
-                    <Truck className="mr-3 h-5 w-5" /> Registrar Carga
+                  <Button
+                    size="lg"
+                    className="h-10 rounded-lg bg-indigo-600 px-4 text-[9px] font-black uppercase tracking-wider text-white hover:bg-indigo-700"
+                  >
+                    <Truck className="mr-2 h-4 w-4" /> Registrar Carga
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="rounded-[3rem] border-none shadow-2xl p-12 max-w-2xl">
-                  <DialogHeader className="mb-8">
-                    <DialogTitle className="text-3xl font-black text-slate-900 tracking-tighter uppercase">Manifesto de Carregamento</DialogTitle>
+                <DialogContent className="max-h-[90vh] w-[calc(100%_-_1.5rem)] max-w-2xl overflow-y-auto rounded-2xl border-none p-5 shadow-2xl sm:p-8">
+                  <DialogHeader className="mb-4">
+                    <DialogTitle className="text-xl font-black text-slate-900 tracking-tight uppercase sm:text-2xl">
+                      Manifesto de Carregamento
+                    </DialogTitle>
                     <DialogDescription className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em] mt-2">
                       Identificação do transportador para o volume {volume.code}.
                     </DialogDescription>
                   </DialogHeader>
-                  <LoadingForm 
-                    initialData={{ driver_name: volume.driver_name, vehicle_plate: volume.vehicle_plate }}
-                    onSubmit={(data) => updateStatus('carregado', data)} 
+                  <LoadingForm
+                    initialData={{
+                      driver_name: volume.driver_name,
+                      vehicle_plate: volume.vehicle_plate,
+                    }}
+                    onSubmit={(data) => updateStatus("carregado", data)}
                   />
                 </DialogContent>
               </Dialog>
             )}
 
-            {volume.status === 'carregado' && (
-              <Button size="lg" className="h-12 px-8 rounded-[1.25rem] bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-[0.2em] text-[10px] border-none shadow-xl shadow-emerald-600/20 transition-all active:scale-95" onClick={() => updateStatus('entregue')} disabled={busy}>
-                <CheckCircle2 className="mr-3 h-5 w-5" /> Entregar
+            {volume.status === "carregado" && (
+              <Button
+                size="lg"
+                className="h-10 rounded-lg bg-emerald-600 px-4 text-[9px] font-black uppercase tracking-wider text-white hover:bg-emerald-700"
+                onClick={() => updateStatus("entregue")}
+                disabled={busy}
+              >
+                <CheckCircle2 className="mr-2 h-4 w-4" /> Entregar
               </Button>
             )}
-            
-            {volume.status === 'entregue' && (
-              <div className="flex items-center gap-4 text-emerald-600 font-black text-[10px] px-8 py-3 bg-emerald-50 rounded-full border border-emerald-100 uppercase tracking-[0.2em] shadow-sm">
+
+            {volume.status === "entregue" && (
+              <div className="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-2 text-[9px] font-black uppercase tracking-wider text-emerald-600">
                 <ShieldCheck className="h-4 w-4" />
                 ENTREGUE
               </div>
             )}
           </div>
         )}
-        
+
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full hover:bg-slate-100 transition-colors">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-12 w-12 rounded-full hover:bg-slate-100 transition-colors"
+            >
               <Info className="h-5 w-5 text-slate-400" />
             </Button>
           </DialogTrigger>
-          <DialogContent className="rounded-[3rem] border-none shadow-2xl p-12">
-            <DialogHeader className="mb-8">
-              <DialogTitle className="text-3xl font-black text-slate-900 tracking-tighter uppercase">Detalhes do Volume</DialogTitle>
+          <DialogContent className="max-h-[90vh] w-[calc(100%_-_1.5rem)] overflow-y-auto rounded-2xl border-none p-5 shadow-2xl sm:p-8">
+            <DialogHeader className="mb-4">
+              <DialogTitle className="text-xl font-black text-slate-900 tracking-tight uppercase sm:text-2xl">
+                Detalhes do Volume
+              </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
                 <div>
                   <p className="text-xs text-muted-foreground uppercase font-bold">Status</p>
                   <p className="font-medium capitalize">{volume.status}</p>
@@ -400,36 +548,55 @@ function VolumeRow({ volume, project }: { volume: any, project: any }) {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground uppercase font-bold">Peso</p>
-                  <p className="font-medium">{volume.weight_kg ? `${volume.weight_kg}kg` : "Não informado"}</p>
+                  <p className="font-medium">
+                    {volume.weight_kg ? `${volume.weight_kg}kg` : "Não informado"}
+                  </p>
                 </div>
               </div>
-              
+
               <div className="border-t pt-4 space-y-2">
                 <p className="text-xs text-muted-foreground uppercase font-bold">Linha do Tempo</p>
                 <div className="space-y-2">
                   <TimelineItem icon={Calendar} label="Criado" date={volume.created_at} />
-                  {volume.scanned_at && <TimelineItem icon={Scan} label="Conferido" date={volume.scanned_at} />}
-                  {volume.loaded_at && <TimelineItem icon={Truck} label="Carregado" date={volume.loaded_at} />}
-                  {volume.delivered_at && <TimelineItem icon={CheckCircle2} label="Entregue" date={volume.delivered_at} />}
+                  {volume.scanned_at && (
+                    <TimelineItem icon={Scan} label="Conferido" date={volume.scanned_at} />
+                  )}
+                  {volume.loaded_at && (
+                    <TimelineItem icon={Truck} label="Carregado" date={volume.loaded_at} />
+                  )}
+                  {volume.delivered_at && (
+                    <TimelineItem icon={CheckCircle2} label="Entregue" date={volume.delivered_at} />
+                  )}
                 </div>
               </div>
-              
+
               {(volume.vehicle_plate || volume.driver_name) && (
                 <div className="border-t pt-4 space-y-2">
                   <p className="text-xs text-muted-foreground uppercase font-bold">Logística</p>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <p><strong>Veículo:</strong> {volume.vehicle_plate || "-"}</p>
-                    <p><strong>Motorista:</strong> {volume.driver_name || "-"}</p>
+                  <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
+                    <p>
+                      <strong>Veículo:</strong> {volume.vehicle_plate || "-"}
+                    </p>
+                    <p>
+                      <strong>Motorista:</strong> {volume.driver_name || "-"}
+                    </p>
                   </div>
                 </div>
               )}
             </div>
             <DialogFooter>
-               {volume.status !== 'aguardando' && (
-                <Button variant="outline" size="sm" className="w-full text-destructive" onClick={() => updateStatus('bloqueado', { lock_reason: 'Reabertura manual de carga' })}>
+              {volume.status !== "aguardando" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-destructive"
+                  onClick={() =>
+                    updateStatus("bloqueado", { lock_reason: "Reabertura manual de carga" })
+                  }
+                >
                   <ShieldAlert className="mr-2 h-3.5 w-3.5" /> Bloquear / Reabrir Carga
                 </Button>
-               )}
+              )}
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -438,7 +605,13 @@ function VolumeRow({ volume, project }: { volume: any, project: any }) {
   );
 }
 
-function LoadingForm({ onSubmit, initialData }: { onSubmit: (data: any) => void, initialData?: { driver_name?: string | null, vehicle_plate?: string | null } }) {
+function LoadingForm({
+  onSubmit,
+  initialData,
+}: {
+  onSubmit: (data: VolumeStatusMetadata) => void;
+  initialData?: { driver_name?: string | null; vehicle_plate?: string | null };
+}) {
   const [plate, setPlate] = useState(initialData?.vehicle_plate || "");
   const [driver, setDriver] = useState(initialData?.driver_name || "");
   const [weight, setWeight] = useState("");
@@ -447,20 +620,43 @@ function LoadingForm({ onSubmit, initialData }: { onSubmit: (data: any) => void,
     <div className="space-y-4 py-4">
       <div className="space-y-2">
         <Label htmlFor="plate">Placa do Veículo</Label>
-        <Input id="plate" placeholder="ABC-1234" value={plate} onChange={(e) => setPlate(e.target.value)} />
+        <Input
+          id="plate"
+          placeholder="ABC-1234"
+          value={plate}
+          onChange={(e) => setPlate(e.target.value)}
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="driver">Nome do Motorista / Responsável</Label>
-        <Input id="driver" placeholder="João Silva" value={driver} onChange={(e) => setDriver(e.target.value)} />
+        <Input
+          id="driver"
+          placeholder="João Silva"
+          value={driver}
+          onChange={(e) => setDriver(e.target.value)}
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="weight">Peso Aproximado (kg)</Label>
-        <Input id="weight" type="number" step="0.1" placeholder="0.0" value={weight} onChange={(e) => setWeight(e.target.value)} />
+        <Input
+          id="weight"
+          type="number"
+          step="0.1"
+          placeholder="0.0"
+          value={weight}
+          onChange={(e) => setWeight(e.target.value)}
+        />
       </div>
-      <Button 
-        className="w-full h-11" 
+      <Button
+        className="w-full h-11"
         disabled={!plate || !driver}
-        onClick={() => onSubmit({ vehicle_plate: plate, driver_name: driver, weight_kg: weight ? parseFloat(weight) : null })}
+        onClick={() =>
+          onSubmit({
+            vehicle_plate: plate,
+            driver_name: driver,
+            weight_kg: weight ? parseFloat(weight) : null,
+          })
+        }
       >
         Confirmar Carregamento
       </Button>
@@ -468,15 +664,25 @@ function LoadingForm({ onSubmit, initialData }: { onSubmit: (data: any) => void,
   );
 }
 
-function TimelineItem({ icon: Icon, label, date }: { icon: any, label: string, date: string }) {
+function TimelineItem({
+  icon: Icon,
+  label,
+  date,
+}: {
+  icon: LucideIcon;
+  label: string;
+  date: string | null;
+}) {
   return (
     <div className="flex items-center gap-3 text-xs">
       <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center shrink-0">
         <Icon className="h-3 w-3 text-muted-foreground" />
       </div>
-      <div className="flex flex-1 justify-between">
+      <div className="flex min-w-0 flex-1 flex-col justify-between gap-0.5 sm:flex-row">
         <span className="text-muted-foreground">{label}</span>
-        <span className="font-medium">{new Date(date).toLocaleString('pt-BR')}</span>
+        <span className="break-words font-medium">
+          {new Date(date ?? 0).toLocaleString("pt-BR")}
+        </span>
       </div>
     </div>
   );

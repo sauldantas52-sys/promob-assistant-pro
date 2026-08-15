@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedAssemblyRouteImport } from './routes/_authenticated.assembly'
+import { Route as AuthenticatedBusinessRouteImport } from './routes/_authenticated.business'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedFactoryWallboardRouteImport } from './routes/_authenticated.factory-wallboard'
 import { Route as AuthenticatedForcePasswordChangeRouteImport } from './routes/_authenticated.force-password-change'
@@ -42,6 +43,11 @@ const LoginRoute = LoginRouteImport.update({
 const AuthenticatedAssemblyRoute = AuthenticatedAssemblyRouteImport.update({
   id: '/assembly',
   path: '/assembly',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedBusinessRoute = AuthenticatedBusinessRouteImport.update({
+  id: '/business',
+  path: '/business',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -111,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/assembly': typeof AuthenticatedAssemblyRoute
+  '/business': typeof AuthenticatedBusinessRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/factory-wallboard': typeof AuthenticatedFactoryWallboardRoute
   '/force-password-change': typeof AuthenticatedForcePasswordChangeRoute
@@ -127,6 +134,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/assembly': typeof AuthenticatedAssemblyRoute
+  '/business': typeof AuthenticatedBusinessRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/factory-wallboard': typeof AuthenticatedFactoryWallboardRoute
   '/force-password-change': typeof AuthenticatedForcePasswordChangeRoute
@@ -145,6 +153,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
   '/_authenticated/assembly': typeof AuthenticatedAssemblyRoute
+  '/_authenticated/business': typeof AuthenticatedBusinessRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/factory-wallboard': typeof AuthenticatedFactoryWallboardRoute
   '/_authenticated/force-password-change': typeof AuthenticatedForcePasswordChangeRoute
@@ -163,6 +172,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/assembly'
+    | '/business'
     | '/dashboard'
     | '/factory-wallboard'
     | '/force-password-change'
@@ -179,6 +189,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/assembly'
+    | '/business'
     | '/dashboard'
     | '/factory-wallboard'
     | '/force-password-change'
@@ -196,6 +207,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/login'
     | '/_authenticated/assembly'
+    | '/_authenticated/business'
     | '/_authenticated/dashboard'
     | '/_authenticated/factory-wallboard'
     | '/_authenticated/force-password-change'
@@ -243,6 +255,13 @@ declare module '@tanstack/react-router' {
       path: '/assembly'
       fullPath: '/assembly'
       preLoaderRoute: typeof AuthenticatedAssemblyRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/business': {
+      id: '/_authenticated/business'
+      path: '/business'
+      fullPath: '/business'
+      preLoaderRoute: typeof AuthenticatedBusinessRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/dashboard': {
@@ -327,6 +346,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAssemblyRoute: typeof AuthenticatedAssemblyRoute
+  AuthenticatedBusinessRoute: typeof AuthenticatedBusinessRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedFactoryWallboardRoute: typeof AuthenticatedFactoryWallboardRoute
   AuthenticatedForcePasswordChangeRoute: typeof AuthenticatedForcePasswordChangeRoute
@@ -342,6 +362,7 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAssemblyRoute: AuthenticatedAssemblyRoute,
+  AuthenticatedBusinessRoute: AuthenticatedBusinessRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedFactoryWallboardRoute: AuthenticatedFactoryWallboardRoute,
   AuthenticatedForcePasswordChangeRoute: AuthenticatedForcePasswordChangeRoute,
