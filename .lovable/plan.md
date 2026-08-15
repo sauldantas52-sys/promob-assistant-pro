@@ -1,37 +1,31 @@
-# Plano: Análise de XML Promob e Relatório Técnico
+# Plano: Monta AI — Promob Assistant Pro (Consolidação Industrial)
 
-O objetivo é processar o arquivo `amanda 111.xml` para extrair os metadados industriais e apresentar uma visão técnica clara do projeto para o usuário.
+O objetivo é consolidar a plataforma como a solução definitiva para o fluxo Promob, utilizando os dados reais do projeto "Amanda 111" para validar o fluxo de produção e auditoria.
 
-## Análise do Arquivo `amanda 111.xml`
-- **Projeto:** Amanda 111 (identificado via `user-uploads://amanda_111-2.xml`).
-- **Data/Hora:** 13/08/2026 às 19:50:31.
-- **Sistema:** Promob Plus Enterprise (Versão 5).
-- **Ambientes:** 2 ambientes (Cozinhas - Ambiente 3D).
-- **Conteúdo Identificado:**
-  - Módulos de Dormitórios (Armários, Bases Lineares, Laterais).
-  - Peças em MDF (Branco 15mm e 6mm).
-  - Ferragens (Dobradiças Aço sem amortecedor).
-  - Fitas de borda (0.4mm).
+## Análise do Projeto "Amanda 111"
+O sistema identificou a seguinte estrutura no arquivo `amanda 111.xml`:
+- **Hierarquia Industrial:** 1 Módulo Principal (Armário) com sub-itens (Laterais, Bases, Fundo).
+- **Materiais:** Predomínio de MDF Branco 15mm e 6mm.
+- **Ferragens:** Kit de 20 dobradiças (Acessórios Avulsos).
+- **Segurança:** O sistema aplicou automaticamente `machining_blocked = true` em todas as peças estruturais.
 
 ## Ações Propostas
 
-### 1. Extração e Resumo de Engenharia
-- Utilizar o parser industrial `parseProjectFile` para converter o XML em uma estrutura de dados operacional.
-- Identificar a hierarquia: Projetos -> Ambientes -> Módulos -> Peças.
+### 1. Reforço de Branding "Promob Assistant"
+- Atualizar o Dashboard principal para destacar o status "Promob Assistant Pro Ativo".
+- Incluir indicadores de "Saúde do XML" (alertas para medidas inconsistentes ou materiais não cadastrados).
 
-### 2. Geração de Relatório de Dossiê (Audit Report)
-- Criar uma prévia do dossiê técnico que será gerado pelo sistema:
-  - **Identificação:** Projeto Amanda 111.
-  - **Trava de Segurança:** `machining_blocked = true` (Garantindo que nenhuma peça seja enviada para a CNC sem conferência).
-  - **Lista de Materiais:** MDF Branco 15mm e 6mm.
-  - **Componentes:** 1 Módulo "Armário" com bases e laterais.
+### 2. Fluxo de Importação Wizard 4.0
+- Integrar a detecção automática de ambientes do XML (ex: "Cozinhas - Ambiente 3D") para categorizar os módulos no banco de dados.
+- Adicionar uma etapa de "Confirmação Técnica" onde o auditor visualiza o resumo de peças (Amanda 111: 5 peças estruturais, 20 ferragens) antes de liberar para o Wallboard.
 
-### 3. Visualização de Metadados Industrial 4.0
-- Apresentar ao usuário uma representação visual (via log do sistema ou interface de importação) do que o sistema "vê":
-  - **Dimensões:** 700 x 2200 x 350 mm (Armário).
-  - **Peças:** Base Linear, Lateral, Fundo.
-  - **Ferragens:** Dobradiças UN 20x.
+### 3. Dossiê de Auditoria e QR Code
+- Gerar o Dossiê Técnico de Auditoria para o projeto "Amanda 111", consolidando:
+  - Mapa de Corte (referenciando o material MDF Branco).
+  - Etiquetas Industriais com QR Code para cada peça (Base, Lateral, Fundo).
+  - Log de Auditoria registrando o upload e o bloqueio preventivo de usinagem.
 
 ## Detalhes Técnicos
-- O processamento respeitará as regras de negócio de `company_id` e RLS.
-- O campo `machining_blocked` será mantido como `true` por padrão.
+- **Segurança:** Manter o isolamento por `company_id` e a trava `machining_blocked`.
+- **Integridade:** Validar decimais (ex: 1080,6mm) para evitar erros em máquinas CNC.
+- **UI:** Aplicar o "Industrial Design System 4.0" em todas as novas visualizações de dados.
