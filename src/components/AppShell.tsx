@@ -108,75 +108,118 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-slate-50 flex-col lg:flex-row">
+      {/* Top Lime Bar */}
+      <div className="fixed top-0 left-0 right-0 h-1.5 bg-[var(--lime-industrial)] z-50" />
+
+      {/* Sidebar Industrial Drawer/Fixed */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-80 transform bg-sidebar text-sidebar-foreground transition-all duration-700 lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 w-64 transform bg-[var(--sidebar-industrial)] text-white transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex h-28 items-center gap-5 border-b border-sidebar-border/30 px-10">
-          <div className="flex h-16 w-16 items-center justify-center rounded-[2rem] bg-blue-600 shadow-2xl shadow-blue-600/30 ring-4 ring-blue-600/10">
-            <Boxes className="h-9 w-9 text-white" />
+        <div className="flex flex-col h-full pt-4">
+          {/* Logo Monta AI */}
+          <div className="px-6 py-6 border-b border-white/5">
+            <div className="flex items-center gap-3">
+              <div className="bg-[var(--lime-industrial)] p-2 rounded-lg">
+                <Boxes className="h-5 w-5 text-slate-900" />
+              </div>
+              <span className="text-xl font-black tracking-tight uppercase">Monta AI</span>
+            </div>
           </div>
-          <div className="leading-none space-y-1">
-            <p className="text-2xl font-black tracking-tighter uppercase text-white">Monta AI</p>
-            <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.3em]">Industrial 4.0</p>
+
+          {/* Navigation */}
+          <nav className="flex-1 overflow-y-auto px-3 py-6 space-y-1 custom-scrollbar">
+            {navItems.filter(item => !role || item.roles.includes(role)).map((item) => {
+              const active = pathname.startsWith(item.to);
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors ${
+                    active
+                      ? "bg-white/10 text-[var(--lime-industrial)]"
+                      : "text-slate-400 hover:bg-white/5 hover:text-white"
+                  }`}
+                >
+                  <item.icon className={`h-4 w-4 ${active ? "text-[var(--lime-industrial)]" : ""}`} />
+                  {item.label}
+                  {active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--lime-industrial)]" />}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* User Footer */}
+          <div className="p-4 bg-black/20 border-t border-white/5">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-8 w-8 rounded-full bg-slate-800 flex items-center justify-center border border-white/10">
+                <span className="text-[10px] font-bold">{fullName?.charAt(0) || user?.email?.charAt(0) || '?'}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-bold truncate uppercase">{fullName?.split(' ')[0] || 'User'}</p>
+                <p className="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">
+                  {role ? (roleLabels[role] || role) : "Operador"}
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2 mb-4 px-2 py-1 bg-emerald-500/10 rounded-md border border-emerald-500/20">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[9px] font-bold text-emerald-500 uppercase">Fábrica em Movimento</span>
+            </div>
+
+            <Button
+              variant="ghost"
+              className="w-full justify-start h-9 text-[10px] font-bold uppercase text-slate-500 hover:text-white hover:bg-white/5 px-3"
+              onClick={async () => {
+                await signOut();
+                navigate({ to: "/login" });
+              }}
+            >
+              <LogOut className="mr-2 h-3.5 w-3.5" /> Sair
+            </Button>
           </div>
-          <button className="ml-auto lg:hidden" onClick={() => setOpen(false)} aria-label="Fechar menu">
+        </div>
+        
+        {/* Mobile Close Button */}
+        {open && (
+          <button 
+            className="absolute top-4 -right-12 p-2 bg-slate-900 text-white rounded-r-lg lg:hidden"
+            onClick={() => setOpen(false)}
+          >
             <X className="h-6 w-6" />
           </button>
-        </div>
-        <nav className="space-y-3 p-8">
-          {navItems.filter(item => !role || item.roles.includes(role)).map((item) => {
-            const active = pathname.startsWith(item.to);
-            return (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={`flex items-center gap-5 rounded-[2rem] px-8 py-6 text-[12px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${
-                  active
-                    ? "bg-blue-600 text-white shadow-2xl shadow-blue-600/20 translate-x-2"
-                    : "text-sidebar-foreground/40 hover:bg-white/5 hover:text-white hover:translate-x-1"
-                }`}
-              >
-                <item.icon className={`h-6 w-6 transition-transform duration-500 ${active ? "scale-110" : ""}`} />
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-        <div className="absolute bottom-0 w-full border-t border-sidebar-border/30 p-10 bg-sidebar/90 backdrop-blur-3xl">
-          <div className="flex flex-col gap-2">
-            <p className="truncate text-lg font-black text-white uppercase tracking-tight">{fullName ?? user.email}</p>
-            <Badge variant="outline" className="w-fit border-sidebar-border/50 bg-slate-900 text-[10px] font-black uppercase tracking-[0.3em] text-blue-400 py-2 px-4 rounded-full">
-              {role ? (roleLabels[role] || role) : "Operador"}
-            </Badge>
-          </div>
-          <Button
-            variant="ghost"
-            className="mt-10 w-full justify-start rounded-[1.5rem] px-8 py-8 text-[11px] font-black uppercase tracking-[0.3em] text-sidebar-foreground/40 hover:bg-red-900/20 hover:text-red-400 transition-all duration-500 group"
-            onClick={async () => {
-              await signOut();
-              navigate({ to: "/login" });
-            }}
-          >
-            <LogOut className="mr-4 h-6 w-6 transition-transform group-hover:-translate-x-2" /> Encerrar Acesso
-          </Button>
-        </div>
+        )}
       </aside>
 
+      {/* Overlay for mobile */}
       {open && (
-        <div className="fixed inset-0 z-30 bg-slate-900/60 backdrop-blur-sm lg:hidden" onClick={() => setOpen(false)} />
+        <div 
+          className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm lg:hidden" 
+          onClick={() => setOpen(false)} 
+        />
       )}
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-16 items-center gap-3 border-b border-slate-200 bg-white px-6 lg:hidden shadow-sm">
-          <button onClick={() => setOpen(true)} aria-label="Abrir menu" className="p-2 hover:bg-slate-100 rounded-lg">
+      {/* Main Content Area */}
+      <div className="flex min-w-0 flex-1 flex-col pt-1.5">
+        {/* Mobile Header */}
+        <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-6 lg:hidden">
+          <button onClick={() => setOpen(true)} className="p-2 -ml-2 hover:bg-slate-100 rounded-lg">
             <Menu className="h-6 w-6 text-slate-600" />
           </button>
-          <span className="font-black text-slate-900 uppercase tracking-tight">Monta AI</span>
+          <div className="flex items-center gap-2">
+            <Boxes className="h-5 w-5 text-[var(--lime-industrial)]" />
+            <span className="font-black text-slate-900 uppercase tracking-tight">Monta AI</span>
+          </div>
+          <div className="w-10" /> {/* Spacer for symmetry */}
         </header>
-        <main className="min-w-0 flex-1 bg-slate-50/50">{children}</main>
+
+        {/* Content */}
+        <main className="min-w-0 flex-1 overflow-x-hidden pt-0 lg:pt-0">
+          {children}
+        </main>
       </div>
     </div>
   );
