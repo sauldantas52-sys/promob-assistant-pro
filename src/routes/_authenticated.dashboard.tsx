@@ -1,12 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { FolderKanban, Factory, Wrench, AlertTriangle, ClipboardCheck, ChevronRight, ShieldCheck } from "lucide-react";
+import { FolderKanban, Factory, Wrench, AlertTriangle, ClipboardCheck, ChevronRight, ShieldCheck, Upload } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AppShell } from "@/components/AppShell";
 import { useAuth, roleLabels, type AppRole } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import { hasPermission } from "@/lib/permissions";
 import { statusLabel, statusTone } from "@/lib/project-status";
 import { cn } from "@/lib/utils";
 
