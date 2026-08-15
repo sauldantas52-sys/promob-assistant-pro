@@ -129,17 +129,27 @@ function ProjectsContent() {
             Inteligência operacional e controle de fluxo Promob.
           </p>
         </div>
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-6">
           {hasPermission(role, "projects", "import") && (
             <Button 
-              className="h-24 px-12 rounded-[2rem] bg-slate-900 hover:bg-black text-white font-black uppercase tracking-[0.3em] text-[12px] shadow-2xl shadow-slate-900/40 gap-6 transition-all duration-500 active:scale-95 group"
+              className="h-28 px-14 rounded-[2.5rem] bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-[0.3em] text-[14px] shadow-2xl shadow-blue-600/40 gap-6 transition-all duration-500 active:scale-95 group"
               onClick={() => navigate({ to: "/projects/import" })}
             >
-              <Plus className="h-8 w-8 text-blue-400 transition-transform group-hover:rotate-90" /> Importar Projeto
+              <Upload className="h-10 w-10 text-white transition-transform group-hover:-translate-y-2" /> Importar Promob
+            </Button>
+          )}
+          {hasPermission(role, "projects", "create") && (
+            <Button 
+              variant="outline"
+              className="h-28 px-14 rounded-[2.5rem] border-4 border-slate-900 bg-transparent text-slate-900 font-black uppercase tracking-[0.3em] text-[14px] gap-6 transition-all duration-500 active:scale-95 group hover:bg-slate-900 hover:text-white"
+              onClick={() => setOpen(true)}
+            >
+              <Plus className="h-10 w-10 transition-transform group-hover:rotate-90" /> Novo Manual
             </Button>
           )}
         </div>
       </header>
+
 
       <div className="flex flex-col gap-6 p-10 bg-white rounded-[4rem] border border-slate-100 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.08)]">
         <div className="relative flex-1">
