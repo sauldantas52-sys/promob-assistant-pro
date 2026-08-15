@@ -450,6 +450,25 @@ function ProjectDetail() {
               <span className="h-2 w-10 bg-blue-600 rounded-full" />
               <p className="text-[12px] font-black uppercase tracking-[0.6em] text-blue-600">Dossiê Técnico Industrial</p>
               <div className="h-3 w-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-4 rounded-full text-[9px] font-black uppercase tracking-widest border-2 hover:bg-slate-900 hover:text-white transition-all"
+                onClick={async () => {
+                  try {
+                    const { generateAuditReport } = await import("@/lib/audit-report.functions");
+                    const result = await generateAuditReport({ data: { projectId: projectId } });
+                    if (result.success) {
+                      toast.success("Dossiê consolidado com sucesso!");
+                    }
+                  } catch (err) {
+                    toast.error("Erro ao gerar dossiê.");
+                  }
+                }}
+              >
+                <Download className="h-3 w-3 mr-2" />
+                Gerar Dossiê 4.0
+              </Button>
             </div>
             <h1 className="text-4xl md:text-[6rem] font-black tracking-tighter text-slate-900 uppercase leading-[0.9]">
               {project.data?.name}
@@ -939,7 +958,11 @@ function ProjectDetail() {
           <PhysicalChecklistFlow projectId={projectId} />
         </TabsContent>
 
-        <TabsContent value="integration_audit" className="mt-6">
+          <TabsContent value="physical-pilot" className="mt-6">
+            <PhysicalChecklistFlow projectId={projectId} />
+          </TabsContent>
+
+          <TabsContent value="integration_audit" className="mt-6">
           <AuditIntegrationTab projectId={projectId} />
         </TabsContent>
 
