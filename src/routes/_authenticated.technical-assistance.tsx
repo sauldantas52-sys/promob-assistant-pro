@@ -57,6 +57,7 @@ function TechnicalAssistancePage() {
     queryKey: ["notifications", companyId],
     enabled: !!companyId,
     queryFn: async () => {
+      if (!companyId) return [];
       const { data, error } = await supabase
         .from("notifications")
         .select("*")
