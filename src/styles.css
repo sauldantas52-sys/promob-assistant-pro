@@ -43,44 +43,37 @@
 }
 
 :root {
-  --radius: 1rem;
-  --background: #F1F5F9; /* Slate 100 industrial */
+  --radius: 0.5rem;
+  --background: #FFFFFF;
   --foreground: #020617;
   --card: #FFFFFF;
   --card-foreground: #020617;
-  --primary: #0F4C5C;
+  --primary: #020617;
   --primary-foreground: #F8FAFC;
-  --secondary: #E2E8F0;
+  --secondary: #F1F5F9;
   --secondary-foreground: #1E293B;
   --border: #E2E8F0;
   
-  /* Cores Operacionais Refinadas */
-  --corte: #B91C1C;
-  --borda: #D97706;
-  --usinagem: #7C3AED;
-  --picking: #2563EB;
-  --montagem: #059669;
-  --expedicao: #4F46E5;
-
-  --sidebar: #0F172A;
-  --sidebar-foreground: #F8FAFC;
-  --sidebar-primary: #3B82F6;
-  --sidebar-border: #1E293B;
+  /* Industrial Design System 4.0 Operational Colors */
+  --corte: #EF4444; /* Red */
+  --borda: #F59E0B; /* Amber */
+  --usinagem: #8B5CF6; /* Purple */
+  --picking: #3B82F6; /* Blue */
+  --montagem: #10B981; /* Green */
+  --expedicao: #6366F1; /* Indigo */
+  
+  /* Specific Sidebar Industrial Dark */
+  --sidebar-industrial: #0F172A;
+  --sidebar-active: #22C55E; /* Lime green for active markers if needed, but the top bar is the main lime element */
+  --lime-industrial: #84CC16;
 }
 
 .dark {
   --background: #020617;
-  --foreground: #F1F5F9;
+  --foreground: #F8FAFC;
   --card: #0F172A;
-  --card-foreground: #F1F5F9;
-  --primary: #3B82F6;
-  --primary-foreground: #FFFFFF;
-  --secondary: #1E293B;
-  --secondary-foreground: #CBD5E1;
+  --card-foreground: #F8FAFC;
   --border: #1E293B;
-  
-  --sidebar: #020617;
-  --sidebar-foreground: #F1F5F9;
 }
 
 @layer base {
