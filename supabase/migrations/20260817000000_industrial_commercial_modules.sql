@@ -1,4 +1,4 @@
-create table public.pricing_configs (
+create table if not exists public.pricing_configs (
     id uuid primary key default gen_random_uuid(),
     company_id uuid references public.companies(id) not null,
     material_name text not null,
@@ -8,7 +8,7 @@ create table public.pricing_configs (
     created_at timestamp with time zone default now()
 );
 
-create table public.project_estimates (
+create table if not exists public.project_estimates (
     id uuid primary key default gen_random_uuid(),
     project_id uuid references public.projects(id) not null,
     items jsonb not null default '[]',
@@ -25,5 +25,7 @@ grant all on public.project_estimates to service_role;
 alter table public.pricing_configs enable row level security;
 alter table public.project_estimates enable row level security;
 
+drop policy if exists "Acesso por empresa" on public.pricing_configs;
+drop policy if exists "Acesso por empresa" on public.project_estimates;
 create policy "Acesso por empresa" on public.pricing_configs for all to authenticated using (company_id = (select company_id from public.profiles where id = auth.uid()));
 create policy "Acesso por empresa" on public.project_estimates for all to authenticated using (project_id in (select id from public.projects where company_id = (select company_id from public.profiles where id = auth.uid())));

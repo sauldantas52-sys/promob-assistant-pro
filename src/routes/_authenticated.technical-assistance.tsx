@@ -720,7 +720,7 @@ function TreatmentDialog({
       if (!user) throw new Error("Nao autenticado.");
       if (notes.trim().length < 5)
         throw new Error("Registre o diagnostico ou a tratativa (minimo 5 caracteres).");
-      const { error } = await supabase.rpc("record_maintenance_transition" as any, {
+      const { error } = await supabase.rpc("record_maintenance_transition", {
         _request_id: ticket.id,
         _new_status: status as MaintenanceStatus,
         _notes: notes.trim(),

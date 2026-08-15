@@ -262,8 +262,8 @@ function ImportPage() {
       const { error: sessionError } = await supabase.from("project_import_sessions").insert({
         id: projectId,
         company_id: companyId,
-        step: "uploading",
-        files: preparedFiles.map((item) => item.storagePath),
+        created_by: authData.user.id,
+        planned_paths: preparedFiles.map((item) => item.storagePath),
         status: "uploading",
       });
       if (sessionError) throw sessionError;
@@ -321,7 +321,7 @@ function ImportPage() {
 
         rpcAttempted = true;
         const { data: importedProjectId, error: importError } = await supabase.rpc(
-          "import_client_project" as any,
+          "import_client_project",
           {
             _project_id: projectId,
             _project: {
@@ -348,7 +348,7 @@ function ImportPage() {
             .eq("id", projectId)
             .maybeSingle();
           if (committedProject) return committedProject.id;
-          const { error: trackingError } = await supabase.rpc("mark_import_cleanup_required" as any, {
+          const { error: trackingError } = await supabase.rpc("mark_import_cleanup_required", {
             _session_id: projectId,
           });
           if (trackingError) {
@@ -377,7 +377,7 @@ function ImportPage() {
           cleanupFailed = !!cleanupError;
         }
         if (cleanupFailed) {
-          const { error: trackingError } = await supabase.rpc("mark_import_cleanup_required" as any, {
+          const { error: trackingError } = await supabase.rpc("mark_import_cleanup_required", {
             _session_id: projectId,
           });
           if (trackingError)
@@ -388,7 +388,7 @@ function ImportPage() {
             `${error instanceof Error ? error.message : "Falha na importação."} Limpeza automática pendente para auditoria.`,
           );
         }
-        const { error: discardError } = await supabase.rpc("discard_import_session" as any, {
+        const { error: discardError } = await supabase.rpc("discard_import_session", {
           _session_id: projectId,
         });
         if (discardError)

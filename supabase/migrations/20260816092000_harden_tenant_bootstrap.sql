@@ -375,6 +375,9 @@ create table if not exists public.project_import_sessions (
   status text not null default 'uploading' check (status in ('uploading', 'cleanup_required')),
   created_at timestamptz not null default now()
 );
+alter table public.project_import_sessions
+add column if not exists created_by uuid references auth.users(id) on delete cascade,
+add column if not exists planned_paths text[];
 alter table public.project_import_sessions enable row level security;
 grant select, insert, update, delete on public.project_import_sessions to authenticated;
 create or replace function public.validate_project_import_session()
