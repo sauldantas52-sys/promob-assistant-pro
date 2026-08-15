@@ -37,9 +37,8 @@ export function useNotifications() {
           // Show toast for new notification
           toast(newNotif.title, {
             description: newNotif.message,
-            icon: newNotif.type === 'exception' ? <AlertTriangle className="h-4 w-4 text-red-500" /> : 
-                  newNotif.type === 'gate_completed' ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : 
-                  <Info className="h-4 w-4 text-blue-500" />,
+            // Icons should be handled by the toast implementation or passed as components
+            // but here we just pass the type in metadata if needed
           });
         }
       )
