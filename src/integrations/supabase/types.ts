@@ -1042,6 +1042,8 @@ export type Database = {
           id: string
           project_id: string
           size_bytes: number | null
+          storage_path: string | null
+          storage_status: string | null
           summary: Json | null
         }
         Insert: {
@@ -1051,6 +1053,8 @@ export type Database = {
           id?: string
           project_id: string
           size_bytes?: number | null
+          storage_path?: string | null
+          storage_status?: string | null
           summary?: Json | null
         }
         Update: {
@@ -1060,11 +1064,58 @@ export type Database = {
           id?: string
           project_id?: string
           size_bytes?: number | null
+          storage_path?: string | null
+          storage_status?: string | null
           summary?: Json | null
         }
         Relationships: [
           {
             foreignKeyName: "project_files_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_import_sessions: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          files: string[] | null
+          id: string
+          project_id: string | null
+          status: string
+          step: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          files?: string[] | null
+          id?: string
+          project_id?: string | null
+          status: string
+          step: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          files?: string[] | null
+          id?: string
+          project_id?: string | null
+          status?: string
+          step?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_import_sessions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_import_sessions_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
