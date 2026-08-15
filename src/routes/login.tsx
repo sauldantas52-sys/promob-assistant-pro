@@ -169,21 +169,21 @@ function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4 sm:p-6">
       <div className="w-full max-w-lg">
-        <div className="mb-16 flex flex-col items-center text-center">
-          <div className="mb-8 flex h-28 w-28 items-center justify-center rounded-[3rem] bg-blue-600 text-white shadow-2xl shadow-blue-600/30 ring-8 ring-blue-600/5">
-            <Boxes className="h-14 w-14" />
+        <div className="mb-8 sm:mb-16 flex flex-col items-center text-center">
+          <div className="mb-4 sm:mb-8 flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-[2rem] sm:rounded-[3rem] bg-blue-600 text-white shadow-2xl shadow-blue-600/30 ring-4 sm:ring-8 ring-blue-600/5">
+            <Boxes className="h-10 w-10 sm:h-14 sm:w-14" />
           </div>
-          <h1 className="text-6xl font-black text-slate-900 uppercase tracking-tighter leading-none mb-4">Monta AI</h1>
-          <p className="text-[12px] font-black text-blue-600 uppercase tracking-[0.5em]">Protocolo Piloto Ativo</p>
+          <h1 className="text-4xl sm:text-6xl font-black text-slate-900 uppercase tracking-tighter leading-none mb-2 sm:mb-4">Monta AI</h1>
+          <p className="text-[10px] sm:text-[12px] font-black text-blue-600 uppercase tracking-[0.3em] sm:tracking-[0.5em]">Protocolo Piloto Ativo</p>
         </div>
 
         {mode === "forgot" ? (
-          <Card className="border-primary/15 shadow-lg">
+          <Card className="border-primary/15 shadow-lg mx-auto w-full">
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Recuperar senha</CardTitle>
-              <CardDescription>Informe seu e-mail para receber o link de recuperação.</CardDescription>
+              <CardTitle className="text-base sm:text-lg">Recuperar senha</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">Informe seu e-mail para receber o link de recuperação.</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleResetPassword} className="space-y-4">
@@ -198,17 +198,17 @@ function LoginPage() {
             </CardContent>
           </Card>
         ) : (
-          <Card className="border-none shadow-[0_60px_150px_-30px_rgba(0,0,0,0.15)] rounded-[4rem] bg-white overflow-hidden">
-            <CardHeader className="pb-8 pt-16 px-16 border-b border-slate-50">
-              <CardTitle className="text-3xl font-black text-slate-900 uppercase tracking-tighter">Acesso Restrito</CardTitle>
-              <CardDescription className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em] mt-2">Lojas, Fábricas e Engenharia</CardDescription>
+          <Card className="border-none shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1),0_60px_150px_-30px_rgba(0,0,0,0.15)] rounded-[2rem] sm:rounded-[4rem] bg-white overflow-hidden mx-auto w-full">
+            <CardHeader className="pb-4 sm:pb-8 pt-8 sm:pt-16 px-6 sm:px-16 border-b border-slate-50">
+              <CardTitle className="text-xl sm:text-3xl font-black text-slate-900 uppercase tracking-tighter">Acesso Restrito</CardTitle>
+              <CardDescription className="text-[10px] sm:text-[12px] font-black text-slate-400 uppercase tracking-[0.15em] sm:tracking-[0.2em] mt-1 sm:mt-2">Lojas, Fábricas e Engenharia</CardDescription>
             </CardHeader>
-            <CardContent className="px-16 pb-16 pt-12">
+            <CardContent className="px-6 sm:px-16 pb-8 sm:pb-16 pt-6 sm:pt-12">
               <Tabs value={mode} onValueChange={(v) => setMode(v as any)}>
-                <TabsList className="mb-12 grid w-full grid-cols-3 p-2 bg-slate-100 rounded-[2rem] h-20 border border-slate-200 shadow-sm">
-                  <TabsTrigger value="operator" className="rounded-[1.6rem] data-[state=active]:bg-white data-[state=active]:shadow-2xl font-black text-[10px] uppercase tracking-[0.1em]">Operador</TabsTrigger>
-                  <TabsTrigger value="signin" className="rounded-[1.6rem] data-[state=active]:bg-white data-[state=active]:shadow-2xl font-black text-[10px] uppercase tracking-[0.1em]">Admin</TabsTrigger>
-                  <TabsTrigger value="signup" className="rounded-[1.6rem] data-[state=active]:bg-white data-[state=active]:shadow-2xl font-black text-[10px] uppercase tracking-[0.1em]">Registro</TabsTrigger>
+                <TabsList className="mb-8 sm:mb-12 grid w-full grid-cols-3 p-1 sm:p-2 bg-slate-100 rounded-[1.2rem] sm:rounded-[2rem] h-14 sm:h-20 border border-slate-200 shadow-sm">
+                  <TabsTrigger value="operator" className="rounded-[0.8rem] sm:rounded-[1.6rem] data-[state=active]:bg-white data-[state=active]:shadow-lg sm:data-[state=active]:shadow-2xl font-black text-[9px] sm:text-[10px] uppercase tracking-[0.05em] sm:tracking-[0.1em] px-1 overflow-hidden text-ellipsis whitespace-nowrap">Operador</TabsTrigger>
+                  <TabsTrigger value="signin" className="rounded-[0.8rem] sm:rounded-[1.6rem] data-[state=active]:bg-white data-[state=active]:shadow-lg sm:data-[state=active]:shadow-2xl font-black text-[9px] sm:text-[10px] uppercase tracking-[0.05em] sm:tracking-[0.1em] px-1 overflow-hidden text-ellipsis whitespace-nowrap">Admin</TabsTrigger>
+                  <TabsTrigger value="signup" className="rounded-[0.8rem] sm:rounded-[1.6rem] data-[state=active]:bg-white data-[state=active]:shadow-lg sm:data-[state=active]:shadow-2xl font-black text-[9px] sm:text-[10px] uppercase tracking-[0.05em] sm:tracking-[0.1em] px-1 overflow-hidden text-ellipsis whitespace-nowrap">Registro</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="operator">
