@@ -127,13 +127,16 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  
+  // Hook de notificações global
+  useNotifications();
 
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
-        <Toaster />
+        <Toaster position="top-right" closeButton richColors />
       </AuthProvider>
     </QueryClientProvider>
   );
