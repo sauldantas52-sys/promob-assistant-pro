@@ -1,25 +1,37 @@
-# Plano Industrial: Integração de Arquivos e Dossiê de Auditoria
+# Plano: Análise de XML Promob e Relatório Técnico
 
-O objetivo é aprimorar a interface de importação para que o sistema reaja imediatamente ao upload do XML do Promob e consolidar o dossiê técnico de auditoria.
+O objetivo é processar o arquivo `amanda 111.xml` para extrair os metadados industriais e apresentar uma visão técnica clara do projeto para o usuário.
+
+## Análise do Arquivo `amanda 111.xml`
+- **Projeto:** Amanda 111 (identificado via `user-uploads://amanda_111-2.xml`).
+- **Data/Hora:** 13/08/2026 às 19:50:31.
+- **Sistema:** Promob Plus Enterprise (Versão 5).
+- **Ambientes:** 2 ambientes (Cozinhas - Ambiente 3D).
+- **Conteúdo Identificado:**
+  - Módulos de Dormitórios (Armários, Bases Lineares, Laterais).
+  - Peças em MDF (Branco 15mm e 6mm).
+  - Ferragens (Dobradiças Aço sem amortecedor).
+  - Fitas de borda (0.4mm).
 
 ## Ações Propostas
 
-### 1. Automação da Importação Assistida
-- Modificar `src/routes/_authenticated.projects.import.tsx` para que a seleção do arquivo XML dispare automaticamente o avanço para a etapa de processamento.
-- Implementar a detecção imediata de arquivos complementares (PDF/DXF) durante o upload do XML.
+### 1. Extração e Resumo de Engenharia
+- Utilizar o parser industrial `parseProjectFile` para converter o XML em uma estrutura de dados operacional.
+- Identificar a hierarquia: Projetos -> Ambientes -> Módulos -> Peças.
 
-### 2. Dossiê de Auditoria Industrial 4.0
-- Refinar a função `generateAuditReport` em `src/lib/audit-report.functions.ts` para incluir a consolidação de metadados industriais:
-  - Lista de Peças (Extraída do XML).
-  - Status dos Gates de Segurança (machining_blocked).
-  - Evidências do Piloto Físico (physical_pilot_checks).
-  - Logs de Auditoria (production_logs).
+### 2. Geração de Relatório de Dossiê (Audit Report)
+- Criar uma prévia do dossiê técnico que será gerado pelo sistema:
+  - **Identificação:** Projeto Amanda 111.
+  - **Trava de Segurança:** `machining_blocked = true` (Garantindo que nenhuma peça seja enviada para a CNC sem conferência).
+  - **Lista de Materiais:** MDF Branco 15mm e 6mm.
+  - **Componentes:** 1 Módulo "Armário" com bases e laterais.
 
-### 3. Refinamento Visual Operacional
-- Padronizar os elementos de feedback (toasts e loaders) para o padrão Industrial Design System 4.0.
-- Garantir que a trava `machining_blocked = true` seja visível e auditável no dossiê gerado.
+### 3. Visualização de Metadados Industrial 4.0
+- Apresentar ao usuário uma representação visual (via log do sistema ou interface de importação) do que o sistema "vê":
+  - **Dimensões:** 700 x 2200 x 350 mm (Armário).
+  - **Peças:** Base Linear, Lateral, Fundo.
+  - **Ferragens:** Dobradiças UN 20x.
 
 ## Detalhes Técnicos
-- Utilizar `useMutation` para garantir a atomicidade da criação do projeto e inserção de módulos/peças.
-- Manter o isolamento por `company_id` através do middleware de autenticação.
-- Assegurar compatibilidade com o runtime do Cloudflare Worker (evitando bibliotecas Node-only para geração de PDF).
+- O processamento respeitará as regras de negócio de `company_id` e RLS.
+- O campo `machining_blocked` será mantido como `true` por padrão.
