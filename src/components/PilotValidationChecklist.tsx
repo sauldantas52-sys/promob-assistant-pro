@@ -208,7 +208,7 @@ export function PilotValidationChecklist({
 
   const releaseMachining = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.rpc("release_project_machining", {
+      const { error } = await supabase.rpc("release_project_machining" as any, {
         _project_id: projectId,
       });
       if (error) throw error;
