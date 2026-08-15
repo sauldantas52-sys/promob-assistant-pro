@@ -155,7 +155,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="p-4 bg-black/20 border-t border-white/5">
             <div className="flex items-center gap-3 mb-4">
               <div className="h-8 w-8 rounded-full bg-slate-800 flex items-center justify-center border border-white/10">
-                <span className="text-[10px] font-bold">{fullName?.charAt(0) || user.email.charAt(0)}</span>
+                <span className="text-[10px] font-bold">{fullName?.charAt(0) || user?.email?.charAt(0) || '?'}</span>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] font-bold truncate uppercase">{fullName?.split(' ')[0] || 'User'}</p>
