@@ -9,8 +9,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { Loader2, Upload, FileUp, CheckCircle2, ChevronRight, Boxes, ShieldCheck, AlertTriangle } from "lucide-react";
+import { Loader2, Upload, FileUp, CheckCircle2, ChevronRight, Boxes, ShieldCheck, AlertTriangle, FileText } from "lucide-react";
 import { parseProjectFile } from "@/lib/promob-import";
+
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/projects/import")({
