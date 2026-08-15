@@ -3,7 +3,7 @@ import { z } from "zod";
 
 const operatorAuthSchema = z.object({
   operatorCode: z.string().min(1),
-  pin: z.string().min(6).max(20),
+  pin: z.string().min(4).max(20), // Atualizado para 4 dígitos
 });
 
 async function hashPin(pin: string) {

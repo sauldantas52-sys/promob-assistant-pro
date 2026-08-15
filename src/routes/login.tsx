@@ -254,7 +254,7 @@ function LoginPage() {
                           />
                         </div>
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center mt-2">
-                          Use de 6 a 20 números
+                          Use de 4 a 20 números
                         </p>
                       </div>
                     </div>

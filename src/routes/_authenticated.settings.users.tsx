@@ -273,7 +273,7 @@ function UsersManagementPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>PIN Numérico (6-20 dígitos)</Label>
+                  <Label>PIN Numérico (4-20 dígitos)</Label>
                   <Input 
                     type="password"
                     inputMode="numeric"
