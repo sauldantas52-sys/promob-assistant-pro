@@ -1,9 +1,10 @@
+
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 const operatorAuthSchema = z.object({
   operatorCode: z.string().min(1),
-  pin: z.string().min(4).max(20), // Atualizado para 4 dígitos
+  pin: z.string().min(4).max(20),
 });
 
 async function hashPin(pin: string) {
@@ -25,7 +26,6 @@ export const authenticateOperator = createServerFn({ method: "POST" })
   .handler(async ({ data: { operatorCode, pin } }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    // 1. Find profile by code
     const { data: profile, error: profileError } = await supabaseAdmin
       .from("profiles")
       .select("id, pin_hash, locked_until, failed_attempts, company_id, full_name")
@@ -36,12 +36,10 @@ export const authenticateOperator = createServerFn({ method: "POST" })
       return { success: false, error: "Código do operador não encontrado." };
     }
 
-    // 2. Check lockout
     if (profile.locked_until && new Date(profile.locked_until) > new Date()) {
       return { success: false, error: "Conta bloqueada. Tente novamente mais tarde." };
     }
 
-    // 3. Verify PIN
     const isValid = await verifyPin(pin, profile.pin_hash);
 
     if (!isValid) {
@@ -53,7 +51,6 @@ export const authenticateOperator = createServerFn({ method: "POST" })
         locked_until: lockedUntil
       }).eq("id", profile.id);
 
-      // Log failure
       await supabaseAdmin.from("operator_login_logs").insert({
         profile_id: profile.id,
         operator_code: operatorCode,
@@ -67,7 +64,6 @@ export const authenticateOperator = createServerFn({ method: "POST" })
       };
     }
 
-    // 4. Success - Fetch real password
     const { data: secret, error: secretError } = await supabaseAdmin
       .from("operator_secrets")
       .select("secret_password")
@@ -78,19 +74,16 @@ export const authenticateOperator = createServerFn({ method: "POST" })
       return { success: false, error: "Erro interno: Credenciais operacionais não configuradas." };
     }
 
-    // Fetch email from auth.users (via admin)
     const { data: { user }, error: userError } = await supabaseAdmin.auth.admin.getUserById(profile.id);
     if (userError || !user) {
        return { success: false, error: "Usuário não encontrado no sistema de autenticação." };
     }
 
-    // Reset attempts
     await supabaseAdmin.from("profiles").update({
       failed_attempts: 0,
       locked_until: null
     }).eq("id", profile.id);
 
-    // Log success
     await supabaseAdmin.from("operator_login_logs").insert({
       profile_id: profile.id,
       operator_code: operatorCode,
@@ -109,7 +102,7 @@ export const setOperatorCredentials = createServerFn({ method: "POST" })
   .validator((data: unknown) => z.object({
     profileId: z.string().uuid(),
     operatorCode: z.string().min(1),
-    pin: z.string().min(6).max(20),
+    pin: z.string().min(4).max(20),
     realPassword: z.string().min(8)
   }).parse(data))
   .handler(async ({ data }) => {
@@ -132,4 +125,51 @@ export const setOperatorCredentials = createServerFn({ method: "POST" })
      if (secretError) throw secretError;
 
      return { success: true };
+  });
+
+export const createOperator = createServerFn({ method: "POST" })
+  .validator((data: unknown) => z.object({
+    email: z.string().email(),
+    fullName: z.string().min(2),
+    role: z.string(),
+    companyId: z.string().uuid(),
+    operatorCode: z.string().min(1),
+    pin: z.string().min(4).max(20),
+    internalPassword: z.string().min(12)
+  }).parse(data))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // 1. Create Supabase Auth user with a strong internal password
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email: data.email,
+      password: data.internalPassword,
+      email_confirm: true,
+      user_metadata: { full_name: data.fullName }
+    });
+
+    if (authError) throw authError;
+    const userId = authData.user.id;
+
+    // 2. Set profile & role
+    await supabaseAdmin.from("profiles").insert({
+      id: userId,
+      company_id: data.companyId,
+      full_name: data.fullName,
+      operator_code: data.operatorCode,
+      pin_hash: await hashPin(data.pin)
+    });
+
+    await supabaseAdmin.from("user_roles").insert({
+      user_id: userId,
+      role: data.role as any
+    });
+
+    // 3. Store internal password in operator_secrets
+    await supabaseAdmin.from("operator_secrets").insert({
+      profile_id: userId,
+      secret_password: data.internalPassword
+    });
+
+    return { success: true, userId };
   });
