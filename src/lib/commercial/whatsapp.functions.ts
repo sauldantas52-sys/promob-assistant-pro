@@ -11,7 +11,7 @@ function digitsOnly(str: string) {
   return str.replace(/\D/g, "");
 }
 
-export const sendOrderToWhatsApp = createServerFn({ method: "POST" })
+export const sendOutsourcingOrderWhatsApp = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((data) => sendOrderToWhatsAppSchema.parse(data))
   .handler(async ({ data, context }) => {

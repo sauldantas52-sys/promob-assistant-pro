@@ -64,9 +64,9 @@ function PickingPage() {
 
       return data.map((project) => ({
         ...project,
-        project_site: sitesResult.data.find((site) => site.project_id === project.id) ?? null,
+        project_site: sitesResult.data.find((site) => ((site as any).project_id) === project.id) ?? null,
         next_appointment:
-          appointmentsResult.data.find((appointment) => appointment.project_id === project.id) ??
+          appointmentsResult.data.find((appointment) => ((appointment as any).project_id) === project.id) ??
           null,
       }));
     },
