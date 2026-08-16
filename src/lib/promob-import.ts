@@ -171,6 +171,8 @@ function parsePartNode(p: Element): ParsedPart {
       edge_2: attr(p, ["EDGE2", "BORDA2"]),
       edge_3: attr(p, ["EDGE3", "BORDA3"]),
       edge_4: attr(p, ["EDGE4", "BORDA4"]),
+      drill_xml: attr(p, ["DRILL", "FUROS", "HOLES"]),
+      tag_industrial: attr(p, ["TAG", "ETIQUETA", "BARCODE"]),
     }
   };
 }
