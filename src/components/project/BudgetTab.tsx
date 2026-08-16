@@ -64,7 +64,7 @@ export function BudgetTab({ projectId }: { projectId: string }) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-black">{formatCurrency(quote?.total_amount)}</div>
+            <div className="text-4xl font-black">{formatCurrency(quote?.total_value)}</div>
             <p className="text-xs mt-2 opacity-70 italic">
               {quote ? `Baseado na revisão ${quote.version || '1'}` : "*Aguardando cálculo técnico"}
             </p>
@@ -98,7 +98,10 @@ export function BudgetTab({ projectId }: { projectId: string }) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-black text-slate-900">{formatCurrency(quote?.tax_amount)}</div>
+            {/* 15% estimated if tax_value not available */}
+            <div className="text-2xl font-black text-slate-900">
+              {formatCurrency(quote?.total_value ? quote.total_value * 0.15 : null)}
+            </div>
             <p className="text-xs mt-1 text-slate-400">ICMS/IPI + Encargos Industriais</p>
           </CardContent>
         </Card>
@@ -130,7 +133,7 @@ export function BudgetTab({ projectId }: { projectId: string }) {
                 <TableRow>
                   <TableCell className="font-bold">Total do Projeto</TableCell>
                   <TableCell>{quote.id.slice(0, 8)}</TableCell>
-                  <TableCell className="text-right font-black">{formatCurrency(quote.total_amount)}</TableCell>
+                  <TableCell className="text-right font-black">{formatCurrency(quote.total_value)}</TableCell>
                 </TableRow>
               ) : (
                 <TableRow>
