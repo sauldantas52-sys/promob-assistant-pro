@@ -135,30 +135,4 @@ revoke all on function public.confirm_store_credit_transaction(uuid) from public
 grant execute on function public.prepare_store_credit_purchase(uuid, uuid, numeric, uuid) to authenticated;
 grant execute on function public.confirm_store_credit_transaction(uuid) to authenticated;
 
--- Storage policies for commercial-documents
-create policy "Authorized roles read commercial documents"
-on storage.objects for select to authenticated
-using (
-  bucket_id = 'commercial-documents'
-  and (storage.foldername(name))[1] = public.current_company_id()::text
-  and (
-    public.can_manage_commercial()
-    or public.can_manage_projects()
-    or public.has_role(auth.uid(), 'auditor'::public.app_role)
-  )
-);
-create policy "Authorized roles upload commercial documents"
-on storage.objects for insert to authenticated
-with check (
-  bucket_id = 'commercial-documents'
-  and (storage.foldername(name))[1] = public.current_company_id()::text
-  and (public.can_manage_commercial() or public.can_manage_projects())
-);
-create policy "Authorized roles remove own pending commercial documents"
-on storage.objects for delete to authenticated
-using (
-  bucket_id = 'commercial-documents'
-  and owner_id = auth.uid()::text
-  and (storage.foldername(name))[1] = public.current_company_id()::text
-  and (public.can_manage_commercial() or public.can_manage_projects())
-);
+-- Canonical storage policies are created by 20260818000001.
