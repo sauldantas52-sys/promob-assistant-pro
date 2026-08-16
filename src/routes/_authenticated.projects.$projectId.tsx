@@ -39,6 +39,8 @@ import { PreliminaryCutPlanTab } from "@/components/project/PreliminaryCutPlanTa
 import { VisualEstimateTab } from "@/components/project/VisualEstimateTab";
 import { AuditIntegrationTab } from "@/components/project/AuditIntegrationTab";
 import { PhysicalChecklistFlow } from "@/components/PhysicalChecklistFlow";
+import { Technical3DView } from "@/components/project/Technical3DView";
+import { parseDXF } from "@/lib/dxf-parser";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
