@@ -2493,6 +2493,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      import_client_project: {
+        Args: {
+          _files: Json
+          _loose_parts: Json
+          _modules: Json
+          _project: Json
+          _project_id: string
+        }
+        Returns: string
+      }
       prepare_store_credit_purchase: {
         Args: {
           _account_id: string
