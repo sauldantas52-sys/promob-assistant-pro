@@ -628,6 +628,13 @@ function ProjectDetail() {
           </TabsList>
         </div>
 
+        <TabsContent value="technical3d" className="mt-6">
+          <Technical3DView 
+            geometries={latestDxfStored ? parseDXF("DXF_CONTENT_PLACEHOLDER") : []} 
+            projectName={project.data?.name} 
+          />
+        </TabsContent>
+
         <TabsContent value="modules" className="mt-6">
           <Card>
             <CardContent className="p-0">
