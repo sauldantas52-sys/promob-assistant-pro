@@ -345,16 +345,36 @@ function ImportPage() {
         );
         if (importError) throw importError;
         // Auditoria Pós-Importação 4.0: Validar persistência real
-        const { data: audit, error: auditError } = await supabase
+        const { data: projectAudit, error: projectError } = await supabase
+          .from("projects")
+          .select("id")
+          .eq("id", projectId)
+          .maybeSingle();
+
+        if (projectError || !projectAudit) {
+           throw new Error("Falha na persistência industrial: o projeto não foi detectado no banco de dados.");
+        }
+
+        const { data: partsAudit, error: partsError } = await supabase
           .from("parts")
           .select("id", { count: "exact", head: true })
-          .eq("project_id", importedProjectId);
+          .eq("project_id", projectId);
         
-        if (auditError || !audit || audit.length === 0) {
-           throw new Error("Falha na persistência industrial: o projeto foi criado mas as peças não foram detectadas no banco de dados.");
+        const hasModules = result.modules.length > 0 || result.loose_parts.length > 0;
+        if (hasModules && (partsError || !partsAudit || partsAudit.length === 0)) {
+           throw new Error(`Falha na persistência industrial: o XML possui itens (${result.modules.length} módulos), mas nenhuma peça foi gravada no banco.`);
+        }
+
+        const { data: filesAudit } = await supabase
+          .from("project_files")
+          .select("id")
+          .eq("project_id", projectId);
+        
+        if (!filesAudit || filesAudit.length < preparedFiles.length) {
+          throw new Error(`Falha na persistência industrial: foram enviados ${preparedFiles.length} arquivos, mas apenas ${filesAudit?.length || 0} foram registrados.`);
         }
         
-        return importedProjectId;
+        return projectId;
       } catch (error) {
         if (rpcAttempted) {
           const { data: committedProject, error: verificationError } = await supabase
