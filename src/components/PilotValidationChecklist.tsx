@@ -136,6 +136,7 @@ const CHECK_EVIDENCE: Record<string, { source: string; fileTypes?: string[] }> =
   lista_corte: { source: "cut_plan_document", fileTypes: ["lista_corte_pdf"] },
   nesting_dxf: { source: "nesting_dxf", fileTypes: ["dxf_conferencia"] },
   materiais: { source: "promob_xml", fileTypes: ["xml"] },
+  imagem_referencia: { source: "promob_xml", fileTypes: ["imagem_referencia"] },
   documentacao_tecnica: {
     source: "technical_document",
     fileTypes: ["cotas_pdf", "dxf_conferencia"],
@@ -334,7 +335,9 @@ export function PilotValidationChecklist({
       <CardContent className="p-8 space-y-10">
         {/* Evidence Matrix 4.0 */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 pb-6 border-b border-slate-100">
-          {Object.entries(CHECK_EVIDENCE).filter(([_, ev]) => ev.fileTypes).map(([key, ev]) => {
+          {Object.entries(CHECK_EVIDENCE)
+            .filter(([key, ev]) => ev.fileTypes && key !== 'imagem_referencia') // Imagem é visual apenas, não gate técnico rígido no grid
+            .map(([key, ev]) => {
             const hasFile = projectFiles.some(f => 
               (f.file_type && ev.fileTypes?.includes(f.file_type)) || 
               (f.file_name && ev.fileTypes?.some(type => f.file_name.toLowerCase().includes(type.replace('_pdf', '').replace('_', ''))))
