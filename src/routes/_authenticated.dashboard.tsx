@@ -47,6 +47,7 @@ function DashboardContent() {
       const { data, error } = await supabase
         .from("projects")
         .select("id, name, client_name, status, environment, created_at, machining_blocked, is_validated, company_id")
+        .eq("company_id", companyId)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
