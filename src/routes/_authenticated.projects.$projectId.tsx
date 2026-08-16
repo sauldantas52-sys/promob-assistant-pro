@@ -611,6 +611,7 @@ function ProjectDetail() {
         <div className="max-w-full overflow-x-auto overscroll-x-contain rounded-lg border border-slate-200 bg-slate-100 [scrollbar-width:thin]">
           <TabsList className="flex h-12 w-max min-w-full justify-start rounded-none bg-transparent p-1">
             <TabTrigger value="modules" icon={LayoutGrid} label="Módulos" />
+            <TabTrigger value="technical3d" icon={Box} label="Gêmeo DXF" />
             <TabTrigger value="parts" icon={ClipboardList} label="Lista Técnica" />
             <TabTrigger value="commercial" icon={FileText} label="Comercial" />
             <TabTrigger value="cutplan" icon={Scissors} label="Plano de Corte" />
