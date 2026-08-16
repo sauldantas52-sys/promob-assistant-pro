@@ -57,22 +57,44 @@ export const generateAuditReport = createServerFn({ method: "POST" })
           { 
             title: "Engenharia e XML", 
             status: "Auditado",
-            details: `Total de itens: ${parts?.length || 0}. Resumo: ${JSON.stringify(partsSummary)}`
+            details: `Total de itens: ${parts?.length || 0}. Resumo: ${JSON.stringify(partsSummary)}`,
+            parts: parts?.map(p => ({
+              nome: p.name,
+              material: p.material,
+              dimensoes: `${p.width_mm}x${p.length_mm}x${p.thickness_mm}`,
+              fita: p.edge_banding,
+              metadata: p.metadata
+            }))
           },
           { 
             title: "Gates de Segurança Industrial", 
             status: project?.is_validated ? "Aprovado" : "Em Auditoria",
-            checks: validationChecks?.length || 0
+            items: validationChecks?.map(c => ({
+              tipo: c.check_type,
+              status: c.is_completed ? "Validado" : "Pendente",
+              data: c.completed_at,
+              notas: c.notes
+            }))
           },
           { 
             title: "Evidências do Piloto Físico", 
             count: physicalChecks?.length || 0,
-            status: physicalChecks?.length ? "Em Andamento" : "Não Iniciado"
+            status: physicalChecks?.length ? "Em Andamento" : "Não Iniciado",
+            evidencias: physicalChecks?.map(c => ({
+              etapa: c.check_type,
+              observacao: c.notes,
+              anexo: c.evidence_photo
+            }))
           },
           { 
             title: "Histórico de Auditoria e Logs", 
             logsCount: logs?.length || 0,
-            lastAction: logs?.[0]?.action
+            lastAction: logs?.[0]?.action,
+            logs: logs?.slice(0, 20).map(l => ({
+              data: l.created_at,
+              acao: l.action,
+              detalhes: l.notes
+            }))
           }
         ]
       };
