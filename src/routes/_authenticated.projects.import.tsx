@@ -187,7 +187,7 @@ function ImportPage() {
       setIsProcessing(true);
 
       // Parse before persistence so malformed XML never creates a partial project.
-      const result = await parseProjectFile(files.xml);
+      const result = parsePromobXML(await files.xml.text());
       const dxfFile = classification.dxf;
       if (!dxfFile) throw new Error("O arquivo DXF é obrigatório.");
       const dxfGeometry = parseDXF(await dxfFile.text());
