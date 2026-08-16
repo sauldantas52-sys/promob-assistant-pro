@@ -206,10 +206,10 @@ function ImportPage() {
           summary: {
             modules: result.modules.length,
             parts:
-              result.modules.reduce((total, module) => total + module.parts.length, 0) +
-              result.looseParts.length,
-            looseParts: result.looseParts.length,
-            warnings: result.warnings,
+              result.modules.reduce((total: number, module: PromobModule) => total + module.parts.length, 0) +
+              result.loose_parts.length,
+            looseParts: result.loose_parts.length,
+            warnings: [],
           },
         },
         { file: classification.cotas, type: "cotas_pdf", summary: { source: "pasta_cliente" } },
