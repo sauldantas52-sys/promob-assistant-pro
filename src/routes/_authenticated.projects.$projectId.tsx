@@ -86,7 +86,7 @@ import { MaintenancePhoto } from "@/components/MaintenancePhoto";
 import { supabase } from "@/integrations/supabase/client";
 import { Constants, type Enums, type Tables } from "@/integrations/supabase/types";
 import { ProjectShippingTab } from "@/components/ProjectShippingTab";
-import { parseProjectFile } from "@/lib/promob-import";
+import { parsePromobXML } from "@/lib/promob-import";
 import { projectStatuses, statusLabel, statusTone } from "@/lib/project-status";
 import { useAuth } from "@/lib/auth";
 import { hasPermission } from "@/lib/permissions";
