@@ -1695,6 +1695,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_manage_commercial: { Args: never; Returns: boolean }
+      can_manage_projects: { Args: never; Returns: boolean }
       check_must_change_password: {
         Args: { _user_id: string }
         Returns: boolean
