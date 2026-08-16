@@ -33,7 +33,7 @@ export const sendOutsourcingOrderWhatsApp = createServerFn({ method: "POST" })
       throw new Error("Seu perfil não pode enviar ordens terceirizadas.");
     }
 
-    const { data: order, error: orderError } = (await supabase) as anyAdmin
+    const { data: order, error: orderError } = await (supabaseAdmin as any)
       .from("outsourcing_orders" as any)
       .select(
         "id, company_id, project_id, order_number, status, message_text, xml_file_id, supplier_id, suppliers(name, whatsapp, company_id), projects(company_id), project_files(file_name, storage_path, file_type, project_id)",
