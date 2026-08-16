@@ -153,7 +153,8 @@ const CHECK_EVIDENCE: Record<string, { source: string; fileTypes?: string[] }> =
 export function PilotValidationChecklist({
   projectId,
   isMachiningBlocked,
-}: PilotValidationChecklistProps) {
+  projectFiles = [],
+}: PilotValidationChecklistProps & { projectFiles?: any[] }) {
   const queryClient = useQueryClient();
   const { role } = useAuth();
   const canApprove = hasPermission(role, "projects", "approve");
@@ -325,6 +326,25 @@ export function PilotValidationChecklist({
         </div>
       </CardHeader>
       <CardContent className="p-8 space-y-10">
+        {/* Evidence Matrix 4.0 */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 pb-6 border-b border-slate-100">
+          {Object.entries(CHECK_EVIDENCE).filter(([_, ev]) => ev.fileTypes).map(([key, ev]) => {
+            const hasFile = projectFiles.some(f => ev.fileTypes?.includes(f.file_type));
+            const label = CHECK_ITEMS.find(i => i.id === key)?.label || key;
+            return (
+              <div key={key} className={cn(
+                "flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all",
+                hasFile ? "bg-emerald-50 border-emerald-100 text-emerald-700" : "bg-slate-50 border-slate-100 text-slate-400"
+              )}>
+                {hasFile ? <ShieldCheck className="h-4 w-4 mb-1" /> : <AlertTriangle className="h-4 w-4 mb-1" />}
+                <span className="text-[8px] font-black uppercase text-center leading-tight tracking-tighter">
+                  {label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
         <div className="grid gap-10">
           {GATES.map((gate) => {
             const gateItems = gate.items;
