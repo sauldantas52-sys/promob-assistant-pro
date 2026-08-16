@@ -29,6 +29,7 @@ import {
   ArrowRightLeft,
   CheckSquare,
   type LucideIcon,
+  Box,
 } from "lucide-react";
 import { Parser } from "@json2csv/plainjs";
 import { EngineeringTab } from "@/components/EngineeringTab";
