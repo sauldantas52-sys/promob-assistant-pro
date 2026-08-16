@@ -1,31 +1,29 @@
-# Plano: Monta AI — Promob Assistant Pro (Consolidação Industrial)
+# Plano de Sincronização e Auditoria — Monta AI 4.0
 
-O objetivo é consolidar a plataforma como a solução definitiva para o fluxo Promob, utilizando os dados reais do projeto "Amanda 111" para validar o fluxo de produção e auditoria.
+O objetivo deste plano é finalizar a sincronização da infraestrutura de banco de dados e auditoria do projeto "Promob Assistant Pro" (ID 5e1598ce-5020-41f1-8d67-19d1bd2c2bf4), garantindo a conformidade com o **Industrial Design System 4.0** e os novos contratos comerciais.
 
-## Análise do Projeto "Amanda 111"
-O sistema identificou a seguinte estrutura no arquivo `amanda 111.xml`:
-- **Hierarquia Industrial:** 1 Módulo Principal (Armário) com sub-itens (Laterais, Bases, Fundo).
-- **Materiais:** Predomínio de MDF Branco 15mm e 6mm.
-- **Ferragens:** Kit de 20 dobradiças (Acessórios Avulsos).
-- **Segurança:** O sistema aplicou automaticamente `machining_blocked = true` em todas as peças estruturais.
+## 1. Infraestrutura de Armazenamento
+- Criar o bucket privado `commercial-documents` no Lovable Cloud.
+- Este bucket armazenará propostas, contratos e evidências financeiras (PDF/Imagens).
 
-## Ações Propostas
+## 2. Sincronização de Banco de Dados (Migrations)
+Executar sequencialmente as migrations extraídas do commit `7d5e007`:
+- **Migração 02**: Extensão dos fluxos operacionais para o papel de `projetista`.
+- **Migração 03**: Implementação da função RPC `create_complete_client_project` (criação atômica de projeto + cliente + endereço + ambientes).
+- **Migração 04**: Hardening de evidências industriais (trava de segurança `machining_blocked` vinculada a arquivos técnicos).
+- **Migração 05**: Função RPC para importação de saldos legados (`import_legacy_store_credits`).
+- **Migração 06**: Refinamento de segurança e validação de tenant (`company_id`) em todas as novas tabelas comerciais.
 
-### 1. Reforço de Branding "Promob Assistant"
-- Atualizar o Dashboard principal para destacar o status "Promob Assistant Pro Ativo".
-- Incluir indicadores de "Saúde do XML" (alertas para medidas inconsistentes ou materiais não cadastrados).
-
-### 2. Fluxo de Importação Wizard 4.0
-- Integrar a detecção automática de ambientes do XML (ex: "Cozinhas - Ambiente 3D") para categorizar os módulos no banco de dados.
-- Adicionar uma etapa de "Confirmação Técnica" onde o auditor visualiza o resumo de peças (Amanda 111: 5 peças estruturais, 20 ferragens) antes de liberar para o Wallboard.
-
-### 3. Dossiê de Auditoria e QR Code
-- Gerar o Dossiê Técnico de Auditoria para o projeto "Amanda 111", consolidando:
-  - Mapa de Corte (referenciando o material MDF Branco).
-  - Etiquetas Industriais com QR Code para cada peça (Base, Lateral, Fundo).
-  - Log de Auditoria registrando o upload e o bloqueio preventivo de usinagem.
+## 3. Validação e Auditoria Final
+Confirmar a existência e o funcionamento dos seguintes componentes no banco:
+- Tabela `public.suppliers` (infraestrutura de fornecedores).
+- Tabela `public.store_credit_accounts` (gestão de créditos industriais).
+- Função `public.import_legacy_store_credits(jsonb)` (migração de dados beta).
 
 ## Detalhes Técnicos
-- **Segurança:** Manter o isolamento por `company_id` e a trava `machining_blocked`.
-- **Integridade:** Validar decimais (ex: 1080,6mm) para evitar erros em máquinas CNC.
-- **UI:** Aplicar o "Industrial Design System 4.0" em todas as novas visualizações de dados.
+- As migrations garantem isolamento total por `company_id`.
+- O gatilho `enforce_project_lock_changes` impedirá a liberação de usinagem sem a presença de evidências técnicas (XML/DXF).
+- O papel de `projetista` terá permissões equivalentes ao `escritorio` no fluxo de importação e validação técnica.
+
+---
+**Aviso:** Nenhuma alteração no código TypeScript ou nas integrações de terceiros (WhatsApp) será realizada nesta etapa. Os dados existentes serão preservados sem reset de banco.
