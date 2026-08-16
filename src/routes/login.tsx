@@ -87,7 +87,7 @@ function LoginPage() {
       }
 
       // Proceder com o login real no Supabase Auth usando as credenciais retornadas
-      await signIn(result.email!, result.password!);
+      await signIn(result.email!, result.password ?? pin);
       toast.success("Acesso operacional concedido!");
       navigate({ to: "/dashboard" });
     } catch (error) {

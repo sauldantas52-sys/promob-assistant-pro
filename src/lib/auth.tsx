@@ -2,7 +2,8 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-export type AppRole = "admin" | "escritorio" | "fabrica" | "montador" | "auditor";
+export type AppRole =
+  "admin" | "projetista" | "comercial" | "escritorio" | "fabrica" | "montador" | "auditor";
 
 type AuthState = {
   user: User | null;
@@ -50,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       typeof pendingCompanyName === "string" &&
       typeof pendingFullName === "string"
     ) {
-      const { error: bootstrapError } = await supabase.rpc("bootstrap_company" as any, {
+      const { error: bootstrapError } = await supabase.rpc("bootstrap_company", {
         _company_name: pendingCompanyName,
         _full_name: pendingFullName,
       });
@@ -166,6 +167,8 @@ export function useAuth() {
 
 export const roleLabels: Record<AppRole, string> = {
   admin: "Administrador",
+  projetista: "Projetista",
+  comercial: "Comercial",
   escritorio: "Escritório / Projetos",
   fabrica: "Fábrica / Produção",
   montador: "Montador",

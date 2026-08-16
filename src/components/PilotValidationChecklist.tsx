@@ -87,9 +87,9 @@ const GATES = [
       },
       {
         id: "tags_skp",
-        label: "Tags Industriais (00-18)",
+        label: "Hierarquia e Módulos Promob",
         icon: FileSearch,
-        description: "Bridge SketchUp",
+        description: "Estrutura confirmada no XML",
       },
     ],
   },
@@ -118,7 +118,7 @@ const GATES = [
       },
       {
         id: "grupos_completos",
-        label: "Grupos G1/G2/G3/AV",
+        label: "Módulos G1/G2/G3 e Avulsos",
         icon: LayoutGrid,
         description: "Estrutura física completa",
       },
@@ -128,6 +128,27 @@ const GATES = [
 
 // Flat items for easy lookup
 const CHECK_ITEMS = GATES.flatMap((g) => g.items);
+
+const CHECK_EVIDENCE: Record<string, { source: string; fileTypes?: string[] }> = {
+  xml_valido: { source: "promob_xml", fileTypes: ["xml"] },
+  lista_corte: { source: "cut_plan_document", fileTypes: ["lista_corte_pdf"] },
+  nesting_dxf: { source: "nesting_dxf", fileTypes: ["dxf_conferencia"] },
+  materiais: { source: "promob_xml", fileTypes: ["xml"] },
+  documentacao_tecnica: {
+    source: "technical_document",
+    fileTypes: ["cotas_pdf", "dxf_conferencia"],
+  },
+  cotas_furacao: {
+    source: "technical_document",
+    fileTypes: ["cotas_pdf", "dxf_conferencia"],
+  },
+  bitolas: { source: "promob_xml", fileTypes: ["xml"] },
+  tags_skp: { source: "promob_xml", fileTypes: ["xml"] },
+  usinagem_liberada: { source: "operational_confirmation" },
+  pecas_conferidas: { source: "operational_confirmation" },
+  ferragens_conferidas: { source: "operational_confirmation" },
+  grupos_completos: { source: "operational_confirmation" },
+};
 
 export function PilotValidationChecklist({
   projectId,
@@ -152,6 +173,18 @@ export function PilotValidationChecklist({
     },
   });
 
+  const { data: evidenceFiles = [] } = useQuery({
+    queryKey: ["validation-evidence-files", projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("project_files")
+        .select("id, file_type, file_name")
+        .eq("project_id", projectId);
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const toggleCheck = useMutation({
     mutationFn: async ({ type, completed }: { type: string; completed: boolean }) => {
       const {
@@ -159,14 +192,30 @@ export function PilotValidationChecklist({
       } = await supabase.auth.getUser();
       if (!user) throw new Error("Não autenticado");
 
-      const { error } = await supabase.from("validation_checks").upsert({
-        project_id: projectId,
-        check_type: type,
-        is_completed: completed,
-        completed_by: user.id,
-        completed_at: completed ? new Date().toISOString() : null,
-        updated_at: new Date().toISOString(),
-      });
+      const evidence = CHECK_EVIDENCE[type];
+      if (!evidence) throw new Error("Regra de evidência não configurada.");
+      const evidenceFile = evidence.fileTypes
+        ? evidenceFiles.find(
+            (file) => file.file_type && evidence.fileTypes?.includes(file.file_type),
+          )
+        : null;
+      if (completed && evidence.fileTypes && !evidenceFile) {
+        throw new Error("O arquivo técnico exigido não está armazenado neste projeto.");
+      }
+
+      const { error } = await supabase.from("validation_checks").upsert(
+        {
+          project_id: projectId,
+          check_type: type,
+          is_completed: completed,
+          completed_by: user.id,
+          completed_at: completed ? new Date().toISOString() : null,
+          evidence_source: completed ? evidence.source : null,
+          evidence_file_id: completed ? (evidenceFile?.id ?? null) : null,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "project_id,check_type" },
+      );
 
       if (error) throw error;
 
@@ -208,7 +257,7 @@ export function PilotValidationChecklist({
 
   const releaseMachining = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.rpc("release_project_machining" as any, {
+      const { error } = await supabase.rpc("release_project_machining", {
         _project_id: projectId,
       });
       if (error) throw error;
@@ -222,21 +271,26 @@ export function PilotValidationChecklist({
     onError: (error: Error) => toast.error(error.message),
   });
 
-  const allCompleted = CHECK_ITEMS.every(
-    (item) => checks?.find((c) => c.check_type === item.id)?.is_completed,
-  );
+  const isVerified = (checkType: string) => {
+    const check = checks?.find((candidate) => candidate.check_type === checkType);
+    const evidence = CHECK_EVIDENCE[checkType];
+    return Boolean(
+      check?.is_completed &&
+      evidence &&
+      check.evidence_source === evidence.source &&
+      (!evidence.fileTypes || check.evidence_file_id),
+    );
+  };
+
+  const allCompleted = CHECK_ITEMS.every((item) => isVerified(item.id));
 
   const gate1Items = GATES.find((g) => g.id === "corte_borda")?.items || [];
-  const gate1Completed = gate1Items.every(
-    (item) => checks?.find((c) => c.check_type === item.id)?.is_completed,
-  );
+  const gate1Completed = gate1Items.every((item) => isVerified(item.id));
 
   const gate2Items = GATES.find((g) => g.id === "usinagem")?.items || [];
-  const isGate2Done = gate2Items.every(
-    (item) => checks?.find((c) => c.check_type === item.id)?.is_completed,
-  );
+  const isGate2Done = gate2Items.every((item) => isVerified(item.id));
 
-  const completedCount = checks?.filter((c) => c.is_completed).length || 0;
+  const completedCount = CHECK_ITEMS.filter((item) => isVerified(item.id)).length;
 
   if (isLoading) return null;
 
@@ -248,7 +302,7 @@ export function PilotValidationChecklist({
       )}
     >
       <CardHeader className="pb-4 pt-8 px-8 border-b border-white/50">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
             <CardTitle className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 flex items-center gap-2">
               <ShieldCheck
@@ -274,9 +328,7 @@ export function PilotValidationChecklist({
         <div className="grid gap-10">
           {GATES.map((gate) => {
             const gateItems = gate.items;
-            const gateCompletedCount =
-              checks?.filter((c) => gateItems.some((i) => i.id === c.check_type) && c.is_completed)
-                .length || 0;
+            const gateCompletedCount = gateItems.filter((item) => isVerified(item.id)).length;
             const isGateDone = gateCompletedCount === gateItems.length;
 
             return (
@@ -311,7 +363,7 @@ export function PilotValidationChecklist({
 
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                   {gateItems.map((item) => {
-                    const isDone = checks?.find((c) => c.check_type === item.id)?.is_completed;
+                    const isDone = isVerified(item.id);
                     const Icon = item.icon;
 
                     return (
@@ -388,7 +440,7 @@ export function PilotValidationChecklist({
         )}
 
         {isGate2Done && isMachiningBlocked && (
-          <div className="flex items-center gap-4 p-6 rounded-[1.5rem] bg-blue-50 border-2 border-blue-100 text-blue-900">
+          <div className="flex flex-col gap-4 p-6 rounded-[1.5rem] bg-blue-50 border-2 border-blue-100 text-blue-900 sm:flex-row sm:items-center">
             <ShieldCheck className="h-8 w-8 text-blue-600 shrink-0" />
             <div className="space-y-1">
               <p className="text-[11px] font-black uppercase tracking-[0.2em]">Gate 2 concluído</p>
@@ -398,7 +450,7 @@ export function PilotValidationChecklist({
               </p>
             </div>
             <Button
-              className="ml-auto shrink-0 bg-blue-700 text-white hover:bg-blue-800"
+              className="w-full shrink-0 bg-blue-700 text-white hover:bg-blue-800 sm:ml-auto sm:w-auto"
               disabled={!canApprove || releaseMachining.isPending}
               onClick={() => releaseMachining.mutate()}
             >
@@ -409,7 +461,7 @@ export function PilotValidationChecklist({
 
         {gate1Completed && !isGate2Done && (
           <div className="space-y-4 p-6 rounded-[2rem] bg-slate-50 border-2 border-slate-200">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-4 text-slate-900">
                 <History className="h-6 w-6 text-slate-400" />
                 <div className="space-y-1">

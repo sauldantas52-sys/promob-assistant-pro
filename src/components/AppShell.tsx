@@ -34,25 +34,25 @@ const navItems = [
     to: "/dashboard",
     label: "Comando",
     icon: LayoutDashboard,
-    roles: ["admin", "escritorio", "fabrica", "montador", "auditor"],
+    roles: ["admin", "projetista", "comercial", "escritorio", "fabrica", "montador", "auditor"],
   },
   {
     to: "/projects",
     label: "Projetos",
     icon: FolderKanban,
-    roles: ["admin", "escritorio", "auditor"],
+    roles: ["admin", "projetista", "comercial", "escritorio", "auditor"],
   },
   {
     to: "/business",
-    label: "Negócio 360",
+    label: "Comercial 360",
     icon: Briefcase,
-    roles: ["admin", "escritorio", "auditor"],
+    roles: ["admin", "projetista", "comercial", "escritorio", "auditor"],
   },
   {
     to: "/projects/import",
     label: "Pasta do Cliente",
     icon: Upload,
-    roles: ["admin", "escritorio"],
+    roles: ["admin", "projetista", "escritorio"],
   },
   { to: "/production", label: "Produção", icon: Factory, roles: ["admin", "fabrica", "auditor"] },
   {
@@ -73,9 +73,9 @@ const navItems = [
     to: "/technical-assistance",
     label: "Assistência",
     icon: AlertTriangle,
-    roles: ["admin", "escritorio", "montador", "auditor"],
+    roles: ["admin", "projetista", "escritorio", "montador", "auditor"],
   },
-  { to: "/settings/users", label: "Usuários", icon: Users, roles: ["admin", "escritorio"] },
+  { to: "/settings/users", label: "Usuários", icon: Users, roles: ["admin"] },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {

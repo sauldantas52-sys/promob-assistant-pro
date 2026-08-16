@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
+  BookOpen,
   Boxes,
   CheckCircle2,
   ChevronRight,
@@ -19,6 +20,8 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { AssemblyLabel } from "@/components/AssemblyLabel";
+import { AssemblyNotebook } from "@/components/assembly/AssemblyNotebook";
+import { ProjectFieldSchedule } from "@/components/assembly/ProjectFieldSchedule";
 import { AppShell } from "@/components/AppShell";
 import { ConferenceDialog } from "@/components/ConferenceDialog";
 import { Badge } from "@/components/ui/badge";
@@ -55,7 +58,14 @@ type AssemblyGroup = Pick<
 >;
 type AssemblyModule = Pick<
   Database["public"]["Tables"]["modules"]["Row"],
-  "id" | "name" | "width_mm" | "height_mm" | "depth_mm" | "quantity" | "is_completed"
+  | "id"
+  | "name"
+  | "environment"
+  | "width_mm"
+  | "height_mm"
+  | "depth_mm"
+  | "quantity"
+  | "is_completed"
 >;
 type AssemblyPart = Pick<
   Database["public"]["Tables"]["parts"]["Row"],
@@ -72,6 +82,7 @@ type AssemblyPart = Pick<
   | "edge_banding"
   | "storage_location"
   | "assembly_group_id"
+  | "module_id"
 >;
 type AssemblyProject = { id: string; status: string | null; parts: AssemblyPart[] | null };
 
@@ -105,15 +116,45 @@ function AssemblyContent() {
           `
           id, name, client_name, environment, status,
           modules(id, name, environment, width_mm, height_mm, depth_mm, quantity, is_completed, data_source),
-          parts(id, name, kind, quantity, unit, is_completed, material, thickness_mm, width_mm, length_mm, edge_banding, storage_location, assembly_group_id, visibility_type, data_source),
+          parts(id, name, kind, quantity, unit, is_completed, material, thickness_mm, width_mm, length_mm, edge_banding, storage_location, assembly_group_id, module_id, visibility_type, data_source),
           assembly_groups(id, module_id, code, name, color, is_locked, lock_reason, conference_status, sealed_at, sealed_by),
+          project_versions(thumbnail_url, is_active, status),
           maintenance_requests(*)
         `,
         )
         .in("status", ["separacao", "conferencia", "expedicao", "montagem", "assistencia"])
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data;
+      if (data.length === 0) return [];
+
+      const projectIds = data.map((project) => project.id);
+      const [sitesResult, appointmentsResult] = await Promise.all([
+        supabase
+          .from("project_sites")
+          .select(
+            "project_id, street, number, complement, district, city, state, postal_code, reference, contact_name, contact_phone",
+          )
+          .in("project_id", projectIds),
+        supabase
+          .from("project_appointments")
+          .select("project_id, kind, scheduled_at, arrival_time, status")
+          .in("project_id", projectIds)
+          .in("kind", ["montagem", "entrega"])
+          .neq("status", "cancelado")
+          .neq("status", "concluido")
+          .gte("scheduled_at", new Date().toISOString())
+          .order("scheduled_at", { ascending: true }),
+      ]);
+      if (sitesResult.error) throw sitesResult.error;
+      if (appointmentsResult.error) throw appointmentsResult.error;
+
+      return data.map((project) => ({
+        ...project,
+        project_site: sitesResult.data.find((site) => site.project_id === project.id) ?? null,
+        next_appointment:
+          appointmentsResult.data.find((appointment) => appointment.project_id === project.id) ??
+          null,
+      }));
     },
   });
 
@@ -183,6 +224,26 @@ function AssemblyContent() {
           {list.map((project) => {
             const modules = project.modules ?? [];
             const groups = project.assembly_groups ?? [];
+            const sortedModules = [...modules].sort((left, right) => {
+              const leftCode = groups.find((group) => group.module_id === left.id)?.code;
+              const rightCode = groups.find((group) => group.module_id === right.id)?.code;
+              return (
+                compareGroupCodes(leftCode, rightCode) ||
+                left.name.localeCompare(right.name, "pt-BR")
+              );
+            });
+            const sortedGroups = [...groups].sort((left, right) =>
+              compareGroupCodes(left.code, right.code),
+            );
+            const kitRows = [
+              ...sortedGroups.flatMap((group) => {
+                const module = modules.find((item) => item.id === group.module_id);
+                return module ? [{ module, group }] : [];
+              }),
+              ...sortedModules
+                .filter((module) => !groups.some((group) => group.module_id === module.id))
+                .map((module) => ({ module, group: undefined })),
+            ];
             const modulesDone = modules.filter((module) => module.is_completed).length;
             const sealedKits = groups.filter((group) => group.sealed_at).length;
             const lockedKits = groups.filter((group) => group.is_locked).length;
@@ -212,16 +273,33 @@ function AssemblyContent() {
                       <CardTitle className="truncate text-xl font-black uppercase tracking-tight sm:text-2xl">
                         {project.name}
                       </CardTitle>
-                      <p className="mt-1 truncate text-[11px] font-medium text-slate-400">
-                        {project.client_name || "Cliente nao informado"} /{" "}
-                        {project.environment || "Ambiente geral"}
-                      </p>
+                      <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs">
+                        <p>
+                          <span className="font-black uppercase text-slate-500">Cliente </span>
+                          <span className="font-bold text-white">
+                            {project.client_name || "Não informado"}
+                          </span>
+                        </p>
+                        <p>
+                          <span className="font-black uppercase text-slate-500">Ambiente </span>
+                          <span className="font-bold text-white">
+                            {project.environment || "Ambiente geral"}
+                          </span>
+                        </p>
+                      </div>
                     </div>
                     <div className="grid grid-cols-3 gap-px overflow-hidden rounded border border-slate-700 bg-slate-700 md:w-[360px]">
                       <DarkMetric label="Modulos" value={`${modulesDone}/${modules.length}`} />
                       <DarkMetric label="Kits selados" value={`${sealedKits}/${groups.length}`} />
                       <DarkMetric label="Bloqueios" value={lockedKits} alert={lockedKits > 0} />
                     </div>
+                  </div>
+                  <div className="mt-4">
+                    <ProjectFieldSchedule
+                      site={project.project_site}
+                      appointment={project.next_appointment}
+                      dark
+                    />
                   </div>
                   <div className="mt-4 flex items-center gap-3">
                     <Progress
@@ -259,14 +337,13 @@ function AssemblyContent() {
                     </TabsList>
 
                     <TabsContent value="kits" className="mt-0 space-y-3">
-                      {modules.map((module) => {
-                        const group = groups.find((item) => item.module_id === module.id);
+                      {kitRows.map(({ module, group }) => {
                         const parts = (project.parts ?? []).filter(
                           (part) => part.assembly_group_id === group?.id,
                         );
                         return (
                           <KitCard
-                            key={module.id}
+                            key={group?.id ?? module.id}
                             project={project}
                             module={module}
                             group={group}
@@ -275,7 +352,7 @@ function AssemblyContent() {
                           />
                         );
                       })}
-                      {modules.length === 0 && <EmptyRow text="Nenhum modulo importado." />}
+                      {kitRows.length === 0 && <EmptyRow text="Nenhum modulo importado." />}
                     </TabsContent>
 
                     <TabsContent value="modules" className="mt-0 space-y-2">
@@ -283,7 +360,7 @@ function AssemblyContent() {
                         Marque o módulo somente após nivelamento, fixação, regulagem e inspeção
                         visual. Kits bloqueados devem ser tratados na conferência.
                       </div>
-                      {modules.map((module, index) => {
+                      {sortedModules.map((module, index) => {
                         const group = groups.find((item) => item.module_id === module.id);
                         const canCompleteModule =
                           canEdit && project.status === "montagem" && !group?.is_locked;
@@ -372,7 +449,7 @@ function AssemblyContent() {
                     </TabsContent>
                   </Tabs>
 
-                  <div className="mt-4 grid gap-2 border-t border-slate-200 pt-4 sm:grid-cols-2">
+                  <div className="mt-4 grid gap-2 border-t border-slate-200 pt-4 sm:grid-cols-3">
                     <Button
                       asChild
                       variant="outline"
@@ -383,12 +460,42 @@ function AssemblyContent() {
                       </Link>
                     </Button>
                     <Button
-                      onClick={() => navigate({ to: "/technical-assistance" })}
-                      className="h-11 rounded-md bg-slate-900 text-[10px] font-black uppercase tracking-wider"
+                      asChild
+                      className="h-12 rounded-md bg-slate-900 text-[10px] font-black uppercase tracking-wider"
                     >
-                      <AlertTriangle className="mr-2 h-4 w-4 text-amber-400" /> Assistencia (
-                      {project.maintenance_requests?.length ?? 0})
+                      <a href={assistanceUrl(project.id)}>
+                        <AlertTriangle className="mr-2 h-4 w-4 text-amber-400" /> Assistência (
+                        {project.maintenance_requests?.length ?? 0})
+                      </a>
                     </Button>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="h-12 rounded-md text-[10px] font-black uppercase tracking-wider"
+                        >
+                          <BookOpen className="mr-2 h-4 w-4" /> Caderno da obra
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-h-[94vh] max-w-5xl overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>Caderno de montagem</DialogTitle>
+                        </DialogHeader>
+                        <AssemblyNotebook
+                          project={project}
+                          site={project.project_site}
+                          appointment={project.next_appointment}
+                          modules={sortedModules}
+                          groups={sortedGroups}
+                          parts={project.parts ?? []}
+                          modelPreviewUrl={
+                            project.project_versions?.find(
+                              (version) => version.is_active && version.thumbnail_url,
+                            )?.thumbnail_url ?? null
+                          }
+                        />
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </CardContent>
               </Card>
@@ -459,6 +566,18 @@ function KitCard({
                   ? `Recebido e selado em ${new Date(group.sealed_at).toLocaleDateString("pt-BR")}`
                   : "Aguardando conferencia e selo de recebimento"}
             </p>
+            <div className="mt-2 flex flex-wrap gap-2 text-[9px] font-bold uppercase tracking-wider">
+              <span className="flex items-center gap-1 rounded-sm border border-slate-200 px-1.5 py-0.5 text-slate-600">
+                <span
+                  className="h-2.5 w-2.5 rounded-full border border-slate-300"
+                  style={{ backgroundColor: group?.color || "transparent" }}
+                />
+                Cor logística: {group?.color || "não informada"}
+              </span>
+              <span className="rounded-sm border border-slate-200 px-1.5 py-0.5 text-slate-600">
+                Material/acabamento: {formatMaterials(parts)}
+              </span>
+            </div>
           </div>
         </div>
         <div className="flex gap-2">
@@ -489,20 +608,30 @@ function KitCard({
               </DialogHeader>
               <div className="flex flex-col items-center gap-4">
                 {parts.map((part) => (
-                  <AssemblyLabel
-                    key={part.id}
-                    moduleCode={group?.code ?? "???"}
-                    moduleName={module.name}
-                    color={group?.color ?? "#000"}
-                    partName={part.name}
-                    dimensions={`${part.width_mm}x${part.length_mm}mm`}
-                    material={part.material ?? null}
-                    thickness={part.thickness_mm ?? null}
-                    edgeBanding={part.edge_banding ?? null}
-                    storageLocation={part.storage_location ?? null}
-                    qrValue={`montaai://${project.id}/${part.id}`}
-                    projectId={project.id}
-                  />
+                  <div key={part.id} className="space-y-2">
+                    <AssemblyLabel
+                      moduleCode={group?.code ?? "???"}
+                      moduleName={module.name}
+                      color={group?.color ?? "#000"}
+                      partName={part.name}
+                      dimensions={`${part.width_mm}x${part.length_mm}mm`}
+                      material={part.material ?? null}
+                      thickness={part.thickness_mm ?? null}
+                      edgeBanding={part.edge_banding ?? null}
+                      storageLocation={part.storage_location ?? null}
+                      qrValue={`montaai://${project.id}/${part.id}`}
+                      projectId={project.id}
+                    />
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="h-10 w-full text-[9px] font-black uppercase"
+                    >
+                      <a href={assistanceUrl(project.id, module.id, part.id)}>
+                        <AlertTriangle className="mr-2 h-3.5 w-3.5" /> Assistência desta peça
+                      </a>
+                    </Button>
+                  </div>
                 ))}
               </div>
             </DialogContent>
@@ -532,6 +661,13 @@ function KitCard({
           <Progress value={progress} className="h-1.5" />
           <span className="text-[9px] font-black">{Math.round(progress)}%</span>
         </div>
+      </div>
+      <div className="border-t border-slate-200 bg-slate-50 p-3">
+        <Button asChild variant="outline" className="h-11 w-full text-[9px] font-black uppercase">
+          <a href={assistanceUrl(project.id, module.id)}>
+            <AlertTriangle className="mr-2 h-4 w-4" /> Abrir assistência deste módulo
+          </a>
+        </Button>
       </div>
       <ConferenceDialog
         open={conferenceOpen}
@@ -630,4 +766,28 @@ function PartsPanel({
       </div>
     </div>
   );
+}
+
+function compareGroupCodes(left?: string | null, right?: string | null) {
+  const groupNumber = (code?: string | null) => {
+    const match = code?.trim().match(/^G\s*(\d+)/i);
+    return match ? Number(match[1]) : Number.POSITIVE_INFINITY;
+  };
+  const numberDifference = groupNumber(left) - groupNumber(right);
+  if (numberDifference) return numberDifference;
+  if (!left && right) return 1;
+  if (left && !right) return -1;
+  return (left ?? "").localeCompare(right ?? "", "pt-BR", { numeric: true });
+}
+
+function assistanceUrl(projectId: string, moduleId?: string, partId?: string) {
+  const search = new URLSearchParams({ project: projectId, new: "1" });
+  if (moduleId) search.set("module", moduleId);
+  if (partId) search.set("part", partId);
+  return `/technical-assistance?${search.toString()}`;
+}
+
+function formatMaterials(parts: AssemblyPart[]) {
+  const materials = Array.from(new Set(parts.map((part) => part.material).filter(Boolean)));
+  return materials.length ? materials.join(", ") : "não informado";
 }
