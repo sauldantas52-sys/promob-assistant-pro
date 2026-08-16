@@ -176,6 +176,11 @@ function parsePartNode(p: Element): ParsedPart {
       material_id: attr(p, ["MATERIAL_ID"]),
       color_id: attr(p, ["COLOR_ID"]),
       finish_id: attr(p, ["FINISH_ID"]),
+      // New: Detailed Edge metadata
+      edge_top: attr(p, ["EDGE_TOP", "B_SUP"]),
+      edge_bottom: attr(p, ["EDGE_BOTTOM", "B_INF"]),
+      edge_left: attr(p, ["EDGE_LEFT", "B_ESQ"]),
+      edge_right: attr(p, ["EDGE_RIGHT", "B_DIR"]),
     }
   };
 }
