@@ -178,6 +178,116 @@ export type Database = {
           },
         ]
       }
+      clients: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          document: string | null
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          document?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          document?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clients_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      communication_outbox: {
+        Row: {
+          attachment_path: string | null
+          attempt_count: number
+          channel: string
+          company_id: string
+          created_at: string
+          created_by: string
+          id: string
+          last_error: string | null
+          message_text: string
+          outsourcing_order_id: string | null
+          provider_message_id: string | null
+          recipient: string
+          sent_at: string | null
+          status: string
+        }
+        Insert: {
+          attachment_path?: string | null
+          attempt_count?: number
+          channel: string
+          company_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          last_error?: string | null
+          message_text: string
+          outsourcing_order_id?: string | null
+          provider_message_id?: string | null
+          recipient: string
+          sent_at?: string | null
+          status?: string
+        }
+        Update: {
+          attachment_path?: string | null
+          attempt_count?: number
+          channel?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          last_error?: string | null
+          message_text?: string
+          outsourcing_order_id?: string | null
+          provider_message_id?: string | null
+          recipient?: string
+          sent_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communication_outbox_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communication_outbox_outsourcing_order_id_fkey"
+            columns: ["outsourcing_order_id"]
+            isOneToOne: false
+            referencedRelation: "outsourcing_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           created_at: string | null
@@ -250,6 +360,78 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_documents: {
+        Row: {
+          company_id: string
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string
+          created_by: string | null
+          document_date: string | null
+          document_hash: string
+          document_number: string | null
+          file_name: string
+          id: string
+          ocr_confidence: number | null
+          ocr_text: string | null
+          status: string
+          storage_path: string
+          supplier_id: string | null
+          total_amount: number | null
+        }
+        Insert: {
+          company_id: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          document_date?: string | null
+          document_hash: string
+          document_number?: string | null
+          file_name: string
+          id?: string
+          ocr_confidence?: number | null
+          ocr_text?: string | null
+          status?: string
+          storage_path: string
+          supplier_id?: string | null
+          total_amount?: number | null
+        }
+        Update: {
+          company_id?: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          document_date?: string | null
+          document_hash?: string
+          document_number?: string | null
+          file_name?: string
+          id?: string
+          ocr_confidence?: number | null
+          ocr_text?: string | null
+          status?: string
+          storage_path?: string
+          supplier_id?: string | null
+          total_amount?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_documents_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
             referencedColumns: ["id"]
           },
         ]
@@ -587,6 +769,86 @@ export type Database = {
             columns: ["profile_id"]
             isOneToOne: true
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      outsourcing_orders: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string
+          freight_amount: number
+          id: string
+          message_text: string | null
+          order_number: string
+          project_id: string | null
+          requested_due_date: string | null
+          sent_at: string | null
+          status: string
+          supplier_id: string
+          updated_at: string
+          xml_file_id: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by: string
+          freight_amount?: number
+          id?: string
+          message_text?: string | null
+          order_number: string
+          project_id?: string | null
+          requested_due_date?: string | null
+          sent_at?: string | null
+          status?: string
+          supplier_id: string
+          updated_at?: string
+          xml_file_id?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          freight_amount?: number
+          id?: string
+          message_text?: string | null
+          order_number?: string
+          project_id?: string | null
+          requested_due_date?: string | null
+          sent_at?: string | null
+          status?: string
+          supplier_id?: string
+          updated_at?: string
+          xml_file_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outsourcing_orders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outsourcing_orders_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outsourcing_orders_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outsourcing_orders_xml_file_id_fkey"
+            columns: ["xml_file_id"]
+            isOneToOne: false
+            referencedRelation: "project_files"
             referencedColumns: ["id"]
           },
         ]
@@ -999,6 +1261,82 @@ export type Database = {
           },
         ]
       }
+      project_appointments: {
+        Row: {
+          arrival_time: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          kind: string
+          notes: string | null
+          project_id: string
+          scheduled_at: string
+          status: string
+        }
+        Insert: {
+          arrival_time?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind: string
+          notes?: string | null
+          project_id: string
+          scheduled_at: string
+          status?: string
+        }
+        Update: {
+          arrival_time?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          notes?: string | null
+          project_id?: string
+          scheduled_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_appointments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_environments: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          project_id: string
+          sequence: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          project_id: string
+          sequence?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          project_id?: string
+          sequence?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_environments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_estimates: {
         Row: {
           created_at: string | null
@@ -1212,6 +1550,62 @@ export type Database = {
           },
         ]
       }
+      project_sites: {
+        Row: {
+          city: string
+          complement: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          district: string | null
+          id: string
+          number: string
+          postal_code: string | null
+          project_id: string
+          reference: string | null
+          state: string
+          street: string
+        }
+        Insert: {
+          city: string
+          complement?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          district?: string | null
+          id?: string
+          number: string
+          postal_code?: string | null
+          project_id: string
+          reference?: string | null
+          state: string
+          street: string
+        }
+        Update: {
+          city?: string
+          complement?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          district?: string | null
+          id?: string
+          number?: string
+          postal_code?: string | null
+          project_id?: string
+          reference?: string | null
+          state?: string
+          street?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_sites_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_version_files: {
         Row: {
           company_id: string
@@ -1415,6 +1809,7 @@ export type Database = {
         Row: {
           assembly_notes: string | null
           assembly_photos: Json | null
+          client_id: string | null
           client_name: string | null
           commercial_approved: boolean | null
           company_id: string
@@ -1438,6 +1833,7 @@ export type Database = {
         Insert: {
           assembly_notes?: string | null
           assembly_photos?: Json | null
+          client_id?: string | null
           client_name?: string | null
           commercial_approved?: boolean | null
           company_id: string
@@ -1461,6 +1857,7 @@ export type Database = {
         Update: {
           assembly_notes?: string | null
           assembly_photos?: Json | null
+          client_id?: string | null
           client_name?: string | null
           commercial_approved?: boolean | null
           company_id?: string
@@ -1482,6 +1879,13 @@ export type Database = {
           validated_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "projects_company_id_fkey"
             columns: ["company_id"]
@@ -1592,6 +1996,213 @@ export type Database = {
           },
         ]
       }
+      store_credit_accounts: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          current_balance: number
+          id: string
+          opening_balance: number
+          supplier_id: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          current_balance?: number
+          id?: string
+          opening_balance?: number
+          supplier_id: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          current_balance?: number
+          id?: string
+          opening_balance?: number
+          supplier_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_credit_accounts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_credit_accounts_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      store_credit_transactions: {
+        Row: {
+          account_id: string
+          amount: number
+          company_id: string
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string
+          created_by: string
+          document_id: string | null
+          id: string
+          idempotency_key: string
+          kind: string
+          new_balance: number
+          notes: string | null
+          previous_balance: number
+          reversal_of: string | null
+          status: string
+        }
+        Insert: {
+          account_id: string
+          amount: number
+          company_id: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          created_by: string
+          document_id?: string | null
+          id?: string
+          idempotency_key?: string
+          kind: string
+          new_balance?: number
+          notes?: string | null
+          previous_balance?: number
+          reversal_of?: string | null
+          status?: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          company_id?: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          created_by?: string
+          document_id?: string | null
+          id?: string
+          idempotency_key?: string
+          kind?: string
+          new_balance?: number
+          notes?: string | null
+          previous_balance?: number
+          reversal_of?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_credit_transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "store_credit_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_credit_transactions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_credit_transactions_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "financial_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_credit_transactions_reversal_of_fkey"
+            columns: ["reversal_of"]
+            isOneToOne: false
+            referencedRelation: "store_credit_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_offers: {
+        Row: {
+          brand: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          normalized_product: string
+          package_quantity: number
+          product_name: string
+          shipping_cost: number
+          source_document_id: string | null
+          supplier_id: string
+          unit: string
+          unit_price: number
+          valid_until: string | null
+        }
+        Insert: {
+          brand?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          normalized_product: string
+          package_quantity?: number
+          product_name: string
+          shipping_cost?: number
+          source_document_id?: string | null
+          supplier_id: string
+          unit: string
+          unit_price: number
+          valid_until?: string | null
+        }
+        Update: {
+          brand?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          normalized_product?: string
+          package_quantity?: number
+          product_name?: string
+          shipping_cost?: number
+          source_document_id?: string | null
+          supplier_id?: string
+          unit?: string
+          unit_price?: number
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_offers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_offers_source_document_id_fkey"
+            columns: ["source_document_id"]
+            isOneToOne: false
+            referencedRelation: "financial_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_offers_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       supplier_prices: {
         Row: {
           availability: boolean | null
@@ -1627,6 +2238,62 @@ export type Database = {
           supplier_name?: string
         }
         Relationships: []
+      }
+      suppliers: {
+        Row: {
+          active: boolean
+          average_lead_days: number | null
+          company_id: string
+          contact_name: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          legal_name: string | null
+          name: string
+          services: string[]
+          tax_document: string | null
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          active?: boolean
+          average_lead_days?: number | null
+          company_id: string
+          contact_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          legal_name?: string | null
+          name: string
+          services?: string[]
+          tax_document?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          active?: boolean
+          average_lead_days?: number | null
+          company_id?: string
+          contact_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          legal_name?: string | null
+          name?: string
+          services?: string[]
+          tax_document?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suppliers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -1683,6 +2350,119 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "validation_checks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      visual_analysis_findings: {
+        Row: {
+          bounding_box: Json | null
+          confidence: number | null
+          created_at: string
+          finding_type: string
+          id: string
+          normalized_value: Json | null
+          original_text: string | null
+          page_number: number | null
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          session_id: string
+        }
+        Insert: {
+          bounding_box?: Json | null
+          confidence?: number | null
+          created_at?: string
+          finding_type: string
+          id?: string
+          normalized_value?: Json | null
+          original_text?: string | null
+          page_number?: number | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          session_id: string
+        }
+        Update: {
+          bounding_box?: Json | null
+          confidence?: number | null
+          created_at?: string
+          finding_type?: string
+          id?: string
+          normalized_value?: Json | null
+          original_text?: string | null
+          page_number?: number | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visual_analysis_findings_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "visual_analysis_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      visual_analysis_sessions: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          file_hash: string | null
+          file_name: string
+          id: string
+          manufacturing_authority: boolean
+          method: string
+          project_id: string | null
+          purpose: string
+          status: string
+          storage_path: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          file_hash?: string | null
+          file_name: string
+          id?: string
+          manufacturing_authority?: boolean
+          method?: string
+          project_id?: string | null
+          purpose?: string
+          status?: string
+          storage_path: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          file_hash?: string | null
+          file_name?: string
+          id?: string
+          manufacturing_authority?: boolean
+          method?: string
+          project_id?: string | null
+          purpose?: string
+          status?: string
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visual_analysis_sessions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visual_analysis_sessions_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
