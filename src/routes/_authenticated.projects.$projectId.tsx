@@ -518,6 +518,7 @@ function ProjectDetail() {
             <PilotValidationChecklist
               projectId={projectId}
               isMachiningBlocked={project.data?.machining_blocked ?? true}
+              projectFiles={files.data || []}
             />
 
             <div>
