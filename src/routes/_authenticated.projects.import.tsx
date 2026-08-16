@@ -447,7 +447,57 @@ function ImportPage() {
   return (
     <AppShell>
       <div className="mx-auto max-w-[1440px] space-y-5 px-3 py-4 sm:px-5 sm:py-6 md:px-8 lg:px-10 lg:py-8">
-        <header className="rounded-xl border border-slate-800 bg-slate-950 p-4 text-white sm:p-6 lg:p-8">
+        {createProjectMutation.isSuccess && (
+          <Card className="border-emerald-200 bg-emerald-50 p-6 shadow-2xl">
+            <div className="flex flex-col items-center gap-4 text-center">
+              <div className="rounded-full bg-emerald-100 p-3 text-emerald-600">
+                <ShieldCheck className="h-10 w-10" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-black uppercase tracking-tighter text-slate-900">
+                  Importação Industrial Concluída
+                </h2>
+                <p className="mt-1 text-sm font-bold text-slate-500 uppercase tracking-widest">
+                  Projeto persistido com auditoria de integridade 4.0
+                </p>
+              </div>
+              
+              <div className="grid w-full grid-cols-2 gap-4 mt-6">
+                <div className="rounded-xl border border-emerald-100 bg-white p-4">
+                  <p className="text-[10px] font-black uppercase text-slate-400">ID do Projeto</p>
+                  <p className="mt-1 font-mono text-xs font-bold truncate">
+                    {createProjectMutation.data}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-emerald-100 bg-white p-4">
+                  <p className="text-[10px] font-black uppercase text-slate-400">Banco de Dados</p>
+                  <p className="mt-1 text-emerald-600 font-black uppercase text-[10px]">Auditado & Confirmado</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <Button 
+                  onClick={() => navigate({ to: "/projects/$projectId", params: { projectId: createProjectMutation.data } })}
+                  className="bg-slate-950 text-white font-black uppercase text-[10px] tracking-widest px-8"
+                >
+                  Abrir Engenharia
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => window.location.reload()}
+                  className="font-black uppercase text-[10px] tracking-widest px-8"
+                >
+                  Nova Importação
+                </Button>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {!createProjectMutation.isSuccess && (
+          <>
+            <header className="rounded-xl border border-slate-800 bg-slate-950 p-4 text-white sm:p-6 lg:p-8">
+
           <Button
             variant="ghost"
             onClick={() => navigate({ to: "/projects" })}
@@ -830,6 +880,8 @@ function ImportPage() {
             </div>
           </aside>
         </div>
+          </>
+        )}
       </div>
     </AppShell>
   );
