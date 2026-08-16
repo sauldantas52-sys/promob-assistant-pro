@@ -1,226 +1,141 @@
-export type ParsedPart = {
-  id_xml?: string | null;
-  kind: "peca" | "chapa" | "ferragem" | "acessorio";
+import { z } from 'zod';
+
+export const PartMetadataSchema = z.object({
+  unique_id: z.string().optional(),
+  unique_parent_id: z.string().optional(),
+  repetition: z.number().default(1),
+  text_dimension: z.string().optional(),
+  unit: z.string().default('un'),
+  family: z.string().optional(),
+  group: z.string().optional(),
+  reference: z.string().optional(),
+  materials: z.array(z.string()).optional(),
+  id_xml: z.string().optional(),
+});
+
+export type PartMetadata = z.infer<typeof PartMetadataSchema>;
+
+export interface PromobPart {
   name: string;
-  material?: string | null;
-  thickness_mm?: number | null;
-  width_mm?: number | null;
-  length_mm?: number | null;
+  kind: 'peca' | 'item' | 'ferragem';
+  material?: string;
+  thickness_mm?: number;
+  width_mm?: number;
+  length_mm?: number;
   quantity: number;
-  unit?: string | null;
-  edge_banding?: string | null;
-  data_source?: string;
-  visibility_type?: "visivel" | "oculta" | "avulsa" | "ausente" | "nao_confirmada";
-  cutting_edge_released?: boolean;
-  machining_blocked?: boolean;
-  metadata?: Record<string, any>;
-};
-
-export type ParsedModule = {
-  id_xml?: string | null;
-  name: string;
-  environment?: string | null;
-  width_mm?: number | null;
-  height_mm?: number | null;
-  depth_mm?: number | null;
-  quantity: number;
-  parts: ParsedPart[];
-  data_source?: string;
-};
-
-export type ImportResult = {
-  fileName: string;
-  fileType: string;
-  sizeBytes: number;
-  modules: ParsedModule[];
-  looseParts: ParsedPart[];
-  warnings: string[];
-};
-
-const num = (value: string | null | undefined): number | null => {
-  if (value === null || value === undefined || value.trim() === "") return null;
-  // Converte "1080,6" para "1080.6", remove caracteres não numéricos exceto ponto, sinal e decimais
-  const sanitized = String(value).replace(",", ".").trim();
-  const parsed = parseFloat(sanitized);
-  return Number.isFinite(parsed) ? parsed : null;
-};
-
-const attr = (el: Element, names: string[]): string | null => {
-  for (const name of names) {
-    for (const a of Array.from(el.attributes)) {
-      if (a.name.toLowerCase() === name.toLowerCase() && a.value.trim() !== "") return a.value;
-    }
-  }
-  return null;
-};
-
-/** Lê XML exportado do Promob (estruturas variam por versão, por isso a busca é tolerante). */
-export function parsePromobXml(fileName: string, sizeBytes: number, xmlText: string): ImportResult {
-  const warnings: string[] = [];
-  const doc = new DOMParser().parseFromString(xmlText, "application/xml");
-  if (doc.querySelector("parsererror")) {
-    return {
-      fileName,
-      fileType: "xml",
-      sizeBytes,
-      modules: [],
-      looseParts: [],
-      warnings: ["Não foi possível interpretar o XML: arquivo inválido ou corrompido."],
-    };
-  }
-
-  const modules: ParsedModule[] = [];
-  const looseParts: ParsedPart[] = [];
-  const seen = new Set<Element>();
-
-  // 1. Encontrar todos os ITEM na árvore
-  const allItemNodes = Array.from(doc.querySelectorAll("ITEM, Item, item"));
-
-  // 2. Identificar Módulos (itens que têm filhos ou são estruturais)
-  // No Promob real, UNIQUEPARENTID="-2" ou "0" costuma indicar raiz.
-  for (const node of allItemNodes) {
-    if (seen.has(node)) continue;
-
-    const parentId = attr(node, ["UNIQUEPARENTID"]);
-    const hasChildren = node.querySelector("ITEMS > ITEM, COMPONENTS > ITEM, COMPONENT, PART");
-    
-    // Se for um item da raiz (-2) e tiver filhos, tratamos como Módulo
-    if (parentId === "-2" && hasChildren) {
-      const name = attr(node, ["DESCRIPTION", "name", "REFERENCE"]) ?? "Módulo";
-      const idXml = attr(node, ["UNIQUEID", "ID"]);
-      const width = num(attr(node, ["WIDTH", "L"]));
-      const height = num(attr(node, ["HEIGHT", "A"]));
-      const depth = num(attr(node, ["DEPTH", "P"]));
-      const quantity = num(attr(node, ["QUANTITY", "qtd"])) ?? 1;
-      const environment = attr(node, ["ENVIRONMENT", "ambiente", "GROUP"]);
-
-      // Buscar peças dentro deste módulo
-      const childNodes = Array.from(node.querySelectorAll("ITEM, COMPONENT, PART, PIECE"));
-      const parts: ParsedPart[] = [];
-
-      for (const child of childNodes) {
-        if (child === node || seen.has(child)) continue;
-        
-        // Só adiciona se for folha (não tem ITEM dentro de si na tag ITEMS ou COMPONENTS) ou se for explicitamente um componente/peça
-        const isLeaf = !child.querySelector("ITEMS > ITEM, COMPONENTS > ITEM");
-        if (isLeaf || child.tagName.toUpperCase() === "COMPONENT" || child.tagName.toUpperCase() === "PART") {
-          parts.push(parsePartNode(child));
-          seen.add(child);
-        }
-      }
-
-      modules.push({ id_xml: idXml ?? null, name, environment, width_mm: width, height_mm: height, depth_mm: depth, quantity, parts, data_source: "XML" });
-      seen.add(node);
-    }
-  }
-
-  // 3. Capturar itens que sobraram na raiz (Acessórios Avulsos / Itens sem módulo)
-  for (const node of allItemNodes) {
-    if (seen.has(node)) continue;
-    const parentId = attr(node, ["UNIQUEPARENTID"]);
-    
-    // Itens na raiz que não foram processados como módulos
-    if (parentId === "-2") {
-      looseParts.push(parsePartNode(node));
-      seen.add(node);
-    }
-  }
-
-  if (modules.length === 0 && looseParts.length === 0) {
-    warnings.push("Nenhum item ou módulo reconhecido. Verifique se o XML é uma exportação válida do Promob.");
-  }
-
-  const missingDims = modules.filter((m) => !m.width_mm && !m.height_mm && !m.depth_mm).length;
-  // Não avisamos se for 0, mas se tiver algum valor parcial e faltar outro, pode ser útil
-  
-  return { fileName, fileType: "xml", sizeBytes, modules, looseParts, warnings };
+  unit: string;
+  edge_banding?: string;
+  metadata?: PartMetadata;
 }
 
-function parsePartNode(p: Element): ParsedPart {
-  const rawType = attr(p, ["FAMILY", "GROUP", "TYPE", "CATEGORY"]) ?? "";
-  const description = attr(p, ["DESCRIPTION", "name", "REFERENCE"]) ?? "Item";
-  
-  // Tenta pegar a medida do TEXTDIMENSION se os atributos individuais falharem ou para validar
-  let width = num(attr(p, ["WIDTH", "L"]));
-  let length = num(attr(p, ["LENGTH", "HEIGHT", "C"]));
-  const thickness = num(attr(p, ["THICKNESS", "E"]));
+export interface PromobModule {
+  name: string;
+  environment?: string;
+  width_mm?: number;
+  height_mm?: number;
+  depth_mm?: number;
+  quantity: number;
+  id_xml?: string;
+  parts: PromobPart[];
+}
 
-  const idXml = attr(p, ["UNIQUEID", "ID"]);
-  const isVisible = attr(p, ["VISIBLE"])?.toLowerCase() !== "false";
-  const visibility: ParsedPart["visibility_type"] = isVisible ? "visivel" : "oculta";
+export interface PromobProject {
+  name: string;
+  client_name?: string;
+  environment?: string;
+  notes?: string;
+  modules: PromobModule[];
+  loose_parts: PromobPart[];
+}
+
+function getAttr(node: Element, name: string): string | undefined {
+  return node.getAttribute(name) || undefined;
+}
+
+function getNumericAttr(node: Element, name: string): number | undefined {
+  const val = node.getAttribute(name);
+  if (!val) return undefined;
+  const num = parseFloat(val.replace(',', '.'));
+  return isNaN(num) ? undefined : num;
+}
+
+function parsePartNode(node: Element): PromobPart {
+  const name = getAttr(node, 'DESCRIPTION') || getAttr(node, 'NAME') || 'Peça Sem Nome';
+  
+  // Metadados Industriais Rigorosos (Pasta do Cliente 4.0)
+  const metadata: PartMetadata = {
+    unique_id: getAttr(node, 'UNIQUEID'),
+    unique_parent_id: getAttr(node, 'UNIQUEPARENTID'),
+    repetition: getNumericAttr(node, 'REPETITION') || 1,
+    text_dimension: getAttr(node, 'TEXTDIMENSION'),
+    unit: getAttr(node, 'UNIT') || 'un',
+    family: getAttr(node, 'FAMILY'),
+    group: getAttr(node, 'GROUP'),
+    reference: getAttr(node, 'REFERENCE'),
+    id_xml: getAttr(node, 'ID'),
+  };
+
+  const quantity = getNumericAttr(node, 'QUANTITY') || 1;
+  const totalQuantity = quantity * metadata.repetition;
 
   return {
-    id_xml: idXml ?? null,
-    kind: classifyKind(rawType, description),
-    name: description,
-    material: attr(p, ["MATERIAL", "COLOR", "REFERENCE"]),
-    thickness_mm: thickness,
-    width_mm: width,
-    length_mm: length,
-    quantity: num(attr(p, ["QUANTITY", "qtd"])) ?? 1,
-    unit: attr(p, ["UNIT"])?.toLowerCase() ?? "un",
-    edge_banding: attr(p, ["EDGE", "BORDER", "BORDA"]),
-    data_source: "XML",
-    visibility_type: visibility,
-    cutting_edge_released: false,
-    machining_blocked: true,
-    metadata: {
-      raw_group: rawType,
-      environment: attr(p, ["ENVIRONMENT", "ambiente", "GROUP"]),
-      edge_1: attr(p, ["EDGE1", "BORDA1"]),
-      edge_2: attr(p, ["EDGE2", "BORDA2"]),
-      edge_3: attr(p, ["EDGE3", "BORDA3"]),
-      edge_4: attr(p, ["EDGE4", "BORDA4"]),
-      drill_xml: attr(p, ["DRILL", "FUROS", "HOLES"]),
-      tag_industrial: attr(p, ["TAG", "ETIQUETA", "BARCODE"]),
-      material_id: attr(p, ["MATERIAL_ID"]),
-      color_id: attr(p, ["COLOR_ID"]),
-      finish_id: attr(p, ["FINISH_ID"]),
-      // New: Detailed Edge metadata
-      edge_top: attr(p, ["EDGE_TOP", "B_SUP"]),
-      edge_bottom: attr(p, ["EDGE_BOTTOM", "B_INF"]),
-      edge_left: attr(p, ["EDGE_LEFT", "B_ESQ"]),
-      edge_right: attr(p, ["EDGE_RIGHT", "B_DIR"]),
-    }
+    name,
+    kind: (getAttr(node, 'FAMILY') === 'FERRAGEM' ? 'ferragem' : 'peca') as any,
+    material: getAttr(node, 'MATERIAL') || getAttr(node, 'COLOR'),
+    thickness_mm: getNumericAttr(node, 'HEIGHT') || getNumericAttr(node, 'THICKNESS'),
+    width_mm: getNumericAttr(node, 'WIDTH'),
+    length_mm: getNumericAttr(node, 'DEPTH') || getNumericAttr(node, 'LENGTH'),
+    quantity: totalQuantity,
+    unit: metadata.unit,
+    edge_banding: getAttr(node, 'EDGE_BANDING'),
+    metadata
   };
 }
 
-function classifyKind(rawGroup: string, name: string): ParsedPart["kind"] {
-  const g = rawGroup.toLowerCase();
-  const n = name.toLowerCase();
+export function parsePromobXML(xmlContent: string): PromobProject {
+  const parser = new DOMParser();
+  const xmlDoc = parser.parseFromString(xmlContent, 'text/xml');
   
-  // Peças Estruturais
-  if (n.includes("lateral") || n.includes("base") || n.includes("fundo") || n.includes("divisória") || n.includes("prateleira") || n.includes("tampo") || n.includes("travessa")) return "peca";
+  const projectNode = xmlDoc.querySelector('PROJECT, PROMOB');
+  const projectName = projectNode?.getAttribute('NAME') || 'Projeto Importado';
   
-  // Portas e Frentes
-  if (n.includes("porta") || n.includes("frente")) return "peca";
+  const modules: PromobModule[] = [];
+  const looseParts: PromobPart[] = [];
 
-  // Ferragens
-  if (g.includes("ferrag") || n.includes("dobradiça") || n.includes("corrediça") || n.includes("parafuso") || n.includes("suporte") || n.includes("fixador")) return "ferragem";
+  // Mapeamento de Ambientes/Módulos
+  const moduleNodes = xmlDoc.querySelectorAll('ITEMS > ITEM[TYPE="COMPONENT"], ENVIRONMENT > ITEM');
   
-  // Acessórios
-  if (g.includes("acess") || n.includes("cabideiro") || n.includes("aramado") || n.includes("organizador") || n.includes("puxador")) return "acessorio";
-  
-  // Chapas / Painéis
-  if (g.includes("chapa") || g.includes("painel") || n.includes("tamponamento") || n.includes("régua")) return "chapa";
-  
-  return "peca";
-}
+  moduleNodes.forEach(node => {
+    const isModule = node.children.length > 0;
+    
+    if (isModule) {
+      const parts: PromobPart[] = [];
+      const partNodes = node.querySelectorAll('ITEM[TYPE="PART"], ITEM[FAMILY="PECA"], ITEM[FAMILY="FERRAGEM"]');
+      
+      partNodes.forEach(partNode => {
+        parts.push(parsePartNode(partNode));
+      });
 
-export async function parseProjectFile(file: File): Promise<ImportResult> {
-  const lower = file.name.toLowerCase();
-  if (lower.endsWith(".xml")) {
-    return parsePromobXml(file.name, file.size, await file.text());
-  }
-  const type = lower.split(".").pop() ?? "desconhecido";
+      modules.push({
+        name: getAttr(node, 'DESCRIPTION') || getAttr(node, 'NAME') || 'Módulo',
+        environment: getAttr(node, 'ENVIRONMENT'),
+        width_mm: getNumericAttr(node, 'WIDTH'),
+        height_mm: getNumericAttr(node, 'HEIGHT'),
+        depth_mm: getNumericAttr(node, 'DEPTH'),
+        quantity: getNumericAttr(node, 'QUANTITY') || 1,
+        id_xml: getAttr(node, 'ID'),
+        parts
+      });
+    } else {
+      looseParts.push(parsePartNode(node));
+    }
+  });
+
   return {
-    fileName: file.name,
-    fileType: type,
-    sizeBytes: file.size,
-    modules: [],
-    looseParts: [],
-    warnings: [
-      `Arquivos .${type} são registrados como anexo. A leitura automática de itens está disponível para exportações XML do Promob.`,
-    ],
+    name: projectName,
+    client_name: projectNode?.getAttribute('CLIENT') || undefined,
+    environment: projectNode?.getAttribute('ENVIRONMENT') || undefined,
+    modules,
+    loose_parts: looseParts
   };
 }
