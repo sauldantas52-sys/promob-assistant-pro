@@ -26,7 +26,7 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import { parseProjectFile } from "@/lib/promob-import";
+import { parsePromobXML, type PromobModule, type PromobPart } from "@/lib/promob-import";
 import { parseDXF } from "@/lib/dxf-parser";
 import { cn } from "@/lib/utils";
 
@@ -187,7 +187,7 @@ function ImportPage() {
       setIsProcessing(true);
 
       // Parse before persistence so malformed XML never creates a partial project.
-      const result = await parseProjectFile(files.xml);
+      const result = parsePromobXML(await files.xml.text());
       const dxfFile = classification.dxf;
       if (!dxfFile) throw new Error("O arquivo DXF é obrigatório.");
       const dxfGeometry = parseDXF(await dxfFile.text());
@@ -206,10 +206,10 @@ function ImportPage() {
           summary: {
             modules: result.modules.length,
             parts:
-              result.modules.reduce((total, module) => total + module.parts.length, 0) +
-              result.looseParts.length,
-            looseParts: result.looseParts.length,
-            warnings: result.warnings,
+              result.modules.reduce((total: number, module: PromobModule) => total + module.parts.length, 0) +
+              result.loose_parts.length,
+            looseParts: result.loose_parts.length,
+            warnings: [],
           },
         },
         { file: classification.cotas, type: "cotas_pdf", summary: { source: "pasta_cliente" } },
@@ -288,14 +288,14 @@ function ImportPage() {
           });
         }
 
-        const modulesPayload = result.modules.map((module) => ({
+        const modulesPayload = result.modules.map((module: PromobModule) => ({
           name: module.name,
           environment: module.environment ?? null,
           width_mm: module.width_mm ?? null,
           height_mm: module.height_mm ?? null,
           depth_mm: module.depth_mm ?? null,
           quantity: module.quantity,
-          parts: module.parts.map((part) => ({
+          parts: module.parts.map((part: PromobPart) => ({
             kind: part.kind,
             name: part.name,
             material: part.material ?? null,
@@ -305,10 +305,10 @@ function ImportPage() {
             quantity: part.quantity,
             unit: part.unit ?? "un",
             edge_banding: part.edge_banding ?? null,
-            metadata: (part as any).metadata ?? {},
+            metadata: part.metadata ?? {},
           })),
         }));
-        const loosePartsPayload = result.looseParts.map((part) => ({
+        const loosePartsPayload = result.loose_parts.map((part: PromobPart) => ({
           kind: part.kind,
           name: part.name,
           material: part.material ?? null,
@@ -318,7 +318,7 @@ function ImportPage() {
           quantity: part.quantity,
           unit: part.unit ?? "un",
           edge_banding: part.edge_banding ?? null,
-          metadata: (part as any).metadata ?? {},
+          metadata: part.metadata ?? {},
         }));
 
         rpcAttempted = true;
@@ -341,6 +341,16 @@ function ImportPage() {
           },
         );
         if (importError) throw importError;
+        // Auditoria Pós-Importação 4.0: Validar persistência real
+        const { data: audit, error: auditError } = await supabase
+          .from("parts")
+          .select("id", { count: "exact", head: true })
+          .eq("project_id", importedProjectId);
+        
+        if (auditError || !audit || audit.length === 0) {
+           throw new Error("Falha na persistência industrial: o projeto foi criado mas as peças não foram detectadas no banco de dados.");
+        }
+        
         return importedProjectId;
       } catch (error) {
         if (rpcAttempted) {
