@@ -67,10 +67,10 @@ function classifyFolder(selectedFiles: File[]): ClassifiedFolder {
 
   return {
     xml: find((file) => file.name.toLowerCase().endsWith(".xml")),
-    cotas: find((file, normalized) => isPdf(file) && (normalized.includes("cotas") || normalized.includes("manual"))),
-    listaCompra: find((file, normalized) => isPdf(file) && (normalized.includes("listacompra") || normalized.includes("insumos"))),
-    listaCorte: find((file, normalized) => isPdf(file) && (normalized.includes("listacorte") || normalized.includes("plano"))),
-    previewCorte: find((file, normalized) => isPdf(file) && (normalized.includes("previewcorte") || normalized.includes("mapa"))),
+    cotas: find((file, normalized) => isPdf(file) && (normalized.includes("cotas") || normalized.includes("manual") || normalized.includes("desenho") || normalized.includes("tecnico"))),
+    listaCompra: find((file, normalized) => isPdf(file) && (normalized.includes("listacompra") || normalized.includes("insumos") || normalized.includes("compra"))),
+    listaCorte: find((file, normalized) => isPdf(file) && (normalized.includes("listacorte") || normalized.includes("plano") || normalized.includes("corte"))),
+    previewCorte: find((file, normalized) => isPdf(file) && (normalized.includes("previewcorte") || normalized.includes("mapa") || normalized.includes("nesting"))),
     image: find((file) => /\.(jpe?g|png|webp)$/i.test(file.name)),
     dxf: find((file) => file.name.toLowerCase().endsWith(".dxf")),
     xmk: find((file) => file.name.toLowerCase().endsWith(".xmk")),

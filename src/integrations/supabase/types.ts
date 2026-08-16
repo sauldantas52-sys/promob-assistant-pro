@@ -926,6 +926,7 @@ export type Database = {
           length_mm: number | null
           machining_blocked: boolean | null
           material: string | null
+          metadata: Json | null
           module_id: string | null
           name: string
           project_id: string
@@ -948,6 +949,7 @@ export type Database = {
           length_mm?: number | null
           machining_blocked?: boolean | null
           material?: string | null
+          metadata?: Json | null
           module_id?: string | null
           name: string
           project_id: string
@@ -970,6 +972,7 @@ export type Database = {
           length_mm?: number | null
           machining_blocked?: boolean | null
           material?: string | null
+          metadata?: Json | null
           module_id?: string | null
           name?: string
           project_id?: string

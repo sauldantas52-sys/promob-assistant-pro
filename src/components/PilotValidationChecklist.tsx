@@ -29,6 +29,7 @@ import { hasPermission } from "@/lib/permissions";
 interface PilotValidationChecklistProps {
   projectId: string;
   isMachiningBlocked: boolean;
+  projectFiles: any[];
 }
 
 const GATES = [
@@ -155,7 +156,7 @@ export function PilotValidationChecklist({
   projectId,
   isMachiningBlocked,
   projectFiles = [],
-}: PilotValidationChecklistProps & { projectFiles?: any[] }) {
+}: PilotValidationChecklistProps) {
   const queryClient = useQueryClient();
   const { role } = useAuth();
   const canApprove = hasPermission(role, "projects", "approve");
@@ -332,19 +333,32 @@ export function PilotValidationChecklist({
       </CardHeader>
       <CardContent className="p-8 space-y-10">
         {/* Evidence Matrix 4.0 */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 pb-6 border-b border-slate-100">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 pb-6 border-b border-slate-100">
           {Object.entries(CHECK_EVIDENCE).filter(([_, ev]) => ev.fileTypes).map(([key, ev]) => {
-            const hasFile = projectFiles.some(f => ev.fileTypes?.includes(f.file_type));
+            const hasFile = projectFiles.some(f => 
+              ev.fileTypes?.includes(f.file_type) || 
+              (f.file_name && ev.fileTypes?.some(type => f.file_name.toLowerCase().includes(type.replace('_pdf', ''))))
+            );
+            const isAutoValidated = checks?.some(c => c.check_type === key && c.notes?.includes("automática"));
             const label = CHECK_ITEMS.find(i => i.id === key)?.label || key;
+            
             return (
               <div key={key} className={cn(
-                "flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all",
+                "flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all relative overflow-hidden",
                 hasFile ? "bg-emerald-50 border-emerald-100 text-emerald-700" : "bg-slate-50 border-slate-100 text-slate-400"
               )}>
+                {isAutoValidated && (
+                  <div className="absolute top-0 right-0 p-1">
+                    <div className="h-2 w-2 bg-blue-500 rounded-full animate-pulse" title="Validado automaticamente" />
+                  </div>
+                )}
                 {hasFile ? <ShieldCheck className="h-4 w-4 mb-1" /> : <AlertTriangle className="h-4 w-4 mb-1" />}
                 <span className="text-[8px] font-black uppercase text-center leading-tight tracking-tighter">
                   {label}
                 </span>
+                {hasFile && (
+                  <span className="mt-1 text-[7px] font-bold text-emerald-500/70 uppercase">Processado</span>
+                )}
               </div>
             );
           })}

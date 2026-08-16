@@ -19,7 +19,7 @@ export const generateAuditReport = createServerFn({ method: "POST" })
 
       const { data: parts } = await sb
         .from("parts")
-        .select("kind, material, thickness_mm, width_mm, length_mm, quantity, edge_banding")
+        .select("kind, material, thickness_mm, width_mm, length_mm, quantity, edge_banding, metadata")
         .eq("project_id", data.projectId);
 
       const { data: validationChecks } = await sb
@@ -57,22 +57,44 @@ export const generateAuditReport = createServerFn({ method: "POST" })
           { 
             title: "Engenharia e XML", 
             status: "Auditado",
-            details: `Total de itens: ${parts?.length || 0}. Resumo: ${JSON.stringify(partsSummary)}`
+            details: `Total de itens: ${parts?.length || 0}. Resumo: ${JSON.stringify(partsSummary)}`,
+            parts: (parts as any[])?.map(p => ({
+              nome: p.name,
+              material: p.material,
+              dimensoes: `${p.width_mm}x${p.length_mm}x${p.thickness_mm}`,
+              fita: p.edge_banding,
+              metadata: p.metadata
+            }))
           },
           { 
             title: "Gates de Segurança Industrial", 
             status: project?.is_validated ? "Aprovado" : "Em Auditoria",
-            checks: validationChecks?.length || 0
+            items: (validationChecks as any[])?.map(c => ({
+              tipo: c.check_type,
+              status: c.is_completed ? "Validado" : "Pendente",
+              data: c.completed_at,
+              notas: c.notes
+            }))
           },
           { 
             title: "Evidências do Piloto Físico", 
             count: physicalChecks?.length || 0,
-            status: physicalChecks?.length ? "Em Andamento" : "Não Iniciado"
+            status: physicalChecks?.length ? "Em Andamento" : "Não Iniciado",
+            evidencias: (physicalChecks as any[])?.map(c => ({
+              etapa: c.gate_id,
+              observacao: c.notes,
+              anexo: c.evidence_url
+            }))
           },
           { 
             title: "Histórico de Auditoria e Logs", 
             logsCount: logs?.length || 0,
-            lastAction: logs?.[0]?.action
+            lastAction: logs?.[0]?.action,
+            logs: (logs as any[])?.slice(0, 20).map(l => ({
+              data: l.created_at,
+              acao: l.action,
+              detalhes: l.notes
+            }))
           }
         ]
       };
