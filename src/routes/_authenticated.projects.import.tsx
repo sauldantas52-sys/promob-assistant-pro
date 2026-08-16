@@ -895,7 +895,7 @@ function ImportPage() {
                 Criar projeto bloqueado
               </Button>
               <p className="mt-3 text-center text-[9px] font-bold uppercase leading-relaxed tracking-[0.1em] text-slate-400">
-                O XML será processado pela rotina existente. machining_blocked permanece true.
+                Somente arquivos da pasta serão interpretados. Fidelidade Industrial 100%.
               </p>
             </div>
           </aside>
