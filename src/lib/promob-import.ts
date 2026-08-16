@@ -1,16 +1,16 @@
 import { z } from 'zod';
 
 export const PartMetadataSchema = z.object({
-  unique_id: z.string().optional(),
-  unique_parent_id: z.string().optional(),
+  unique_id: z.string().optional().nullable(),
+  unique_parent_id: z.string().optional().nullable(),
   repetition: z.number().default(1),
-  text_dimension: z.string().optional(),
+  text_dimension: z.string().optional().nullable(),
   unit: z.string().default('un'),
-  family: z.string().optional(),
-  group: z.string().optional(),
-  reference: z.string().optional(),
-  materials: z.array(z.string()).optional(),
-  id_xml: z.string().optional(),
+  family: z.string().optional().nullable(),
+  group: z.string().optional().nullable(),
+  reference: z.string().optional().nullable(),
+  materials: z.array(z.string()).optional().nullable(),
+  id_xml: z.string().optional().nullable(),
 });
 
 export type PartMetadata = z.infer<typeof PartMetadataSchema>;
@@ -18,32 +18,32 @@ export type PartMetadata = z.infer<typeof PartMetadataSchema>;
 export interface PromobPart {
   name: string;
   kind: 'peca' | 'item' | 'ferragem';
-  material?: string;
-  thickness_mm?: number;
-  width_mm?: number;
-  length_mm?: number;
+  material?: string | null;
+  thickness_mm?: number | null;
+  width_mm?: number | null;
+  length_mm?: number | null;
   quantity: number;
   unit: string;
-  edge_banding?: string;
+  edge_banding?: string | null;
   metadata?: PartMetadata;
 }
 
 export interface PromobModule {
   name: string;
-  environment?: string;
-  width_mm?: number;
-  height_mm?: number;
-  depth_mm?: number;
+  environment?: string | null;
+  width_mm?: number | null;
+  height_mm?: number | null;
+  depth_mm?: number | null;
   quantity: number;
-  id_xml?: string;
+  id_xml?: string | null;
   parts: PromobPart[];
 }
 
 export interface PromobProject {
   name: string;
-  client_name?: string;
-  environment?: string;
-  notes?: string;
+  client_name?: string | null;
+  environment?: string | null;
+  notes?: string | null;
   modules: PromobModule[];
   loose_parts: PromobPart[];
 }
@@ -62,7 +62,6 @@ function getNumericAttr(node: Element, name: string): number | undefined {
 function parsePartNode(node: Element): PromobPart {
   const name = getAttr(node, 'DESCRIPTION') || getAttr(node, 'NAME') || 'Peça Sem Nome';
   
-  // Metadados Industriais Rigorosos (Pasta do Cliente 4.0)
   const metadata: PartMetadata = {
     unique_id: getAttr(node, 'UNIQUEID'),
     unique_parent_id: getAttr(node, 'UNIQUEPARENTID'),
@@ -81,13 +80,13 @@ function parsePartNode(node: Element): PromobPart {
   return {
     name,
     kind: (getAttr(node, 'FAMILY') === 'FERRAGEM' ? 'ferragem' : 'peca') as any,
-    material: getAttr(node, 'MATERIAL') || getAttr(node, 'COLOR'),
-    thickness_mm: getNumericAttr(node, 'HEIGHT') || getNumericAttr(node, 'THICKNESS'),
-    width_mm: getNumericAttr(node, 'WIDTH'),
-    length_mm: getNumericAttr(node, 'DEPTH') || getNumericAttr(node, 'LENGTH'),
+    material: getAttr(node, 'MATERIAL') || getAttr(node, 'COLOR') || null,
+    thickness_mm: getNumericAttr(node, 'HEIGHT') || getNumericAttr(node, 'THICKNESS') || null,
+    width_mm: getNumericAttr(node, 'WIDTH') || null,
+    length_mm: getNumericAttr(node, 'DEPTH') || getNumericAttr(node, 'LENGTH') || null,
     quantity: totalQuantity,
     unit: metadata.unit,
-    edge_banding: getAttr(node, 'EDGE_BANDING'),
+    edge_banding: getAttr(node, 'EDGE_BANDING') || null,
     metadata
   };
 }
@@ -102,7 +101,6 @@ export function parsePromobXML(xmlContent: string): PromobProject {
   const modules: PromobModule[] = [];
   const looseParts: PromobPart[] = [];
 
-  // Mapeamento de Ambientes/Módulos
   const moduleNodes = xmlDoc.querySelectorAll('ITEMS > ITEM[TYPE="COMPONENT"], ENVIRONMENT > ITEM');
   
   moduleNodes.forEach(node => {
@@ -118,12 +116,12 @@ export function parsePromobXML(xmlContent: string): PromobProject {
 
       modules.push({
         name: getAttr(node, 'DESCRIPTION') || getAttr(node, 'NAME') || 'Módulo',
-        environment: getAttr(node, 'ENVIRONMENT'),
-        width_mm: getNumericAttr(node, 'WIDTH'),
-        height_mm: getNumericAttr(node, 'HEIGHT'),
-        depth_mm: getNumericAttr(node, 'DEPTH'),
+        environment: getAttr(node, 'ENVIRONMENT') || null,
+        width_mm: getNumericAttr(node, 'WIDTH') || null,
+        height_mm: getNumericAttr(node, 'HEIGHT') || null,
+        depth_mm: getNumericAttr(node, 'DEPTH') || null,
         quantity: getNumericAttr(node, 'QUANTITY') || 1,
-        id_xml: getAttr(node, 'ID'),
+        id_xml: getAttr(node, 'ID') || null,
         parts
       });
     } else {
@@ -133,8 +131,8 @@ export function parsePromobXML(xmlContent: string): PromobProject {
 
   return {
     name: projectName,
-    client_name: projectNode?.getAttribute('CLIENT') || undefined,
-    environment: projectNode?.getAttribute('ENVIRONMENT') || undefined,
+    client_name: projectNode?.getAttribute('CLIENT') || null,
+    environment: projectNode?.getAttribute('ENVIRONMENT') || null,
     modules,
     loose_parts: looseParts
   };
