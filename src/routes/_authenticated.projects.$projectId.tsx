@@ -120,7 +120,7 @@ function ProjectDetail() {
   const fileInput = useRef<HTMLInputElement>(null);
   const [importing, setImporting] = useState(false);
 
-  const [warnings, setWarnings] = useState<string[]>([]);
+  const [warnings] = useState<string[]>([]);
   const [filterType, setFilterType] = useState<string>("all");
   const [searchPart, setSearchPart] = useState("");
 
