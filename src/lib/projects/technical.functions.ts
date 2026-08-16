@@ -18,7 +18,7 @@ export const updateValidationCheck = createServerFn({ method: "POST" })
   .inputValidator((data) => z.object({
     projectId: z.string(),
     checkType: z.string(),
-    isValid: z.boolean(),
+    isCompleted: z.boolean(),
     notes: z.string().optional()
   }).parse(data))
   .handler(async ({ data }) => {
@@ -27,9 +27,9 @@ export const updateValidationCheck = createServerFn({ method: "POST" })
       .upsert({
         project_id: data.projectId,
         check_type: data.checkType,
-        is_valid: data.isValid,
-        notes: data.notes,
-        validated_at: data.isValid ? new Date().toISOString() : null
+        is_completed: data.isCompleted,
+        notes: data.notes ?? null,
+        completed_at: data.isCompleted ? new Date().toISOString() : null
       }, { onConflict: 'project_id,check_type' });
     
     if (error) throw error;
