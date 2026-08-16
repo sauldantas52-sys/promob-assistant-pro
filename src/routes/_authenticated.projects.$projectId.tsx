@@ -647,7 +647,7 @@ function ProjectDetail() {
 
         <TabsContent value="technical3d" className="mt-6">
           <Technical3DView 
-            geometries={latestDxfStored ? parseDXF("DXF_CONTENT_PLACEHOLDER") : []} 
+            geometries={dxfContent.data ? parseDXF(dxfContent.data) : []} 
             projectName={project.data?.name} 
           />
         </TabsContent>
