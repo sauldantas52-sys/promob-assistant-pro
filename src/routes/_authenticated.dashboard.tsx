@@ -128,14 +128,20 @@ function DashboardContent() {
             <CardContent className="pt-6">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <p className="text-5xl font-black tracking-tighter text-slate-900">{decisionRequired}</p>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">Bloqueios de Engenharia</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-5xl font-black tracking-tighter text-slate-900">{decisionRequired}</p>
+                    <p className="text-xs font-bold text-slate-400">Bloqueios</p>
+                  </div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">Usinagem Interrompida</p>
                 </div>
                 <div className="flex flex-col items-end gap-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-xl font-black text-blue-600">{validationPending}</p>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase">Aguardando Checklist</p>
+                  </div>
                   <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-none rounded px-2 py-0.5 text-[9px] font-bold uppercase">
                     machining_blocked = true
                   </Badge>
-                  <p className="text-[9px] text-slate-400 font-bold uppercase">Aguardando Auditoria</p>
                 </div>
               </div>
             </CardContent>
