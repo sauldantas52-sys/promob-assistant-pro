@@ -987,7 +987,7 @@ function ProjectDetail() {
           <PilotValidationChecklist
             projectId={projectId}
             isMachiningBlocked={!!allParts.some((p) => p.machining_blocked)}
-            projectFiles={projectFiles}
+            projectFiles={files.data || []}
           />
         </TabsContent>
 
