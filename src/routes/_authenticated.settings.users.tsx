@@ -1,261 +1,355 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { useAuth, roleLabels, type AppRole } from "@/lib/auth";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState, type FormEvent } from "react";
+import { Ban, KeyRound, Loader2, Pencil, Shield, ShieldCheck, UserPlus, Users } from "lucide-react";
+import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { Loader2, UserPlus, Mail, Shield, UserCheck, Trash2, KeyRound, HardHat } from "lucide-react";
-import { inviteUser } from "@/lib/user-management.functions";
-import { setOperatorCredentials, createOperator } from "@/lib/operator-auth.functions";
-import { AUTH_CONFIG } from "@/lib/auth-config";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useAuth } from "@/lib/auth";
+import {
+  companyUserRoles,
+  createCompanyUser,
+  listCompanyUsers,
+  updateCompanyUserAccess,
+  type CompanyUserRole,
+} from "@/lib/operator-auth.functions";
 
-export const Route = createFileRoute('/_authenticated/settings/users')({
-
+export const Route = createFileRoute("/_authenticated/settings/users")({
   component: UsersManagementPage,
 });
 
-interface UserProfile {
+type CompanyUser = Awaited<ReturnType<typeof listCompanyUsers>>[number];
+
+const roleLabels: Record<CompanyUserRole, string> = {
+  admin: "Administrador",
+  projetista: "Projetista",
+  comercial: "Comercial",
+  escritorio: "Escritório",
+  fabrica: "Fábrica",
+  montador: "Montador",
+  auditor: "Auditor",
+};
+
+function errorMessage(error: unknown, fallback: string) {
+  return error instanceof Error && error.message ? error.message : fallback;
+}
+
+function PinInput({
+  id,
+  value,
+  onChange,
+  required = false,
+}: {
   id: string;
-  full_name: string | null;
-  must_change_password: boolean | null;
-  user_roles: { role: string }[];
-  email?: string;
+  value: string;
+  onChange: (value: string) => void;
+  required?: boolean;
+}) {
+  return (
+    <Input
+      id={id}
+      type="password"
+      inputMode="numeric"
+      autoComplete="new-password"
+      minLength={8}
+      maxLength={20}
+      pattern="[0-9]{8,20}"
+      placeholder="8 a 20 dígitos"
+      value={value}
+      onChange={(event) => {
+        if (/^\d*$/.test(event.target.value)) onChange(event.target.value);
+      }}
+      required={required}
+    />
+  );
 }
 
 function UsersManagementPage() {
-  const { user: currentUser, role: currentRole, companyId } = useAuth();
-  const [users, setUsers] = useState<UserProfile[]>([]);
+  const { user: currentUser, role: currentRole, loading: authLoading } = useAuth();
+  const [users, setUsers] = useState<CompanyUser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [inviting, setInviting] = useState(false);
-  const [configuringOperator, setConfiguringOperator] = useState<UserProfile | null>(null);
-  
-  // Operator config state
-  const [opCode, setOpCode] = useState("");
-  const [opPin, setOpPin] = useState("");
-  const [opRealPass, setOpRealPass] = useState("");
-  const [settingOp, setSettingOp] = useState(false);
-  
-  // Form state
-  const [email, setEmail] = useState("");
+  const [saving, setSaving] = useState(false);
   const [fullName, setFullName] = useState("");
-  const [role, setRole] = useState<AppRole>("escritorio");
+  const [operatorCode, setOperatorCode] = useState("");
+  const [pin, setPin] = useState("");
+  const [role, setRole] = useState<CompanyUserRole>("projetista");
+  const [editing, setEditing] = useState<CompanyUser | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editCode, setEditCode] = useState("");
+  const [editPin, setEditPin] = useState("");
+  const [editRole, setEditRole] = useState<CompanyUserRole>("projetista");
+  const [busyUserId, setBusyUserId] = useState<string | null>(null);
 
-  const fetchUsers = async () => {
-    if (!companyId) return;
+  const loadUsers = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select(`
-          id,
-          full_name,
-          must_change_password,
-          user_roles(role)
-        `)
-        .eq('company_id', companyId);
-
-      if (error) throw error;
-      setUsers(data as any || []);
+      setUsers(await listCompanyUsers());
     } catch (error) {
-      toast.error("Erro ao carregar usuários.");
+      toast.error(errorMessage(error, "Não foi possível carregar os usuários."));
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchUsers();
-  }, [companyId]);
+    if (!authLoading && currentRole === "admin") void loadUsers();
+    if (!authLoading && currentRole !== "admin") setLoading(false);
+  }, [authLoading, currentRole]);
 
-  const handleInvite = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!companyId) return;
-    setInviting(true);
-    
+  const handleCreate = async (event: FormEvent) => {
+    event.preventDefault();
+    setSaving(true);
     try {
-      if (role === 'fabrica' || role === 'montador') {
-        const pin = Math.random().toString().slice(2, 8); // temporary random pin
-        const internalPass = Math.random().toString(36).slice(-16) + "A1!";
-        const firstPart = fullName?.split(' ')[0] || 'OP';
-        const opCode = `OP-${firstPart.toUpperCase()}-${Math.floor(Math.random() * 1000)}`;
-        
-        await createOperator({
-          data: {
-            email,
-            fullName,
-            role,
-            companyId,
-            operatorCode: opCode,
-            pin,
-            internalPassword: internalPass
-          }
-        });
-        toast.success(`Operador criado: Código ${opCode}, PIN temporário: ${pin}`);
-      } else {
-        await inviteUser({
-          data: { email, fullName, role, companyId }
-        });
-        toast.success(`Convite registrado para ${email}`);
-      }
-      
-      setEmail("");
+      await createCompanyUser({ data: { fullName, operatorCode, pin, role } });
       setFullName("");
-      fetchUsers();
+      setOperatorCode("");
+      setPin("");
+      setRole("projetista");
+      toast.success("Usuário criado com segurança.");
+      await loadUsers();
     } catch (error) {
-      toast.error("Erro ao registrar usuário.");
+      toast.error(errorMessage(error, "Não foi possível criar o usuário."));
     } finally {
-      setInviting(false);
+      setSaving(false);
     }
-
   };
 
-  const handleSetOperator = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!configuringOperator) return;
-    setSettingOp(true);
+  const openEditor = (companyUser: CompanyUser) => {
+    if (!companyUser.role) return;
+    setEditing(companyUser);
+    setEditName(companyUser.fullName);
+    setEditCode(companyUser.operatorCode);
+    setEditRole(companyUser.role);
+    setEditPin("");
+  };
+
+  const handleEdit = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!editing) return;
+    setSaving(true);
     try {
-      await setOperatorCredentials({
+      await updateCompanyUserAccess({
         data: {
-          profileId: configuringOperator.id,
-          operatorCode: opCode,
-          pin: opPin,
-          realPassword: opRealPass
-        }
+          userId: editing.id,
+          fullName: editName,
+          operatorCode: editCode,
+          role: editRole,
+          ...(editPin ? { pin: editPin } : {}),
+        },
       });
-      toast.success("Credenciais operacionais configuradas!");
-      setConfiguringOperator(null);
-      setOpCode("");
-      setOpPin("");
-      setOpRealPass("");
-      fetchUsers();
+      setEditing(null);
+      toast.success(editPin ? "Usuário e PIN atualizados." : "Usuário atualizado.");
+      await loadUsers();
     } catch (error) {
-      toast.error("Erro ao configurar operador.");
+      toast.error(errorMessage(error, "Não foi possível atualizar o usuário."));
     } finally {
-      setSettingOp(false);
+      setSaving(false);
     }
   };
 
-  if (currentRole !== 'admin' && currentRole !== 'escritorio') {
+  const toggleBlocked = async (companyUser: CompanyUser) => {
+    setBusyUserId(companyUser.id);
+    try {
+      await updateCompanyUserAccess({
+        data: { userId: companyUser.id, blocked: !companyUser.blocked },
+      });
+      toast.success(companyUser.blocked ? "Usuário ativado." : "Usuário bloqueado.");
+      await loadUsers();
+    } catch (error) {
+      toast.error(errorMessage(error, "Não foi possível alterar o acesso."));
+    } finally {
+      setBusyUserId(null);
+    }
+  };
+
+  if (authLoading) {
     return (
-      <div className="p-8 text-center">
-        <Shield className="mx-auto h-12 w-12 text-slate-300 mb-4" />
-        <h2 className="text-xl font-black uppercase">Acesso Negado</h2>
-        <p className="text-slate-500">Apenas administradores podem gerenciar usuários.</p>
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (currentRole !== "admin") {
+    return (
+      <div className="mx-auto flex min-h-[55vh] max-w-md flex-col items-center justify-center px-6 text-center">
+        <div className="mb-5 rounded-2xl bg-slate-100 p-4">
+          <Shield className="h-9 w-9 text-slate-500" />
+        </div>
+        <h1 className="text-2xl font-black uppercase tracking-tight text-slate-900">
+          Acesso restrito
+        </h1>
+        <p className="mt-2 text-sm text-slate-500">
+          Somente administradores podem gerenciar usuários.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="p-8 space-y-8 max-w-7xl mx-auto">
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-5xl font-black text-slate-900 uppercase tracking-tighter">Usuários</h1>
-          <p className="text-sm font-bold text-blue-600 uppercase tracking-[0.3em] mt-2">Gestão de Acesso e Permissões</p>
+    <main className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
+      <header className="rounded-3xl bg-slate-950 px-6 py-7 text-white sm:px-8 sm:py-9">
+        <div className="flex items-center gap-3 text-blue-400">
+          <ShieldCheck className="h-5 w-5" />
+          <span className="text-xs font-bold uppercase tracking-[0.24em]">Administração</span>
         </div>
+        <h1 className="mt-3 text-3xl font-black uppercase tracking-tight sm:text-4xl">
+          Usuários da empresa
+        </h1>
+        <p className="mt-2 max-w-2xl text-sm text-slate-400">
+          Crie acessos operacionais, defina funções e bloqueie contas sem expor credenciais
+          internas.
+        </p>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <Card className="lg:col-span-1 border-none shadow-xl rounded-[2rem] bg-slate-900 text-white overflow-hidden self-start">
-          <CardHeader className="pt-10 px-10">
-            <div className="flex items-center gap-3 mb-2">
-              <UserPlus className="h-6 w-6 text-blue-400" />
-              <CardTitle className="text-2xl font-black uppercase tracking-tight">Novo Acesso</CardTitle>
-            </div>
-            <CardDescription className="text-slate-400">Envie um convite para novos colaboradores.</CardDescription>
+      <div className="grid gap-6 lg:grid-cols-[minmax(280px,360px)_1fr]">
+        <Card className="h-fit border-slate-200 shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <UserPlus className="h-5 w-5 text-blue-600" />
+              Novo usuário
+            </CardTitle>
+            <CardDescription>Todos os campos são obrigatórios.</CardDescription>
           </CardHeader>
-          <CardContent className="p-10">
-            <form onSubmit={handleInvite} className="space-y-6">
+          <CardContent>
+            <form className="space-y-4" onSubmit={handleCreate}>
               <div className="space-y-2">
-                <Label htmlFor="invite-name" className="text-slate-300">Nome Completo</Label>
-                <Input 
-                  id="invite-name" 
-                  value={fullName} 
-                  onChange={(e) => setFullName(e.target.value)} 
-                  className="bg-slate-800 border-slate-700 text-white rounded-xl h-12" 
-                  required 
+                <Label htmlFor="new-name">Nome completo</Label>
+                <Input
+                  id="new-name"
+                  maxLength={120}
+                  value={fullName}
+                  onChange={(event) => setFullName(event.target.value)}
+                  required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="invite-email" className="text-slate-300">E-mail</Label>
-                <Input 
-                  id="invite-email" 
-                  type="email" 
-                  value={email} 
-                  onChange={(e) => setEmail(e.target.value)} 
-                  className="bg-slate-800 border-slate-700 text-white rounded-xl h-12" 
-                  required 
+                <Label htmlFor="new-code">Código / matrícula</Label>
+                <Input
+                  id="new-code"
+                  maxLength={50}
+                  value={operatorCode}
+                  onChange={(event) => setOperatorCode(event.target.value)}
+                  placeholder="Ex.: MAT-1042"
+                  required
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-slate-300">Perfil Industrial</Label>
-                <Select value={role} onValueChange={(v) => setRole(v as AppRole)}>
-                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white rounded-xl h-12">
+                <Label htmlFor="new-pin">PIN numérico</Label>
+                <PinInput id="new-pin" value={pin} onChange={setPin} required />
+              </div>
+              <div className="space-y-2">
+                <Label>Função</Label>
+                <Select value={role} onValueChange={(value) => setRole(value as CompanyUserRole)}>
+                  <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.entries(roleLabels).map(([key, label]) => (
-                      <SelectItem key={key} value={key}>{label}</SelectItem>
+                    {companyUserRoles.map((value) => (
+                      <SelectItem key={value} value={value}>
+                        {roleLabels[value]}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              <Button type="submit" className="w-full h-14 rounded-xl bg-blue-600 hover:bg-blue-700 font-black uppercase tracking-widest" disabled={inviting}>
-                {inviting ? <Loader2 className="animate-spin" /> : "Enviar Convite"}
+              <Button
+                className="h-11 w-full bg-blue-600 font-bold hover:bg-blue-700"
+                disabled={saving}
+                type="submit"
+              >
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Criar usuário"}
               </Button>
             </form>
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2 border-none shadow-2xl rounded-[2rem] bg-white overflow-hidden">
-          <CardHeader className="pt-10 px-10 border-b border-slate-50">
-            <CardTitle className="text-2xl font-black text-slate-900 uppercase tracking-tight">Colaboradores Ativos</CardTitle>
+        <Card className="border-slate-200 shadow-sm">
+          <CardHeader className="border-b border-slate-100">
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Users className="h-5 w-5 text-blue-600" />
+              Equipe
+            </CardTitle>
+            <CardDescription>
+              {users.length} {users.length === 1 ? "usuário" : "usuários"}
+            </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
             {loading ? (
-              <div className="p-20 flex justify-center"><Loader2 className="h-10 w-10 animate-spin text-slate-300" /></div>
+              <div className="flex min-h-56 items-center justify-center">
+                <Loader2 className="h-7 w-7 animate-spin text-slate-400" />
+              </div>
+            ) : users.length === 0 ? (
+              <div className="p-10 text-center text-sm text-slate-500">
+                Nenhum usuário cadastrado.
+              </div>
             ) : (
-              <div className="divide-y divide-slate-50">
-                {users.map((u) => (
-                  <div key={u.id} className="flex items-center justify-between p-8 hover:bg-slate-50 transition-colors">
-                    <div className="flex items-center gap-4">
-                      <div className="h-14 w-14 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400">
-                        <UserCheck className="h-7 w-7" />
+              <div className="divide-y divide-slate-100">
+                {users.map((companyUser) => (
+                  <article
+                    key={companyUser.id}
+                    className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h2 className="truncate font-bold text-slate-900">
+                          {companyUser.fullName || "Sem nome"}
+                        </h2>
+                        <Badge variant={companyUser.blocked ? "destructive" : "secondary"}>
+                          {companyUser.blocked ? "Bloqueado" : "Ativo"}
+                        </Badge>
                       </div>
-                      <div>
-                        <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">{u.full_name || 'Sem Nome'}</h3>
-                        <div className="flex gap-2 mt-1">
-                          <span className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[10px] font-black uppercase tracking-wider">
-                            {roleLabels[u.user_roles[0]?.role as AppRole] || u.user_roles[0]?.role}
-                          </span>
-                          {u.must_change_password && (
-                            <span className="px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-[10px] font-black uppercase tracking-wider">
-                              Troca de PIN pendente
-                            </span>
-                          )}
-                        </div>
-                      </div>
+                      <p className="mt-1 text-sm text-slate-500">
+                        {companyUser.operatorCode || "Sem matrícula"}
+                      </p>
+                      <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-blue-700">
+                        {companyUser.role ? roleLabels[companyUser.role] : "Sem função"}
+                      </p>
                     </div>
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-12 w-12 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50"
-                        onClick={() => {
-                          setConfiguringOperator(u);
-                          setOpCode(`OP-${(u.full_name?.split(' ')[0] || 'USR').toUpperCase()}`);
-                        }}
+                    <div className="flex gap-2 sm:justify-end">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openEditor(companyUser)}
+                        disabled={!companyUser.role}
                       >
-                        <KeyRound className="h-5 w-5" />
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Editar
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50">
-                        <Trash2 className="h-5 w-5" />
+                      <Button
+                        variant={companyUser.blocked ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => void toggleBlocked(companyUser)}
+                        disabled={
+                          busyUserId === companyUser.id || currentUser?.id === companyUser.id
+                        }
+                      >
+                        {busyUserId === companyUser.id ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Ban className="mr-2 h-4 w-4" />
+                        )}
+                        {companyUser.blocked ? "Ativar" : "Bloquear"}
                       </Button>
                     </div>
-                  </div>
+                  </article>
                 ))}
               </div>
             )}
@@ -263,73 +357,71 @@ function UsersManagementPage() {
         </Card>
       </div>
 
-      {configuringOperator && (
-        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-          <Card className="w-full max-w-md border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden">
-            <CardHeader className="pt-10 px-10 border-b border-slate-50">
-              <div className="flex items-center gap-3 mb-2">
-                <HardHat className="h-6 w-6 text-blue-600" />
-                <CardTitle className="text-2xl font-black uppercase tracking-tight">Configurar Operador</CardTitle>
-              </div>
-              <CardDescription>
-                Defina as credenciais simplificadas para <strong>{configuringOperator.full_name}</strong>.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-10">
-              <form onSubmit={handleSetOperator} className="space-y-6">
-                <div className="space-y-2">
-                  <Label>Código do Operador</Label>
-                  <Input 
-                    value={opCode} 
-                    onChange={(e) => setOpCode(e.target.value)} 
-                    placeholder="Ex: OP-01" 
-                    className="h-12 rounded-xl"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>PIN Numérico (4-20 dígitos)</Label>
-                  <Input 
-                    type="password"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={opPin} 
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      if (v === "" || /^\d+$/.test(v)) setOpPin(v);
-                    }} 
-                    placeholder="Apenas números" 
-                    className="h-12 rounded-xl"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Senha Supabase (Interna)</Label>
-                  <Input 
-                    type="password"
-                    value={opRealPass} 
-                    onChange={(e) => setOpRealPass(e.target.value)} 
-                    placeholder="Senha de 8+ caracteres" 
-                    className="h-12 rounded-xl"
-                    required
-                  />
-                  <p className="text-[10px] text-slate-400">
-                    Esta senha será usada automaticamente pelo sistema no login via PIN.
-                  </p>
-                </div>
-                <div className="flex gap-3 pt-4">
-                  <Button type="button" variant="ghost" className="flex-1 h-12 rounded-xl" onClick={() => setConfiguringOperator(null)}>
-                    Cancelar
-                  </Button>
-                  <Button type="submit" className="flex-1 h-12 rounded-xl bg-blue-600 hover:bg-blue-700 font-black uppercase tracking-widest" disabled={settingOp}>
-                    {settingOp ? <Loader2 className="animate-spin" /> : "Salvar"}
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-    </div>
+      <Dialog open={Boolean(editing)} onOpenChange={(open) => !open && setEditing(null)}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Editar usuário</DialogTitle>
+            <DialogDescription>
+              Altere dados, função ou informe um novo PIN para redefini-lo.
+            </DialogDescription>
+          </DialogHeader>
+          <form className="space-y-4" onSubmit={handleEdit}>
+            <div className="space-y-2">
+              <Label htmlFor="edit-name">Nome completo</Label>
+              <Input
+                id="edit-name"
+                maxLength={120}
+                value={editName}
+                onChange={(event) => setEditName(event.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-code">Código / matrícula</Label>
+              <Input
+                id="edit-code"
+                maxLength={50}
+                value={editCode}
+                onChange={(event) => setEditCode(event.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-pin" className="flex items-center gap-2">
+                <KeyRound className="h-4 w-4" />
+                Novo PIN (opcional)
+              </Label>
+              <PinInput id="edit-pin" value={editPin} onChange={setEditPin} />
+            </div>
+            <div className="space-y-2">
+              <Label>Função</Label>
+              <Select
+                value={editRole}
+                onValueChange={(value) => setEditRole(value as CompanyUserRole)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {companyUserRoles.map((value) => (
+                    <SelectItem key={value} value={value}>
+                      {roleLabels[value]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogFooter className="gap-2 pt-2">
+              <Button type="button" variant="ghost" onClick={() => setEditing(null)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={saving}>
+                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Salvar alterações
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </main>
   );
 }

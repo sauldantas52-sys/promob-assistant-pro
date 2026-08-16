@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AppShell } from "@/components/AppShell";
+import { ProjectFieldSchedule } from "@/components/assembly/ProjectFieldSchedule";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -32,13 +33,42 @@ function PickingPage() {
         .select(
           `
           id, name, client_name, environment, status,
-          parts(id, name, kind, quantity, unit, is_completed, storage_location, assembly_group_id, assembly_groups(code))
+          parts(id, name, kind, quantity, unit, is_completed, storage_location, material, module_id, assembly_group_id, assembly_groups(id, code, color, module_id, modules(id, name)))
         `,
         )
         .in("status", ["usinagem", "separacao", "conferencia"])
         .order("updated_at", { ascending: false });
       if (error) throw error;
-      return data;
+      if (data.length === 0) return [];
+
+      const projectIds = data.map((project) => project.id);
+      const [sitesResult, appointmentsResult] = await Promise.all([
+        supabase
+          .from("project_sites")
+          .select(
+            "project_id, street, number, complement, district, city, state, postal_code, reference, contact_name, contact_phone",
+          )
+          .in("project_id", projectIds),
+        supabase
+          .from("project_appointments")
+          .select("project_id, kind, scheduled_at, arrival_time, status")
+          .in("project_id", projectIds)
+          .in("kind", ["montagem", "entrega"])
+          .neq("status", "cancelado")
+          .neq("status", "concluido")
+          .gte("scheduled_at", new Date().toISOString())
+          .order("scheduled_at", { ascending: true }),
+      ]);
+      if (sitesResult.error) throw sitesResult.error;
+      if (appointmentsResult.error) throw appointmentsResult.error;
+
+      return data.map((project) => ({
+        ...project,
+        project_site: sitesResult.data.find((site) => site.project_id === project.id) ?? null,
+        next_appointment:
+          appointmentsResult.data.find((appointment) => appointment.project_id === project.id) ??
+          null,
+      }));
     },
   });
 
@@ -92,13 +122,22 @@ function PickingPage() {
             const pieceItems = parts.filter((p) => p.kind !== "ferragem" && p.kind !== "acessorio");
 
             // is_completed remains the production state for pieces. Only hardware is toggled here.
-            const groupCode = (part: (typeof parts)[number]) => part.assembly_groups?.code ?? "";
-            const g1 = hardwareItems.filter((part) => groupCode(part) === "G1");
-            const g2 = hardwareItems.filter((part) => groupCode(part) === "G2");
-            const g3 = hardwareItems.filter((part) => groupCode(part) === "G3");
-            const av = hardwareItems.filter(
-              (part) => !g1.includes(part) && !g2.includes(part) && !g3.includes(part),
-            );
+            const logisticsGroups = Array.from(
+              hardwareItems.reduce((grouped, item) => {
+                const group = item.assembly_groups;
+                const key = group
+                  ? `${group.code}|${group.color ?? ""}|${group.module_id ?? ""}|${group.id}`
+                  : "ungrouped";
+                const current = grouped.get(key);
+                if (current) current.items.push(item);
+                else grouped.set(key, { group, items: [item] });
+                return grouped;
+              }, new Map<string, { group: (typeof hardwareItems)[number]["assembly_groups"]; items: typeof hardwareItems }>()),
+            )
+              .map(([, value]) => value)
+              .sort((left, right) =>
+                compareGroupCodes(left.group?.code ?? null, right.group?.code ?? null),
+              );
 
             const total = parts.length;
             const done = parts.filter((i) => i.is_completed).length;
@@ -136,6 +175,10 @@ function PickingPage() {
                       {done} / {total} conferidos
                     </Badge>
                   </div>
+                  <ProjectFieldSchedule
+                    site={project.project_site}
+                    appointment={project.next_appointment}
+                  />
                   <div className="grid gap-2 sm:grid-cols-2">
                     <div
                       className={cn(
@@ -197,6 +240,11 @@ function PickingPage() {
                               <p className="mt-1 text-[9px] font-black uppercase tracking-wider text-slate-400">
                                 Qtd: {item.quantity} {item.unit}
                               </p>
+                              <PartIdentity
+                                code={item.assembly_groups?.code}
+                                color={item.assembly_groups?.color}
+                                material={item.material}
+                              />
                             </div>
                             <Badge
                               className={cn(
@@ -212,20 +260,31 @@ function PickingPage() {
                         ))}
                       </div>
                     )}
-                    {[
-                      { label: "G1 - Módulos Base", items: g1, color: "bg-teal-600" },
-                      { label: "G2 - Complementares", items: g2, color: "bg-slate-600" },
-                      { label: "G3 - Acabamentos", items: g3, color: "bg-indigo-600" },
-                      { label: "AV - Avulsos / Ferragens", items: av, color: "bg-orange-600" },
-                    ].map(
+                    {logisticsGroups.map(
                       (group) =>
                         group.items.length > 0 && (
-                          <div key={group.label} className="bg-white">
+                          <div
+                            key={
+                              group.group
+                                ? `${group.group.code}-${group.group.color}-${group.group.module_id}-${group.group.id}`
+                                : "ungrouped"
+                            }
+                            className="bg-white"
+                          >
                             <div className="flex items-center gap-3 border-y border-slate-100 bg-slate-50 px-4 py-3 sm:px-5">
-                              <div className={cn("h-2.5 w-2.5 rounded-full", group.color)} />
-                              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">
-                                {group.label}
-                              </p>
+                              <div
+                                className="h-3 w-3 rounded-full border border-slate-300"
+                                style={{ backgroundColor: group.group?.color || "transparent" }}
+                              />
+                              <div>
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-700">
+                                  {group.group?.code || "Sem grupo logístico"}
+                                </p>
+                                <p className="mt-0.5 text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                                  Módulo: {group.group?.modules?.name || "não vinculado"} · Cor
+                                  logística: {group.group?.color || "não informada"}
+                                </p>
+                              </div>
                             </div>
                             {group.items.map((item) => (
                               <div
@@ -279,6 +338,9 @@ function PickingPage() {
                                           {item.storage_location}
                                         </Badge>
                                       )}
+                                      <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500">
+                                        Material/acabamento: {item.material || "não informado"}
+                                      </span>
                                     </div>
                                   </div>
                                 </div>
@@ -360,4 +422,39 @@ function PickingPage() {
       </div>
     </AppShell>
   );
+}
+
+function PartIdentity({
+  code,
+  color,
+  material,
+}: {
+  code?: string | null | undefined;
+  color?: string | null | undefined;
+  material?: string | null | undefined;
+}) {
+  return (
+    <div className="mt-2 flex flex-wrap gap-2 text-[9px] font-bold uppercase tracking-wider text-slate-500">
+      <span className="flex items-center gap-1">
+        <span
+          className="h-2.5 w-2.5 rounded-full border border-slate-300"
+          style={{ backgroundColor: color || "transparent" }}
+        />
+        Grupo: {code || "não vinculado"} · Cor logística: {color || "não informada"}
+      </span>
+      <span>Material/acabamento: {material || "não informado"}</span>
+    </div>
+  );
+}
+
+function compareGroupCodes(left: string | null, right: string | null) {
+  const groupNumber = (code: string | null) => {
+    const match = code?.trim().match(/^G\s*(\d+)/i);
+    return match ? Number(match[1]) : Number.POSITIVE_INFINITY;
+  };
+  const numberDifference = groupNumber(left) - groupNumber(right);
+  if (numberDifference) return numberDifference;
+  if (!left && right) return 1;
+  if (left && !right) return -1;
+  return (left ?? "").localeCompare(right ?? "", "pt-BR", { numeric: true });
 }
