@@ -2491,17 +2491,27 @@ export type Database = {
         Args: { _transaction_id: string }
         Returns: number
       }
-      create_complete_client_project: {
-        Args: {
-          _client: Json
-          _files: Json
-          _loose_parts: Json
-          _modules: Json
-          _project: Json
-          _site: Json
-        }
-        Returns: string
-      }
+      create_complete_client_project:
+        | {
+            Args: {
+              _client: Json
+              _environments: Json
+              _project: Json
+              _site: Json
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              _client: Json
+              _files: Json
+              _loose_parts: Json
+              _modules: Json
+              _project: Json
+              _site: Json
+            }
+            Returns: string
+          }
       current_company_id: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -2520,10 +2530,7 @@ export type Database = {
         }
         Returns: string
       }
-      import_legacy_store_credits: {
-        Args: { _payload: Json }
-        Returns: undefined
-      }
+      import_legacy_store_credits: { Args: { _payload: Json }; Returns: Json }
       prepare_store_credit_purchase: {
         Args: {
           _account_id: string
