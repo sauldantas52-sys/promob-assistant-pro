@@ -230,7 +230,6 @@ function ProjectDetail() {
         sum + ((p.width_mm ?? 0) / 1000) * ((p.length_mm ?? 0) / 1000) * Number(p.quantity ?? 1),
       0,
     ) || 0;
-  const projectFiles = files.data ?? [];
   const latestXml = projectFiles.find(
     (file) =>
       file.file_type?.toLowerCase().includes("xml") ||
