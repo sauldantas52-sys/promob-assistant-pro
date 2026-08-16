@@ -46,7 +46,7 @@ function DashboardContent() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
-        .select("id, name, client_name, status, environment, created_at, machining_blocked")
+        .select("id, name, client_name, status, environment, created_at, machining_blocked, is_validated")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -55,7 +55,8 @@ function DashboardContent() {
 
   const list = projects.data ?? [];
   const activeCount = list.filter(p => p.status !== 'expedido' && p.status !== 'assistencia').length;
-  const decisionRequired = list.filter(p => p.machining_blocked === true || p.status === 'nao_confirmado').length;
+  const decisionRequired = list.filter(p => p.machining_blocked === true || p.status === 'novo').length;
+  const validationPending = list.filter(p => p.is_validated === false).length;
   
   const countByStatus = (status: string) => list.filter((p) => p.status === status).length;
 
@@ -116,25 +117,31 @@ function DashboardContent() {
             </CardContent>
           </Card>
 
-          {/* Exige Decisão - Light/Accent Panel */}
+          {/* Segurança de Engenharia - Light/Accent Panel */}
           <Card className="bg-white border border-slate-200 overflow-hidden shadow-sm">
             <CardHeader className="pb-2 border-b border-slate-100">
               <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-amber-500" />
-                Exige Decisão
+                Segurança Industrial
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <p className="text-5xl font-black tracking-tighter text-slate-900">{decisionRequired}</p>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">Alertas de Engenharia</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-5xl font-black tracking-tighter text-slate-900">{decisionRequired}</p>
+                    <p className="text-xs font-bold text-slate-400">Bloqueios</p>
+                  </div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">Usinagem Interrompida</p>
                 </div>
                 <div className="flex flex-col items-end gap-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-xl font-black text-blue-600">{validationPending}</p>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase">Aguardando Checklist</p>
+                  </div>
                   <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-none rounded px-2 py-0.5 text-[9px] font-bold uppercase">
-                    Usinagem Bloqueada
+                    machining_blocked = true
                   </Badge>
-                  <p className="text-[9px] text-slate-400 font-bold uppercase">Aguardando Validação</p>
                 </div>
               </div>
             </CardContent>

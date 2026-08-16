@@ -1,83 +1,113 @@
-import { useState } from "react";
-import { Camera, Upload, CheckCircle2, AlertCircle, Eye } from "lucide-react";
+import { Box, Upload, AlertCircle, Eye, Info } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
+import { Link } from "@tanstack/react-router";
 
 export function VisualEstimateTab({ projectId }: { projectId: string }) {
-  const [isUploading, setIsUploading] = useState(false);
-  
-  const handleSimulateUpload = () => {
-    setIsUploading(true);
-    setTimeout(() => {
-      setIsUploading(false);
-      toast.success("IA detectou 4 módulos e 12 peças no croqui.");
-    }, 2000);
-  };
+  const { data: modules } = useQuery({
+    queryKey: ["project_modules_visual", projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("modules")
+        .select("*")
+        .eq("project_id", projectId);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: files } = useQuery({
+    queryKey: ["project_files_visual", projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("project_files")
+        .select("*")
+        .eq("project_id", projectId)
+        .in("file_type", ["imagem_referencia", "dxf_conferencia"]);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const referenceImage = files?.find(f => f.file_type === 'imagem_referencia');
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="rounded-3xl border-dashed border-2 border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-colors">
-          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="h-20 w-20 rounded-full bg-blue-100 flex items-center justify-center mb-4">
-              <Camera className="h-10 w-10 text-blue-600" />
+        <Card className="rounded-3xl border-none shadow-xl bg-slate-900 overflow-hidden relative aspect-video flex items-center justify-center">
+          {referenceImage ? (
+             <div className="absolute inset-0 opacity-40 bg-cover bg-center" style={{ backgroundImage: `url(${referenceImage.storage_path})` }} />
+          ) : (
+            <div className="absolute inset-0 opacity-10 bg-[url('https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=80')] bg-cover bg-center" />
+          )}
+          
+          <div className="relative z-10 text-center p-8">
+            <div className="h-16 w-16 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center mx-auto mb-4">
+              <Eye className="h-8 w-8 text-white" />
             </div>
-            <h3 className="text-lg font-black uppercase tracking-tight text-slate-900">Upload de Croqui / Foto</h3>
-            <p className="text-sm text-slate-500 max-w-xs mt-2">
-              Envie fotos do ambiente ou desenhos à mão para gerar uma estimativa rápida de materiais.
+            <h3 className="text-white font-black uppercase tracking-widest text-sm">Visualização de Referência</h3>
+            <p className="text-slate-400 text-xs mt-2 uppercase font-bold tracking-tight">
+              {referenceImage ? "Imagem da Pasta do Cliente" : "Nenhuma imagem de referência anexada"}
             </p>
-            <Button 
-              onClick={handleSimulateUpload}
-              disabled={isUploading}
-              className="mt-6 bg-blue-600 hover:bg-blue-700 text-white rounded-full px-8 h-12 gap-2"
-            >
-              {isUploading ? "Processando IA..." : <><Upload className="h-4 w-4" /> Selecionar Arquivo</>}
-            </Button>
-          </CardContent>
+          </div>
         </Card>
 
         <div className="space-y-4">
-          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 px-2">Detecção Inteligente</h3>
-          {[
-            { type: "Armário Superior", qty: 2, confidence: 94 },
-            { type: "Gaveteiro", qty: 1, confidence: 88 },
-            { type: "Painel TV", qty: 1, confidence: 72 },
-          ].map((item, idx) => (
-            <Card key={idx} className="rounded-2xl border-none shadow-sm bg-white p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center">
-                  <Eye className="h-5 w-5 text-slate-600" />
+          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 px-2 flex items-center gap-2">
+             <Box className="h-3 w-3" /> Módulos Identificados no XML
+          </h3>
+          {modules && modules.length > 0 ? (
+            modules.slice(0, 5).map((mod) => (
+              <Card key={mod.id} className="rounded-2xl border-none shadow-sm bg-white p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600">
+                    <Box className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-900">{mod.name}</p>
+                    <p className="text-[10px] text-slate-500 uppercase font-black">
+                      {mod.width_mm}x{mod.height_mm}x{mod.depth_mm}mm
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-bold text-slate-900">{item.type}</p>
-                  <p className="text-[10px] text-slate-500 uppercase font-black">{item.qty} unidade(s)</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <Badge className={item.confidence > 90 ? "bg-emerald-500" : "bg-amber-500"}>
-                  {item.confidence}% Confiança
-                </Badge>
-              </div>
-            </Card>
-          ))}
+                <Badge variant="outline" className="text-[9px] uppercase font-black">Confirmado XML</Badge>
+              </Card>
+            ))
+          ) : (
+            <div className="p-8 text-center border-2 border-dashed rounded-2xl border-slate-100">
+              <p className="text-xs text-slate-400 italic">Aguardando importação de arquivos técnicos.</p>
+            </div>
+          )}
+          {modules && modules.length > 5 && (
+            <p className="text-[10px] text-center text-slate-400 uppercase font-bold tracking-widest">+ {modules.length - 5} outros módulos</p>
+          )}
         </div>
       </div>
 
       <Card className="rounded-3xl border-none shadow-xl bg-white">
-        <CardHeader className="border-b">
-          <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-900">Matriz de Validação Visual</CardTitle>
+        <CardHeader className="border-b flex flex-row items-center justify-between">
+          <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-900">Governança Industrial</CardTitle>
+          <Info className="h-4 w-4 text-slate-400" />
         </CardHeader>
-        <CardContent className="pt-6">
-          <div className="flex items-start gap-4 p-4 rounded-2xl bg-red-50 border border-red-100">
-            <AlertCircle className="h-5 w-5 text-red-600 mt-1" />
+        <CardContent className="pt-6 space-y-4">
+          <div className="flex items-start gap-4 p-4 rounded-2xl bg-amber-50 border border-amber-100">
+            <AlertCircle className="h-5 w-5 text-amber-600 mt-1" />
             <div>
-              <p className="text-sm font-black text-red-900 uppercase">Bloqueio de Engenharia Ativo</p>
-              <p className="text-xs text-red-700 mt-1">
-                Estimativas visuais servem apenas para orçamento inicial. É obrigatório o envio do XML Promob para liberação da produção.
+              <p className="text-sm font-black text-amber-900 uppercase">Fidelidade aos Arquivos</p>
+              <p className="text-xs text-amber-700 mt-1 leading-relaxed">
+                Este sistema opera em base técnica real. Imagens e croquis servem apenas como referência visual espacial. 
+                A autoridade de fabricação reside exclusivamente no **XML Promob** e no **DXF de Usinagem**.
               </p>
             </div>
+          </div>
+          
+          <div className="flex justify-end">
+             <Button asChild variant="outline" className="rounded-full text-[10px] font-black uppercase tracking-widest">
+               <Link to="/projects/import">Anexar Novos Arquivos</Link>
+             </Button>
           </div>
         </CardContent>
       </Card>

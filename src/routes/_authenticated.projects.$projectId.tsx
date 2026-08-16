@@ -29,6 +29,7 @@ import {
   ArrowRightLeft,
   CheckSquare,
   type LucideIcon,
+  Box,
 } from "lucide-react";
 import { Parser } from "@json2csv/plainjs";
 import { EngineeringTab } from "@/components/EngineeringTab";
@@ -39,6 +40,8 @@ import { PreliminaryCutPlanTab } from "@/components/project/PreliminaryCutPlanTa
 import { VisualEstimateTab } from "@/components/project/VisualEstimateTab";
 import { AuditIntegrationTab } from "@/components/project/AuditIntegrationTab";
 import { PhysicalChecklistFlow } from "@/components/PhysicalChecklistFlow";
+import { Technical3DView } from "@/components/project/Technical3DView";
+import { parseDXF } from "@/lib/dxf-parser";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -181,6 +184,24 @@ function ProjectDetail() {
     },
   });
 
+  const projectFiles = files.data ?? [];
+  
+  const dxfContent = useQuery({
+    queryKey: ["dxf_content", projectId],
+    queryFn: async () => {
+      const dxfFile = projectFiles.find(f => f.file_type === 'dxf_conferencia' && f.storage_status === 'stored');
+      if (!dxfFile?.storage_path) return null;
+      
+      const { data, error } = await supabase.storage
+        .from("project-files")
+        .download(dxfFile.storage_path);
+        
+      if (error) throw error;
+      return await data.text();
+    },
+    enabled: projectFiles.some(f => f.file_type === 'dxf_conferencia' && f.storage_status === 'stored')
+  });
+
   const updateStatus = useMutation({
     mutationFn: async (status: string) => {
       const { error } = await supabase
@@ -209,7 +230,6 @@ function ProjectDetail() {
         sum + ((p.width_mm ?? 0) / 1000) * ((p.length_mm ?? 0) / 1000) * Number(p.quantity ?? 1),
       0,
     ) || 0;
-  const projectFiles = files.data ?? [];
   const latestXml = projectFiles.find(
     (file) =>
       file.file_type?.toLowerCase().includes("xml") ||
@@ -609,6 +629,7 @@ function ProjectDetail() {
         <div className="max-w-full overflow-x-auto overscroll-x-contain rounded-lg border border-slate-200 bg-slate-100 [scrollbar-width:thin]">
           <TabsList className="flex h-12 w-max min-w-full justify-start rounded-none bg-transparent p-1">
             <TabTrigger value="modules" icon={LayoutGrid} label="Módulos" />
+            <TabTrigger value="technical3d" icon={Box} label="Gêmeo DXF" />
             <TabTrigger value="parts" icon={ClipboardList} label="Lista Técnica" />
             <TabTrigger value="commercial" icon={FileText} label="Comercial" />
             <TabTrigger value="cutplan" icon={Scissors} label="Plano de Corte" />
@@ -623,6 +644,13 @@ function ProjectDetail() {
             <TabTrigger value="files" icon={FileUp} label="Arquivos" />
           </TabsList>
         </div>
+
+        <TabsContent value="technical3d" className="mt-6">
+          <Technical3DView 
+            geometries={dxfContent.data ? parseDXF(dxfContent.data) : []} 
+            projectName={project.data?.name} 
+          />
+        </TabsContent>
 
         <TabsContent value="modules" className="mt-6">
           <Card>
