@@ -709,7 +709,7 @@ function ImportPage() {
                       Checklist do pacote
                     </h2>
                     <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.14em] text-slate-500">
-                      Falha fechada / 7 obrigatórios
+                      Falha fechada / 7 obrigatórios (imagem opcional)
                     </p>
                   </div>
                   <FileText className="h-5 w-5 text-lime-300" />
