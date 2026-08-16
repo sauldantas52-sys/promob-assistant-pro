@@ -103,6 +103,14 @@ function DashboardContent() {
                       <p className="text-lg font-bold text-[var(--status-usinagem)]">{countByStatus('usinagem')}</p>
                       <p className="text-[9px] text-slate-500 uppercase font-bold">Usinagem</p>
                     </div>
+                    <div className="mt-2">
+                      <p className="text-lg font-bold text-[var(--status-montagem)]">{countByStatus('montagem')}</p>
+                      <p className="text-[9px] text-slate-500 uppercase font-bold">Montagem</p>
+                    </div>
+                    <div className="mt-2">
+                      <p className="text-lg font-bold text-[var(--status-expedicao)]">{countByStatus('expedicao')}</p>
+                      <p className="text-[9px] text-slate-500 uppercase font-bold">Carga</p>
+                    </div>
                   </div>
               </div>
             </CardContent>
