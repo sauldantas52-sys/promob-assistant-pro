@@ -55,16 +55,20 @@
   --border: #E2E8F0;
   
   /* Industrial Design System 4.0 Operational Colors */
-  --corte: #EF4444; /* Red */
-  --borda: #F59E0B; /* Amber */
-  --usinagem: #8B5CF6; /* Purple */
-  --picking: #3B82F6; /* Blue */
-  --montagem: #10B981; /* Green */
-  --expedicao: #6366F1; /* Indigo */
+  --status-corte: #EF4444; /* Red */
+  --status-borda: #F59E0B; /* Amber */
+  --status-usinagem: #8B5CF6; /* Purple */
+  --status-picking: #3B82F6; /* Blue */
+  --status-montagem: #10B981; /* Green */
+  --status-expedicao: #6366F1; /* Indigo */
+  
+  --group-g1: #14B8A6; /* Teal */
+  --group-g2: #64748B; /* Slate */
+  --group-g3: #6366F1; /* Indigo */
+  --group-av: #F97316; /* Orange */
   
   /* Specific Sidebar Industrial Dark */
   --sidebar-industrial: #0F172A;
-  --sidebar-active: #22C55E; /* Lime green for active markers if needed, but the top bar is the main lime element */
   --lime-industrial: #84CC16;
 }
 

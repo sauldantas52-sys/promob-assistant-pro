@@ -94,16 +94,16 @@ function DashboardContent() {
                   <p className="text-5xl font-black tracking-tighter">{activeCount}</p>
                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1">Projetos em Operação</p>
                 </div>
-                <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-right">
-                  <div>
-                    <p className="text-lg font-bold">{countByStatus('corte')}</p>
-                    <p className="text-[9px] text-slate-500 uppercase font-bold">Corte</p>
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-right">
+                    <div>
+                      <p className="text-lg font-bold text-[var(--status-corte)]">{countByStatus('corte')}</p>
+                      <p className="text-[9px] text-slate-500 uppercase font-bold">Corte</p>
+                    </div>
+                    <div>
+                      <p className="text-lg font-bold text-[var(--status-usinagem)]">{countByStatus('usinagem')}</p>
+                      <p className="text-[9px] text-slate-500 uppercase font-bold">Usinagem</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-lg font-bold">{countByStatus('usinagem')}</p>
-                    <p className="text-[9px] text-slate-500 uppercase font-bold">Usinagem</p>
-                  </div>
-                </div>
               </div>
             </CardContent>
           </Card>
