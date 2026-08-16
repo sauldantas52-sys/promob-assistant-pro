@@ -197,7 +197,7 @@ function ProjectDetail() {
       if (error) throw error;
       return await data.text();
     },
-    enabled: !!projectFiles.find(f => f.file_type === 'dxf_conferencia' && f.storage_status === 'stored')
+    enabled: projectFiles.some(f => f.file_type === 'dxf_conferencia' && f.storage_status === 'stored')
   });
 
   const updateStatus = useMutation({
