@@ -115,7 +115,7 @@ export async function fetchProjectClients(companyId: string): Promise<ProjectCli
     .eq("company_id", companyId)
     .order("name");
   if (error) throw error;
-  return data;
+  return String(data);
 }
 
 export async function fetchProjectsDashboard(companyId: string): Promise<ProjectSummary[]> {
@@ -202,7 +202,7 @@ export async function createCompleteProject(input: CreateProjectInput): Promise<
           email: input.client.email.trim(),
           document: input.client.document.trim(),
         };
-  const { data, error } = await projectsDb.rpc("create_complete_client_project", {
+  const { data, error } = await (projectsDb as any).rpc("create_complete_client_project", {
     _client: client,
     _project: { name: input.projectName.trim() },
     _site: {
@@ -221,5 +221,5 @@ export async function createCompleteProject(input: CreateProjectInput): Promise<
   });
   if (error) throw error;
   if (!data) throw new Error("O banco não retornou o projeto criado.");
-  return data;
+  return String(data);
 }
