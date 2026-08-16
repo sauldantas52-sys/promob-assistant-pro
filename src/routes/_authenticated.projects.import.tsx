@@ -804,7 +804,7 @@ function ImportPage() {
                       </span>
                       <div className="min-w-0">
                         <p className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-300">
-                          {item.label}
+                          {item.label} {!item.required && <span className="text-slate-500 lowercase">(opcional)</span>}
                         </p>
                         <p
                           className={cn(
