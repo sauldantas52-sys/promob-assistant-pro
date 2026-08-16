@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       typeof pendingCompanyName === "string" &&
       typeof pendingFullName === "string"
     ) {
-      const { error: bootstrapError } = await supabase.rpc("bootstrap_company", {
+      const { error: bootstrapError } = await supabase.rpc("bootstrap_company" as any, {
         _company_name: pendingCompanyName,
         _full_name: pendingFullName,
       });

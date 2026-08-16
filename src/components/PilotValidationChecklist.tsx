@@ -257,7 +257,7 @@ export function PilotValidationChecklist({
 
   const releaseMachining = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.rpc("release_project_machining", {
+      const { error } = await supabase.rpc("release_project_machining" as any, {
         _project_id: projectId,
       });
       if (error) throw error;
@@ -277,8 +277,8 @@ export function PilotValidationChecklist({
     return Boolean(
       check?.is_completed &&
       evidence &&
-      check.evidence_source === evidence.source &&
-      (!evidence.fileTypes || check.evidence_file_id),
+      ((check as any).evidence_source) === evidence.source &&
+      (!evidence.fileTypes || ((check as any).evidence_file_id)),
     );
   };
 

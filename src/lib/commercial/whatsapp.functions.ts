@@ -34,7 +34,7 @@ export const sendOutsourcingOrderWhatsApp = createServerFn({ method: "POST" })
     }
 
     const { data: order, error: orderError } = await supabaseAdmin
-      .from("outsourcing_orders")
+      .from("outsourcing_orders" as any)
       .select(
         "id, company_id, project_id, order_number, status, message_text, xml_file_id, supplier_id, suppliers(name, whatsapp, company_id), projects(company_id), project_files(file_name, storage_path, file_type, project_id)",
       )
@@ -67,7 +67,7 @@ export const sendOutsourcingOrderWhatsApp = createServerFn({ method: "POST" })
       `Olá, prezado fornecedor. Segue o XML da ordem ${order.order_number} para produção.`;
 
     const outboxId = crypto.randomUUID();
-    const { error: outboxError } = await supabaseAdmin.from("communication_outbox").insert({
+    const { error: outboxError } = await supabaseAdmin.from("communication_outbox" as any).insert({
       id: outboxId,
       company_id: profile.company_id,
       outsourcing_order_id: order.id,
@@ -143,7 +143,7 @@ export const sendOutsourcingOrderWhatsApp = createServerFn({ method: "POST" })
 
       const [outboxUpdate, orderUpdate] = await Promise.all([
         supabaseAdmin
-          .from("communication_outbox")
+          .from("communication_outbox" as any)
           .update({
             status: "sent",
             provider_message_id: providerMessageId,
@@ -151,7 +151,7 @@ export const sendOutsourcingOrderWhatsApp = createServerFn({ method: "POST" })
           })
           .eq("id", outboxId),
         supabaseAdmin
-          .from("outsourcing_orders")
+          .from("outsourcing_orders" as any)
           .update({ status: "sent", sent_at: new Date().toISOString() })
           .eq("id", order.id),
       ]);
@@ -163,7 +163,7 @@ export const sendOutsourcingOrderWhatsApp = createServerFn({ method: "POST" })
       const deliveryUnknown =
         messageRequestStarted && !messageResponseReceived && !providerAccepted;
       const { error: failureUpdateError } = await supabaseAdmin
-        .from("communication_outbox")
+        .from("communication_outbox" as any)
         .update({
           status: providerAccepted ? "sent" : deliveryUnknown ? "delivery_unknown" : "failed",
           last_error: error instanceof Error ? error.message.slice(0, 500) : "Falha de envio",
@@ -172,7 +172,7 @@ export const sendOutsourcingOrderWhatsApp = createServerFn({ method: "POST" })
         .eq("id", outboxId);
       const { error: orderRecoveryError } = providerAccepted
         ? await supabaseAdmin
-            .from("outsourcing_orders")
+            .from("outsourcing_orders" as any)
             .update({ status: "sent", sent_at: new Date().toISOString() })
             .eq("id", order.id)
         : { error: null };
