@@ -305,6 +305,7 @@ function ImportPage() {
             quantity: part.quantity,
             unit: part.unit ?? "un",
             edge_banding: part.edge_banding ?? null,
+            metadata: (part as any).metadata ?? {},
           })),
         }));
         const loosePartsPayload = result.looseParts.map((part) => ({
@@ -317,6 +318,7 @@ function ImportPage() {
           quantity: part.quantity,
           unit: part.unit ?? "un",
           edge_banding: part.edge_banding ?? null,
+          metadata: (part as any).metadata ?? {},
         }));
 
         rpcAttempted = true;

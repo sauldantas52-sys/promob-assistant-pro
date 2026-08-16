@@ -13,6 +13,7 @@ export type ParsedPart = {
   visibility_type?: "visivel" | "oculta" | "avulsa" | "ausente" | "nao_confirmada";
   cutting_edge_released?: boolean;
   machining_blocked?: boolean;
+  metadata?: Record<string, any>;
 };
 
 export type ParsedModule = {
@@ -158,11 +159,19 @@ function parsePartNode(p: Element): ParsedPart {
     length_mm: length,
     quantity: num(attr(p, ["QUANTITY", "qtd"])) ?? 1,
     unit: attr(p, ["UNIT"])?.toLowerCase() ?? "un",
-    edge_banding: attr(p, ["EDGE", "BORDER"]),
+    edge_banding: attr(p, ["EDGE", "BORDER", "BORDA"]),
     data_source: "XML",
     visibility_type: visibility,
     cutting_edge_released: false,
     machining_blocked: true,
+    metadata: {
+      raw_group: rawType,
+      environment: attr(p, ["ENVIRONMENT", "ambiente", "GROUP"]),
+      edge_1: attr(p, ["EDGE1", "BORDA1"]),
+      edge_2: attr(p, ["EDGE2", "BORDA2"]),
+      edge_3: attr(p, ["EDGE3", "BORDA3"]),
+      edge_4: attr(p, ["EDGE4", "BORDA4"]),
+    }
   };
 }
 
