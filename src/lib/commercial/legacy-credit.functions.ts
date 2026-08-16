@@ -36,5 +36,5 @@ export const importLegacyStoreCredits = createServerFn({ method: "POST" })
       _payload: data,
     });
     if (error) throw error;
-    return result as { importedStores: number; importedTransactions: number };
+    return (result || { importedStores: 0, importedTransactions: 0 }) as { importedStores: number; importedTransactions: number };
   });
