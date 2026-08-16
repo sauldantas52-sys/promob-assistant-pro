@@ -131,15 +131,18 @@ function ImportPage() {
 
   const identity = parseFolderIdentity(folderName);
   const requiredFiles = [
-    { label: "XML Promob", file: classification.xml },
-    { label: "COTAS PDF", file: classification.cotas },
-    { label: "ListaCompra PDF", file: classification.listaCompra },
-    { label: "ListaCorte PDF", file: classification.listaCorte },
-    { label: "PreviewCorte PDF", file: classification.previewCorte },
-    { label: "Imagem", file: classification.image },
-    { label: "DXF", file: classification.dxf },
+    { label: "XML Promob", file: classification.xml, required: true },
+    { label: "COTAS PDF", file: classification.cotas, required: true },
+    { label: "ListaCompra PDF", file: classification.listaCompra, required: true },
+    { label: "ListaCorte PDF", file: classification.listaCorte, required: true },
+    { label: "PreviewCorte PDF", file: classification.previewCorte, required: true },
+    { label: "DXF", file: classification.dxf, required: true },
+    { label: "Imagem", file: classification.image, required: false },
+    { label: "Arquivo .PROMOB", file: classification.xmk, required: true },
   ];
-  const hasRequiredFiles = requiredFiles.every((item) => !!item.file);
+  const hasRequiredFiles = requiredFiles
+    .filter((item) => item.required)
+    .every((item) => !!item.file);
   const intakeReady =
     folderFileCount > 0 &&
     identity.hasValidIdentity &&
