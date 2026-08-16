@@ -12,7 +12,7 @@ export function BudgetTab({ projectId }: { projectId: string }) {
     queryKey: ["project_quote", projectId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("project_quotes" as any)
+        .from("project_quotes")
         .select("*")
         .eq("project_id", projectId)
         .maybeSingle();
