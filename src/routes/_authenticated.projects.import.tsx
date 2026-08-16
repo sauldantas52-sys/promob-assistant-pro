@@ -26,7 +26,7 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import { parseProjectFile } from "@/lib/promob-import";
+import { parsePromobXML, type PromobModule, type PromobPart } from "@/lib/promob-import";
 import { parseDXF } from "@/lib/dxf-parser";
 import { cn } from "@/lib/utils";
 
