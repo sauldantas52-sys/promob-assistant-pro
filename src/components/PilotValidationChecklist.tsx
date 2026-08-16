@@ -156,7 +156,7 @@ export function PilotValidationChecklist({
   projectId,
   isMachiningBlocked,
   projectFiles = [],
-}: PilotValidationChecklistProps & { projectFiles?: any[] }) {
+}: PilotValidationChecklistProps) {
   const queryClient = useQueryClient();
   const { role } = useAuth();
   const canApprove = hasPermission(role, "projects", "approve");
