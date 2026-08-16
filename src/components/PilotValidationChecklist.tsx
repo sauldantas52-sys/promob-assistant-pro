@@ -336,8 +336,8 @@ export function PilotValidationChecklist({
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 pb-6 border-b border-slate-100">
           {Object.entries(CHECK_EVIDENCE).filter(([_, ev]) => ev.fileTypes).map(([key, ev]) => {
             const hasFile = projectFiles.some(f => 
-              ev.fileTypes?.includes(f.file_type) || 
-              (f.file_name && ev.fileTypes?.some(type => f.file_name.toLowerCase().includes(type.replace('_pdf', ''))))
+              (f.file_type && ev.fileTypes?.includes(f.file_type)) || 
+              (f.file_name && ev.fileTypes?.some(type => f.file_name.toLowerCase().includes(type.replace('_pdf', '').replace('_', ''))))
             );
             const isAutoValidated = checks?.some(c => c.check_type === key && c.notes?.includes("automática"));
             const label = CHECK_ITEMS.find(i => i.id === key)?.label || key;
