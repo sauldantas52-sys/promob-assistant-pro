@@ -42,39 +42,39 @@ export const sendOutsourcingOrderWhatsApp = createServerFn({ method: "POST" })
       .eq("company_id", profile.company_id)
       .maybeSingle();
     if (orderError || !order) throw new Error("Ordem terceirizada não encontrada.");
-    if (!order.xml_file_id || !order.project_files?.storage_path) {
+    if (!((order as any).xml_file_id) || !((order as any).project_files)?.storage_path) {
       throw new Error("A ordem não possui um XML armazenado.");
     }
-    if (!order.suppliers?.whatsapp) throw new Error("O fornecedor não possui WhatsApp cadastrado.");
+    if (!((order as any).suppliers)?.whatsapp) throw new Error("O fornecedor não possui WhatsApp cadastrado.");
     if (
-      order.suppliers.company_id !== profile.company_id ||
-      order.projects?.company_id !== profile.company_id ||
-      order.project_files?.project_id !== order.project_id ||
-      order.project_files?.file_type !== "xml"
+      ((order as any).suppliers).company_id !== profile.company_id ||
+      ((order as any).projects)?.company_id !== profile.company_id ||
+      ((order as any).project_files)?.project_id !== order.project_id ||
+      ((order as any).project_files)?.file_type !== "xml"
     ) {
       throw new Error("As referências da ordem não pertencem ao mesmo projeto e empresa.");
     }
-    if (!["draft", "reviewed"].includes(order.status)) {
+    if (!["draft", "reviewed"].includes(((order as any).status))) {
       throw new Error("A ordem não está disponível para envio.");
     }
 
-    const recipient = digitsOnly(order.suppliers.whatsapp);
+    const recipient = digitsOnly(((order as any).suppliers).whatsapp);
     if (recipient.length < 10 || recipient.length > 15) {
       throw new Error("O WhatsApp do fornecedor é inválido.");
     }
     const messageText =
-      order.message_text ||
-      `Olá, prezado fornecedor. Segue o XML da ordem ${order.order_number} para produção.`;
+      ((order as any).message_text) ||
+      `Olá, prezado fornecedor. Segue o XML da ordem ${((order as any).order_number)} para produção.`;
 
     const outboxId = crypto.randomUUID();
     const { error: outboxError } = await supabaseAdmin.from("communication_outbox" as any).insert({
       id: outboxId,
       company_id: profile.company_id,
-      outsourcing_order_id: order.id,
+      outsourcing_((order as any).id): ((order as any).id),
       channel: "whatsapp",
       recipient,
       message_text: messageText,
-      attachment_path: order.project_files.storage_path,
+      attachment_path: ((order as any).project_files).storage_path,
       status: "processing",
       attempt_count: 1,
       created_by: context.userId,
@@ -92,13 +92,13 @@ export const sendOutsourcingOrderWhatsApp = createServerFn({ method: "POST" })
     try {
       const { data: object, error: downloadError } = await supabaseAdmin.storage
         .from("project-files")
-        .download(order.project_files.storage_path);
+        .download(((order as any).project_files).storage_path);
       if (downloadError || !object) throw new Error("Não foi possível carregar o XML da ordem.");
 
       const mediaForm = new FormData();
       mediaForm.set("messaging_product", "whatsapp");
       mediaForm.set("type", object.type || "application/xml");
-      mediaForm.set("file", object, order.project_files.file_name || `${order.order_number}.xml`);
+      mediaForm.set("file", object, ((order as any).project_files).file_name || `${((order as any).order_number)}.xml`);
       const mediaResponse = await fetch(
         `https://graph.facebook.com/${graphVersion}/${phoneNumberId}/media`,
         { method: "POST", headers: { Authorization: `Bearer ${accessToken}` }, body: mediaForm },
@@ -124,7 +124,7 @@ export const sendOutsourcingOrderWhatsApp = createServerFn({ method: "POST" })
             type: "document",
             document: {
               id: media.id,
-              filename: order.project_files.file_name || `${order.order_number}.xml`,
+              filename: ((order as any).project_files).file_name || `${((order as any).order_number)}.xml`,
               caption: messageText,
             },
           }),
@@ -153,7 +153,7 @@ export const sendOutsourcingOrderWhatsApp = createServerFn({ method: "POST" })
         supabaseAdmin
           .from("outsourcing_orders" as any)
           .update({ status: "sent", sent_at: new Date().toISOString() })
-          .eq("id", order.id),
+          .eq("id", ((order as any).id)),
       ]);
       if (outboxUpdate.error || orderUpdate.error) {
         throw new Error("A mensagem foi aceita, mas a confirmação local falhou. Não reenvie.");
@@ -174,7 +174,7 @@ export const sendOutsourcingOrderWhatsApp = createServerFn({ method: "POST" })
         ? await supabaseAdmin
             .from("outsourcing_orders" as any)
             .update({ status: "sent", sent_at: new Date().toISOString() })
-            .eq("id", order.id)
+            .eq("id", ((order as any).id))
         : { error: null };
       if (failureUpdateError || orderRecoveryError) {
         throw new Error("Falha no envio e no registro da auditoria. Não reenvie sem conferir.");
