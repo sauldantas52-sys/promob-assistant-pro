@@ -19,7 +19,7 @@ export const generateAuditReport = createServerFn({ method: "POST" })
 
       const { data: parts } = await sb
         .from("parts")
-        .select("kind, material, thickness_mm, width_mm, length_mm, quantity, edge_banding, metadata")
+        .select("kind, material, thickness_mm, width_mm, length_mm, quantity, edge_banding")
         .eq("project_id", data.projectId);
 
       const { data: validationChecks } = await sb
