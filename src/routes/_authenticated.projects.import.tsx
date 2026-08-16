@@ -288,14 +288,14 @@ function ImportPage() {
           });
         }
 
-        const modulesPayload = result.modules.map((module) => ({
+        const modulesPayload = result.modules.map((module: PromobModule) => ({
           name: module.name,
           environment: module.environment ?? null,
           width_mm: module.width_mm ?? null,
           height_mm: module.height_mm ?? null,
           depth_mm: module.depth_mm ?? null,
           quantity: module.quantity,
-          parts: module.parts.map((part) => ({
+          parts: module.parts.map((part: PromobPart) => ({
             kind: part.kind,
             name: part.name,
             material: part.material ?? null,
@@ -305,7 +305,7 @@ function ImportPage() {
             quantity: part.quantity,
             unit: part.unit ?? "un",
             edge_banding: part.edge_banding ?? null,
-            metadata: (part as any).metadata ?? {},
+            metadata: part.metadata ?? {},
           })),
         }));
         const loosePartsPayload = result.loose_parts.map((part: PromobPart) => ({
