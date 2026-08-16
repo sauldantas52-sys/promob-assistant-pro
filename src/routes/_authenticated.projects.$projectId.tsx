@@ -184,6 +184,22 @@ function ProjectDetail() {
     },
   });
 
+  const dxfContent = useQuery({
+    queryKey: ["dxf_content", projectId],
+    queryFn: async () => {
+      const dxfFile = projectFiles.find(f => f.file_type === 'dxf_conferencia' && f.storage_status === 'stored');
+      if (!dxfFile?.storage_path) return null;
+      
+      const { data, error } = await supabase.storage
+        .from("project-files")
+        .download(dxfFile.storage_path);
+        
+      if (error) throw error;
+      return await data.text();
+    },
+    enabled: !!projectFiles.find(f => f.file_type === 'dxf_conferencia' && f.storage_status === 'stored')
+  });
+
   const updateStatus = useMutation({
     mutationFn: async (status: string) => {
       const { error } = await supabase
