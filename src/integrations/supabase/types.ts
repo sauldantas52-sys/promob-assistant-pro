@@ -1420,8 +1420,10 @@ export type Database = {
         Row: {
           company_id: string
           created_at: string | null
+          created_by: string | null
           files: string[] | null
           id: string
+          planned_paths: string[] | null
           project_id: string | null
           status: string
           step: string
@@ -1429,8 +1431,10 @@ export type Database = {
         Insert: {
           company_id: string
           created_at?: string | null
+          created_by?: string | null
           files?: string[] | null
           id?: string
+          planned_paths?: string[] | null
           project_id?: string | null
           status: string
           step: string
@@ -1438,8 +1442,10 @@ export type Database = {
         Update: {
           company_id?: string
           created_at?: string | null
+          created_by?: string | null
           files?: string[] | null
           id?: string
+          planned_paths?: string[] | null
           project_id?: string | null
           status?: string
           step?: string
@@ -2485,6 +2491,17 @@ export type Database = {
         Args: { _transaction_id: string }
         Returns: number
       }
+      create_complete_client_project: {
+        Args: {
+          _client: Json
+          _files: Json
+          _loose_parts: Json
+          _modules: Json
+          _project: Json
+          _site: Json
+        }
+        Returns: string
+      }
       current_company_id: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -2502,6 +2519,10 @@ export type Database = {
           _project_id: string
         }
         Returns: string
+      }
+      import_legacy_store_credits: {
+        Args: { _payload: Json }
+        Returns: undefined
       }
       prepare_store_credit_purchase: {
         Args: {
