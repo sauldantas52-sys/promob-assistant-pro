@@ -308,7 +308,7 @@ function ImportPage() {
             metadata: (part as any).metadata ?? {},
           })),
         }));
-        const loosePartsPayload = result.looseParts.map((part) => ({
+        const loosePartsPayload = result.loose_parts.map((part: PromobPart) => ({
           kind: part.kind,
           name: part.name,
           material: part.material ?? null,
@@ -318,7 +318,7 @@ function ImportPage() {
           quantity: part.quantity,
           unit: part.unit ?? "un",
           edge_banding: part.edge_banding ?? null,
-          metadata: (part as any).metadata ?? {},
+          metadata: part.metadata ?? {},
         }));
 
         rpcAttempted = true;
