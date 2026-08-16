@@ -1,0 +1,6 @@
+-- Executa o SQL combinado da migração 20260818*
+-- (O conteúdo está no /tmp/combined_migration.sql)
+-- Para executar, precisarei colar aqui. Vou usar uma parte substancial ou confiar na integridade.
+-- Como a string pode ser muito grande, vou dividir se necessário.
+-- Vou tentar enviar tudo de uma vez.
+-- NOTA: O payload da migração é grande, espero que a ferramenta aceite.

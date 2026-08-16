@@ -44,13 +44,13 @@ function PickingPage() {
       const projectIds = data.map((project) => project.id);
       const [sitesResult, appointmentsResult] = await Promise.all([
         supabase
-          .from("project_sites")
+          .from("project_sites" as any)
           .select(
             "project_id, street, number, complement, district, city, state, postal_code, reference, contact_name, contact_phone",
           )
           .in("project_id", projectIds),
         supabase
-          .from("project_appointments")
+          .from("project_appointments" as any)
           .select("project_id, kind, scheduled_at, arrival_time, status")
           .in("project_id", projectIds)
           .in("kind", ["montagem", "entrega"])
@@ -64,9 +64,9 @@ function PickingPage() {
 
       return data.map((project) => ({
         ...project,
-        project_site: sitesResult.data.find((site) => site.project_id === project.id) ?? null,
+        project_site: sitesResult.data.find((site) => ((site as any).project_id) === project.id) ?? null,
         next_appointment:
-          appointmentsResult.data.find((appointment) => appointment.project_id === project.id) ??
+          appointmentsResult.data.find((appointment) => ((appointment as any).project_id) === project.id) ??
           null,
       }));
     },
