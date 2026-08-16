@@ -13,11 +13,21 @@ export const generateAuditReport = createServerFn({ method: "POST" })
       
       const { data: project } = await sb
         .from("projects")
-        .select("name, status, is_validated, company_id")
+        .select("name, status, is_validated, company_id, machining_blocked, environment, client_name")
         .eq("id", data.projectId)
         .single();
 
-      const { data: checks } = await sb
+      const { data: parts } = await sb
+        .from("parts")
+        .select("kind, material, thickness_mm, width_mm, length_mm, quantity, edge_banding, metadata")
+        .eq("project_id", data.projectId);
+
+      const { data: validationChecks } = await sb
+        .from("validation_checks")
+        .select("*")
+        .eq("project_id", data.projectId);
+
+      const { data: physicalChecks } = await sb
         .from("physical_pilot_checks")
         .select("*")
         .eq("project_id", data.projectId);
@@ -28,18 +38,42 @@ export const generateAuditReport = createServerFn({ method: "POST" })
         .eq("project_id", data.projectId)
         .order("created_at", { ascending: false });
 
+      const partsSummary = parts?.reduce((acc: any, part) => {
+        acc[part.kind] = (acc[part.kind] || 0) + (part.quantity || 1);
+        return acc;
+      }, {});
+
       return {
         success: true,
         reportUrl: "#", 
         timestamp: new Date().toISOString(),
         projectName: project?.name,
+        clientName: project?.client_name,
+        environment: project?.environment,
         isValidated: project?.is_validated,
-        summary: "Dossiê Industrial 4.0 (Auditoria + Piloto Físico) gerado com sucesso.",
+        machiningBlocked: project?.machining_blocked,
+        summary: "Dossiê Industrial 4.0 Consolidado.",
         sections: [
-          { title: "Engenharia e XML", status: "Confirmado" },
-          { title: "Gates de Segurança", status: project?.is_validated ? "Aprovado" : "Pendente" },
-          { title: "Evidências do Piloto Físico", count: checks?.length || 0 },
-          { title: "Histórico de Auditoria", logs: logs?.length || 0 }
+          { 
+            title: "Engenharia e XML", 
+            status: "Auditado",
+            details: `Total de itens: ${parts?.length || 0}. Resumo: ${JSON.stringify(partsSummary)}`
+          },
+          { 
+            title: "Gates de Segurança Industrial", 
+            status: project?.is_validated ? "Aprovado" : "Em Auditoria",
+            checks: validationChecks?.length || 0
+          },
+          { 
+            title: "Evidências do Piloto Físico", 
+            count: physicalChecks?.length || 0,
+            status: physicalChecks?.length ? "Em Andamento" : "Não Iniciado"
+          },
+          { 
+            title: "Histórico de Auditoria e Logs", 
+            logsCount: logs?.length || 0,
+            lastAction: logs?.[0]?.action
+          }
         ]
       };
     } catch (error) {

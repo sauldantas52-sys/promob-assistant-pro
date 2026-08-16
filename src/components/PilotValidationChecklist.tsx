@@ -291,6 +291,10 @@ export function PilotValidationChecklist({
   const gate2Items = GATES.find((g) => g.id === "usinagem")?.items || [];
   const isGate2Done = gate2Items.every((item) => isVerified(item.id));
 
+  // Automation: Gate 3 Montagem is naturally locked until Gate 2 is done and machining is unblocked
+  const gate3Items = GATES.find((g) => g.id === "montagem")?.items || [];
+  const isGate3Done = gate3Items.every((item) => isVerified(item.id));
+
   const completedCount = CHECK_ITEMS.filter((item) => isVerified(item.id)).length;
 
   if (isLoading) return null;
@@ -456,6 +460,25 @@ export function PilotValidationChecklist({
                 exige o Gate 2 e liberação técnica explícita.
               </p>
             </div>
+          </div>
+        )}
+
+        {/* Automated Industrial Flow: Show Assembly Guide if Gate 3 is reachable */}
+        {gate2Items.every(i => isVerified(i.id)) && !isMachiningBlocked && (
+          <div className="flex flex-col gap-4 p-6 rounded-[1.5rem] bg-emerald-50 border-2 border-emerald-100 text-emerald-900 sm:flex-row sm:items-center">
+            <LayoutGrid className="h-8 w-8 text-emerald-600 shrink-0" />
+            <div className="space-y-1">
+              <p className="text-[11px] font-black uppercase tracking-[0.2em]">Fluxo de Montagem Liberado</p>
+              <p className="text-xs font-medium leading-relaxed">
+                A auditoria técnica foi concluída e a usinagem está desbloqueada. O Caderno de Montagem Mobile está pronto para uso.
+              </p>
+            </div>
+            <Button
+              asChild
+              className="w-full shrink-0 bg-emerald-700 text-white hover:bg-emerald-800 sm:ml-auto sm:w-auto font-black text-[9px] uppercase tracking-widest px-6"
+            >
+              <Link to="/assembly">Abrir Caderno Mobile</Link>
+            </Button>
           </div>
         )}
 
