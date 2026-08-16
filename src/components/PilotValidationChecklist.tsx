@@ -29,6 +29,7 @@ import { hasPermission } from "@/lib/permissions";
 interface PilotValidationChecklistProps {
   projectId: string;
   isMachiningBlocked: boolean;
+  projectFiles: any[];
 }
 
 const GATES = [
