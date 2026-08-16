@@ -58,7 +58,7 @@ export const generateAuditReport = createServerFn({ method: "POST" })
             title: "Engenharia e XML", 
             status: "Auditado",
             details: `Total de itens: ${parts?.length || 0}. Resumo: ${JSON.stringify(partsSummary)}`,
-            parts: parts?.map(p => ({
+            parts: (parts as any[])?.map(p => ({
               nome: p.name,
               material: p.material,
               dimensoes: `${p.width_mm}x${p.length_mm}x${p.thickness_mm}`,
@@ -69,7 +69,7 @@ export const generateAuditReport = createServerFn({ method: "POST" })
           { 
             title: "Gates de Segurança Industrial", 
             status: project?.is_validated ? "Aprovado" : "Em Auditoria",
-            items: validationChecks?.map(c => ({
+            items: (validationChecks as any[])?.map(c => ({
               tipo: c.check_type,
               status: c.is_completed ? "Validado" : "Pendente",
               data: c.completed_at,
@@ -80,17 +80,17 @@ export const generateAuditReport = createServerFn({ method: "POST" })
             title: "Evidências do Piloto Físico", 
             count: physicalChecks?.length || 0,
             status: physicalChecks?.length ? "Em Andamento" : "Não Iniciado",
-            evidencias: physicalChecks?.map(c => ({
-              etapa: c.check_type,
+            evidencias: (physicalChecks as any[])?.map(c => ({
+              etapa: c.gate_id,
               observacao: c.notes,
-              anexo: c.evidence_photo
+              anexo: c.evidence_url
             }))
           },
           { 
             title: "Histórico de Auditoria e Logs", 
             logsCount: logs?.length || 0,
             lastAction: logs?.[0]?.action,
-            logs: logs?.slice(0, 20).map(l => ({
+            logs: (logs as any[])?.slice(0, 20).map(l => ({
               data: l.created_at,
               acao: l.action,
               detalhes: l.notes
