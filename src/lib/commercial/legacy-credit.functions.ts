@@ -32,7 +32,7 @@ export const importLegacyStoreCredits = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((data: unknown) => legacyCreditSchema.parse(data))
   .handler(async ({ data, context }) => {
-    const { data: result, error } = await context.supabase.rpc("import_legacy_store_credits", {
+    const { data: result, error } = await context.supabase.rpc("import_legacy_store_credits" as any, {
       _payload: data,
     });
     if (error) throw error;
