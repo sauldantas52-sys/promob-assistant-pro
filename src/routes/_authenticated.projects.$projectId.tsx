@@ -184,6 +184,8 @@ function ProjectDetail() {
     },
   });
 
+  const projectFiles = files.data ?? [];
+  
   const dxfContent = useQuery({
     queryKey: ["dxf_content", projectId],
     queryFn: async () => {
