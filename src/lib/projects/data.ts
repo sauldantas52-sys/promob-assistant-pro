@@ -115,7 +115,7 @@ export async function fetchProjectClients(companyId: string): Promise<ProjectCli
     .eq("company_id", companyId)
     .order("name");
   if (error) throw error;
-  return String(data);
+  return (data ?? []) as ProjectClient[];
 }
 
 export async function fetchProjectsDashboard(companyId: string): Promise<ProjectSummary[]> {
