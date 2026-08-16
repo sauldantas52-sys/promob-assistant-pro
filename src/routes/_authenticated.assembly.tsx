@@ -130,13 +130,13 @@ function AssemblyContent() {
       const projectIds = data.map((project) => project.id);
       const [sitesResult, appointmentsResult] = await Promise.all([
         supabase
-          .from("project_sites")
+          .from("project_sites" as any)
           .select(
             "project_id, street, number, complement, district, city, state, postal_code, reference, contact_name, contact_phone",
           )
           .in("project_id", projectIds),
         supabase
-          .from("project_appointments")
+          .from("project_appointments" as any)
           .select("project_id, kind, scheduled_at, arrival_time, status")
           .in("project_id", projectIds)
           .in("kind", ["montagem", "entrega"])
