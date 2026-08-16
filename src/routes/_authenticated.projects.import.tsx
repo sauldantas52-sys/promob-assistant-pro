@@ -341,6 +341,16 @@ function ImportPage() {
           },
         );
         if (importError) throw importError;
+        // Auditoria Pós-Importação 4.0: Validar persistência real
+        const { data: audit, error: auditError } = await supabase
+          .from("parts")
+          .select("id", { count: "exact", head: true })
+          .eq("project_id", importedProjectId);
+        
+        if (auditError || !audit || audit.length === 0) {
+           throw new Error("Falha na persistência industrial: o projeto foi criado mas as peças não foram detectadas no banco de dados.");
+        }
+        
         return importedProjectId;
       } catch (error) {
         if (rpcAttempted) {
