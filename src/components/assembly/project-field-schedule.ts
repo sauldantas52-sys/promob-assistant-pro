@@ -1,24 +1,25 @@
-import type { Database } from "@/integrations/supabase/types";
+export type ProjectSite = {
+  project_id: string;
+  street: string | null;
+  number: string | null;
+  complement: string | null;
+  district: string | null;
+  city: string | null;
+  state: string | null;
+  postal_code: string | null;
+  reference: string | null;
+  contact_name: string | null;
+  contact_phone: string | null;
+};
 
-export type ProjectSite = Pick<
-  Database["public"]["Tables"]["project_sites"]["Row"],
-  | "project_id"
-  | "street"
-  | "number"
-  | "complement"
-  | "district"
-  | "city"
-  | "state"
-  | "postal_code"
-  | "reference"
-  | "contact_name"
-  | "contact_phone"
->;
+export type ProjectAppointment = {
+  project_id: string;
+  kind: string;
+  scheduled_at: string;
+  arrival_time: string | null;
+  status: string;
+};
 
-export type ProjectAppointment = Pick<
-  Database["public"]["Tables"]["project_appointments"]["Row"],
-  "project_id" | "kind" | "scheduled_at" | "arrival_time" | "status"
->;
 
 export function formatSiteAddress(site: ProjectSite) {
   const street = `${site.street}, ${site.number}${site.complement ? ` - ${site.complement}` : ""}`;

@@ -213,7 +213,7 @@ export function PilotValidationChecklist({
           evidence_source: completed ? evidence.source : null,
           evidence_file_id: completed ? (evidenceFile?.id ?? null) : null,
           updated_at: new Date().toISOString(),
-        },
+        } as any,
         { onConflict: "project_id,check_type" },
       );
 
