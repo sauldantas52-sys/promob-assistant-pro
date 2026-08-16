@@ -55,7 +55,8 @@ function DashboardContent() {
 
   const list = projects.data ?? [];
   const activeCount = list.filter(p => p.status !== 'expedido' && p.status !== 'assistencia').length;
-  const decisionRequired = list.filter(p => p.machining_blocked === true || p.status === 'nao_confirmado').length;
+  const decisionRequired = list.filter(p => p.machining_blocked === true || p.status === 'novo').length;
+  const validationPending = list.filter(p => p.is_validated === false).length;
   
   const countByStatus = (status: string) => list.filter((p) => p.status === status).length;
 
