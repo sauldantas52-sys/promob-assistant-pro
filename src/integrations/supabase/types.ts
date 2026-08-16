@@ -2481,6 +2481,10 @@ export type Database = {
         Args: { _user_id: string }
         Returns: boolean
       }
+      confirm_store_credit_transaction: {
+        Args: { _transaction_id: string }
+        Returns: number
+      }
       current_company_id: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -2488,6 +2492,15 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      prepare_store_credit_purchase: {
+        Args: {
+          _account_id: string
+          _amount: number
+          _document_id: string
+          _idempotency_key?: string
+        }
+        Returns: string
       }
     }
     Enums: {
