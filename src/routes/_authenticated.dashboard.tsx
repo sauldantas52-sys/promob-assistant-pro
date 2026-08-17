@@ -154,9 +154,9 @@ function DashboardContent() {
           <div className="flex items-center justify-between px-1">
             <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
               <Factory className="h-3.5 w-3.5" />
-              Linha de Produção
+              Terminal de Projetos Industriais
             </h2>
-            <Link to="/production" className="text-[9px] font-bold uppercase tracking-wider text-blue-600 hover:underline">Ver Todos</Link>
+            <Link to="/projects" className="text-[9px] font-bold uppercase tracking-wider text-blue-600 hover:underline">Auditar Planta</Link>
           </div>
 
           <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
