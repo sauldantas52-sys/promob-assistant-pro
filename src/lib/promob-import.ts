@@ -36,7 +36,6 @@ export interface PromobPart {
   unit: string;
   edge_banding?: string | null;
   metadata?: PartMetadata;
-  // Campos técnicos diretos para facilitar o mapeamento no RPC
   color?: string | null;
   supplier?: string | null;
   edge_top?: number;
@@ -58,6 +57,7 @@ export interface PromobModule {
   quantity: number;
   id_xml?: string | null;
   parts: PromobPart[];
+  metadata?: any;
 }
 
 export interface PromobProject {
