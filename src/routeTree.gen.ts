@@ -21,6 +21,7 @@ import { Route as AuthenticatedPickingRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedProductionRouteImport } from './routes/_authenticated.production'
 import { Route as AuthenticatedShippingRouteImport } from './routes/_authenticated.shipping'
 import { Route as AuthenticatedTechnicalAssistanceRouteImport } from './routes/_authenticated.technical-assistance'
+import { Route as DebugProjectDataRouteImport } from './routes/debug.project-data'
 import { Route as AuthenticatedProjectsIndexRouteImport } from './routes/_authenticated.projects.index'
 import { Route as AuthenticatedProjectsProjectIdRouteImport } from './routes/_authenticated.projects.$projectId'
 import { Route as AuthenticatedProjectsImportRouteImport } from './routes/_authenticated.projects.import'
@@ -89,6 +90,11 @@ const AuthenticatedTechnicalAssistanceRoute =
     path: '/technical-assistance',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const DebugProjectDataRoute = DebugProjectDataRouteImport.update({
+  id: '/debug/project-data',
+  path: '/debug/project-data',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedProjectsIndexRoute =
   AuthenticatedProjectsIndexRouteImport.update({
     id: '/projects/',
@@ -132,6 +138,7 @@ export interface FileRoutesByFullPath {
   '/production': typeof AuthenticatedProductionRoute
   '/shipping': typeof AuthenticatedShippingRoute
   '/technical-assistance': typeof AuthenticatedTechnicalAssistanceRoute
+  '/debug/project-data': typeof DebugProjectDataRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/projects/import': typeof AuthenticatedProjectsImportRoute
   '/projects/test-import': typeof AuthenticatedProjectsTestImportRoute
@@ -150,6 +157,7 @@ export interface FileRoutesByTo {
   '/production': typeof AuthenticatedProductionRoute
   '/shipping': typeof AuthenticatedShippingRoute
   '/technical-assistance': typeof AuthenticatedTechnicalAssistanceRoute
+  '/debug/project-data': typeof DebugProjectDataRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/projects/import': typeof AuthenticatedProjectsImportRoute
   '/projects/test-import': typeof AuthenticatedProjectsTestImportRoute
@@ -170,6 +178,7 @@ export interface FileRoutesById {
   '/_authenticated/production': typeof AuthenticatedProductionRoute
   '/_authenticated/shipping': typeof AuthenticatedShippingRoute
   '/_authenticated/technical-assistance': typeof AuthenticatedTechnicalAssistanceRoute
+  '/debug/project-data': typeof DebugProjectDataRoute
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/_authenticated/projects/import': typeof AuthenticatedProjectsImportRoute
   '/_authenticated/projects/test-import': typeof AuthenticatedProjectsTestImportRoute
@@ -190,6 +199,7 @@ export interface FileRouteTypes {
     | '/production'
     | '/shipping'
     | '/technical-assistance'
+    | '/debug/project-data'
     | '/projects/$projectId'
     | '/projects/import'
     | '/projects/test-import'
@@ -208,6 +218,7 @@ export interface FileRouteTypes {
     | '/production'
     | '/shipping'
     | '/technical-assistance'
+    | '/debug/project-data'
     | '/projects/$projectId'
     | '/projects/import'
     | '/projects/test-import'
@@ -227,6 +238,7 @@ export interface FileRouteTypes {
     | '/_authenticated/production'
     | '/_authenticated/shipping'
     | '/_authenticated/technical-assistance'
+    | '/debug/project-data'
     | '/_authenticated/projects/$projectId'
     | '/_authenticated/projects/import'
     | '/_authenticated/projects/test-import'
@@ -238,6 +250,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  DebugProjectDataRoute: typeof DebugProjectDataRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -326,6 +339,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTechnicalAssistanceRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/debug/project-data': {
+      id: '/debug/project-data'
+      path: '/debug/project-data'
+      fullPath: '/debug/project-data'
+      preLoaderRoute: typeof DebugProjectDataRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/projects/': {
       id: '/_authenticated/projects/'
       path: '/projects'
@@ -406,6 +426,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
+  DebugProjectDataRoute: DebugProjectDataRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
