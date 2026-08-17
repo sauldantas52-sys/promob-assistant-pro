@@ -55,7 +55,9 @@ function getAttr(node: Element, name: string): string | undefined {
 function getNumericAttr(node: Element, name: string): number | undefined {
   const val = node.getAttribute(name);
   if (!val) return undefined;
-  const num = parseFloat(val.replace(',', '.'));
+  // Preserva a precisão original do XML
+  const cleanVal = val.replace(',', '.');
+  const num = parseFloat(cleanVal);
   return isNaN(num) ? undefined : num;
 }
 
