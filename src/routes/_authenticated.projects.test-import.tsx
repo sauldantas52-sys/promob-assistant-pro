@@ -31,12 +31,13 @@ function TestImportAuditPage() {
       let query = supabase
         .from("projects")
         .select("*")
-        .eq("company_id", companyId as string);
+        .eq("company_id", companyId as string)
+        .order("created_at", { ascending: false });
       
       if (queryProjectId) {
         query = query.eq("id", queryProjectId);
       } else {
-        query = query.order("created_at", { ascending: false }).limit(1);
+        query = query.limit(1);
       }
 
       const { data, error } = await query.maybeSingle();
