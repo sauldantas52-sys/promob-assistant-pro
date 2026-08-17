@@ -2199,6 +2199,7 @@ export type Database = {
           commercial_approved: boolean | null
           company_id: string
           created_at: string | null
+          created_by: string | null
           cutting_status: string | null
           distribution_completed_at: string | null
           environment: string | null
@@ -2229,6 +2230,7 @@ export type Database = {
           commercial_approved?: boolean | null
           company_id: string
           created_at?: string | null
+          created_by?: string | null
           cutting_status?: string | null
           distribution_completed_at?: string | null
           environment?: string | null
@@ -2259,6 +2261,7 @@ export type Database = {
           commercial_approved?: boolean | null
           company_id?: string
           created_at?: string | null
+          created_by?: string | null
           cutting_status?: string | null
           distribution_completed_at?: string | null
           environment?: string | null
@@ -2989,6 +2992,10 @@ export type Database = {
           _project: Json
           _project_id: string
         }
+        Returns: string
+      }
+      import_client_project_v2: {
+        Args: { _files: Json[]; _project: Json; _project_id: string }
         Returns: string
       }
       import_legacy_store_credits: { Args: { _payload: Json }; Returns: Json }
