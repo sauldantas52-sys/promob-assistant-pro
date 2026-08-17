@@ -363,12 +363,22 @@ function ProjectCard({ project }: { project: ProjectSummary }) {
     : 0;
   return (
     <Link to="/projects/$projectId" params={{ projectId: project.id }} className="min-w-0">
-      <Card className="group h-full overflow-hidden border-slate-200 bg-white shadow-none transition-colors hover:border-slate-950">
+      <Card className={cn(
+        "group h-full overflow-hidden border-slate-200 bg-white shadow-none transition-colors hover:border-slate-950",
+        project.isTest && "border-blue-200 bg-blue-50/30"
+      )}>
         <CardContent className="p-0">
           <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 sm:px-5">
-            <span className="font-mono text-[9px] font-bold tracking-[0.16em] text-slate-400">
-              PRJ-{project.id.slice(0, 8).toUpperCase()}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[9px] font-bold tracking-[0.16em] text-slate-400">
+                PRJ-{project.id.slice(0, 8).toUpperCase()}
+              </span>
+              {project.isTest && (
+                <Badge variant="outline" className="h-4 border-blue-200 bg-blue-100 px-1 text-[8px] font-bold uppercase text-blue-700">
+                  Teste
+                </Badge>
+              )}
+            </div>
             <Badge
               className={cn(
                 "rounded-sm px-2 py-1 text-[9px] font-black uppercase tracking-[0.12em] shadow-none",
