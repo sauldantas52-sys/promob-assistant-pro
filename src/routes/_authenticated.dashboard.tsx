@@ -46,7 +46,7 @@ function DashboardContent() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
-        .select("id, name, client_name, status, environment, created_at, machining_blocked, is_validated, company_id")
+        .select("id, name, client_name, status, environment, created_at, machining_blocked, is_validated, company_id, updated_at")
         .eq("company_id", companyId as string)
         .order("created_at", { ascending: false });
       if (error) throw error;
