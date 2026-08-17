@@ -7,25 +7,40 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info, CheckCircle2, AlertTriangle, Scissors } from "lucide-react";
+import { z } from "zod";
+import { cn as cnUtil } from "@/lib/utils";
+
+const searchSchema = z.object({
+  projectId: z.string().optional(),
+});
 
 export const Route = createFileRoute("/_authenticated/projects/test-import")({
+  validateSearch: (search: Record<string, unknown>) => searchSchema.parse(search),
   component: TestImportAuditPage,
 });
 
 function TestImportAuditPage() {
   const { companyId } = useAuth();
+  const search = Route.useSearch();
+  const queryProjectId = search.projectId;
 
-  // 1. Consulta o projeto mais recente (deve ser o Closet importado)
+  // 1. Consulta o projeto específico (ou o mais recente se não informado)
   const { data: project, isLoading: projectLoading } = useQuery({
-    queryKey: ["audit-project", companyId],
+    queryKey: ["audit-project", companyId, queryProjectId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("projects")
         .select("*")
         .eq("company_id", companyId as string)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .order("created_at", { ascending: false });
+      
+      if (queryProjectId) {
+        query = query.eq("id", queryProjectId);
+      } else {
+        query = query.limit(1);
+      }
+
+      const { data, error } = await query.maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -112,6 +127,10 @@ function TestImportAuditPage() {
           <div>
             <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900">Auditoria Técnica de Importação</h1>
             <p className="text-slate-500 font-bold uppercase text-[10px] tracking-widest mt-1">Industrial Design System 4.0 • Persistência Garantida</p>
+            <div className="mt-2 flex items-center gap-2">
+              <span className="bg-slate-900 text-white text-[10px] px-2 py-0.5 rounded font-black uppercase">{project.name}</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase">{project.client_name || "Sem Cliente"}</span>
+            </div>
           </div>
           <div className="text-right">
             <p className="text-[10px] font-black text-slate-400 uppercase">Project ID</p>
@@ -281,10 +300,10 @@ function TestImportAuditPage() {
                     </TableCell>
                     <TableCell className="text-[10px] font-mono">
                       <div className="grid grid-cols-2 gap-1 w-20">
-                        <span className={cn("px-1 rounded text-center", part.edge_top ? "bg-blue-100 text-blue-700 font-bold" : "text-slate-300")}>{part.edge_top || 0}</span>
-                        <span className={cn("px-1 rounded text-center", part.edge_bottom ? "bg-blue-100 text-blue-700 font-bold" : "text-slate-300")}>{part.edge_bottom || 0}</span>
-                        <span className={cn("px-1 rounded text-center", part.edge_left ? "bg-blue-100 text-blue-700 font-bold" : "text-slate-300")}>{part.edge_left || 0}</span>
-                        <span className={cn("px-1 rounded text-center", part.edge_right ? "bg-blue-100 text-blue-700 font-bold" : "text-slate-300")}>{part.edge_right || 0}</span>
+                        <span className={cnUtil("px-1 rounded text-center", part.edge_top ? "bg-blue-100 text-blue-700 font-bold" : "text-slate-300")}>{part.edge_top || 0}</span>
+                        <span className={cnUtil("px-1 rounded text-center", part.edge_bottom ? "bg-blue-100 text-blue-700 font-bold" : "text-slate-300")}>{part.edge_bottom || 0}</span>
+                        <span className={cnUtil("px-1 rounded text-center", part.edge_left ? "bg-blue-100 text-blue-700 font-bold" : "text-slate-300")}>{part.edge_left || 0}</span>
+                        <span className={cnUtil("px-1 rounded text-center", part.edge_right ? "bg-blue-100 text-blue-700 font-bold" : "text-slate-300")}>{part.edge_right || 0}</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-[11px]">
@@ -310,27 +329,39 @@ function TestImportAuditPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 text-xs font-mono">
              <div className="flex justify-between border-b border-slate-800 pb-1">
                <span className="text-slate-500">Elementos &lt;ITEM&gt;</span>
-               <span className="font-bold text-lime-400">352 (G: 352)</span>
+                <span className={cnUtil("font-bold", (allParts?.length || 0) === 352 ? "text-lime-400" : "text-amber-400")}>
+                 {allParts?.length || 0} (G: 352)
+               </span>
              </div>
              <div className="flex justify-between border-b border-slate-800 pb-1">
                <span className="text-slate-500">Linhas MDF com THICKNESS</span>
-               <span className="font-bold text-lime-400">275 (G: 275)</span>
+                <span className={cnUtil("font-bold", mdfParts.length === 275 ? "text-lime-400" : "text-amber-400")}>
+                 {mdfParts.length} (G: 275)
+               </span>
              </div>
              <div className="flex justify-between border-b border-slate-800 pb-1">
                <span className="text-slate-500">Peças físicas (com REPETITION)</span>
-               <span className="font-bold text-lime-400">409 (G: 409)</span>
+                <span className={cnUtil("font-bold", physicalPartsCount === 409 ? "text-lime-400" : "text-amber-400")}>
+                 {physicalPartsCount} (G: 409)
+               </span>
              </div>
              <div className="flex justify-between border-b border-slate-800 pb-1">
                <span className="text-slate-500">Módulos reconhecidos</span>
-               <span className="font-bold text-lime-400">13 (G: 13)</span>
+                <span className={cnUtil("font-bold", (modules?.length || 0) === 13 ? "text-lime-400" : "text-amber-400")}>
+                 {modules?.length || 0} (G: 13)
+               </span>
              </div>
              <div className="flex justify-between border-b border-slate-800 pb-1">
                <span className="text-slate-500">Linhas MDF dentro dos módulos</span>
-               <span className="font-bold text-lime-400">253 (G: 253)</span>
+                <span className={cnUtil("font-bold", moduleParts.length === 253 ? "text-lime-400" : "text-amber-400")}>
+                 {moduleParts.length} (G: 253)
+               </span>
              </div>
              <div className="flex justify-between border-b border-slate-800 pb-1">
                <span className="text-slate-500">Itens no nível raiz</span>
-               <span className="font-bold text-lime-400">45 (G: 45)</span>
+                <span className={cnUtil("font-bold", rootItemsCount === 45 ? "text-lime-400" : "text-amber-400")}>
+                 {rootItemsCount} (G: 45)
+               </span>
              </div>
              <div className="flex justify-between border-b border-slate-800 pb-1">
                <span className="text-slate-500">NÃO CLASSIFICADOS</span>

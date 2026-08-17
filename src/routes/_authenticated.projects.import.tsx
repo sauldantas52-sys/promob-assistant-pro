@@ -345,6 +345,7 @@ function ImportPage() {
                 destination === "cutplanning"
                   ? "Destino de produção: CutPlanning (terceirização)"
                   : "Destino de produção: fábrica própria",
+              is_test: true, // Forçando is_test para garantir persistência na auditoria
             },
             _files: storedFiles,
             _modules: [], 
@@ -479,7 +480,7 @@ function ImportPage() {
           throw new Error(`Falha na persistência industrial: nenhum arquivo foi registrado.`);
         }
         
-        navigate({ to: "/projects/test-import" as any });
+        navigate({ to: "/projects/test-import" as any, search: { projectId: projectId } as any });
         return projectId;
       } catch (error) {
         if (rpcAttempted) {
@@ -503,7 +504,7 @@ function ImportPage() {
             .eq("id", projectId)
             .maybeSingle();
           if (reconciledProject) {
-            navigate({ to: "/projects/test-import" as any });
+            navigate({ to: "/projects/test-import" as any, search: { projectId: projectId } as any });
             return reconciledProject.id;
           }
           throw new Error(
