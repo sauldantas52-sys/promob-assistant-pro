@@ -104,6 +104,7 @@ export function VisualFeedingMode({ projectId, projectName }: VisualFeedingModeP
           {modules?.map((module) => {
             const ident = identifications?.find((i: any) => i.module_id === module.id);
             const isConfirmed = ident?.confidence_level === 'confirmado';
+            const moduleDXF = module.parts?.some((p: any) => p.dxf_technical_file_path);
 
             return (
               <Card key={module.id} className={cn(
