@@ -14,6 +14,8 @@ import {
   Plus,
   Search,
   Upload,
+  ShieldCheck,
+  CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
