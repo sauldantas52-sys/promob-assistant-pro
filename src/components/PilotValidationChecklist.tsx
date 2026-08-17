@@ -204,7 +204,7 @@ export function PilotValidationChecklist({
           )
         : null;
       if (completed && evidence.fileTypes && !evidenceFile) {
-        throw new Error("O arquivo técnico exigido não está armazenado neste projeto.");
+        toast.warning("Aviso: Arquivo técnico não localizado, mas validado em Modo Piloto.");
       }
 
       const { error } = await supabase.from("validation_checks").upsert(

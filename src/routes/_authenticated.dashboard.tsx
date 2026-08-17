@@ -149,8 +149,8 @@ function DashboardContent() {
                     <p className="text-xl font-black text-blue-600">{validationPending}</p>
                     <p className="text-[9px] font-bold text-slate-400 uppercase">Aguardando Checklist</p>
                   </div>
-                  <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-none rounded px-2 py-0.5 text-[9px] font-bold uppercase">
-                    machining_blocked = true
+                  <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-none rounded px-2 py-0.5 text-[9px] font-bold uppercase">
+                    Modo Piloto: Bypass Ativo
                   </Badge>
                 </div>
               </div>
