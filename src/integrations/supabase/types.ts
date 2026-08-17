@@ -2684,6 +2684,10 @@ export type Database = {
         }
         Returns: string
       }
+      promote_test_project: {
+        Args: { p_project_id: string }
+        Returns: undefined
+      }
       release_project_machining: {
         Args: { _project_id: string }
         Returns: undefined
