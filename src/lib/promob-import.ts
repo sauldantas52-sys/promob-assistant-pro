@@ -89,13 +89,15 @@ function refOf(item: Element, key: string): string | null {
   if (!referencesNode) return null;
   const refNode = referencesNode.querySelector(`[${key}]`);
   if (refNode) return refNode.getAttribute(key);
-  // Promob sometimes uses children nodes instead of attributes for references
+  // Promob sometimes uses children nodes with tag name as key
   const childNode = Array.from(referencesNode.children).find(c => c.tagName === key);
-  return childNode ? childNode.getAttribute('REFERENCE') || childNode.textContent : null;
+  if (childNode) return childNode.getAttribute('REFERENCE') || childNode.textContent;
+  return null;
 }
 
 function parsePartNode(node: Element, moduleSequence: number, pieceSequence: number): PromobPart {
   const name = getAttr(node, 'DESCRIPTION') || getAttr(node, 'NAME') || 'Peça Sem Nome';
+  // Use "REFERENCE" attribute as fallback (Plano B)
   const reference = getAttr(node, 'REFERENCE') || '';
   
   // Rule 4: Plano B - Desmontar Referência
