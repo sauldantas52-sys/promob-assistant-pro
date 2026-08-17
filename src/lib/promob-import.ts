@@ -100,6 +100,7 @@ function parsePartNode(node: Element, moduleSequence: number, pieceSequence: num
   
   // Rule 4: Plano B - Desmontar Referência
   const desmontarReferencia = (ref: string) => {
+    if (!ref) return { material: null, thickness: null, color: null };
     const segments = ref.split('.');
     const validThicknesses = [3, 4, 6, 9, 12, 15, 18, 20, 25, 30];
     let material: string | null = null;
@@ -108,19 +109,20 @@ function parsePartNode(node: Element, moduleSequence: number, pieceSequence: num
     let materialIdx = -1;
 
     for (let i = 0; i < segments.length; i++) {
-      const seg = segments[i].toUpperCase();
+      const seg = segments[i]?.toUpperCase();
+      if (!seg) continue;
       if (seg.includes('MDF') || seg.includes('MDP')) {
         material = seg.includes('MDF') ? 'MDF' : 'MDP';
         materialIdx = i;
       }
-      const num = parseInt(segments[i]);
+      const num = parseInt(segments[i] || '0');
       if (!isNaN(num) && validThicknesses.includes(num)) {
         thickness = num;
       }
     }
     
     if (materialIdx > 0) {
-      color = segments[materialIdx - 1];
+      color = segments[materialIdx - 1] || null;
     }
 
     return { material, thickness, color };
