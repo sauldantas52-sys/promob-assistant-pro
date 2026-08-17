@@ -32,6 +32,11 @@ export const generateAuditReport = createServerFn({ method: "POST" })
         .select("*")
         .eq("project_id", data.projectId);
 
+      const { data: visualIdentifications } = await sb
+        .from("visual_identifications")
+        .select("*, modules(name)")
+        .eq("project_id", data.projectId);
+
       const { data: logs } = await sb
         .from("production_logs")
         .select("*")
@@ -84,6 +89,16 @@ export const generateAuditReport = createServerFn({ method: "POST" })
               etapa: c.gate_id,
               observacao: c.notes,
               anexo: c.evidence_url
+            }))
+          },
+          {
+            title: "Auditoria Visual e Geometria",
+            status: visualIdentifications?.length ? "Auditado" : "Pendente",
+            items: (visualIdentifications as any[])?.map(v => ({
+              modulo: v.modules?.name || 'Módulo não identificado',
+              confianca: v.confidence_level,
+              obs: v.observation,
+              data: v.updated_at
             }))
           },
           { 

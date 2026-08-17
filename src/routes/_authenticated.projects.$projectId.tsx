@@ -30,6 +30,7 @@ import {
   CheckSquare,
   type LucideIcon,
   Box,
+  Eye,
 } from "lucide-react";
 import { Parser } from "@json2csv/plainjs";
 import { EngineeringTab } from "@/components/EngineeringTab";
@@ -41,6 +42,7 @@ import { VisualEstimateTab } from "@/components/project/VisualEstimateTab";
 import { AuditIntegrationTab } from "@/components/project/AuditIntegrationTab";
 import { PhysicalChecklistFlow } from "@/components/PhysicalChecklistFlow";
 import { Technical3DView } from "@/components/project/Technical3DView";
+import { VisualFeedingMode } from "@/components/project/VisualFeedingMode";
 import { parseDXF } from "@/lib/dxf-parser";
 
 import { Button } from "@/components/ui/button";
@@ -629,6 +631,7 @@ function ProjectDetail() {
         <div className="max-w-full overflow-x-auto overscroll-x-contain rounded-lg border border-slate-200 bg-slate-100 [scrollbar-width:thin]">
           <TabsList className="flex h-12 w-max min-w-full justify-start rounded-none bg-transparent p-1">
             <TabTrigger value="modules" icon={LayoutGrid} label="Módulos" />
+            <TabTrigger value="visual-intake" icon={Eye} label="Alimentação Visual" />
             <TabTrigger value="technical3d" icon={Box} label="Gêmeo DXF" />
             <TabTrigger value="parts" icon={ClipboardList} label="Lista Técnica" />
             <TabTrigger value="commercial" icon={FileText} label="Comercial" />
@@ -645,10 +648,17 @@ function ProjectDetail() {
           </TabsList>
         </div>
 
+        <TabsContent value="visual-intake" className="mt-6">
+          <VisualFeedingMode 
+            projectId={projectId} 
+            projectName={project.data?.name}
+          />
+        </TabsContent>
+
         <TabsContent value="technical3d" className="mt-6">
           <Technical3DView 
             geometries={dxfContent.data ? parseDXF(dxfContent.data) : []} 
-            projectName={project.data?.name} 
+            projectName={project.data?.name}
           />
         </TabsContent>
 

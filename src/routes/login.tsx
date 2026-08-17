@@ -180,14 +180,14 @@ function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4 sm:p-6">
       <div className="w-full max-w-lg">
         <div className="mb-8 sm:mb-16 flex flex-col items-center text-center">
-          <div className="mb-4 sm:mb-8 flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-[2rem] sm:rounded-[3rem] bg-blue-600 text-white shadow-2xl shadow-blue-600/30 ring-4 sm:ring-8 ring-blue-600/5">
-            <Boxes className="h-10 w-10 sm:h-14 sm:w-14" />
+          <div className="mb-4 sm:mb-8 flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-[2rem] sm:rounded-[3rem] bg-[var(--sidebar-industrial)] text-white shadow-2xl shadow-slate-900/30 ring-4 sm:ring-8 ring-slate-900/5">
+            <Boxes className="h-10 w-10 sm:h-14 sm:w-14 text-[var(--lime-industrial)]" />
           </div>
           <h1 className="text-4xl sm:text-6xl font-black text-slate-900 uppercase tracking-tighter leading-none mb-2 sm:mb-4">
             Monta AI
           </h1>
-          <p className="text-[10px] sm:text-[12px] font-black text-blue-600 uppercase tracking-[0.3em] sm:tracking-[0.5em]">
-            Protocolo Piloto Ativo
+          <p className="text-[10px] sm:text-[12px] font-black text-slate-500 uppercase tracking-[0.3em] sm:tracking-[0.5em]">
+            Protocolo Industrial 4.0
           </p>
         </div>
 
@@ -252,10 +252,12 @@ function LoginPage() {
 
                 <TabsContent value="operator">
                   <form onSubmit={handleOperatorSignIn} className="space-y-4 sm:space-y-6">
-                    <div className="flex flex-col items-center mb-4 sm:mb-6 text-blue-600">
-                      <HardHat className="h-8 w-8 sm:h-12 sm:w-12 mb-2" />
+                    <div className="flex flex-col items-center mb-4 sm:mb-6 text-slate-900">
+                      <div className="p-4 rounded-full bg-slate-100 mb-2">
+                        <HardHat className="h-8 w-8 sm:h-12 sm:w-12 text-slate-600" />
+                      </div>
                       <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em]">
-                        Acesso Industrial
+                        Terminal de Produção
                       </span>
                     </div>
 
@@ -306,7 +308,7 @@ function LoginPage() {
 
                     <Button
                       type="submit"
-                      className="h-14 sm:h-16 w-full text-base sm:text-lg font-black uppercase tracking-widest rounded-xl sm:rounded-2xl bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-600/20"
+                      className="h-14 sm:h-16 w-full text-base sm:text-lg font-black uppercase tracking-widest rounded-xl sm:rounded-2xl bg-[var(--sidebar-industrial)] hover:bg-slate-800 text-white shadow-xl shadow-slate-900/20"
                       disabled={busy}
                     >
                       {busy ? <Loader2 className="animate-spin" /> : "Iniciar Turno"}

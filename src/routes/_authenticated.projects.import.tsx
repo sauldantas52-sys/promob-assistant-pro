@@ -202,6 +202,7 @@ function ImportPage() {
         file: File | null;
         type: string;
         summary: Json;
+        required?: boolean;
       }> = [
         {
           file: files.xml,
@@ -234,6 +235,7 @@ function ImportPage() {
         {
           file: classification.image,
           type: "imagem_referencia",
+          required: false,
           summary: { source: "pasta_cliente" },
         },
         {

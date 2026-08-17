@@ -88,10 +88,10 @@ const GATES = [
         description: "MDF 6/15/18/25/36mm",
       },
       {
-        id: "tags_skp",
-        label: "Hierarquia e Módulos Promob",
+        id: "visual_ingestion",
+        label: "Alimentação Visual (Gêmeo)",
         icon: FileSearch,
-        description: "Estrutura confirmada no XML",
+        description: "Módulos vs DXF conferidos",
       },
     ],
   },

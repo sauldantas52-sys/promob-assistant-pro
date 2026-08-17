@@ -46,7 +46,7 @@ function DashboardContent() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
-        .select("id, name, client_name, status, environment, created_at, machining_blocked, is_validated, company_id")
+        .select("id, name, client_name, status, environment, created_at, machining_blocked, is_validated, company_id, updated_at")
         .eq("company_id", companyId as string)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -55,9 +55,9 @@ function DashboardContent() {
   });
 
   const list = projects.data ?? [];
-  const activeCount = list.filter(p => p.status !== 'expedido' && p.status !== 'assistencia').length;
-  const decisionRequired = list.filter(p => p.machining_blocked === true || p.status === 'novo').length;
-  const validationPending = list.filter(p => p.is_validated === false).length;
+  const activeCount = list.filter(p => p.status !== 'expedido' && p.status !== 'assistencia' && p.status !== 'concluido').length;
+  const decisionRequired = list.filter(p => (p.machining_blocked === true || p.status === 'novo') && p.status !== 'concluido').length;
+  const validationPending = list.filter(p => p.is_validated === false && p.status !== 'concluido').length;
   
   const countByStatus = (status: string) => list.filter((p) => p.status === status).length;
 
@@ -83,37 +83,44 @@ function DashboardContent() {
         {/* Top Summary Panels */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Fluxo Atual - Dark Panel */}
-          <Card className="bg-[var(--sidebar-industrial)] border-none text-white overflow-hidden shadow-lg">
+          <Card className="bg-[var(--sidebar-industrial)] border-none text-white overflow-hidden shadow-lg group relative">
             <CardHeader className="pb-2 border-b border-white/5">
               <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-[var(--lime-industrial)]" />
-                Fluxo Atual
+                Comando Industrial
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <p className="text-5xl font-black tracking-tighter">{activeCount}</p>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1">Projetos em Operação</p>
-                </div>
-                  <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-right">
-                    <div>
-                      <p className="text-lg font-bold text-[var(--status-corte)]">{countByStatus('corte')}</p>
-                      <p className="text-[9px] text-slate-500 uppercase font-bold">Corte</p>
-                    </div>
-                    <div>
-                      <p className="text-lg font-bold text-[var(--status-usinagem)]">{countByStatus('usinagem')}</p>
-                      <p className="text-[9px] text-slate-500 uppercase font-bold">Usinagem</p>
-                    </div>
-                    <div className="mt-2">
-                      <p className="text-lg font-bold text-[var(--status-montagem)]">{countByStatus('montagem')}</p>
-                      <p className="text-[9px] text-slate-500 uppercase font-bold">Montagem</p>
-                    </div>
-                    <div className="mt-2">
-                      <p className="text-lg font-bold text-[var(--status-expedicao)]">{countByStatus('expedicao')}</p>
-                      <p className="text-[9px] text-slate-500 uppercase font-bold">Carga</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-5xl font-black tracking-tighter">{activeCount}</p>
+                    <div className="flex flex-col">
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Projetos Ativos</p>
+                      <Badge className="bg-emerald-500/10 text-emerald-500 border-none rounded px-1.5 py-0 text-[8px] font-bold uppercase">
+                        Real-time Ingestion
+                      </Badge>
                     </div>
                   </div>
+                </div>
+                <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-right">
+                  <div>
+                    <p className="text-lg font-bold text-[var(--status-corte)]">{countByStatus('corte')}</p>
+                    <p className="text-[9px] text-slate-500 uppercase font-bold">Corte</p>
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-[var(--status-usinagem)]">{countByStatus('usinagem')}</p>
+                    <p className="text-[9px] text-slate-500 uppercase font-bold">Usinagem</p>
+                  </div>
+                  <div className="mt-2">
+                    <p className="text-lg font-bold text-[var(--status-montagem)]">{countByStatus('montagem')}</p>
+                    <p className="text-[9px] text-slate-500 uppercase font-bold">Montagem</p>
+                  </div>
+                  <div className="mt-2">
+                    <p className="text-lg font-bold text-[var(--status-expedicao)]">{countByStatus('expedicao')}</p>
+                    <p className="text-[9px] text-slate-500 uppercase font-bold">Carga</p>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -123,7 +130,7 @@ function DashboardContent() {
             <CardHeader className="pb-2 border-b border-slate-100">
               <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-amber-500" />
-                Segurança Industrial
+                Segurança Técnica
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
@@ -131,9 +138,11 @@ function DashboardContent() {
                 <div>
                   <div className="flex items-baseline gap-2">
                     <p className="text-5xl font-black tracking-tighter text-slate-900">{decisionRequired}</p>
-                    <p className="text-xs font-bold text-slate-400">Bloqueios</p>
+                    <div className="flex flex-col">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Bloqueios CNC</p>
+                      <p className="text-[8px] font-bold text-red-500 uppercase">Aguardando Auditoria</p>
+                    </div>
                   </div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">Usinagem Interrompida</p>
                 </div>
                 <div className="flex flex-col items-end gap-1">
                   <div className="flex items-center gap-2 mb-1">
@@ -154,9 +163,9 @@ function DashboardContent() {
           <div className="flex items-center justify-between px-1">
             <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
               <Factory className="h-3.5 w-3.5" />
-              Linha de Produção
+              Terminal de Projetos Industriais
             </h2>
-            <Link to="/production" className="text-[9px] font-bold uppercase tracking-wider text-blue-600 hover:underline">Ver Todos</Link>
+            <Link to="/projects" className="text-[9px] font-bold uppercase tracking-wider text-blue-600 hover:underline">Auditar Planta</Link>
           </div>
 
           <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
@@ -168,6 +177,7 @@ function DashboardContent() {
                     <th className="px-6 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider">Projeto / Cliente</th>
                     <th className="px-6 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider">Etapa</th>
                     <th className="px-6 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider text-right">Segurança</th>
+                    <th className="px-6 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider text-right">Última Ref.</th>
                     <th className="px-6 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider text-right">Ação</th>
                   </tr>
                 </thead>
@@ -197,6 +207,11 @@ function DashboardContent() {
                             <span className="text-[9px] font-bold uppercase">Liberada</span>
                           </div>
                         )}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <span className="text-[10px] font-bold text-slate-400">
+                          {project.updated_at ? new Date(project.updated_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '-'}
+                        </span>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <Button asChild variant="ghost" size="sm" className="h-8 px-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50">

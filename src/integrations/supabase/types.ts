@@ -2479,6 +2479,70 @@ export type Database = {
           },
         ]
       }
+      visual_identifications: {
+        Row: {
+          confidence_level: string | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          module_id: string | null
+          observation: string | null
+          part_id: string | null
+          project_id: string
+          source_file: string | null
+          updated_at: string | null
+          visual_reference: string | null
+        }
+        Insert: {
+          confidence_level?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          module_id?: string | null
+          observation?: string | null
+          part_id?: string | null
+          project_id: string
+          source_file?: string | null
+          updated_at?: string | null
+          visual_reference?: string | null
+        }
+        Update: {
+          confidence_level?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          module_id?: string | null
+          observation?: string | null
+          part_id?: string | null
+          project_id?: string
+          source_file?: string | null
+          updated_at?: string | null
+          visual_reference?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visual_identifications_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visual_identifications_part_id_fkey"
+            columns: ["part_id"]
+            isOneToOne: false
+            referencedRelation: "parts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visual_identifications_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -2534,6 +2598,7 @@ export type Database = {
         Returns: string
       }
       import_legacy_store_credits: { Args: { _payload: Json }; Returns: Json }
+      is_admin: { Args: never; Returns: boolean }
       prepare_store_credit_purchase: {
         Args: {
           _account_id: string
