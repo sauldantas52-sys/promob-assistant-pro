@@ -148,9 +148,11 @@ function TestImportAuditPage() {
                     <p className="text-[10px] font-black uppercase text-slate-400">{item.label} (UID: {item.uid})</p>
                     <p className="text-xs font-bold mt-1">Esperado: {item.expected}</p>
                     {found ? (
-                      <p className="text-xs font-black text-emerald-700 mt-1">
-                        Persistido: {found.width_mm || '-'}x{found.thickness_mm || '-'}x{found.length_mm || '-'} | {found.unit} | Q: {found.quantity} | R: {(found.metadata as any)?.repetition}
-                      </p>
+                      <div className="text-xs font-black text-emerald-700 mt-1 space-y-0.5">
+                        <p>Persistido: {found.width_mm || 0} x {found.thickness_mm || 0} x {found.length_mm || 0}</p>
+                        <p>Unit: {found.unit} | Qty: {found.quantity} | Rep: {(found.metadata as any)?.repetition}</p>
+                        <p className="text-[9px] text-emerald-600/70">UID: {(found.metadata as any)?.unique_id} | PID: {(found.metadata as any)?.unique_parent_id}</p>
+                      </div>
                     ) : (
                       <p className="text-xs font-black text-red-600 mt-1 uppercase tracking-wider animate-pulse">Item não localizado no banco!</p>
                     )}
