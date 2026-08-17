@@ -31,6 +31,8 @@ import {
   type LucideIcon,
   Box,
   Eye,
+  Building2,
+  Ruler,
 } from "lucide-react";
 import { Parser } from "@json2csv/plainjs";
 import { EngineeringTab } from "@/components/EngineeringTab";
