@@ -196,6 +196,7 @@ export async function fetchProjectsDashboard(companyId: string): Promise<Project
       totalSteps: steps.length,
       modulesCount: (project as any).modules?.[0]?.count || 0,
       partsCount: (project as any).parts?.[0]?.count || 0,
+      isTest: !!project.is_test,
     };
   });
 }
