@@ -31,6 +31,8 @@ import {
   type LucideIcon,
   Box,
   Eye,
+  Building2,
+  Ruler,
 } from "lucide-react";
 import { Parser } from "@json2csv/plainjs";
 import { EngineeringTab } from "@/components/EngineeringTab";
@@ -126,13 +128,25 @@ function ProjectDetail() {
   const [filterType, setFilterType] = useState<string>("all");
   const [searchPart, setSearchPart] = useState("");
 
+  const distribution = useQuery({
+    queryKey: ["project_distribution", projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("project_distribution" as any)
+        .select("*")
+        .eq("project_id", projectId);
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const project = useQuery({
     queryKey: ["project", projectId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
         .select(
-          "id, name, client_name, environment, status, notes, created_at, company_id, cutting_status, machining_status, is_cutting_edge_released, machining_blocked, is_validated",
+          "id, name, client_name, environment, status, operational_status, notes, created_at, company_id, cutting_status, machining_status, is_cutting_edge_released, machining_blocked, is_validated",
         )
         .eq("id", projectId)
         .maybeSingle();
@@ -563,6 +577,9 @@ function ProjectDetail() {
           )}
         </CardContent>
       </Card>
+
+      {/* Central Visual de Distribuição 4.0 */}
+      <ProjectDistributionFlow distribution={distribution.data || []} project={project.data} />
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
         <ProjectMetric
@@ -1664,6 +1681,111 @@ function MaintenanceTab({
             Nenhuma assistência registrada para este projeto.
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+function ProjectDistributionFlow({ distribution, project }: { distribution: any[], project: any }) {
+  const steps = [
+    { area: 'comercial', label: 'Comercial', icon: FileText, sources: 'Contrato' },
+    { area: 'compras', label: 'Compras', icon: Building2, sources: 'ListaCompra.pdf' },
+    { area: 'engenharia', label: 'Engenharia', icon: Ruler, sources: 'XML + COTAS + DXF' },
+    { area: 'corte', label: 'Corte', icon: Scissors, sources: 'ListaCorte.pdf' },
+    { area: 'borda', label: 'Borda', icon: Layers, sources: 'ListaCorte.pdf' },
+    { area: 'usinagem', label: 'Usinagem', icon: ShieldCheck, sources: 'PDF/DXF Técnico' },
+    { area: 'separacao', label: 'Separação', icon: LayoutGrid, sources: 'QR Code' },
+    { area: 'montagem', label: 'Montagem', icon: Wrench, sources: 'Desenhos + XML + DXF' },
+    { area: 'expedicao', label: 'Expedição', icon: Truck, sources: 'Carga' },
+    { area: 'assistencia', label: 'Assistência', icon: MessageSquare, sources: 'Pós-Venda' },
+  ];
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'liberado': return 'bg-emerald-500 text-white border-emerald-600';
+      case 'bloqueado': return 'bg-red-500 text-white border-red-600';
+      case 'pendente':
+      case 'conferencia_pendente': return 'bg-amber-500 text-white border-amber-600';
+      case 'alimentado': return 'bg-blue-500 text-white border-blue-600';
+      default: return 'bg-slate-100 text-slate-400 border-slate-200';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'liberado': return 'Liberado';
+      case 'bloqueado': return 'Bloqueado';
+      case 'conferencia_pendente': return 'Conferência Pendente';
+      case 'alimentado': return 'Alimentado';
+      case 'recebido': return 'Recebido';
+      default: return 'Pendente';
+    }
+  };
+
+  return (
+    <div className="space-y-4 mb-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-400 flex items-center gap-2">
+          <ArrowRightLeft className="h-3.5 w-3.5" />
+          Fluxo de Distribuição Industrial 4.0
+        </h2>
+        <Badge className="rounded px-2 py-0.5 text-[8px] font-black uppercase bg-slate-900 text-white border-none">
+          Status: {project?.operational_status?.toUpperCase() || 'RECEBIDO'}
+        </Badge>
+      </div>
+      
+      <div className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-10 gap-2">
+        {steps.map((step) => {
+          const dist = distribution.find(d => d.area === step.area);
+          const status = dist?.status || 'pendente';
+          const Icon = step.icon;
+          
+          return (
+            <div key={step.area} className={cn(
+              "flex flex-col p-3 rounded-xl border-2 transition-all group relative overflow-hidden",
+              dist ? "bg-white border-slate-100" : "bg-slate-50/50 border-slate-50 opacity-60"
+            )}>
+              <div className="flex items-center justify-between mb-3">
+                <div className={cn(
+                  "p-1.5 rounded-lg",
+                  dist ? "bg-slate-100 text-slate-900" : "bg-slate-50 text-slate-300"
+                )}>
+                  <Icon className="h-3.5 w-3.5" />
+                </div>
+                <div className={cn(
+                  "h-1.5 w-1.5 rounded-full animate-pulse",
+                  status === 'alimentado' ? "bg-blue-500" : 
+                  status === 'liberado' ? "bg-emerald-500" : 
+                  "bg-slate-300"
+                )} />
+              </div>
+              
+              <p className="text-[9px] font-black uppercase tracking-wider text-slate-900 truncate mb-1">
+                {step.label}
+              </p>
+              
+              <div className="space-y-1.5">
+                <Badge className={cn(
+                  "text-[7px] font-black uppercase tracking-widest px-1.5 py-0 border-none rounded-sm w-full justify-center",
+                  getStatusColor(status)
+                )}>
+                  {getStatusLabel(status)}
+                </Badge>
+                
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[7px] font-bold text-slate-400 uppercase tracking-tighter truncate">
+                    Fonte: {step.sources}
+                  </span>
+                  {dist?.item_count > 0 && (
+                    <span className="text-[7px] font-black text-slate-900 uppercase">
+                      Itens: {dist.item_count}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
