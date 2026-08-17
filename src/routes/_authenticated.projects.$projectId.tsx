@@ -30,6 +30,7 @@ import {
   CheckSquare,
   type LucideIcon,
   Box,
+  Eye,
 } from "lucide-react";
 import { Parser } from "@json2csv/plainjs";
 import { EngineeringTab } from "@/components/EngineeringTab";
