@@ -71,6 +71,7 @@ function ProjectsContent() {
   const [creationKey, setCreationKey] = useState(0);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState<"all" | "real" | "test">("all");
 
   const projects = useQuery({
     queryKey: ["projects-dashboard", companyId],
