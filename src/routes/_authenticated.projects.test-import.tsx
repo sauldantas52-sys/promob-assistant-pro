@@ -90,8 +90,8 @@ function TestImportPage() {
               <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Módulos / Peças</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-black text-slate-900">{modulesCount.data} / {partsQuery.data?.count}</p>
-              <p className="text-[10px] text-slate-500 uppercase font-bold mt-1">Ferragens: {hardwareCount.data}</p>
+              <p className="text-2xl font-black text-slate-900">{modulesCount.data || 0} / {partsQuery.data?.count || 0}</p>
+              <p className="text-[10px] text-slate-500 uppercase font-bold mt-1">Ferragens/Acessórios: {hardwareCount.data || 0}</p>
             </CardContent>
           </Card>
 
@@ -116,12 +116,12 @@ function TestImportPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-[10px] font-bold uppercase">Peça</TableHead>
-                  <TableHead className="text-[10px] font-bold uppercase">UID XML</TableHead>
-                  <TableHead className="text-[10px] font-bold uppercase">Material</TableHead>
-                  <TableHead className="text-[10px] font-bold uppercase">Espessura</TableHead>
-                  <TableHead className="text-[10px] font-bold uppercase">Dimensões</TableHead>
-                  <TableHead className="text-[10px] font-bold uppercase text-right">Qtd</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase">Peça</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase">UID XML</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase">Material</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase">Espessura</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase">Dimensões</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase text-right">Qtd</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -129,12 +129,19 @@ function TestImportPage() {
                   <TableRow key={part.id}>
                     <TableCell className="text-[11px] font-bold uppercase">{part.name}</TableCell>
                     <TableCell className="text-[10px] font-mono">{(part.metadata as any)?.id_xml || '-'}</TableCell>
-                    <TableCell className="text-[11px]">{part.material || "Não informado"}</TableCell>
-                    <TableCell className="text-[11px]">{part.thickness_mm || "Não informado"} mm</TableCell>
-                    <TableCell className="text-[11px] font-mono">{part.width_mm}x{part.length_mm}</TableCell>
+                    <TableCell className="text-[11px]">{part.material || "Não informado no XML"}</TableCell>
+                    <TableCell className="text-[11px]">{part.thickness_mm ? `${part.thickness_mm} mm` : "Não informado no XML"}</TableCell>
+                    <TableCell className="text-[11px] font-mono">{part.width_mm || 'N/I'}x{part.length_mm || 'N/I'}</TableCell>
                     <TableCell className="text-[11px] font-bold text-right">{part.quantity}</TableCell>
                   </TableRow>
                 ))}
+                {(!partsQuery.data?.data || partsQuery.data.data.length === 0) && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-12 text-slate-400 italic">
+                      Nenhuma peça persistida no banco.
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </CardContent>

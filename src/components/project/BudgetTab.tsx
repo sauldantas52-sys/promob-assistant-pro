@@ -21,25 +21,29 @@ export function BudgetTab({ projectId }: { projectId: string }) {
     },
   });
 
-  const { data: parts } = useQuery({
-    queryKey: ["parts_summary", projectId],
+  const { data: modulesData } = useQuery({
+    queryKey: ["modules_summary", projectId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("parts")
-        .select("kind, material, quantity")
+        .from("modules")
+        .select("id, name, quantity")
         .eq("project_id", projectId);
       if (error) throw error;
       return data;
     },
   });
 
-  const materialSummary = parts?.reduce((acc: Record<string, number>, part) => {
-    if (part.kind === 'chapa' || part.kind === 'peca') {
-      const key = part.material || 'Material não informado';
-      acc[key] = (acc[key] || 0) + (part.quantity || 1);
-    }
-    return acc;
-  }, {});
+  const { data: parts } = useQuery({
+    queryKey: ["parts_summary", projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("parts")
+        .select("*")
+        .eq("project_id", projectId);
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const formatCurrency = (val: number | null | undefined) => {
     if (val === null || val === undefined) return "Pendente";
@@ -54,7 +58,7 @@ export function BudgetTab({ projectId }: { projectId: string }) {
             <CardTitle className="text-[9px] font-black uppercase tracking-widest text-slate-500">Módulos</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-black text-slate-900">{modules?.data?.length || 0}</p>
+            <p className="text-2xl font-black text-slate-900">{modulesData?.length || 0}</p>
           </CardContent>
         </Card>
         <Card className="bg-slate-50 border-slate-200">
