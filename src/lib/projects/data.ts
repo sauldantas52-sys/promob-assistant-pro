@@ -81,6 +81,7 @@ export type ProjectSummary = {
   totalSteps: number;
   modulesCount: number;
   partsCount: number;
+  isTest: boolean;
 };
 
 export type CreateProjectInput = {
@@ -124,7 +125,7 @@ export async function fetchProjectsDashboard(companyId: string): Promise<Project
   const { data: projects, error } = await supabase
     .from("projects")
     .select(`
-      id, name, client_id, client_name, environment, status, cutting_status, created_at,
+      id, name, client_id, client_name, environment, status, cutting_status, created_at, is_test,
       modules(count),
       parts(count)
     `)
