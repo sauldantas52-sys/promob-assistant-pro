@@ -155,6 +155,7 @@ function ProjectDetail() {
     },
   });
 
+
   const modules = useQuery({
     queryKey: ["modules", projectId],
     queryFn: async () => {

@@ -349,7 +349,6 @@ function ImportPage() {
           "ingest_and_distribute_project" as any,
           {
             _project_id: projectId,
-            _company_id: companyId,
             _modules: modulesPayload,
             _loose_parts: loosePartsPayload,
           }
