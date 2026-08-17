@@ -48,11 +48,13 @@ function DashboardContent() {
         .from("projects")
         .select(`
           id, name, client_name, status, operational_status, environment, created_at, 
-          machining_blocked, is_validated, company_id, updated_at,
+          machining_blocked, is_validated, company_id, updated_at, is_test,
           modules(count),
-          parts(count)
+          parts(count),
+          project_distribution(area, status)
         `)
         .eq("company_id", companyId as string)
+        .eq("is_test", false)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -110,19 +112,27 @@ function DashboardContent() {
                 </div>
                 <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-right">
                   <div>
-                    <p className="text-lg font-bold text-[var(--status-corte)]">{countByStatus('corte')}</p>
+                    <p className="text-lg font-bold text-[var(--status-corte)]">
+                      {list.filter(p => p.project_distribution?.some(d => d.area === 'corte' && d.status !== 'concluido')).length}
+                    </p>
                     <p className="text-[9px] text-slate-500 uppercase font-bold">Corte</p>
                   </div>
                   <div>
-                    <p className="text-lg font-bold text-[var(--status-usinagem)]">{countByStatus('usinagem')}</p>
+                    <p className="text-lg font-bold text-[var(--status-usinagem)]">
+                      {list.filter(p => p.project_distribution?.some(d => d.area === 'usinagem' && d.status !== 'concluido')).length}
+                    </p>
                     <p className="text-[9px] text-slate-500 uppercase font-bold">Usinagem</p>
                   </div>
                   <div className="mt-2">
-                    <p className="text-lg font-bold text-[var(--status-montagem)]">{countByStatus('montagem')}</p>
+                    <p className="text-lg font-bold text-[var(--status-montagem)]">
+                      {list.filter(p => p.status === 'montagem').length}
+                    </p>
                     <p className="text-[9px] text-slate-500 uppercase font-bold">Montagem</p>
                   </div>
                   <div className="mt-2">
-                    <p className="text-lg font-bold text-[var(--status-expedicao)]">{countByStatus('expedicao')}</p>
+                    <p className="text-lg font-bold text-[var(--status-expedicao)]">
+                      {list.filter(p => p.status === 'expedicao').length}
+                    </p>
                     <p className="text-[9px] text-slate-500 uppercase font-bold">Carga</p>
                   </div>
                 </div>

@@ -22,6 +22,11 @@ export const generateAuditReport = createServerFn({ method: "POST" })
         .select("kind, material, thickness_mm, width_mm, length_mm, quantity, edge_banding, metadata")
         .eq("project_id", data.projectId);
 
+      const { data: distribution } = await sb
+        .from("project_distribution")
+        .select("*")
+        .eq("project_id", data.projectId);
+
       const { data: validationChecks } = await sb
         .from("validation_checks")
         .select("*")
@@ -59,6 +64,15 @@ export const generateAuditReport = createServerFn({ method: "POST" })
         machiningBlocked: project?.machining_blocked,
         summary: "Dossiê Industrial 4.0 Consolidado.",
         sections: [
+          {
+            title: "Distribuição Industrial",
+            status: distribution?.length ? "Alimentado" : "Pendente",
+            areas: distribution?.map(d => ({
+              area: d.area,
+              status: d.status,
+              itens: d.item_count
+            }))
+          },
           { 
             title: "Engenharia e XML", 
             status: "Auditado",

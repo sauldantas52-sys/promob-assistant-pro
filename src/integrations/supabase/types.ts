@@ -2670,20 +2670,10 @@ export type Database = {
         Returns: string
       }
       import_legacy_store_credits: { Args: { _payload: Json }; Returns: Json }
-      ingest_and_distribute_project:
-        | {
-            Args: {
-              _company_id: string
-              _loose_parts: Json
-              _modules: Json
-              _project_id: string
-            }
-            Returns: undefined
-          }
-        | {
-            Args: { _loose_parts: Json; _modules: Json; _project_id: string }
-            Returns: undefined
-          }
+      ingest_and_distribute_project: {
+        Args: { _loose_parts: Json; _modules: Json; _project_id: string }
+        Returns: undefined
+      }
       is_admin: { Args: never; Returns: boolean }
       prepare_store_credit_purchase: {
         Args: {

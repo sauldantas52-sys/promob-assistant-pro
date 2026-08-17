@@ -47,10 +47,13 @@ function factoryProjectsQuery() {
       environment,
       is_cutting_edge_released,
       machining_blocked,
+      is_test,
       production_steps(*),
-      shipping_volumes(*)
+      shipping_volumes(*),
+      project_distribution(*)
     `,
     )
+    .eq("is_test", false)
     .in("status", [
       "corte",
       "borda",

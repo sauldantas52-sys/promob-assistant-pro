@@ -365,14 +365,27 @@ function ImportPage() {
         );
         if (distributionError) throw distributionError;
         // Auditoria Pós-Importação 4.0: Validar persistência real
+        const { data: distributionAudit, error: distAuditError } = await supabase
+          .from("project_distribution")
+          .select("id, area, status, item_count")
+          .eq("project_id", projectId);
+
+        if (distAuditError || !distributionAudit || distributionAudit.length === 0) {
+          throw new Error("Falha na Distribuição Industrial: Nenhuma área de produção foi alimentada automaticamente.");
+        }
+
         const { data: projectAudit, error: auditError } = await supabase
           .from("projects")
-          .select("id")
+          .select("id, operational_status")
           .eq("id", projectId)
           .maybeSingle();
 
         if (auditError || !projectAudit) {
            throw new Error("Falha na persistência industrial: o projeto não foi detectado no banco de dados.");
+        }
+
+        if (projectAudit.operational_status !== 'alimentado') {
+          throw new Error(`Falha no fluxo industrial: o status operacional esperado era 'alimentado', mas está como '${projectAudit.operational_status}'.`);
         }
 
         const { data: partsAudit, error: partsError } = await supabase
@@ -381,8 +394,8 @@ function ImportPage() {
           .eq("project_id", projectId);
         
         const hasModules = result.modules.length > 0 || result.loose_parts.length > 0;
-        if (hasModules && (partsError || !partsAudit || partsAudit.length === 0)) {
-           throw new Error(`Falha na persistência industrial: o XML possui itens (${result.modules.length} módulos), mas nenhuma peça foi gravada no banco.`);
+        if (hasModules && (partsError || !partsAudit || (partsAudit as any).count === 0)) {
+           throw new Error(`Falha na persistência industrial: o XML possui itens, mas nenhuma peça foi gravada no banco.`);
         }
 
         const { data: filesAudit } = await supabase
@@ -390,7 +403,6 @@ function ImportPage() {
           .select("id")
           .eq("project_id", projectId);
         
-        /* Auditoria simplificada para o Piloto */
         if (!filesAudit || filesAudit.length === 0) {
           throw new Error(`Falha na persistência industrial: nenhum arquivo foi registrado.`);
         }
