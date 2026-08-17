@@ -7,8 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info, CheckCircle2, AlertTriangle, Scissors } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { z } from "zod";
+import { cn } from "@/lib/utils";
 
 const searchSchema = z.object({
   projectId: z.string().optional(),
