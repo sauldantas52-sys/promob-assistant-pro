@@ -178,6 +178,116 @@ export type Database = {
           },
         ]
       }
+      budget_items: {
+        Row: {
+          budget_id: string
+          category: string | null
+          confidence: number | null
+          id: string
+          is_confirmed: boolean | null
+          name: string | null
+          quantity: number | null
+          source: string | null
+          total_price: number | null
+          unit: string | null
+          unit_price: number | null
+        }
+        Insert: {
+          budget_id: string
+          category?: string | null
+          confidence?: number | null
+          id?: string
+          is_confirmed?: boolean | null
+          name?: string | null
+          quantity?: number | null
+          source?: string | null
+          total_price?: number | null
+          unit?: string | null
+          unit_price?: number | null
+        }
+        Update: {
+          budget_id?: string
+          category?: string | null
+          confidence?: number | null
+          id?: string
+          is_confirmed?: boolean | null
+          name?: string | null
+          quantity?: number | null
+          source?: string | null
+          total_price?: number | null
+          unit?: string | null
+          unit_price?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_items_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budgets: {
+        Row: {
+          analysis_mode: string | null
+          company_id: string
+          confidence: number | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          metadata: Json | null
+          project_id: string
+          raw_ai_response: Json | null
+          source_file: string | null
+          status: string | null
+          total_value: number | null
+        }
+        Insert: {
+          analysis_mode?: string | null
+          company_id: string
+          confidence?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          metadata?: Json | null
+          project_id: string
+          raw_ai_response?: Json | null
+          source_file?: string | null
+          status?: string | null
+          total_value?: number | null
+        }
+        Update: {
+          analysis_mode?: string | null
+          company_id?: string
+          confidence?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          metadata?: Json | null
+          project_id?: string
+          raw_ai_response?: Json | null
+          source_file?: string | null
+          status?: string | null
+          total_value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budgets_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budgets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           company_id: string
@@ -305,6 +415,122 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      cut_plans: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_official: boolean | null
+          kerf_mm: number | null
+          metadata: Json | null
+          project_id: string
+          sheet_height_mm: number | null
+          sheet_width_mm: number | null
+          source: string | null
+          total_cuts: number | null
+          total_pieces: number | null
+          total_sheets: number | null
+          trim_mm: number | null
+          utilization_percent: number | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_official?: boolean | null
+          kerf_mm?: number | null
+          metadata?: Json | null
+          project_id: string
+          sheet_height_mm?: number | null
+          sheet_width_mm?: number | null
+          source?: string | null
+          total_cuts?: number | null
+          total_pieces?: number | null
+          total_sheets?: number | null
+          trim_mm?: number | null
+          utilization_percent?: number | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_official?: boolean | null
+          kerf_mm?: number | null
+          metadata?: Json | null
+          project_id?: string
+          sheet_height_mm?: number | null
+          sheet_width_mm?: number | null
+          source?: string | null
+          total_cuts?: number | null
+          total_pieces?: number | null
+          total_sheets?: number | null
+          trim_mm?: number | null
+          utilization_percent?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cut_plans_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cut_plans_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cut_sheets: {
+        Row: {
+          color: string | null
+          cut_plan_id: string
+          id: string
+          material: string | null
+          placements: Json | null
+          remainders: Json | null
+          sheet_number: number | null
+          thickness_mm: number | null
+          utilization_percent: number | null
+        }
+        Insert: {
+          color?: string | null
+          cut_plan_id: string
+          id?: string
+          material?: string | null
+          placements?: Json | null
+          remainders?: Json | null
+          sheet_number?: number | null
+          thickness_mm?: number | null
+          utilization_percent?: number | null
+        }
+        Update: {
+          color?: string | null
+          cut_plan_id?: string
+          id?: string
+          material?: string | null
+          placements?: Json | null
+          remainders?: Json | null
+          sheet_number?: number | null
+          thickness_mm?: number | null
+          utilization_percent?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cut_sheets_cut_plan_id_fkey"
+            columns: ["cut_plan_id"]
+            isOneToOne: false
+            referencedRelation: "cut_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       engineering_validations: {
         Row: {
@@ -483,6 +709,48 @@ export type Database = {
           },
         ]
       }
+      label_settings: {
+        Row: {
+          company_id: string
+          id: string
+          preset: string | null
+          project_id: string
+          settings: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          id?: string
+          preset?: string | null
+          project_id: string
+          settings?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          id?: string
+          preset?: string | null
+          project_id?: string
+          settings?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "label_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "label_settings_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       maintenance_history: {
         Row: {
           created_at: string | null
@@ -609,10 +877,13 @@ export type Database = {
           environment: string | null
           height_mm: number | null
           id: string
+          id_xml: string | null
           is_completed: boolean | null
+          metadata: Json
           name: string
           project_id: string
           quantity: number
+          sequence: number | null
           width_mm: number | null
         }
         Insert: {
@@ -622,10 +893,13 @@ export type Database = {
           environment?: string | null
           height_mm?: number | null
           id?: string
+          id_xml?: string | null
           is_completed?: boolean | null
+          metadata?: Json
           name: string
           project_id: string
           quantity?: number
+          sequence?: number | null
           width_mm?: number | null
         }
         Update: {
@@ -635,10 +909,13 @@ export type Database = {
           environment?: string | null
           height_mm?: number | null
           id?: string
+          id_xml?: string | null
           is_completed?: boolean | null
+          metadata?: Json
           name?: string
           project_id?: string
           quantity?: number
+          sequence?: number | null
           width_mm?: number | null
         }
         Relationships: [
@@ -916,11 +1193,19 @@ export type Database = {
       parts: {
         Row: {
           assembly_group_id: string | null
+          color: string | null
           created_at: string
           cutting_edge_released: boolean | null
           data_source: string | null
           edge_banding: string | null
+          edge_bottom: number | null
+          edge_left: number | null
+          edge_name_front: string | null
+          edge_name_general: string | null
+          edge_right: number | null
+          edge_top: number | null
           id: string
+          id_xml: string | null
           is_completed: boolean | null
           kind: string
           length_mm: number | null
@@ -928,10 +1213,17 @@ export type Database = {
           material: string | null
           metadata: Json | null
           module_id: string | null
+          module_sequence: number | null
           name: string
+          parent_id_xml: string | null
+          piece_code: string | null
+          piece_sequence: number | null
           project_id: string
           quantity: number
+          quantity_raw: number | null
+          repetition: number | null
           storage_location: string | null
+          supplier: string | null
           thickness_mm: number | null
           unit: string | null
           visibility_type: string | null
@@ -939,11 +1231,19 @@ export type Database = {
         }
         Insert: {
           assembly_group_id?: string | null
+          color?: string | null
           created_at?: string
           cutting_edge_released?: boolean | null
           data_source?: string | null
           edge_banding?: string | null
+          edge_bottom?: number | null
+          edge_left?: number | null
+          edge_name_front?: string | null
+          edge_name_general?: string | null
+          edge_right?: number | null
+          edge_top?: number | null
           id?: string
+          id_xml?: string | null
           is_completed?: boolean | null
           kind?: string
           length_mm?: number | null
@@ -951,10 +1251,17 @@ export type Database = {
           material?: string | null
           metadata?: Json | null
           module_id?: string | null
+          module_sequence?: number | null
           name: string
+          parent_id_xml?: string | null
+          piece_code?: string | null
+          piece_sequence?: number | null
           project_id: string
           quantity?: number
+          quantity_raw?: number | null
+          repetition?: number | null
           storage_location?: string | null
+          supplier?: string | null
           thickness_mm?: number | null
           unit?: string | null
           visibility_type?: string | null
@@ -962,11 +1269,19 @@ export type Database = {
         }
         Update: {
           assembly_group_id?: string | null
+          color?: string | null
           created_at?: string
           cutting_edge_released?: boolean | null
           data_source?: string | null
           edge_banding?: string | null
+          edge_bottom?: number | null
+          edge_left?: number | null
+          edge_name_front?: string | null
+          edge_name_general?: string | null
+          edge_right?: number | null
+          edge_top?: number | null
           id?: string
+          id_xml?: string | null
           is_completed?: boolean | null
           kind?: string
           length_mm?: number | null
@@ -974,10 +1289,17 @@ export type Database = {
           material?: string | null
           metadata?: Json | null
           module_id?: string | null
+          module_sequence?: number | null
           name?: string
+          parent_id_xml?: string | null
+          piece_code?: string | null
+          piece_sequence?: number | null
           project_id?: string
           quantity?: number
+          quantity_raw?: number | null
+          repetition?: number | null
           storage_location?: string | null
+          supplier?: string | null
           thickness_mm?: number | null
           unit?: string | null
           visibility_type?: string | null

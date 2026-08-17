@@ -4,6 +4,7 @@ export const PartMetadataSchema = z.object({
   unique_id: z.string().optional().nullable(),
   unique_parent_id: z.string().optional().nullable(),
   repetition: z.number().default(1),
+  quantity_raw: z.number().optional().nullable(),
   text_dimension: z.string().optional().nullable(),
   unit: z.string().default('un'),
   family: z.string().optional().nullable(),
@@ -11,6 +12,15 @@ export const PartMetadataSchema = z.object({
   reference: z.string().optional().nullable(),
   materials: z.array(z.string()).optional().nullable(),
   id_xml: z.string().optional().nullable(),
+  color: z.string().optional().nullable(),
+  supplier: z.string().optional().nullable(),
+  edge_top: z.number().default(0),
+  edge_bottom: z.number().default(0),
+  edge_left: z.number().default(0),
+  edge_right: z.number().default(0),
+  edge_name_general: z.string().optional().nullable(),
+  edge_name_front: z.string().optional().nullable(),
+  piece_code: z.string().optional().nullable(),
 });
 
 export type PartMetadata = z.infer<typeof PartMetadataSchema>;
@@ -18,25 +28,36 @@ export type PartMetadata = z.infer<typeof PartMetadataSchema>;
 export interface PromobPart {
   name: string;
   kind: 'peca' | 'item' | 'ferragem' | 'acessorio';
-  material?: string | null;
-  thickness_mm?: number | null;
-  width_mm?: number | null;
-  length_mm?: number | null;
+  material?: string | null | undefined;
+  thickness_mm?: number | null | undefined;
+  width_mm?: number | null | undefined;
+  length_mm?: number | null | undefined;
   quantity: number;
   unit: string;
-  edge_banding?: string | null;
-  metadata?: PartMetadata;
+  edge_banding?: string | null | undefined;
+  metadata?: PartMetadata | undefined;
+  color?: string | null | undefined;
+  supplier?: string | null | undefined;
+  edge_top?: number | undefined;
+  edge_bottom?: number | undefined;
+  edge_left?: number | undefined;
+  edge_right?: number | undefined;
+  id_xml?: string | null | undefined;
+  parent_id_xml?: string | null | undefined;
+  repetition?: number | undefined;
+  quantity_raw?: number | null | undefined;
 }
 
 export interface PromobModule {
   name: string;
-  environment?: string | null;
-  width_mm?: number | null;
-  height_mm?: number | null;
-  depth_mm?: number | null;
+  environment?: string | null | undefined;
+  width_mm?: number | null | undefined;
+  height_mm?: number | null | undefined;
+  depth_mm?: number | null | undefined;
   quantity: number;
-  id_xml?: string | null;
+  id_xml?: string | null | undefined;
   parts: PromobPart[];
+  metadata?: any;
 }
 
 export interface PromobProject {
@@ -65,16 +86,31 @@ function parsePartNode(node: Element): PromobPart {
   const name = getAttr(node, 'DESCRIPTION') || getAttr(node, 'NAME') || 'Peça Sem Nome';
   const family = getAttr(node, 'FAMILY')?.toUpperCase();
   
+  // Extração de Bordas
+  const edgeTop = getNumericAttr(node, 'EDGE_TOP') || 0;
+  const edgeBottom = getNumericAttr(node, 'EDGE_BOTTOM') || 0;
+  const edgeLeft = getNumericAttr(node, 'EDGE_LEFT') || 0;
+  const edgeRight = getNumericAttr(node, 'EDGE_RIGHT') || 0;
+
   const metadata: PartMetadata = {
     unique_id: getAttr(node, 'UNIQUEID'),
     unique_parent_id: getAttr(node, 'UNIQUEPARENTID'),
     repetition: getNumericAttr(node, 'REPETITION') || 1,
+    quantity_raw: getNumericAttr(node, 'QUANTITY'),
     text_dimension: getAttr(node, 'TEXTDIMENSION'),
     unit: getAttr(node, 'UNIT') || 'un',
     family: family,
     group: getAttr(node, 'GROUP'),
     reference: getAttr(node, 'REFERENCE'),
     id_xml: getAttr(node, 'ID'),
+    color: getAttr(node, 'COLOR') || getAttr(node, 'MODEL'),
+    supplier: getAttr(node, 'SUPPLIER'),
+    edge_top: edgeTop,
+    edge_bottom: edgeBottom,
+    edge_left: edgeLeft,
+    edge_right: edgeRight,
+    edge_name_general: getAttr(node, 'EDGE_NAME'),
+    piece_code: getAttr(node, 'PIECE_CODE'),
   };
 
   const quantity = getNumericAttr(node, 'QUANTITY') || 1;
@@ -91,10 +127,19 @@ function parsePartNode(node: Element): PromobPart {
     width_mm: getNumericAttr(node, 'WIDTH') || null,
     length_mm: getNumericAttr(node, 'DEPTH') || null,
     quantity, 
-
     unit: metadata.unit,
-    edge_banding: getAttr(node, 'EDGE_BANDING') || null,
-    metadata
+    edge_banding: getAttr(node, 'EDGE_BANDING') || (edgeTop || edgeBottom || edgeLeft || edgeRight ? 'Sim' : null),
+    metadata,
+    color: metadata.color,
+    supplier: metadata.supplier,
+    edge_top: edgeTop,
+    edge_bottom: edgeBottom,
+    edge_left: edgeLeft,
+    edge_right: edgeRight,
+    id_xml: metadata.id_xml,
+    parent_id_xml: metadata.unique_parent_id,
+    repetition: metadata.repetition,
+    quantity_raw: metadata.quantity_raw,
   };
 }
 
@@ -129,7 +174,12 @@ export function parsePromobXML(xmlContent: string): PromobProject {
         depth_mm: getNumericAttr(node, 'DEPTH') || null,
         quantity: getNumericAttr(node, 'QUANTITY') || 1,
         id_xml: getAttr(node, 'ID') || null,
-        parts
+        parts,
+        metadata: {
+          unique_id: getAttr(node, 'UNIQUEID'),
+          id_xml: getAttr(node, 'ID'),
+          reference: getAttr(node, 'REFERENCE')
+        }
       });
     } else {
       looseParts.push(parsePartNode(node));
