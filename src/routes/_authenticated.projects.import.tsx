@@ -839,12 +839,12 @@ function ImportPage() {
                     <span
                       className={cn(
                         "flex h-5 w-5 shrink-0 items-center justify-center rounded-sm",
-                        classification.xmk
+                        classification.others.length > 0
                           ? "bg-slate-700 text-lime-300"
                           : "bg-slate-900 text-slate-600",
                       )}
                     >
-                      {classification.xmk ? (
+                      {classification.others.length > 0 ? (
                         <Check className="h-3.5 w-3.5" />
                       ) : (
                         <span className="font-mono text-[9px]">+</span>
@@ -852,10 +852,12 @@ function ImportPage() {
                     </span>
                     <div className="min-w-0">
                       <p className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">
-                        XMK / opcional
+                        Outros Arquivos / Inventory
                       </p>
                       <p className="truncate text-[10px] text-slate-600">
-                        {classification.xmk?.name || "Identidade suplementar não localizada"}
+                        {classification.others.length > 0 
+                          ? `${classification.others.length} arquivos adicionais detectados` 
+                          : "Nenhum outro arquivo localizado"}
                       </p>
                     </div>
                   </div>
