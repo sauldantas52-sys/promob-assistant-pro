@@ -214,72 +214,56 @@ function ImportPage() {
         throw new Error("O DXF obrigatório não contém geometria reconhecível.");
 
       const projectId = crypto.randomUUID();
-      const packageCandidates: Array<{
-        file: File | null;
-        type: string;
-        summary: Json;
-        required?: boolean;
-      }> = [
-        {
-          file: files.xml,
-          type: "xml",
-          summary: {
-            modules: result.modules.length,
-            parts:
-              result.modules.reduce((total: number, module: PromobModule) => total + module.parts.length, 0) +
-              result.loose_parts.length,
-            looseParts: result.loose_parts.length,
-            warnings: [],
-          },
-        },
-        { file: classification.cotas, type: "cotas_pdf", summary: { source: "pasta_cliente" } },
-        {
-          file: classification.listaCompra,
-          type: "lista_compra_pdf",
-          summary: { source: "pasta_cliente" },
-        },
-        {
-          file: classification.listaCorte,
-          type: "lista_corte_pdf",
-          summary: { source: "pasta_cliente" },
-        },
-        {
-          file: classification.previewCorte,
-          type: "preview_corte_pdf",
-          summary: { source: "pasta_cliente" },
-        },
-        {
-          file: classification.image,
-          type: "imagem_referencia",
-          required: false,
-          summary: { source: "pasta_cliente" },
-        },
-        {
-          file: classification.dxf,
-          type: "dxf_conferencia",
-          summary: { source: "pasta_cliente", entities: dxfGeometry.length },
-        },
-        {
-          file: classification.promob,
-          type: "promob_projeto",
-          summary: { source: "pasta_cliente", format_status: "unconfirmed" },
-        },
-      ];
-      const packageFiles = packageCandidates.filter(
-        (item): item is { file: File; type: string; summary: Json } => item.file !== null,
-      );
-      const preparedFiles = packageFiles.map((item) => {
+      
+      // Add ALL files from the folder to the persistence list, preserving internal paths
+      const allProjectFiles: Array<{ file: File; type: string; summary: Json }> = classification.allFiles.map(file => {
+        const ext = file.name.split('.').pop()?.toLowerCase() || '';
+        const norm = normalizedFileName(file);
+        let type = 'other';
+        
+        if (ext === 'xml') type = 'xml';
+        else if (ext === 'promob') type = 'promob_projeto';
+        else if (ext === 'dxf') type = 'dxf_conferencia';
+        else if (ext === 'pdf') {
+          if (norm.includes("cotas") || norm.includes("manual") || norm.includes("desenho") || norm.includes("tecnico")) type = 'cotas_pdf';
+          else if (norm.includes("listacompra") || norm.includes("insumos") || norm.includes("compra")) type = 'lista_compra_pdf';
+          else if (norm.includes("listacorte") || norm.includes("plano") || norm.includes("corte")) type = 'lista_corte_pdf';
+          else if (norm.includes("previewcorte") || norm.includes("mapa") || norm.includes("nesting")) type = 'preview_corte_pdf';
+          else type = 'pdf_document';
+        }
+        else if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) type = 'imagem_referencia';
+        else if (ext === 'docx') type = 'docx_document';
+
+        return {
+          file,
+          type,
+          summary: { 
+            relativePath: file.webkitRelativePath,
+            size: file.size,
+            lastModified: file.lastModified,
+            source: "pasta_cliente"
+          }
+        };
+      });
+
+      const preparedFiles = allProjectFiles.map((item) => {
         const safeName = item.file.name
           .normalize("NFD")
           .replace(/[\u0300-\u036f]/g, "")
           .replace(/[^a-zA-Z0-9._-]/g, "_");
+          
+        // Use relative path for storage if available, otherwise just safe name
+        const storagePath = `${companyId}/${projectId}/${item.file.webkitRelativePath || safeName}`;
+        
         return {
           ...item,
-          storagePath: `${companyId}/${projectId}/${crypto.randomUUID()}-${safeName}`,
+          storagePath,
         };
       });
+
       const { data: authData } = await supabase.auth.getUser();
       if (!authData.user) throw new Error("Sessão expirada. Entre novamente antes de importar.");
+      
       const { error: sessionError } = await (supabase as any).from("project_import_sessions").insert({
         id: projectId,
         company_id: companyId,
