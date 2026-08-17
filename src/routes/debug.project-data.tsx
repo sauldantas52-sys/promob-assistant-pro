@@ -28,35 +28,23 @@ function DebugProjectData() {
   const amandaData = useQuery({
     queryKey: ["debug-amanda"],
     queryFn: async () => {
-      const { data: project } = await supabase
+      const { data } = await supabase
         .from("projects")
         .select("*, modules(count), parts(count), project_files(count)")
         .ilike("name", "%amanda%")
-        .single();
-      return project;
+        .order("created_at", { ascending: false });
+      return data;
     },
   });
 
   const closetData = useQuery({
     queryKey: ["debug-closet"],
     queryFn: async () => {
-      const { data: project } = await supabase
+      const { data } = await supabase
         .from("projects")
         .select("*, modules(count), parts(count), project_files(count)")
         .ilike("name", "%closet%")
-        .single();
-      return project;
-    },
-  });
-
-  const importSessions = useQuery({
-    queryKey: ["debug-import-sessions"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("project_import_sessions")
-        .select("*")
         .order("created_at", { ascending: false });
-      if (error) throw error;
       return data;
     },
   });
@@ -73,14 +61,13 @@ function DebugProjectData() {
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>Todos os Projetos Visíveis (RLS Check)</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Projetos no Banco (Visíveis via RLS)</CardTitle></CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>ID</TableHead>
                 <TableHead>Nome</TableHead>
-                <TableHead>Company</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Teste?</TableHead>
                 <TableHead>Criado em</TableHead>
@@ -91,7 +78,6 @@ function DebugProjectData() {
                 <TableRow key={p.id}>
                   <TableCell className="font-bold">{p.id}</TableCell>
                   <TableCell>{p.name}</TableCell>
-                  <TableCell>{p.company_id}</TableCell>
                   <TableCell><Badge>{p.status}</Badge></TableCell>
                   <TableCell>{String(p.is_test)}</TableCell>
                   <TableCell>{p.created_at}</TableCell>
@@ -112,36 +98,10 @@ function DebugProjectData() {
         <Card>
           <CardHeader><CardTitle>Foco: CLOSET</CardTitle></CardHeader>
           <CardContent>
-            <pre>{JSON.stringify(closetData.data || "NÃO ENCONTRADO NO BANCO", null, 2)}</pre>
+            <pre>{JSON.stringify(closetData.data || "NÃO ENCONTRADO", null, 2)}</pre>
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader><CardTitle>Sessões de Importação (Reconciliação)</CardTitle></CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Caminhos Planejados</TableHead>
-                <TableHead>Data</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {importSessions.data?.map(s => (
-                <TableRow key={s.id}>
-                  <TableCell>{s.id}</TableCell>
-                  <TableCell><Badge>{s.status}</Badge></TableCell>
-                  <TableCell className="max-w-xs truncate">{JSON.stringify(s.planned_paths)}</TableCell>
-                  <TableCell>{s.created_at}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
     </div>
   );
 }
