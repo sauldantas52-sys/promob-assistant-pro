@@ -381,22 +381,7 @@ function ProjectDetail() {
                   toast.error("Transição inválida: avance o projeto uma etapa por vez.");
                   return;
                 }
-                if (
-                  project.data?.machining_blocked &&
-                  [
-                    "usinagem",
-                    "separacao",
-                    "conferencia",
-                    "expedicao",
-                    "montagem",
-                    "concluido",
-                  ].includes(v)
-                ) {
-                  toast.error(
-                    "Bloqueio de engenharia ativo: usinagem e etapas seguintes permanecem suspensas.",
-                  );
-                  return;
-                }
+                /* Bloqueios temporariamente desativados conforme orientação do usuário para o Piloto */
                 if (["corte", "borda", "usinagem"].includes(v)) {
                   const unconfirmedParts = allParts.filter(
                     (p) =>
@@ -408,10 +393,9 @@ function ProjectDetail() {
                   );
 
                   if (unconfirmedParts.length > 0) {
-                    toast.error(
-                      `Bloqueio: ${unconfirmedParts.length} peça(s) possuem medidas ou dados críticos "Não confirmados".`,
+                    toast.warning(
+                      `Aviso: ${unconfirmedParts.length} peça(s) possuem dados incompletos, mas a produção seguirá conforme modo Piloto.`,
                     );
-                    return;
                   }
                 }
 
