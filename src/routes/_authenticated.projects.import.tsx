@@ -987,6 +987,24 @@ function ImportPage() {
                   <p className="mt-1 font-black text-slate-950">Liberada (Modo Piloto)</p>
                 </div>
               </div>
+              
+              {parseReport && (
+                <div className="mb-4 space-y-2 rounded-md border border-slate-100 bg-slate-50 p-3">
+                  <p className="text-[9px] font-black uppercase tracking-wider text-slate-500">
+                    Relatório de Leitura Monta AI
+                  </p>
+                  <div className="grid grid-cols-2 gap-y-1 font-mono text-[9px]">
+                    <span className="text-slate-400">Itens ITEM:</span>
+                    <span className="text-right font-bold text-slate-700">{parseReport.totalItems}</span>
+                    <span className="text-slate-400">Módulos:</span>
+                    <span className="text-right font-bold text-slate-700">{parseReport.recognizedModules}</span>
+                  </div>
+                  <p className="text-[8px] leading-relaxed text-slate-400 italic">
+                    A classificação de MDF, Ferragens e Módulos é confirmada durante a ingestão.
+                  </p>
+                </div>
+              )}
+
               {isProcessing && (
                 <div className="mb-3 flex items-center gap-2 rounded-md bg-slate-100 p-3 text-[10px] font-black uppercase tracking-wider text-slate-700">
                   <Loader2 className="h-4 w-4 animate-spin" /> Processando XML Promob
