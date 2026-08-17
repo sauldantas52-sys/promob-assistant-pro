@@ -826,7 +826,7 @@ function ImportPage() {
                       className={cn(
                         "flex h-5 w-5 shrink-0 items-center justify-center rounded-sm",
                         classification.others.length > 0
-                          ? "bg-slate-700 text-lime-300"
+                          ? "bg-lime-300 text-slate-950"
                           : "bg-slate-900 text-slate-600",
                       )}
                     >
@@ -840,9 +840,12 @@ function ImportPage() {
                       <p className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">
                         Outros Arquivos / Inventory
                       </p>
-                      <p className="truncate text-[10px] text-slate-600">
+                      <p className={cn(
+                        "truncate text-[10px]",
+                        classification.others.length > 0 ? "text-lime-300" : "text-slate-600"
+                      )}>
                         {classification.others.length > 0 
-                          ? `${classification.others.length} arquivos adicionais detectados` 
+                          ? `${classification.others.length} arquivos detectados (${classification.others.map(f => f.name.split('.').pop()?.toUpperCase()).filter((v, i, a) => a.indexOf(v) === i).join(', ')})` 
                           : "Nenhum outro arquivo localizado"}
                       </p>
                     </div>
