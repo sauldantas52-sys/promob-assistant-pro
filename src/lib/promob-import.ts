@@ -133,8 +133,12 @@ function parsePartNode(node: Element, moduleSequence: number, pieceSequence: num
   const planoB = desmontarReferencia(reference);
 
   // Regra 3: Campos e Origens Corretas
-  const material = refOf(node, 'MATERIAL') || planoB.material;
-  const thickness_mm = parseFloat(refOf(node, 'THICKNESS') || '0') || planoB.thickness || null;
+  const rawMaterial = refOf(node, 'MATERIAL');
+  const material = rawMaterial || planoB.material;
+  
+  const rawThickness = refOf(node, 'THICKNESS');
+  const thickness_mm = rawThickness ? parseFloat(rawThickness.replace(',', '.')) : planoB.thickness;
+  
   const color = refOf(node, 'MODEL') || refOf(node, 'MODEL_DESCRIPTION') || planoB.color;
   const supplier = refOf(node, 'SUPPLIER') || refOf(node, 'SUPPLIER_EXT');
   
