@@ -260,8 +260,8 @@ function ImportPage() {
           summary: { source: "pasta_cliente", entities: dxfGeometry.length },
         },
         {
-          file: classification.xmk,
-          type: "xmk_identidade_opcional",
+          file: classification.promob,
+          type: "promob_projeto",
           summary: { source: "pasta_cliente", format_status: "unconfirmed" },
         },
       ];
