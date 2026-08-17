@@ -15,11 +15,13 @@ import { generateAuditReport } from "@/lib/audit-report.functions";
 import { toast } from "sonner";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export function AuditIntegrationTab({ projectId }: { projectId: string }) {
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const { data: distribution, isLoading: isLoadingDist } = useQuery({
+  const { data: distribution } = useQuery({
     queryKey: ["project_distribution", projectId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -44,17 +46,17 @@ export function AuditIntegrationTab({ projectId }: { projectId: string }) {
   });
 
   const getStatus = (area: string) => {
-    const item = distribution?.find(d => d.area === area);
+    const item = distribution?.find((d: any) => d.area === area);
     return item?.status || "não verificado";
   };
 
   const getItemCount = (area: string) => {
-    const item = distribution?.find(d => d.area === area);
+    const item = distribution?.find((d: any) => d.area === area);
     return item?.item_count || 0;
   };
 
   const hasFile = (type: string) => {
-    return files?.some(f => f.file_type === type) || false;
+    return files?.some((f: any) => f.file_type === type) || false;
   };
 
   const INTEGRATION_MAP = [
@@ -127,7 +129,6 @@ export function AuditIntegrationTab({ projectId }: { projectId: string }) {
     }
   ];
 
-
   const handleGenerateReport = async () => {
     setIsGenerating(true);
     try {
@@ -157,7 +158,7 @@ export function AuditIntegrationTab({ projectId }: { projectId: string }) {
               Evidências e limites de integração
             </h3>
             <p className="mt-1 text-xs text-slate-400">
-              Inventário visual, não monitoramento de disponibilidade.
+              Inventário visual real do banco de dados.
             </p>
           </div>
         </div>
@@ -175,15 +176,14 @@ export function AuditIntegrationTab({ projectId }: { projectId: string }) {
         </Button>
       </div>
 
-      <Alert className="rounded-lg border-amber-200 bg-amber-50 text-amber-950">
-        <Info className="h-4 w-4" />
+      <Alert className="rounded-lg border-emerald-200 bg-emerald-50 text-emerald-950">
+        <ShieldCheck className="h-4 w-4 text-emerald-600" />
         <AlertTitle className="text-xs font-black uppercase tracking-wide">
-          Sem telemetria de integração
+          Auditoria Industrial 4.0 Ativa
         </AlertTitle>
         <AlertDescription className="text-xs">
-          Os estados abaixo não afirmam conexão externa. Serviços sem verificação permanecem
-          neutros; CutPlanning/Cut Pro requer saída oficial anexada e CNC continua sujeito aos gates
-          industriais.
+          Os estados abaixo refletem a persistência real no banco de dados. 
+          A liberação para CNC (usinagem) permanece bloqueada por padrão até a validação física.
         </AlertDescription>
       </Alert>
 
@@ -216,9 +216,9 @@ export function AuditIntegrationTab({ projectId }: { projectId: string }) {
                         variant="outline"
                         className={cn(
                           "text-[9px] uppercase font-black rounded-full px-3",
-                          item.status.includes("local")
-                            ? "bg-blue-50 text-blue-700 border-blue-200"
-                            : item.status === "simulado"
+                          item.status === "alimentado" || item.status === "liberado"
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            : item.status === "conferencia_pendente"
                               ? "bg-blue-50 text-blue-700 border-blue-200"
                               : "bg-slate-50 text-slate-400",
                         )}
@@ -262,8 +262,8 @@ export function AuditIntegrationTab({ projectId }: { projectId: string }) {
                           "text-[9px] uppercase font-black rounded-full px-3",
                           res.status === "gate fechado"
                             ? "bg-red-600 text-white"
-                            : res.status === "autoridade XML"
-                              ? "bg-blue-600 text-white"
+                            : res.status === "auditado" || res.status === "validado" || res.status === "confirmado"
+                              ? "bg-emerald-600 text-white"
                               : "bg-slate-200 text-slate-700",
                         )}
                       >
