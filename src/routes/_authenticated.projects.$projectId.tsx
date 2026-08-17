@@ -155,6 +155,18 @@ function ProjectDetail() {
     },
   });
 
+  const distribution = useQuery({
+    queryKey: ["project-distribution", projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("project_distribution")
+        .select("*")
+        .eq("project_id", projectId);
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const modules = useQuery({
     queryKey: ["modules", projectId],
     queryFn: async () => {
