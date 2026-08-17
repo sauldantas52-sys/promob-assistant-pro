@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -7,14 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { 
   Eye, 
-  CheckCircle2, 
-  AlertCircle, 
   Box, 
-  FileText, 
   Layers, 
   MessageSquare,
   ShieldCheck,
-  ChevronRight
+  Circle,
+  AlertCircle,
+  History
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -48,7 +46,7 @@ export function VisualFeedingMode({ projectId, projectName }: VisualFeedingModeP
         .select("*")
         .eq("project_id", projectId);
       if (error) throw error;
-      return data;
+      return data as any[];
     },
   });
 
@@ -222,7 +220,7 @@ export function VisualFeedingMode({ projectId, projectName }: VisualFeedingModeP
               <div className="flex items-center justify-between p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
                 <span className="text-[10px] font-bold uppercase text-emerald-400">Status Geral</span>
                 <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
-                  {identifications?.filter((i: any) => i.confidence_level === 'confirmado').length === modules?.length 
+                  {identifications?.filter((i: any) => i.confidence_level === 'confirmado').length === (modules?.length || 0) 
                     ? "100% Auditado" 
                     : "Em Conferência"}
                 </span>
@@ -237,7 +235,7 @@ export function VisualFeedingMode({ projectId, projectName }: VisualFeedingModeP
             </div>
           </Card>
 
-          <Card className="rounded-[2.5rem] border-slate-100 p-6">
+          <Card className="rounded-[2.5rem] border-slate-100 p-6 shadow-none border">
             <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-6 flex items-center gap-2">
               <History className="h-4 w-4" /> Últimas Atividades
             </h3>
