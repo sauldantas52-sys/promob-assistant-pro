@@ -1308,6 +1308,60 @@ export type Database = {
           },
         ]
       }
+      project_distribution: {
+        Row: {
+          area: string
+          created_at: string | null
+          id: string
+          item_count: number | null
+          metadata: Json | null
+          project_id: string | null
+          source_file_id: string | null
+          source_type: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          area: string
+          created_at?: string | null
+          id?: string
+          item_count?: number | null
+          metadata?: Json | null
+          project_id?: string | null
+          source_file_id?: string | null
+          source_type: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          area?: string
+          created_at?: string | null
+          id?: string
+          item_count?: number | null
+          metadata?: Json | null
+          project_id?: string | null
+          source_file_id?: string | null
+          source_type?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_distribution_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_distribution_source_file_id_fkey"
+            columns: ["source_file_id"]
+            isOneToOne: false
+            referencedRelation: "project_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_environments: {
         Row: {
           created_at: string
@@ -1824,8 +1878,10 @@ export type Database = {
           company_id: string
           created_at: string | null
           cutting_status: string | null
+          distribution_completed_at: string | null
           environment: string | null
           id: string
+          ingestion_completed_at: string | null
           is_cutting_edge_released: boolean | null
           is_machining_assembly_blocked: boolean | null
           is_validated: boolean
@@ -1834,6 +1890,9 @@ export type Database = {
           name: string
           notes: string | null
           official_cut_plan_validated: boolean | null
+          operational_status:
+            | Database["public"]["Enums"]["project_operational_status"]
+            | null
           status: string | null
           updated_at: string
           validated_at: string | null
@@ -1848,8 +1907,10 @@ export type Database = {
           company_id: string
           created_at?: string | null
           cutting_status?: string | null
+          distribution_completed_at?: string | null
           environment?: string | null
           id?: string
+          ingestion_completed_at?: string | null
           is_cutting_edge_released?: boolean | null
           is_machining_assembly_blocked?: boolean | null
           is_validated?: boolean
@@ -1858,6 +1919,9 @@ export type Database = {
           name: string
           notes?: string | null
           official_cut_plan_validated?: boolean | null
+          operational_status?:
+            | Database["public"]["Enums"]["project_operational_status"]
+            | null
           status?: string | null
           updated_at?: string
           validated_at?: string | null
@@ -1872,8 +1936,10 @@ export type Database = {
           company_id?: string
           created_at?: string | null
           cutting_status?: string | null
+          distribution_completed_at?: string | null
           environment?: string | null
           id?: string
+          ingestion_completed_at?: string | null
           is_cutting_edge_released?: boolean | null
           is_machining_assembly_blocked?: boolean | null
           is_validated?: boolean
@@ -1882,6 +1948,9 @@ export type Database = {
           name?: string
           notes?: string | null
           official_cut_plan_validated?: boolean | null
+          operational_status?:
+            | Database["public"]["Enums"]["project_operational_status"]
+            | null
           status?: string | null
           updated_at?: string
           validated_at?: string | null
@@ -2598,6 +2667,15 @@ export type Database = {
         Returns: string
       }
       import_legacy_store_credits: { Args: { _payload: Json }; Returns: Json }
+      ingest_and_distribute_project: {
+        Args: {
+          _company_id: string
+          _loose_parts: Json
+          _modules: Json
+          _project_id: string
+        }
+        Returns: undefined
+      }
       is_admin: { Args: never; Returns: boolean }
       prepare_store_credit_purchase: {
         Args: {
@@ -2635,6 +2713,15 @@ export type Database = {
         | "erro_montagem"
         | "outros"
       maintenance_urgency: "baixa" | "media" | "alta" | "critica"
+      project_operational_status:
+        | "recebido"
+        | "processando"
+        | "alimentado"
+        | "conferencia_pendente"
+        | "divergencia_encontrada"
+        | "pronto_para_producao"
+        | "em_producao"
+        | "finalizado"
       shipping_status:
         | "aguardando"
         | "conferido"
@@ -2792,6 +2879,16 @@ export const Constants = {
         "outros",
       ],
       maintenance_urgency: ["baixa", "media", "alta", "critica"],
+      project_operational_status: [
+        "recebido",
+        "processando",
+        "alimentado",
+        "conferencia_pendente",
+        "divergencia_encontrada",
+        "pronto_para_producao",
+        "em_producao",
+        "finalizado",
+      ],
       shipping_status: [
         "aguardando",
         "conferido",
