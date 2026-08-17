@@ -598,6 +598,8 @@ function ImportPage() {
                         if (input) {
                           input.setAttribute("webkitdirectory", "");
                           input.setAttribute("directory", "");
+                          // Remove any filter that might restrict extensions
+                          input.removeAttribute("accept");
                         }
                       }}
                       onChange={handleFolderSelection}
