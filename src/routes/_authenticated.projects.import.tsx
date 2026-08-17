@@ -304,13 +304,14 @@ function ImportPage() {
                   : "Destino de produção: fábrica própria",
             },
             _files: storedFiles,
-            _modules: [], // Não alimentar módulos aqui, usar nova RPC de distribuição
+            _modules: [], 
             _loose_parts: [],
           },
         );
         if (importError) throw importError;
 
-        // 2. Distribuição Automática 4.0
+        // 2. Distribuição Automática 4.0 (MVP Requisitado)
+        // Mapeamento rigoroso conforme requisitos do usuário
         const modulesPayload = result.modules.map((module: PromobModule) => ({
           name: module.name,
           environment: module.environment ?? null,
@@ -325,10 +326,14 @@ function ImportPage() {
             thickness_mm: part.thickness_mm ?? null,
             width_mm: part.width_mm ?? null,
             length_mm: part.length_mm ?? null,
-            quantity: part.quantity,
+            quantity: part.quantity, // QUANTITY preservado
             unit: part.unit ?? "un",
             edge_banding: part.edge_banding ?? null,
-            metadata: part.metadata ?? {},
+            metadata: {
+              ...part.metadata,
+              repetition: part.metadata?.repetition ?? 1, // REPETITION preservado separadamente
+              source: "XML"
+            },
           })),
         }));
         
@@ -342,7 +347,11 @@ function ImportPage() {
           quantity: part.quantity,
           unit: part.unit ?? "un",
           edge_banding: part.edge_banding ?? null,
-          metadata: part.metadata ?? {},
+          metadata: {
+            ...part.metadata,
+            repetition: part.metadata?.repetition ?? 1,
+            source: "XML"
+          },
         }));
 
         const { error: distributionError } = await supabase.rpc(

@@ -119,7 +119,7 @@ export async function fetchProjectClients(companyId: string): Promise<ProjectCli
 }
 
 export async function fetchProjectsDashboard(companyId: string): Promise<ProjectSummary[]> {
-  const { data: projects, error } = await projectsDb
+  const { data: projects, error } = await supabase
     .from("projects")
     .select("id, name, client_id, client_name, environment, status, cutting_status, created_at")
     .eq("company_id", companyId)
@@ -133,19 +133,19 @@ export async function fetchProjectsDashboard(companyId: string): Promise<Project
     .filter((id): id is string => id !== null);
   const [clientsResult, environmentsResult, appointmentsResult, stepsResult] = await Promise.all([
     clientIds.length
-      ? projectsDb.from("clients").select("id, name").in("id", clientIds)
+      ? supabase.from("clients").select("id, name").in("id", clientIds)
       : Promise.resolve({ data: [], error: null }),
-    projectsDb
+    supabase
       .from("project_environments")
       .select("project_id, name, sequence")
       .in("project_id", projectIds)
       .order("sequence"),
-    projectsDb
+    supabase
       .from("project_appointments")
       .select("project_id, kind, scheduled_at, status")
       .in("project_id", projectIds)
       .order("scheduled_at"),
-    projectsDb.from("production_steps").select("project_id, status").in("project_id", projectIds),
+    supabase.from("production_steps").select("project_id, status").in("project_id", projectIds),
   ]);
 
   const relatedError =
