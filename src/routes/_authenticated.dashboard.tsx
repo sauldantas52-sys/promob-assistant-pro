@@ -123,7 +123,7 @@ function DashboardContent() {
             <CardHeader className="pb-2 border-b border-slate-100">
               <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-amber-500" />
-                Segurança Industrial
+                Segurança Técnica
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
