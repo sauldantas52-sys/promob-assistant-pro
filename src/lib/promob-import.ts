@@ -28,34 +28,34 @@ export type PartMetadata = z.infer<typeof PartMetadataSchema>;
 export interface PromobPart {
   name: string;
   kind: 'peca' | 'item' | 'ferragem' | 'acessorio';
-  material?: string | null;
-  thickness_mm?: number | null;
-  width_mm?: number | null;
-  length_mm?: number | null;
+  material?: string | null | undefined;
+  thickness_mm?: number | null | undefined;
+  width_mm?: number | null | undefined;
+  length_mm?: number | null | undefined;
   quantity: number;
   unit: string;
-  edge_banding?: string | null;
-  metadata?: PartMetadata;
-  color?: string | null;
-  supplier?: string | null;
-  edge_top?: number;
-  edge_bottom?: number;
-  edge_left?: number;
-  edge_right?: number;
-  id_xml?: string | null;
-  parent_id_xml?: string | null;
-  repetition?: number;
-  quantity_raw?: number | null;
+  edge_banding?: string | null | undefined;
+  metadata?: PartMetadata | undefined;
+  color?: string | null | undefined;
+  supplier?: string | null | undefined;
+  edge_top?: number | undefined;
+  edge_bottom?: number | undefined;
+  edge_left?: number | undefined;
+  edge_right?: number | undefined;
+  id_xml?: string | null | undefined;
+  parent_id_xml?: string | null | undefined;
+  repetition?: number | undefined;
+  quantity_raw?: number | null | undefined;
 }
 
 export interface PromobModule {
   name: string;
-  environment?: string | null;
-  width_mm?: number | null;
-  height_mm?: number | null;
-  depth_mm?: number | null;
+  environment?: string | null | undefined;
+  width_mm?: number | null | undefined;
+  height_mm?: number | null | undefined;
+  depth_mm?: number | null | undefined;
   quantity: number;
-  id_xml?: string | null;
+  id_xml?: string | null | undefined;
   parts: PromobPart[];
   metadata?: any;
 }
