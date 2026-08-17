@@ -55,9 +55,9 @@ function DashboardContent() {
   });
 
   const list = projects.data ?? [];
-  const activeCount = list.filter(p => p.status !== 'expedido' && p.status !== 'assistencia').length;
-  const decisionRequired = list.filter(p => p.machining_blocked === true || p.status === 'novo').length;
-  const validationPending = list.filter(p => p.is_validated === false).length;
+  const activeCount = list.filter(p => p.status !== 'expedido' && p.status !== 'assistencia' && p.status !== 'concluido').length;
+  const decisionRequired = list.filter(p => (p.machining_blocked === true || p.status === 'novo') && p.status !== 'concluido').length;
+  const validationPending = list.filter(p => p.is_validated === false && p.status !== 'concluido').length;
   
   const countByStatus = (status: string) => list.filter((p) => p.status === status).length;
 
