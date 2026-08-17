@@ -1317,7 +1317,7 @@ export type Database = {
           metadata: Json | null
           project_id: string | null
           source_file_id: string | null
-          source_type: string
+          source_type: string | null
           status: string | null
           updated_at: string | null
         }
@@ -1329,7 +1329,7 @@ export type Database = {
           metadata?: Json | null
           project_id?: string | null
           source_file_id?: string | null
-          source_type: string
+          source_type?: string | null
           status?: string | null
           updated_at?: string | null
         }
@@ -1341,7 +1341,7 @@ export type Database = {
           metadata?: Json | null
           project_id?: string | null
           source_file_id?: string | null
-          source_type?: string
+          source_type?: string | null
           status?: string | null
           updated_at?: string | null
         }
@@ -2718,6 +2718,13 @@ export type Database = {
         | "erro_montagem"
         | "outros"
       maintenance_urgency: "baixa" | "media" | "alta" | "critica"
+      part_kind:
+        | "peca"
+        | "chapa"
+        | "ferragem"
+        | "acessorio"
+        | "servico"
+        | "outro"
       project_operational_status:
         | "recebido"
         | "processando"
@@ -2884,6 +2891,7 @@ export const Constants = {
         "outros",
       ],
       maintenance_urgency: ["baixa", "media", "alta", "critica"],
+      part_kind: ["peca", "chapa", "ferragem", "acessorio", "servico", "outro"],
       project_operational_status: [
         "recebido",
         "processando",
