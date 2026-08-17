@@ -89,13 +89,15 @@ function refOf(item: Element, key: string): string | null {
   if (!referencesNode) return null;
   const refNode = referencesNode.querySelector(`[${key}]`);
   if (refNode) return refNode.getAttribute(key);
-  // Promob sometimes uses children nodes instead of attributes for references
+  // Promob sometimes uses children nodes with tag name as key
   const childNode = Array.from(referencesNode.children).find(c => c.tagName === key);
-  return childNode ? childNode.getAttribute('REFERENCE') || childNode.textContent : null;
+  if (childNode) return childNode.getAttribute('REFERENCE') || childNode.textContent;
+  return null;
 }
 
 function parsePartNode(node: Element, moduleSequence: number, pieceSequence: number): PromobPart {
   const name = getAttr(node, 'DESCRIPTION') || getAttr(node, 'NAME') || 'Peça Sem Nome';
+  // Use "REFERENCE" attribute as fallback (Plano B)
   const reference = getAttr(node, 'REFERENCE') || '';
   
   // Rule 4: Plano B - Desmontar Referência
@@ -115,13 +117,14 @@ function parsePartNode(node: Element, moduleSequence: number, pieceSequence: num
         material = seg.includes('MDF') ? 'MDF' : 'MDP';
         materialIdx = i;
       }
+      // Check if the segment is exactly a valid thickness
       const num = parseInt(segments[i] || '0');
-      if (!isNaN(num) && validThicknesses.includes(num)) {
+      if (segments[i] === num.toString() && validThicknesses.includes(num)) {
         thickness = num;
       }
     }
     
-    if (materialIdx > 0) {
+    if (materialIdx > 0 && !color) {
       color = segments[materialIdx - 1] || null;
     }
 
@@ -131,8 +134,12 @@ function parsePartNode(node: Element, moduleSequence: number, pieceSequence: num
   const planoB = desmontarReferencia(reference);
 
   // Regra 3: Campos e Origens Corretas
-  const material = refOf(node, 'MATERIAL') || planoB.material;
-  const thickness_mm = parseFloat(refOf(node, 'THICKNESS') || '0') || planoB.thickness || null;
+  const rawMaterial = refOf(node, 'MATERIAL');
+  const material = rawMaterial || planoB.material;
+  
+  const rawThickness = refOf(node, 'THICKNESS');
+  const thickness_mm = rawThickness ? parseFloat(rawThickness.replace(',', '.')) : planoB.thickness;
+  
   const color = refOf(node, 'MODEL') || refOf(node, 'MODEL_DESCRIPTION') || planoB.color;
   const supplier = refOf(node, 'SUPPLIER') || refOf(node, 'SUPPLIER_EXT');
   
@@ -187,7 +194,7 @@ function parsePartNode(node: Element, moduleSequence: number, pieceSequence: num
     piece_code: getAttr(node, 'PIECE_CODE'),
   };
 
-  if (!refOf(node, 'MATERIAL') && !refOf(node, 'THICKNESS')) {
+  if ((!rawMaterial || !rawThickness) && (planoB.material || planoB.thickness)) {
     (metadata as any).origem = "referencia_desmontada";
   }
 
