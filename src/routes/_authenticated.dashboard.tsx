@@ -177,6 +177,7 @@ function DashboardContent() {
                     <th className="px-6 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider">Projeto / Cliente</th>
                     <th className="px-6 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider">Etapa</th>
                     <th className="px-6 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider text-right">Segurança</th>
+                    <th className="px-6 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider text-right">Última Ref.</th>
                     <th className="px-6 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider text-right">Ação</th>
                   </tr>
                 </thead>
