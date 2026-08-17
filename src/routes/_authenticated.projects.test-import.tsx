@@ -171,34 +171,45 @@ function TestImportAuditPage() {
             <Table>
               <TableHeader className="bg-slate-50">
                 <TableRow>
-                  <TableHead className="text-[9px] font-black uppercase">UID / Parent</TableHead>
-                  <TableHead className="text-[9px] font-black uppercase">Descrição</TableHead>
-                  <TableHead className="text-[9px] font-black uppercase">Ref / Family / Group</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase">XML ID / Parent</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase">Descrição / Material</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase">Dim (CxLxe)</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase">Cor / Supplier</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase">Bordas (T/B/L/R)</TableHead>
                   <TableHead className="text-[9px] font-black uppercase">Unit / Qty / Rep</TableHead>
-                  <TableHead className="text-[9px] font-black uppercase">Dim (WxHxD)</TableHead>
-                  <TableHead className="text-[9px] font-black uppercase">TxtDim</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase">Origem</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {allParts?.map((part) => (
                   <TableRow key={part.id} className="hover:bg-slate-50 transition-colors">
                     <TableCell className="font-mono text-[10px]">
-                      {(part.metadata as any)?.unique_id || "-"} <br/>
+                      {part.id_xml || "-"} <br/>
                       <span className="text-slate-400">{(part.metadata as any)?.unique_parent_id || "-"}</span>
                     </TableCell>
-                    <TableCell className="text-[11px] font-bold uppercase tracking-tight">{part.name}</TableCell>
-                    <TableCell className="text-[10px]">
-                      {(part.metadata as any)?.reference || "-"} <br/>
-                      <span className="text-[9px] font-bold text-slate-500">{(part.metadata as any)?.family} / {(part.metadata as any)?.group}</span>
-                    </TableCell>
-                    <TableCell className="text-[11px]">
-                      <span className="font-black">{part.unit}</span> | Q: <span className="font-black">{part.quantity}</span> | R: <span className="font-black">{(part.metadata as any)?.repetition}</span>
+                    <TableCell>
+                      <p className="text-[11px] font-black uppercase tracking-tight text-slate-900">{part.name}</p>
+                      <p className="text-[9px] font-bold text-slate-500 uppercase">{part.material || "Item"}</p>
                     </TableCell>
                     <TableCell className="text-[11px] font-mono whitespace-nowrap">
-                      {part.width_mm || 0} x {part.thickness_mm || 0} x {part.length_mm || 0}
+                      <span className="font-black">{part.length_mm || 0}</span> x <span className="font-black">{part.width_mm || 0}</span> x <span className="text-blue-600 font-black">{part.thickness_mm || 0}</span>
                     </TableCell>
-                    <TableCell className="text-[10px] text-slate-500">
-                      {(part.metadata as any)?.text_dimension || "-"}
+                    <TableCell>
+                      <p className="text-[10px] font-bold text-slate-700">{part.color || "-"}</p>
+                      <p className="text-[9px] text-slate-400">{part.supplier || "-"}</p>
+                    </TableCell>
+                    <TableCell className="text-[10px] font-mono">
+                      {part.edge_top}/{part.edge_bottom}/{part.edge_left}/{part.edge_right}
+                    </TableCell>
+                    <TableCell className="text-[11px]">
+                      <span className="font-black">{part.unit}</span> | Q: <span className="font-black">{part.quantity_raw || 0}</span> | R: <span className="font-black">{part.repetition}</span>
+                    </TableCell>
+                    <TableCell className="text-[9px]">
+                      {(part.metadata as any)?.origem === "referencia_desmontada" ? (
+                        <span className="bg-amber-100 text-amber-700 px-1 rounded font-bold">Plano B</span>
+                      ) : (
+                        <span className="text-slate-400">XML</span>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

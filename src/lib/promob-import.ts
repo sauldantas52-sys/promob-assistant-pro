@@ -21,6 +21,9 @@ export const PartMetadataSchema = z.object({
   edge_name_general: z.string().optional().nullable(),
   edge_name_front: z.string().optional().nullable(),
   piece_code: z.string().optional().nullable(),
+  module_sequence: z.number().optional().nullable(),
+  piece_sequence: z.number().optional().nullable(),
+  origem: z.string().optional().nullable(),
 });
 
 export type PartMetadata = z.infer<typeof PartMetadataSchema>;
@@ -76,70 +79,146 @@ function getAttr(node: Element, name: string): string | undefined {
 function getNumericAttr(node: Element, name: string): number | undefined {
   const val = node.getAttribute(name);
   if (!val) return undefined;
-  // Preserva a precisão original do XML
   const cleanVal = val.replace(',', '.');
   const num = parseFloat(cleanVal);
   return isNaN(num) ? undefined : num;
 }
 
-function parsePartNode(node: Element): PromobPart {
+function refOf(item: Element, key: string): string | null {
+  const referencesNode = item.querySelector('REFERENCES');
+  if (!referencesNode) return null;
+  const refNode = referencesNode.querySelector(`[${key}]`);
+  if (refNode) return refNode.getAttribute(key);
+  // Promob sometimes uses children nodes instead of attributes for references
+  const childNode = Array.from(referencesNode.children).find(c => c.tagName === key);
+  return childNode ? childNode.getAttribute('REFERENCE') || childNode.textContent : null;
+}
+
+function parsePartNode(node: Element, moduleSequence: number, pieceSequence: number): PromobPart {
   const name = getAttr(node, 'DESCRIPTION') || getAttr(node, 'NAME') || 'Peça Sem Nome';
-  const family = getAttr(node, 'FAMILY')?.toUpperCase();
+  const reference = getAttr(node, 'REFERENCE') || '';
   
-  // Extração de Bordas
-  const edgeTop = getNumericAttr(node, 'EDGE_TOP') || 0;
-  const edgeBottom = getNumericAttr(node, 'EDGE_BOTTOM') || 0;
-  const edgeLeft = getNumericAttr(node, 'EDGE_LEFT') || 0;
-  const edgeRight = getNumericAttr(node, 'EDGE_RIGHT') || 0;
+  // Rule 4: Plano B - Desmontar Referência
+  const desmontarReferencia = (ref: string) => {
+    if (!ref) return { material: null, thickness: null, color: null };
+    const segments = ref.split('.');
+    const validThicknesses = [3, 4, 6, 9, 12, 15, 18, 20, 25, 30];
+    let material: string | null = null;
+    let thickness: number | null = null;
+    let color: string | null = null;
+    let materialIdx = -1;
+
+    for (let i = 0; i < segments.length; i++) {
+      const seg = segments[i]?.toUpperCase();
+      if (!seg) continue;
+      if (seg.includes('MDF') || seg.includes('MDP')) {
+        material = seg.includes('MDF') ? 'MDF' : 'MDP';
+        materialIdx = i;
+      }
+      const num = parseInt(segments[i] || '0');
+      if (!isNaN(num) && validThicknesses.includes(num)) {
+        thickness = num;
+      }
+    }
+    
+    if (materialIdx > 0) {
+      color = segments[materialIdx - 1] || null;
+    }
+
+    return { material, thickness, color };
+  };
+
+  const planoB = desmontarReferencia(reference);
+
+  // Regra 3: Campos e Origens Corretas
+  const material = refOf(node, 'MATERIAL') || planoB.material;
+  const thickness_mm = parseFloat(refOf(node, 'THICKNESS') || '0') || planoB.thickness || null;
+  const color = refOf(node, 'MODEL') || refOf(node, 'MODEL_DESCRIPTION') || planoB.color;
+  const supplier = refOf(node, 'SUPPLIER') || refOf(node, 'SUPPLIER_EXT');
+  
+  const edgeTop = parseInt(refOf(node, 'FITA_BORDA_1') || '0');
+  const edgeBottom = parseInt(refOf(node, 'FITA_BORDA_2') || '0');
+  const edgeLeft = parseInt(refOf(node, 'FITA_BORDA_3') || '0');
+  const edgeRight = parseInt(refOf(node, 'FITA_BORDA_4') || '0');
+  
+  const edgeNameGeneral = refOf(node, 'MODEL_DESCRIPTION_FITA') || refOf(node, 'MODEL_DESCRIPTION') || 'Fita';
+  const edgeNameFront = refOf(node, 'MODEL_DESCRIPTION_FITA_FRO') || edgeNameGeneral;
+
+  // Regra 5: Dimensões (Ordenadas)
+  const dims = [
+    getNumericAttr(node, 'WIDTH') || 0,
+    getNumericAttr(node, 'HEIGHT') || 0,
+    getNumericAttr(node, 'DEPTH') || 0
+  ].sort((a, b) => b - a);
+
+  const length_mm = dims[0] || null;
+  const width_mm = dims[1] || null;
+  // Espessura vem apenas de THICKNESS ou Plano B, não de HEIGHT (Regra 5)
+
+  // Regra 6: Quantidade
+  const repetition = getNumericAttr(node, 'REPETITION') || 1;
+  const quantityRaw = getNumericAttr(node, 'QUANTITY');
+
+  // Regra 8: Sub-Identificadores
+  const uniqueId = getAttr(node, 'UNIQUEID');
+  const metadatas = node.querySelector('METADATAS');
+  const uniqueIdColl = metadatas?.querySelector('METADATA[ID="UniqueIdCollection"]')?.getAttribute('VALUE');
+  const idXml = uniqueIdColl ? uniqueIdColl.split(';')[0] : (getAttr(node, 'ID') || uniqueId);
 
   const metadata: PartMetadata = {
-    unique_id: getAttr(node, 'UNIQUEID'),
+    unique_id: uniqueId,
     unique_parent_id: getAttr(node, 'UNIQUEPARENTID'),
-    repetition: getNumericAttr(node, 'REPETITION') || 1,
-    quantity_raw: getNumericAttr(node, 'QUANTITY'),
+    repetition,
+    quantity_raw: quantityRaw,
     text_dimension: getAttr(node, 'TEXTDIMENSION'),
     unit: getAttr(node, 'UNIT') || 'un',
-    family: family,
+    family: getAttr(node, 'FAMILY'),
     group: getAttr(node, 'GROUP'),
-    reference: getAttr(node, 'REFERENCE'),
-    id_xml: getAttr(node, 'ID'),
-    color: getAttr(node, 'COLOR') || getAttr(node, 'MODEL'),
-    supplier: getAttr(node, 'SUPPLIER'),
+    reference: reference,
+    id_xml: idXml,
+    color,
+    supplier,
     edge_top: edgeTop,
     edge_bottom: edgeBottom,
     edge_left: edgeLeft,
     edge_right: edgeRight,
-    edge_name_general: getAttr(node, 'EDGE_NAME'),
+    edge_name_general: edgeNameGeneral,
+    edge_name_front: edgeNameFront,
     piece_code: getAttr(node, 'PIECE_CODE'),
   };
 
-  const quantity = getNumericAttr(node, 'QUANTITY') || 1;
-  
-  let kind: 'peca' | 'item' | 'ferragem' | 'acessorio' = 'peca';
-  if (family === 'FERRAGEM') kind = 'ferragem';
-  else if (family === 'ACESSORIO') kind = 'acessorio';
+  if (!refOf(node, 'MATERIAL') && !refOf(node, 'THICKNESS')) {
+    (metadata as any).origem = "referencia_desmontada";
+  }
+
+  // Regra 2: Classificação
+  let kind: 'peca' | 'item' | 'ferragem' | 'acessorio' = 'item';
+  const isMdf = (material?.includes('MDF') || material?.includes('MDP')) && thickness_mm !== null;
+  if (isMdf) kind = 'peca';
+  else if (metadata.family?.toUpperCase() === 'FERRAGEM') kind = 'ferragem';
+  else if (metadata.family?.toUpperCase() === 'ACESSORIO') kind = 'acessorio';
 
   return {
     name,
     kind,
-    material: getAttr(node, 'MATERIAL') || null,
-    thickness_mm: getNumericAttr(node, 'HEIGHT') || getNumericAttr(node, 'THICKNESS') || null,
-    width_mm: getNumericAttr(node, 'WIDTH') || null,
-    length_mm: getNumericAttr(node, 'DEPTH') || null,
-    quantity, 
+    material,
+    thickness_mm,
+    width_mm,
+    length_mm,
+    quantity: repetition, // Repetition é a contagem de peças físicas
     unit: metadata.unit,
-    edge_banding: getAttr(node, 'EDGE_BANDING') || (edgeTop || edgeBottom || edgeLeft || edgeRight ? 'Sim' : null),
+    edge_banding: (edgeTop || edgeBottom || edgeLeft || edgeRight) ? 'Sim' : null,
     metadata,
-    color: metadata.color,
-    supplier: metadata.supplier,
+    color,
+    supplier,
     edge_top: edgeTop,
     edge_bottom: edgeBottom,
     edge_left: edgeLeft,
     edge_right: edgeRight,
-    id_xml: metadata.id_xml,
+    id_xml: idXml,
     parent_id_xml: metadata.unique_parent_id,
-    repetition: metadata.repetition,
-    quantity_raw: metadata.quantity_raw,
+    repetition,
+    quantity_raw: quantityRaw,
   };
 }
 
@@ -153,38 +232,112 @@ export function parsePromobXML(xmlContent: string): PromobProject {
   const modules: PromobModule[] = [];
   const looseParts: PromobPart[] = [];
 
-  const moduleNodes = xmlDoc.querySelectorAll('ITEMS > ITEM[TYPE="COMPONENT"], ENVIRONMENT > ITEM');
-  
-  moduleNodes.forEach(node => {
-    const isModule = node.children.length > 0;
-    
-    if (isModule) {
-      const parts: PromobPart[] = [];
-      const partNodes = node.querySelectorAll('ITEM[TYPE="PART"], ITEM[FAMILY="PECA"], ITEM[FAMILY="FERRAGEM"]');
-      
-      partNodes.forEach(partNode => {
-        parts.push(parsePartNode(partNode));
-      });
+  // Contadores para o Relatório de Leitura (Regra 9)
+  let totalItems = 0;
+  let recognizedModules = 0;
+  let mdfPiecesInModules = 0;
+  let looseMdfPieces = 0;
+  let hardwareItems = 0;
+  let unclassifiedItems = 0;
+  const unclassifiedList: any[] = [];
 
-      modules.push({
-        name: getAttr(node, 'DESCRIPTION') || getAttr(node, 'NAME') || 'Módulo',
-        environment: getAttr(node, 'ENVIRONMENT') || null,
-        width_mm: getNumericAttr(node, 'WIDTH') || null,
-        height_mm: getNumericAttr(node, 'HEIGHT') || null,
-        depth_mm: getNumericAttr(node, 'DEPTH') || null,
-        quantity: getNumericAttr(node, 'QUANTITY') || 1,
-        id_xml: getAttr(node, 'ID') || null,
-        parts,
-        metadata: {
-          unique_id: getAttr(node, 'UNIQUEID'),
-          id_xml: getAttr(node, 'ID'),
-          reference: getAttr(node, 'REFERENCE')
+  const allItems = Array.from(xmlDoc.querySelectorAll('ITEM'));
+  totalItems = allItems.length;
+
+  // Regra 7: Módulos (Subir a árvore)
+  const getParentModule = (node: Element): Element | null => {
+    let parent = node.parentElement;
+    while (parent) {
+      if (parent.tagName === 'ITEM') return parent;
+      parent = parent.parentElement;
+    }
+    return null;
+  };
+
+  // Mapear módulos por ID para evitar duplicatas e organizar peças
+  const moduleMap = new Map<string, PromobModule>();
+  const modulesOrder: string[] = [];
+
+  allItems.forEach(node => {
+    const uniqueId = node.getAttribute('UNIQUEID') || '';
+    const name = node.getAttribute('DESCRIPTION') || node.getAttribute('NAME') || 'Sem Nome';
+    
+    // Tentar classificar como peça
+    const part = parsePartNode(node, 0, 0); // Sequências serão ajustadas depois
+    
+    if (part.kind === 'peca') {
+      const parentNode = getParentModule(node);
+      if (parentNode) {
+        const parentId = parentNode.getAttribute('UNIQUEID') || parentNode.getAttribute('ID') || 'unknown';
+        if (!moduleMap.has(parentId)) {
+          recognizedModules++;
+          const newModule: PromobModule = {
+            name: parentNode.getAttribute('DESCRIPTION') || parentNode.getAttribute('NAME') || 'Módulo',
+            environment: parentNode.getAttribute('ENVIRONMENT') || null,
+            width_mm: getNumericAttr(parentNode, 'WIDTH') || null,
+            height_mm: getNumericAttr(parentNode, 'HEIGHT') || null,
+            depth_mm: getNumericAttr(parentNode, 'DEPTH') || null,
+            quantity: getNumericAttr(parentNode, 'QUANTITY') || 1,
+            id_xml: parentNode.getAttribute('ID') || null,
+            parts: [],
+            metadata: {
+              unique_id: parentId,
+              reference: parentNode.getAttribute('REFERENCE')
+            }
+          };
+          moduleMap.set(parentId, newModule);
+          modulesOrder.push(parentId);
         }
-      });
+        moduleMap.get(parentId)!.parts.push(part);
+        mdfPiecesInModules++;
+      } else {
+        looseParts.push(part);
+        looseMdfPieces++;
+      }
+    } else if (part.kind === 'ferragem' || part.kind === 'acessorio') {
+      hardwareItems++;
     } else {
-      looseParts.push(parsePartNode(node));
+      unclassifiedItems++;
+      if (unclassifiedList.length < 10) {
+        unclassifiedList.push({ name, uniqueId, reason: 'Não classificado como MDF, Ferragem ou Acessório' });
+      }
     }
   });
+
+  // Consolidar módulos e ajustar sequências
+  modulesOrder.forEach((id, idx) => {
+    const mod = moduleMap.get(id)!;
+    mod.parts.forEach((p, pIdx) => {
+      if (p.metadata) {
+        p.metadata.module_sequence = idx + 1;
+        p.metadata.piece_sequence = pIdx + 1;
+      }
+    });
+    modules.push(mod);
+  });
+
+  // Ajustar sequências para peças avulsas
+  looseParts.forEach((p, pIdx) => {
+    if (p.metadata) {
+      p.metadata.module_sequence = null; // Avulso
+      p.metadata.piece_sequence = pIdx + 1;
+    }
+  });
+
+  // Regra 9: Relatório de Leitura
+  console.log(`
+    === RELATÓRIO DE LEITURA MONTA AI ===
+    Itens ITEM no arquivo:     ${totalItems}
+    Módulos reconhecidos:      ${recognizedModules}
+    Peças de MDF em módulos:   ${mdfPiecesInModules}
+    Peças de MDF avulsas:      ${looseMdfPieces}
+    Ferragens e acessórios:    ${hardwareItems}
+    Itens NÃO classificados:   ${unclassifiedItems}
+  `);
+
+  if (unclassifiedList.length > 0) {
+    console.warn('Top 10 Itens não classificados:', unclassifiedList);
+  }
 
   return {
     name: projectName,

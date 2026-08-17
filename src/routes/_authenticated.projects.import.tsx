@@ -164,6 +164,16 @@ function ImportPage() {
     !!files.xml;
 
 
+  const [parseReport, setParseReport] = useState<{
+    totalItems: number;
+    recognizedModules: number;
+    mdfPiecesInModules: number;
+    looseMdfPieces: number;
+    hardwareItems: number;
+    unclassifiedItems: number;
+    unclassifiedList: any[];
+  } | null>(null);
+
   function handleFolderSelection(event: ChangeEvent<HTMLInputElement>) {
     const selectedFiles = Array.from(event.target.files ?? []);
     const rootNames = new Set(
@@ -188,6 +198,32 @@ function ImportPage() {
       name: rootName,
       client: nextIdentity.client,
     }));
+    
+    // Auto-parse report for Rule 9
+    if (nextClassification.xml) {
+      nextClassification.xml.text().then(xmlContent => {
+        try {
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(xmlContent, 'text/xml');
+          const allItems = xmlDoc.querySelectorAll('ITEM');
+          const totalItems = allItems.length;
+          
+          // Re-implement simplified count logic for visual report only
+          // The real parse happens in the mutation
+          setParseReport({
+            totalItems,
+            recognizedModules: xmlDoc.querySelectorAll('ITEM[TYPE="COMPONENT"]').length || 0,
+            mdfPiecesInModules: 0,
+            looseMdfPieces: 0,
+            hardwareItems: 0,
+            unclassifiedItems: 0,
+            unclassifiedList: []
+          });
+        } catch (e) {
+          console.error("Erro na pré-leitura do XML:", e);
+        }
+      });
+    }
   }
 
   const createProjectMutation = useMutation({
@@ -338,8 +374,12 @@ function ImportPage() {
             edge_bottom: part.edge_bottom ?? 0,
             edge_left: part.edge_left ?? 0,
             edge_right: part.edge_right ?? 0,
+            edge_name_general: (part.metadata as any)?.edge_name_general ?? null,
+            edge_name_front: (part.metadata as any)?.edge_name_front ?? null,
             repetition: part.repetition ?? 1,
             quantity_raw: part.quantity_raw ?? null,
+            module_sequence: (part.metadata as any)?.module_sequence ?? null,
+            piece_sequence: (part.metadata as any)?.piece_sequence ?? null,
             metadata: {
               ...part.metadata,
               source: "XML"
@@ -367,8 +407,12 @@ function ImportPage() {
           edge_bottom: part.edge_bottom ?? 0,
           edge_left: part.edge_left ?? 0,
           edge_right: part.edge_right ?? 0,
+          edge_name_general: (part.metadata as any)?.edge_name_general ?? null,
+          edge_name_front: (part.metadata as any)?.edge_name_front ?? null,
           repetition: part.repetition ?? 1,
           quantity_raw: part.quantity_raw ?? null,
+          module_sequence: (part.metadata as any)?.module_sequence ?? null,
+          piece_sequence: (part.metadata as any)?.piece_sequence ?? null,
           metadata: {
             ...part.metadata,
             source: "XML"
@@ -943,6 +987,24 @@ function ImportPage() {
                   <p className="mt-1 font-black text-slate-950">Liberada (Modo Piloto)</p>
                 </div>
               </div>
+              
+              {parseReport && (
+                <div className="mb-4 space-y-2 rounded-md border border-slate-100 bg-slate-50 p-3">
+                  <p className="text-[9px] font-black uppercase tracking-wider text-slate-500">
+                    Relatório de Leitura Monta AI
+                  </p>
+                  <div className="grid grid-cols-2 gap-y-1 font-mono text-[9px]">
+                    <span className="text-slate-400">Itens ITEM:</span>
+                    <span className="text-right font-bold text-slate-700">{parseReport.totalItems}</span>
+                    <span className="text-slate-400">Módulos:</span>
+                    <span className="text-right font-bold text-slate-700">{parseReport.recognizedModules}</span>
+                  </div>
+                  <p className="text-[8px] leading-relaxed text-slate-400 italic">
+                    A classificação de MDF, Ferragens e Módulos é confirmada durante a ingestão.
+                  </p>
+                </div>
+              )}
+
               {isProcessing && (
                 <div className="mb-3 flex items-center gap-2 rounded-md bg-slate-100 p-3 text-[10px] font-black uppercase tracking-wider text-slate-700">
                   <Loader2 className="h-4 w-4 animate-spin" /> Processando XML Promob
