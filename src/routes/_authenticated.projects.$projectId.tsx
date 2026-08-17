@@ -648,10 +648,17 @@ function ProjectDetail() {
           </TabsList>
         </div>
 
+        <TabsContent value="visual-intake" className="mt-6">
+          <VisualFeedingMode 
+            projectId={projectId} 
+            projectName={project.data?.name}
+          />
+        </TabsContent>
+
         <TabsContent value="technical3d" className="mt-6">
           <Technical3DView 
             geometries={dxfContent.data ? parseDXF(dxfContent.data) : []} 
-            projectName={project.data?.name} 
+            projectName={project.data?.name}
           />
         </TabsContent>
 
