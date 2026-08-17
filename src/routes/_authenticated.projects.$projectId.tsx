@@ -240,7 +240,8 @@ function ProjectDetail() {
 
   const allParts = parts.data ?? [];
   const panels = allParts.filter((p) => p.kind === "peca" || p.kind === "chapa");
-  const hardware = allParts.filter((p) => p.kind === "ferragem" || p.kind === "acessorio");
+  const hardware = allParts.filter((p) => p.kind === "ferragem");
+  const accessories = allParts.filter((p) => p.kind === "acessorio");
   const totalArea =
     panels.reduce(
       (sum, p) =>
@@ -602,10 +603,10 @@ function ProjectDetail() {
           color="text-emerald-600"
         />
         <ProjectMetric
-          icon={AlertTriangle}
-          label="Sem Módulo"
-          value={String(allParts.filter((p) => !p.module_id).length)}
-          color="text-orange-600"
+          icon={Building2}
+          label="Acessórios"
+          value={String(accessories.length)}
+          color="text-amber-600"
         />
         <ProjectMetric
           icon={ShieldCheck}

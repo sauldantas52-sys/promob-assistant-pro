@@ -370,6 +370,10 @@ function ProjectCard({ project }: { project: ProjectSummary }) {
             <div className="mt-5 grid grid-cols-[1fr_auto] items-end gap-4 border-t border-slate-100 pt-4">
               <div>
                 <div className="flex justify-between gap-3 text-[9px] font-black uppercase tracking-wider text-slate-400">
+                  <span>Módulos / Peças</span>
+                  <span>{project.modulesCount} / {project.partsCount}</span>
+                </div>
+                <div className="flex justify-between gap-3 mt-2 text-[9px] font-black uppercase tracking-wider text-slate-400">
                   <span>Produção</span>
                   <span>{project.totalSteps ? `${progress}%` : "Sem etapas"}</span>
                 </div>

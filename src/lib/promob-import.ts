@@ -17,7 +17,7 @@ export type PartMetadata = z.infer<typeof PartMetadataSchema>;
 
 export interface PromobPart {
   name: string;
-  kind: 'peca' | 'item' | 'ferragem';
+  kind: 'peca' | 'item' | 'ferragem' | 'acessorio';
   material?: string | null;
   thickness_mm?: number | null;
   width_mm?: number | null;
@@ -61,6 +61,7 @@ function getNumericAttr(node: Element, name: string): number | undefined {
 
 function parsePartNode(node: Element): PromobPart {
   const name = getAttr(node, 'DESCRIPTION') || getAttr(node, 'NAME') || 'Peça Sem Nome';
+  const family = getAttr(node, 'FAMILY')?.toUpperCase();
   
   const metadata: PartMetadata = {
     unique_id: getAttr(node, 'UNIQUEID'),
@@ -68,23 +69,26 @@ function parsePartNode(node: Element): PromobPart {
     repetition: getNumericAttr(node, 'REPETITION') || 1,
     text_dimension: getAttr(node, 'TEXTDIMENSION'),
     unit: getAttr(node, 'UNIT') || 'un',
-    family: getAttr(node, 'FAMILY'),
+    family: family,
     group: getAttr(node, 'GROUP'),
     reference: getAttr(node, 'REFERENCE'),
     id_xml: getAttr(node, 'ID'),
   };
 
   const quantity = getNumericAttr(node, 'QUANTITY') || 1;
-  const totalQuantity = quantity * metadata.repetition;
+  
+  let kind: 'peca' | 'item' | 'ferragem' | 'acessorio' = 'peca';
+  if (family === 'FERRAGEM') kind = 'ferragem';
+  else if (family === 'ACESSORIO') kind = 'acessorio';
 
   return {
     name,
-    kind: (getAttr(node, 'FAMILY') === 'FERRAGEM' ? 'ferragem' : 'peca') as any,
+    kind,
     material: getAttr(node, 'MATERIAL') || getAttr(node, 'COLOR') || null,
     thickness_mm: getNumericAttr(node, 'HEIGHT') || getNumericAttr(node, 'THICKNESS') || null,
     width_mm: getNumericAttr(node, 'WIDTH') || null,
     length_mm: getNumericAttr(node, 'DEPTH') || getNumericAttr(node, 'LENGTH') || null,
-    quantity: totalQuantity,
+    quantity, // Preservamos QUANTITY separadamente de REPETITION no processamento final
     unit: metadata.unit,
     edge_banding: getAttr(node, 'EDGE_BANDING') || null,
     metadata
