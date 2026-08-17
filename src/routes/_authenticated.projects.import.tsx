@@ -154,7 +154,7 @@ function ImportPage() {
     { label: "PreviewCorte PDF", file: classification.previewCorte, required: true },
     { label: "DXF", file: classification.dxf, required: true },
     { label: "Imagem", file: classification.image, required: false },
-    { label: "Arquivo .PROMOB", file: classification.xmk, required: true },
+    { label: "Arquivo .PROMOB", file: classification.promob, required: true },
   ];
   const hasRequiredFiles = requiredFiles
     .filter((item) => item.required)
