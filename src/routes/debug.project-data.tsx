@@ -13,6 +13,19 @@ export const Route = createFileRoute("/debug/project-data")({
 function DebugProjectData() {
   const { user, companyId, role } = useAuth();
 
+  const recentParts = useQuery({
+    queryKey: ["debug-recent-parts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("parts")
+        .select("id, id_xml, name, thickness_mm, color, supplier, edge_top, edge_right, repetition, quantity_raw, metadata")
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const allProjects = useQuery({
     queryKey: ["debug-all-projects"],
     queryFn: async () => {
@@ -81,6 +94,42 @@ function DebugProjectData() {
                   <TableCell><Badge>{p.status}</Badge></TableCell>
                   <TableCell>{String(p.is_test)}</TableCell>
                   <TableCell>{p.created_at}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle>Últimas 20 Peças (Fidelidade Industrial)</CardTitle></CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID XML</TableHead>
+                <TableHead>Nome</TableHead>
+                <TableHead>ESP(mm)</TableHead>
+                <TableHead>Cor</TableHead>
+                <TableHead>Forn.</TableHead>
+                <TableHead>Bordas (T/R)</TableHead>
+                <TableHead>Rep.</TableHead>
+                <TableHead>Qtd.Raw</TableHead>
+                <TableHead>Metadata</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {recentParts.data?.map(part => (
+                <TableRow key={part.id}>
+                  <TableCell className="font-bold">{part.id_xml}</TableCell>
+                  <TableCell>{part.name}</TableCell>
+                  <TableCell>{part.thickness_mm}</TableCell>
+                  <TableCell>{part.color}</TableCell>
+                  <TableCell>{part.supplier}</TableCell>
+                  <TableCell>{part.edge_top} / {part.edge_right}</TableCell>
+                  <TableCell>{part.repetition}</TableCell>
+                  <TableCell>{part.quantity_raw}</TableCell>
+                  <TableCell className="max-w-[200px] truncate">{JSON.stringify(part.metadata)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
