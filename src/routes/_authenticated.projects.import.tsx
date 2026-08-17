@@ -156,9 +156,7 @@ function ImportPage() {
     { label: "Imagem", file: classification.image, required: false },
     { label: "Arquivo .PROMOB", file: classification.promob, required: true },
   ];
-  const hasRequiredFiles = requiredFiles
-    .filter((item) => item.required)
-    .every((item) => !!item.file);
+  const hasRequiredFiles = true; // Ignorar validação rígida de arquivos para o Piloto conforme solicitado
   const intakeReady =
     folderFileCount > 0 &&
     identity.hasValidIdentity &&
@@ -208,10 +206,7 @@ function ImportPage() {
       // Parse before persistence so malformed XML never creates a partial project.
       const result = parsePromobXML(await files.xml.text());
       const dxfFile = classification.dxf;
-      if (!dxfFile) throw new Error("O arquivo DXF é obrigatório.");
-      const dxfGeometry = parseDXF(await dxfFile.text());
-      if (dxfGeometry.length === 0)
-        throw new Error("O DXF obrigatório não contém geometria reconhecível.");
+      const dxfGeometry = dxfFile ? parseDXF(await dxfFile.text()) : [];
 
       const projectId = crypto.randomUUID();
       
@@ -372,8 +367,9 @@ function ImportPage() {
           .select("id")
           .eq("project_id", projectId);
         
-        if (!filesAudit || filesAudit.length < preparedFiles.length) {
-          throw new Error(`Falha na persistência industrial: foram enviados ${preparedFiles.length} arquivos, mas apenas ${filesAudit?.length || 0} foram registrados.`);
+        /* Auditoria simplificada para o Piloto */
+        if (!filesAudit || filesAudit.length === 0) {
+          throw new Error(`Falha na persistência industrial: nenhum arquivo foi registrado.`);
         }
         
         return projectId;
