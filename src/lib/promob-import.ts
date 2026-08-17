@@ -174,7 +174,12 @@ export function parsePromobXML(xmlContent: string): PromobProject {
         depth_mm: getNumericAttr(node, 'DEPTH') || null,
         quantity: getNumericAttr(node, 'QUANTITY') || 1,
         id_xml: getAttr(node, 'ID') || null,
-        parts
+        parts,
+        metadata: {
+          unique_id: getAttr(node, 'UNIQUEID'),
+          id_xml: getAttr(node, 'ID'),
+          reference: getAttr(node, 'REFERENCE')
+        }
       });
     } else {
       looseParts.push(parsePartNode(node));
