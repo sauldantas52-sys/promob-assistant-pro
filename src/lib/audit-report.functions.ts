@@ -91,6 +91,16 @@ export const generateAuditReport = createServerFn({ method: "POST" })
               anexo: c.evidence_url
             }))
           },
+          {
+            title: "Auditoria Visual e Geometria",
+            status: visualIdentifications?.length ? "Auditado" : "Pendente",
+            items: (visualIdentifications as any[])?.map(v => ({
+              modulo: v.modules?.name || 'Módulo não identificado',
+              confianca: v.confidence_level,
+              obs: v.observation,
+              data: v.updated_at
+            }))
+          },
           { 
             title: "Histórico de Auditoria e Logs", 
             logsCount: logs?.length || 0,
