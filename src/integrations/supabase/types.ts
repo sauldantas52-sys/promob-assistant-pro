@@ -3004,6 +3004,16 @@ export type Database = {
         Returns: undefined
       }
       is_admin: { Args: never; Returns: boolean }
+      persist_industrial_project_bypass: {
+        Args: {
+          _client_name: string
+          _company_id: string
+          _name: string
+          _project_id: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
       prepare_store_credit_purchase: {
         Args: {
           _account_id: string
