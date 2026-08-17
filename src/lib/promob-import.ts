@@ -117,13 +117,14 @@ function parsePartNode(node: Element, moduleSequence: number, pieceSequence: num
         material = seg.includes('MDF') ? 'MDF' : 'MDP';
         materialIdx = i;
       }
+      // Check if the segment is exactly a valid thickness
       const num = parseInt(segments[i] || '0');
-      if (!isNaN(num) && validThicknesses.includes(num)) {
+      if (segments[i] === num.toString() && validThicknesses.includes(num)) {
         thickness = num;
       }
     }
     
-    if (materialIdx > 0) {
+    if (materialIdx > 0 && !color) {
       color = segments[materialIdx - 1] || null;
     }
 
