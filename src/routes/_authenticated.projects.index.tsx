@@ -228,7 +228,7 @@ function ProjectsContent() {
         </section>
       )}
 
-      <section className="grid gap-2 rounded-lg border border-slate-200 bg-white p-2 sm:grid-cols-[1fr_230px]">
+      <section className="grid gap-2 rounded-lg border border-slate-200 bg-white p-2 sm:grid-cols-[1fr_200px_200px]">
         <div className="relative min-w-0">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <Input
@@ -239,6 +239,21 @@ function ProjectsContent() {
             onChange={(event) => setSearch(event.target.value)}
           />
         </div>
+
+        <Select value={typeFilter} onValueChange={(v: any) => setTypeFilter(v)}>
+          <SelectTrigger className="h-11 border-slate-200 text-[11px] font-black uppercase tracking-[0.12em]">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
+              <SelectValue placeholder="Tipo" />
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os tipos</SelectItem>
+            <SelectItem value="real">Produção Real</SelectItem>
+            <SelectItem value="test">Teste / Piloto</SelectItem>
+          </SelectContent>
+        </Select>
+
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="h-11 border-slate-200 text-[11px] font-black uppercase tracking-[0.12em]">
             <div className="flex items-center gap-2">
