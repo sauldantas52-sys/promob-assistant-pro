@@ -200,7 +200,12 @@ function TestImportAuditPage() {
                       <p className="text-[9px] text-slate-400">{part.supplier || "-"}</p>
                     </TableCell>
                     <TableCell className="text-[10px] font-mono">
-                      {part.edge_top}/{part.edge_bottom}/{part.edge_left}/{part.edge_right}
+                      <div className="grid grid-cols-2 gap-1 w-20">
+                        <span className={cn("px-1 rounded text-center", part.edge_top ? "bg-blue-100 text-blue-700 font-bold" : "text-slate-300")}>{part.edge_top || 0}</span>
+                        <span className={cn("px-1 rounded text-center", part.edge_bottom ? "bg-blue-100 text-blue-700 font-bold" : "text-slate-300")}>{part.edge_bottom || 0}</span>
+                        <span className={cn("px-1 rounded text-center", part.edge_left ? "bg-blue-100 text-blue-700 font-bold" : "text-slate-300")}>{part.edge_left || 0}</span>
+                        <span className={cn("px-1 rounded text-center", part.edge_right ? "bg-blue-100 text-blue-700 font-bold" : "text-slate-300")}>{part.edge_right || 0}</span>
+                      </div>
                     </TableCell>
                     <TableCell className="text-[11px]">
                       <span className="font-black">{part.unit}</span> | Q: <span className="font-black">{part.quantity_raw || 0}</span> | R: <span className="font-black">{part.repetition}</span>
