@@ -234,6 +234,7 @@ function ImportPage() {
         {
           file: classification.image,
           type: "imagem_referencia",
+          required: false,
           summary: { source: "pasta_cliente" },
         },
         {
