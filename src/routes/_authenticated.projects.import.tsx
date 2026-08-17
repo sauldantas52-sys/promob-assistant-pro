@@ -38,7 +38,9 @@ type ClassifiedFolder = {
   previewCorte: File | null;
   image: File | null;
   dxf: File | null;
-  xmk: File | null;
+  promob: File | null;
+  allFiles: File[];
+  others: File[];
 };
 
 const emptyClassification: ClassifiedFolder = {
@@ -49,7 +51,9 @@ const emptyClassification: ClassifiedFolder = {
   previewCorte: null,
   image: null,
   dxf: null,
-  xmk: null,
+  promob: null,
+  allFiles: [],
+  others: [],
 };
 
 function normalizedFileName(file: File) {
