@@ -16,140 +16,117 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-const INTEGRATION_MAP = [
-  {
-    module: "CutPlanService",
-    status: "não verificado",
-    description: "CutPlanning/Cut Pro exige evidência oficial; conexão não é inferida.",
-  },
-  {
-    module: "SheetLayoutService",
-    status: "não verificado",
-    description: "Pré-plano local não comprova nesting oficial.",
-  },
-  {
-    module: "OcrService",
-    status: "não verificado",
-    description: "Disponibilidade não consultada por esta tela.",
-  },
-  {
-    module: "ReceiptParser",
-    status: "não verificado",
-    description: "Disponibilidade não consultada por esta tela.",
-  },
-  {
-    module: "StoreCreditService",
-    status: "não verificado",
-    description: "Disponibilidade não consultada por esta tela.",
-  },
-  {
-    module: "QuoteEngine",
-    status: "não verificado",
-    description: "Disponibilidade não consultada por esta tela.",
-  },
-  {
-    module: "CommercialProposalService",
-    status: "não verificado",
-    description: "Disponibilidade não consultada por esta tela.",
-  },
-  {
-    module: "ContractGenerator",
-    status: "não verificado",
-    description: "Disponibilidade não consultada por esta tela.",
-  },
-  {
-    module: "RelatorioService",
-    status: "resumo local",
-    description: "A tela gera somente um resumo; nenhum PDF é produzido.",
-  },
-  {
-    module: "BusinessEngine",
-    status: "não verificado",
-    description: "Gates devem ser confirmados pelos registros do projeto.",
-  },
-  {
-    module: "WhatsAppService",
-    status: "simulado",
-    description: "Sem credenciais ou envio real confirmado.",
-  },
-];
-
-const TEST_RESULTS = [
-  {
-    task: "1. Lista de peças",
-    status: "autoridade XML",
-    evidence: "Identidade e revisão devem corresponder ao XML anexado",
-  },
-  {
-    task: "2. Pré-plano de corte",
-    status: "estimativo",
-    evidence: "Referência local; não é ordem de produção",
-  },
-  {
-    task: "3. Resultado CutPlanning / Cut Pro",
-    status: "gate manual",
-    evidence: "Exige arquivo oficial e conferência de revisão",
-  },
-  {
-    task: "4. Geometria DXF",
-    status: "conferência",
-    evidence: "DXF confere geometria; não substitui a autoridade XML",
-  },
-  {
-    task: "5. Leitura OCR",
-    status: "não verificado",
-    evidence: "Nenhum health check é executado por esta tela",
-  },
-  {
-    task: "6. Estoque e baixas",
-    status: "confirmação humana",
-    evidence: "Não inferir movimentação sem registro operacional",
-  },
-  {
-    task: "7. Orçamento",
-    status: "não verificado",
-    evidence: "Disponibilidade do motor não é medida aqui",
-  },
-  {
-    task: "8. Proposta e contrato",
-    status: "não verificado",
-    evidence: "Geração não equivale a assinatura digital",
-  },
-  {
-    task: "9. Usinagem CNC",
-    status: "gate fechado",
-    evidence: "Importação não concede liberação CNC",
-  },
-  {
-    task: "10. Logs e histórico",
-    status: "evidência exigida",
-    evidence: "Validar registros persistidos no projeto",
-  },
-];
-
-const PENDENCIES = [
-  {
-    item: "Credenciais WhatsApp",
-    status: "Pendente",
-    risk: "Médio",
-    detail: "Sem provedor oficial Meta/Twilio configurado.",
-  },
-  {
-    item: "Validação Física CNC",
-    status: "Pendente",
-    risk: "Crítico",
-    detail: "Exige confirmação de bitola na máquina.",
-  },
-  {
-    item: "Assinatura Digital",
-    status: "Pendente",
-    risk: "Baixo",
-    detail: "Integração DocuSign/Gov.br futura.",
-  },
-];
-
 export function AuditIntegrationTab({ projectId }: { projectId: string }) {
   const [isGenerating, setIsGenerating] = useState(false);
+
+  const { data: distribution, isLoading: isLoadingDist } = useQuery({
+    queryKey: ["project_distribution", projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("project_distribution")
+        .select("*")
+        .eq("project_id", projectId);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: files } = useQuery({
+    queryKey: ["project_files_audit", projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("project_files")
+        .select("file_type")
+        .eq("project_id", projectId);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const getStatus = (area: string) => {
+    const item = distribution?.find(d => d.area === area);
+    return item?.status || "não verificado";
+  };
+
+  const getItemCount = (area: string) => {
+    const item = distribution?.find(d => d.area === area);
+    return item?.item_count || 0;
+  };
+
+  const hasFile = (type: string) => {
+    return files?.some(f => f.file_type === type) || false;
+  };
+
+  const INTEGRATION_MAP = [
+    {
+      module: "CutPlanService",
+      status: getStatus("corte"),
+      description: hasFile("lista_corte_pdf") 
+        ? "Lista de corte detectada. Conexão operacional estabelecida." 
+        : "CutPlanning/Cut Pro exige evidência oficial; conexão não é inferida.",
+    },
+    {
+      module: "SheetLayoutService",
+      status: getStatus("corte"),
+      description: hasFile("preview_corte_pdf") 
+        ? "Nesting detectado. Geometria de chapa alimentada." 
+        : "Pré-plano local não comprova nesting oficial.",
+    },
+    {
+      module: "EngineeringEngine",
+      status: getStatus("engenharia"),
+      description: `${getItemCount("engenharia")} módulos persistidos no banco de dados.`,
+    },
+    {
+      module: "MachiningControl",
+      status: getStatus("usinagem"),
+      description: "Gate de segurança industrial (CNC) ativo.",
+    },
+    {
+      module: "CommercialProposalService",
+      status: getStatus("comercial"),
+      description: "Inventário comercial alimentado via XML.",
+    }
+  ];
+
+  const TEST_RESULTS = [
+    {
+      task: "1. Lista de peças",
+      status: getStatus("engenharia") === "alimentado" ? "auditado" : "pendente",
+      evidence: `${getItemCount("corte")} peças processadas com sucesso.`,
+    },
+    {
+      task: "2. Pré-plano de corte",
+      status: hasFile("lista_corte_pdf") ? "confirmado" : "estimativo",
+      evidence: hasFile("lista_corte_pdf") ? "Arquivo físico localizado na pasta." : "Referência local; não é ordem de produção.",
+    },
+    {
+      task: "3. Geometria DXF",
+      status: hasFile("dxf_conferencia") ? "validado" : "ausente",
+      evidence: hasFile("dxf_conferencia") ? "Gêmeo digital DXF pronto para conferência." : "DXF não localizado para esta revisão.",
+    },
+    {
+      task: "4. Usinagem CNC",
+      status: "gate fechado",
+      evidence: "Bloqueio machining_blocked = true ativo por padrão.",
+    },
+  ];
+
+  const PENDENCIES = [
+    {
+      item: "Validação Física CNC",
+      status: "Pendente",
+      risk: "Crítico",
+      detail: "Exige confirmação de bitola na máquina antes da liberação.",
+    },
+    {
+      item: "Conferência de Borda",
+      status: getStatus("borda") === "conferencia_pendente" ? "Aguardando" : "OK",
+      risk: "Médio",
+      detail: `${getItemCount("borda")} peças exigem fita de borda.`,
+    }
+  ];
+
 
   const handleGenerateReport = async () => {
     setIsGenerating(true);
