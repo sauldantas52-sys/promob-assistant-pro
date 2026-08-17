@@ -24,6 +24,7 @@ import { Route as AuthenticatedTechnicalAssistanceRouteImport } from './routes/_
 import { Route as AuthenticatedProjectsIndexRouteImport } from './routes/_authenticated.projects.index'
 import { Route as AuthenticatedProjectsProjectIdRouteImport } from './routes/_authenticated.projects.$projectId'
 import { Route as AuthenticatedProjectsImportRouteImport } from './routes/_authenticated.projects.import'
+import { Route as AuthenticatedProjectsTestImportRouteImport } from './routes/_authenticated.projects.test-import'
 import { Route as AuthenticatedSettingsUsersRouteImport } from './routes/_authenticated.settings.users'
 
 const IndexRoute = IndexRouteImport.update({
@@ -106,6 +107,12 @@ const AuthenticatedProjectsImportRoute =
     path: '/projects/import',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedProjectsTestImportRoute =
+  AuthenticatedProjectsTestImportRouteImport.update({
+    id: '/projects/test-import',
+    path: '/projects/test-import',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedSettingsUsersRoute =
   AuthenticatedSettingsUsersRouteImport.update({
     id: '/settings/users',
@@ -127,6 +134,7 @@ export interface FileRoutesByFullPath {
   '/technical-assistance': typeof AuthenticatedTechnicalAssistanceRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/projects/import': typeof AuthenticatedProjectsImportRoute
+  '/projects/test-import': typeof AuthenticatedProjectsTestImportRoute
   '/settings/users': typeof AuthenticatedSettingsUsersRoute
   '/projects/': typeof AuthenticatedProjectsIndexRoute
 }
@@ -144,6 +152,7 @@ export interface FileRoutesByTo {
   '/technical-assistance': typeof AuthenticatedTechnicalAssistanceRoute
   '/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/projects/import': typeof AuthenticatedProjectsImportRoute
+  '/projects/test-import': typeof AuthenticatedProjectsTestImportRoute
   '/settings/users': typeof AuthenticatedSettingsUsersRoute
   '/projects': typeof AuthenticatedProjectsIndexRoute
 }
@@ -163,6 +172,7 @@ export interface FileRoutesById {
   '/_authenticated/technical-assistance': typeof AuthenticatedTechnicalAssistanceRoute
   '/_authenticated/projects/$projectId': typeof AuthenticatedProjectsProjectIdRoute
   '/_authenticated/projects/import': typeof AuthenticatedProjectsImportRoute
+  '/_authenticated/projects/test-import': typeof AuthenticatedProjectsTestImportRoute
   '/_authenticated/settings/users': typeof AuthenticatedSettingsUsersRoute
   '/_authenticated/projects/': typeof AuthenticatedProjectsIndexRoute
 }
@@ -182,6 +192,7 @@ export interface FileRouteTypes {
     | '/technical-assistance'
     | '/projects/$projectId'
     | '/projects/import'
+    | '/projects/test-import'
     | '/settings/users'
     | '/projects/'
   fileRoutesByTo: FileRoutesByTo
@@ -199,6 +210,7 @@ export interface FileRouteTypes {
     | '/technical-assistance'
     | '/projects/$projectId'
     | '/projects/import'
+    | '/projects/test-import'
     | '/settings/users'
     | '/projects'
   id:
@@ -217,6 +229,7 @@ export interface FileRouteTypes {
     | '/_authenticated/technical-assistance'
     | '/_authenticated/projects/$projectId'
     | '/_authenticated/projects/import'
+    | '/_authenticated/projects/test-import'
     | '/_authenticated/settings/users'
     | '/_authenticated/projects/'
   fileRoutesById: FileRoutesById
@@ -334,6 +347,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProjectsImportRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/projects/test-import': {
+      id: '/_authenticated/projects/test-import'
+      path: '/projects/test-import'
+      fullPath: '/projects/test-import'
+      preLoaderRoute: typeof AuthenticatedProjectsTestImportRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/settings/users': {
       id: '/_authenticated/settings/users'
       path: '/settings/users'
@@ -356,6 +376,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedTechnicalAssistanceRoute: typeof AuthenticatedTechnicalAssistanceRoute
   AuthenticatedProjectsProjectIdRoute: typeof AuthenticatedProjectsProjectIdRoute
   AuthenticatedProjectsImportRoute: typeof AuthenticatedProjectsImportRoute
+  AuthenticatedProjectsTestImportRoute: typeof AuthenticatedProjectsTestImportRoute
   AuthenticatedSettingsUsersRoute: typeof AuthenticatedSettingsUsersRoute
   AuthenticatedProjectsIndexRoute: typeof AuthenticatedProjectsIndexRoute
 }
@@ -372,6 +393,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedTechnicalAssistanceRoute: AuthenticatedTechnicalAssistanceRoute,
   AuthenticatedProjectsProjectIdRoute: AuthenticatedProjectsProjectIdRoute,
   AuthenticatedProjectsImportRoute: AuthenticatedProjectsImportRoute,
+  AuthenticatedProjectsTestImportRoute: AuthenticatedProjectsTestImportRoute,
   AuthenticatedSettingsUsersRoute: AuthenticatedSettingsUsersRoute,
   AuthenticatedProjectsIndexRoute: AuthenticatedProjectsIndexRoute,
 }
