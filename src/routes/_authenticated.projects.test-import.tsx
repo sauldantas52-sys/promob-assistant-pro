@@ -174,6 +174,7 @@ function TestImportAuditPage() {
                   <TableHead className="text-[9px] font-black uppercase">XML ID / Parent</TableHead>
                   <TableHead className="text-[9px] font-black uppercase">Descrição / Material</TableHead>
                   <TableHead className="text-[9px] font-black uppercase">Dim (CxLxe)</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase">Fitas (1-4)</TableHead>
                   <TableHead className="text-[9px] font-black uppercase">Cor / Supplier</TableHead>
                   <TableHead className="text-[9px] font-black uppercase">Bordas (T/B/L/R)</TableHead>
                   <TableHead className="text-[9px] font-black uppercase">Unit / Qty / Rep</TableHead>
