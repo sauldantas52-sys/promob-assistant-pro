@@ -21,6 +21,9 @@ export const PartMetadataSchema = z.object({
   edge_name_general: z.string().optional().nullable(),
   edge_name_front: z.string().optional().nullable(),
   piece_code: z.string().optional().nullable(),
+  module_sequence: z.number().optional().nullable(),
+  piece_sequence: z.number().optional().nullable(),
+  origem: z.string().optional().nullable(),
 });
 
 export type PartMetadata = z.infer<typeof PartMetadataSchema>;
