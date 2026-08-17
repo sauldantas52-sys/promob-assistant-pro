@@ -2608,6 +2608,10 @@ export type Database = {
         }
         Returns: string
       }
+      release_project_machining: {
+        Args: { _project_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role:
