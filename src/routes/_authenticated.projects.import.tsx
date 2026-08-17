@@ -38,7 +38,9 @@ type ClassifiedFolder = {
   previewCorte: File | null;
   image: File | null;
   dxf: File | null;
-  xmk: File | null;
+  promob: File | null;
+  allFiles: File[];
+  others: File[];
 };
 
 const emptyClassification: ClassifiedFolder = {
@@ -49,7 +51,9 @@ const emptyClassification: ClassifiedFolder = {
   previewCorte: null,
   image: null,
   dxf: null,
-  xmk: null,
+  promob: null,
+  allFiles: [],
+  others: [],
 };
 
 function normalizedFileName(file: File) {
@@ -65,7 +69,7 @@ function classifyFolder(selectedFiles: File[]): ClassifiedFolder {
     selectedFiles.find((file) => predicate(file, normalizedFileName(file))) ?? null;
   const isPdf = (file: File) => file.name.toLowerCase().endsWith(".pdf");
 
-  return {
+  const result: ClassifiedFolder = {
     xml: find((file) => file.name.toLowerCase().endsWith(".xml")),
     cotas: find((file, normalized) => isPdf(file) && (normalized.includes("cotas") || normalized.includes("manual") || normalized.includes("desenho") || normalized.includes("tecnico"))),
     listaCompra: find((file, normalized) => isPdf(file) && (normalized.includes("listacompra") || normalized.includes("insumos") || normalized.includes("compra"))),
@@ -73,8 +77,20 @@ function classifyFolder(selectedFiles: File[]): ClassifiedFolder {
     previewCorte: find((file, normalized) => isPdf(file) && (normalized.includes("previewcorte") || normalized.includes("mapa") || normalized.includes("nesting"))),
     image: find((file) => /\.(jpe?g|png|webp)$/i.test(file.name)),
     dxf: find((file) => file.name.toLowerCase().endsWith(".dxf")),
-    xmk: find((file) => file.name.toLowerCase().endsWith(".xmk")),
+    promob: find((file) => file.name.toLowerCase().endsWith(".promob")),
+    allFiles: selectedFiles,
+    others: [],
   };
+
+  // Identify others (files not matching the primary categories)
+  const classifiedPaths = new Set([
+    result.xml, result.cotas, result.listaCompra, result.listaCorte, 
+    result.previewCorte, result.image, result.dxf, result.promob
+  ].filter(Boolean).map(f => f!.name));
+
+  result.others = selectedFiles.filter(f => !classifiedPaths.has(f.name));
+
+  return result;
 }
 
 function parseFolderIdentity(folderName: string) {
@@ -138,7 +154,7 @@ function ImportPage() {
     { label: "PreviewCorte PDF", file: classification.previewCorte, required: true },
     { label: "DXF", file: classification.dxf, required: true },
     { label: "Imagem", file: classification.image, required: false },
-    { label: "Arquivo .PROMOB", file: classification.xmk, required: true },
+    { label: "Arquivo .PROMOB", file: classification.promob, required: true },
   ];
   const hasRequiredFiles = requiredFiles
     .filter((item) => item.required)
@@ -198,72 +214,56 @@ function ImportPage() {
         throw new Error("O DXF obrigatório não contém geometria reconhecível.");
 
       const projectId = crypto.randomUUID();
-      const packageCandidates: Array<{
-        file: File | null;
-        type: string;
-        summary: Json;
-        required?: boolean;
-      }> = [
-        {
-          file: files.xml,
-          type: "xml",
-          summary: {
-            modules: result.modules.length,
-            parts:
-              result.modules.reduce((total: number, module: PromobModule) => total + module.parts.length, 0) +
-              result.loose_parts.length,
-            looseParts: result.loose_parts.length,
-            warnings: [],
-          },
-        },
-        { file: classification.cotas, type: "cotas_pdf", summary: { source: "pasta_cliente" } },
-        {
-          file: classification.listaCompra,
-          type: "lista_compra_pdf",
-          summary: { source: "pasta_cliente" },
-        },
-        {
-          file: classification.listaCorte,
-          type: "lista_corte_pdf",
-          summary: { source: "pasta_cliente" },
-        },
-        {
-          file: classification.previewCorte,
-          type: "preview_corte_pdf",
-          summary: { source: "pasta_cliente" },
-        },
-        {
-          file: classification.image,
-          type: "imagem_referencia",
-          required: false,
-          summary: { source: "pasta_cliente" },
-        },
-        {
-          file: classification.dxf,
-          type: "dxf_conferencia",
-          summary: { source: "pasta_cliente", entities: dxfGeometry.length },
-        },
-        {
-          file: classification.xmk,
-          type: "xmk_identidade_opcional",
-          summary: { source: "pasta_cliente", format_status: "unconfirmed" },
-        },
-      ];
-      const packageFiles = packageCandidates.filter(
-        (item): item is { file: File; type: string; summary: Json } => item.file !== null,
-      );
-      const preparedFiles = packageFiles.map((item) => {
+      
+      // Add ALL files from the folder to the persistence list, preserving internal paths
+      const allProjectFiles: Array<{ file: File; type: string; summary: Json }> = classification.allFiles.map(file => {
+        const ext = file.name.split('.').pop()?.toLowerCase() || '';
+        const norm = normalizedFileName(file);
+        let type = 'other';
+        
+        if (ext === 'xml') type = 'xml';
+        else if (ext === 'promob') type = 'promob_projeto';
+        else if (ext === 'dxf') type = 'dxf_conferencia';
+        else if (ext === 'pdf') {
+          if (norm.includes("cotas") || norm.includes("manual") || norm.includes("desenho") || norm.includes("tecnico")) type = 'cotas_pdf';
+          else if (norm.includes("listacompra") || norm.includes("insumos") || norm.includes("compra")) type = 'lista_compra_pdf';
+          else if (norm.includes("listacorte") || norm.includes("plano") || norm.includes("corte")) type = 'lista_corte_pdf';
+          else if (norm.includes("previewcorte") || norm.includes("mapa") || norm.includes("nesting")) type = 'preview_corte_pdf';
+          else type = 'pdf_document';
+        }
+        else if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) type = 'imagem_referencia';
+        else if (ext === 'docx') type = 'docx_document';
+
+        return {
+          file,
+          type,
+          summary: { 
+            relativePath: file.webkitRelativePath,
+            size: file.size,
+            lastModified: file.lastModified,
+            source: "pasta_cliente"
+          }
+        };
+      });
+
+      const preparedFiles = allProjectFiles.map((item) => {
         const safeName = item.file.name
           .normalize("NFD")
           .replace(/[\u0300-\u036f]/g, "")
           .replace(/[^a-zA-Z0-9._-]/g, "_");
+          
+        // Use relative path for storage if available, otherwise just safe name
+        const storagePath = `${companyId}/${projectId}/${item.file.webkitRelativePath || safeName}`;
+        
         return {
           ...item,
-          storagePath: `${companyId}/${projectId}/${crypto.randomUUID()}-${safeName}`,
+          storagePath,
         };
       });
+
       const { data: authData } = await supabase.auth.getUser();
       if (!authData.user) throw new Error("Sessão expirada. Entre novamente antes de importar.");
+      
       const { error: sessionError } = await (supabase as any).from("project_import_sessions").insert({
         id: projectId,
         company_id: companyId,
@@ -598,6 +598,8 @@ function ImportPage() {
                         if (input) {
                           input.setAttribute("webkitdirectory", "");
                           input.setAttribute("directory", "");
+                          // Remove any filter that might restrict extensions
+                          input.removeAttribute("accept");
                         }
                       }}
                       onChange={handleFolderSelection}
@@ -823,12 +825,12 @@ function ImportPage() {
                     <span
                       className={cn(
                         "flex h-5 w-5 shrink-0 items-center justify-center rounded-sm",
-                        classification.xmk
-                          ? "bg-slate-700 text-lime-300"
+                        classification.others.length > 0
+                          ? "bg-lime-300 text-slate-950"
                           : "bg-slate-900 text-slate-600",
                       )}
                     >
-                      {classification.xmk ? (
+                      {classification.others.length > 0 ? (
                         <Check className="h-3.5 w-3.5" />
                       ) : (
                         <span className="font-mono text-[9px]">+</span>
@@ -836,10 +838,15 @@ function ImportPage() {
                     </span>
                     <div className="min-w-0">
                       <p className="text-[10px] font-black uppercase tracking-[0.1em] text-slate-400">
-                        XMK / opcional
+                        Outros Arquivos / Inventory
                       </p>
-                      <p className="truncate text-[10px] text-slate-600">
-                        {classification.xmk?.name || "Identidade suplementar não localizada"}
+                      <p className={cn(
+                        "truncate text-[10px]",
+                        classification.others.length > 0 ? "text-lime-300" : "text-slate-600"
+                      )}>
+                        {classification.others.length > 0 
+                          ? `${classification.others.length} arquivos detectados (${classification.others.map(f => f.name.split('.').pop()?.toUpperCase()).filter((v, i, a) => a.indexOf(v) === i).join(', ')})` 
+                          : "Nenhum outro arquivo localizado"}
                       </p>
                     </div>
                   </div>
