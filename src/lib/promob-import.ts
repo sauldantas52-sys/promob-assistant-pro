@@ -227,38 +227,112 @@ export function parsePromobXML(xmlContent: string): PromobProject {
   const modules: PromobModule[] = [];
   const looseParts: PromobPart[] = [];
 
-  const moduleNodes = xmlDoc.querySelectorAll('ITEMS > ITEM[TYPE="COMPONENT"], ENVIRONMENT > ITEM');
-  
-  moduleNodes.forEach(node => {
-    const isModule = node.children.length > 0;
-    
-    if (isModule) {
-      const parts: PromobPart[] = [];
-      const partNodes = node.querySelectorAll('ITEM[TYPE="PART"], ITEM[FAMILY="PECA"], ITEM[FAMILY="FERRAGEM"]');
-      
-      partNodes.forEach(partNode => {
-        parts.push(parsePartNode(partNode));
-      });
+  // Contadores para o Relatório de Leitura (Regra 9)
+  let totalItems = 0;
+  let recognizedModules = 0;
+  let mdfPiecesInModules = 0;
+  let looseMdfPieces = 0;
+  let hardwareItems = 0;
+  let unclassifiedItems = 0;
+  const unclassifiedList: any[] = [];
 
-      modules.push({
-        name: getAttr(node, 'DESCRIPTION') || getAttr(node, 'NAME') || 'Módulo',
-        environment: getAttr(node, 'ENVIRONMENT') || null,
-        width_mm: getNumericAttr(node, 'WIDTH') || null,
-        height_mm: getNumericAttr(node, 'HEIGHT') || null,
-        depth_mm: getNumericAttr(node, 'DEPTH') || null,
-        quantity: getNumericAttr(node, 'QUANTITY') || 1,
-        id_xml: getAttr(node, 'ID') || null,
-        parts,
-        metadata: {
-          unique_id: getAttr(node, 'UNIQUEID'),
-          id_xml: getAttr(node, 'ID'),
-          reference: getAttr(node, 'REFERENCE')
+  const allItems = Array.from(xmlDoc.querySelectorAll('ITEM'));
+  totalItems = allItems.length;
+
+  // Regra 7: Módulos (Subir a árvore)
+  const getParentModule = (node: Element): Element | null => {
+    let parent = node.parentElement;
+    while (parent) {
+      if (parent.tagName === 'ITEM') return parent;
+      parent = parent.parentElement;
+    }
+    return null;
+  };
+
+  // Mapear módulos por ID para evitar duplicatas e organizar peças
+  const moduleMap = new Map<string, PromobModule>();
+  const modulesOrder: string[] = [];
+
+  allItems.forEach(node => {
+    const uniqueId = node.getAttribute('UNIQUEID') || '';
+    const name = node.getAttribute('DESCRIPTION') || node.getAttribute('NAME') || 'Sem Nome';
+    
+    // Tentar classificar como peça
+    const part = parsePartNode(node, 0, 0); // Sequências serão ajustadas depois
+    
+    if (part.kind === 'peca') {
+      const parentNode = getParentModule(node);
+      if (parentNode) {
+        const parentId = parentNode.getAttribute('UNIQUEID') || parentNode.getAttribute('ID') || 'unknown';
+        if (!moduleMap.has(parentId)) {
+          recognizedModules++;
+          const newModule: PromobModule = {
+            name: parentNode.getAttribute('DESCRIPTION') || parentNode.getAttribute('NAME') || 'Módulo',
+            environment: parentNode.getAttribute('ENVIRONMENT') || null,
+            width_mm: getNumericAttr(parentNode, 'WIDTH') || null,
+            height_mm: getNumericAttr(parentNode, 'HEIGHT') || null,
+            depth_mm: getNumericAttr(parentNode, 'DEPTH') || null,
+            quantity: getNumericAttr(parentNode, 'QUANTITY') || 1,
+            id_xml: parentNode.getAttribute('ID') || null,
+            parts: [],
+            metadata: {
+              unique_id: parentId,
+              reference: parentNode.getAttribute('REFERENCE')
+            }
+          };
+          moduleMap.set(parentId, newModule);
+          modulesOrder.push(parentId);
         }
-      });
+        moduleMap.get(parentId)!.parts.push(part);
+        mdfPiecesInModules++;
+      } else {
+        looseParts.push(part);
+        looseMdfPieces++;
+      }
+    } else if (part.kind === 'ferragem' || part.kind === 'acessorio') {
+      hardwareItems++;
     } else {
-      looseParts.push(parsePartNode(node));
+      unclassifiedItems++;
+      if (unclassifiedList.length < 10) {
+        unclassifiedList.push({ name, uniqueId, reason: 'Não classificado como MDF, Ferragem ou Acessório' });
+      }
     }
   });
+
+  // Consolidar módulos e ajustar sequências
+  modulesOrder.forEach((id, idx) => {
+    const mod = moduleMap.get(id)!;
+    mod.parts.forEach((p, pIdx) => {
+      if (p.metadata) {
+        p.metadata.module_sequence = idx + 1;
+        p.metadata.piece_sequence = pIdx + 1;
+      }
+    });
+    modules.push(mod);
+  });
+
+  // Ajustar sequências para peças avulsas
+  looseParts.forEach((p, pIdx) => {
+    if (p.metadata) {
+      p.metadata.module_sequence = null; // Avulso
+      p.metadata.piece_sequence = pIdx + 1;
+    }
+  });
+
+  // Regra 9: Relatório de Leitura
+  console.log(`
+    === RELATÓRIO DE LEITURA MONTA AI ===
+    Itens ITEM no arquivo:     ${totalItems}
+    Módulos reconhecidos:      ${recognizedModules}
+    Peças de MDF em módulos:   ${mdfPiecesInModules}
+    Peças de MDF avulsas:      ${looseMdfPieces}
+    Ferragens e acessórios:    ${hardwareItems}
+    Itens NÃO classificados:   ${unclassifiedItems}
+  `);
+
+  if (unclassifiedList.length > 0) {
+    console.warn('Top 10 Itens não classificados:', unclassifiedList);
+  }
 
   return {
     name: projectName,
