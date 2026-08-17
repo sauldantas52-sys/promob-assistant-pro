@@ -15,15 +15,16 @@ const searchSchema = z.object({
 });
 
 export const Route = createFileRoute("/_authenticated/projects/test-import")({
-  validateSearch: searchSchema,
+  validateSearch: (search: Record<string, unknown>) => searchSchema.parse(search),
   component: TestImportAuditPage,
 });
 
 function TestImportAuditPage() {
   const { companyId } = useAuth();
-  const { projectId: queryProjectId } = Route.useSearch();
+  const search = Route.useSearch();
+  const queryProjectId = search.projectId;
 
-  // 1. Consulta o projeto específico (ou o mais recente se não informado, para manter compatibilidade)
+  // 1. Consulta o projeto específico (ou o mais recente se não informado)
   const { data: project, isLoading: projectLoading } = useQuery({
     queryKey: ["audit-project", companyId, queryProjectId],
     queryFn: async () => {
