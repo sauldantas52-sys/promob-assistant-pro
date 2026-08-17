@@ -203,18 +203,24 @@ function ImportPage() {
     if (nextClassification.xml) {
       nextClassification.xml.text().then(xmlContent => {
         try {
-          const parser = new DOMParser();
-          const xmlDoc = parser.parseFromString(xmlContent, 'text/xml');
-          const allItems = xmlDoc.querySelectorAll('ITEM');
-          const totalItems = allItems.length;
+          const result = parsePromobXML(xmlContent);
           
-          // Re-implement simplified count logic for visual report only
-          // The real parse happens in the mutation
+          let mdfPiecesInModules = 0;
+          let looseMdfPieces = 0;
+          let hardwareItems = 0;
+          let unclassifiedItems = 0;
+          let recognizedModules = result.modules.length;
+
+          result.modules.forEach(m => {
+            mdfPiecesInModules += m.parts.filter(p => p.kind === 'peca').length;
+          });
+          looseMdfPieces = result.loose_parts.filter(p => p.kind === 'peca').length;
+          
           setParseReport({
-            totalItems,
-            recognizedModules: xmlDoc.querySelectorAll('ITEM[TYPE="COMPONENT"]').length || 0,
-            mdfPiecesInModules: 0,
-            looseMdfPieces: 0,
+            totalItems: 0, // Simplified for preview
+            recognizedModules,
+            mdfPiecesInModules,
+            looseMdfPieces,
             hardwareItems: 0,
             unclassifiedItems: 0,
             unclassifiedList: []
