@@ -159,9 +159,10 @@ function ImportPage() {
   const hasRequiredFiles = true; // Ingestão não bloqueada por gates
   const intakeReady =
     folderFileCount > 0 &&
-    identity.hasValidIdentity &&
+    (identity.client.length > 0 || folderName.length > 0) &&
     !!destination &&
     !!files.xml;
+
 
   function handleFolderSelection(event: ChangeEvent<HTMLInputElement>) {
     const selectedFiles = Array.from(event.target.files ?? []);
