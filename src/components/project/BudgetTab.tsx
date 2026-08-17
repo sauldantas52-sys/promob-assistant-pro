@@ -48,12 +48,12 @@ export function BudgetTab({ projectId }: { projectId: string }) {
 
   return (
     <div className="space-y-6">
-      <Alert className="bg-blue-50 border-blue-200 text-blue-800 rounded-2xl">
+      <Alert className="bg-emerald-50 border-emerald-200 text-emerald-800 rounded-2xl">
         <ShieldCheck className="h-4 w-4" />
-        <AlertTitle className="font-black uppercase tracking-tight text-xs">Aviso de Governança Comercial</AlertTitle>
+        <AlertTitle className="font-black uppercase tracking-tight text-xs">Governança Comercial — Modo Piloto</AlertTitle>
         <AlertDescription className="text-sm">
-          A produção industrial deste projeto está **bloqueada** até a aprovação formal da Proposta Comercial e Contrato. 
-          O uso de estimativas visuais é estritamente orçamentário.
+          A produção industrial deste projeto está **liberada para testes físicos** conforme Modo Piloto. 
+          Certifique-se de validar a Proposta Comercial antes da expedição final.
         </AlertDescription>
       </Alert>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
