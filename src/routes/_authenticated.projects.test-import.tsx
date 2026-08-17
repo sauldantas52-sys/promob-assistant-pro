@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Info, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Info, CheckCircle2, AlertTriangle, Scissors } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/projects/test-import")({
   component: TestImportAuditPage,
@@ -322,7 +322,7 @@ function TestImportAuditPage() {
              </div>
              <div>
                <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest">Total Itens Raiz</p>
-               <p className="text-2xl font-black mt-1">{rootItems.length}</p>
+               <p className="text-2xl font-black mt-1">{rootItemsCount}</p>
              </div>
           </div>
           <div className="mt-8 pt-8 border-t border-slate-800 flex items-center gap-4">
