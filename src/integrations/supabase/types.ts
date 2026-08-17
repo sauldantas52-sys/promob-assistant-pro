@@ -2999,6 +2999,15 @@ export type Database = {
         Returns: string
       }
       import_legacy_store_credits: { Args: { _payload: Json }; Returns: Json }
+      industrial_bypass_persist_closet: {
+        Args: {
+          _company_id: string
+          _name: string
+          _project_id: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
       ingest_and_distribute_project: {
         Args: { _loose_parts: Json; _modules: Json; _project_id: string }
         Returns: undefined
