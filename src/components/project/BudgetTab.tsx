@@ -48,97 +48,84 @@ export function BudgetTab({ projectId }: { projectId: string }) {
 
   return (
     <div className="space-y-6">
-      <Alert className="bg-emerald-50 border-emerald-200 text-emerald-800 rounded-2xl">
-        <ShieldCheck className="h-4 w-4" />
-        <AlertTitle className="font-black uppercase tracking-tight text-xs">Governança Comercial — Modo Piloto</AlertTitle>
-        <AlertDescription className="text-sm">
-          A produção industrial deste projeto está **liberada para testes físicos** conforme Modo Piloto. 
-          Certifique-se de validar a Proposta Comercial antes da expedição final.
-        </AlertDescription>
-      </Alert>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="rounded-3xl border-none shadow-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-sm font-black uppercase tracking-widest opacity-80">
-              <Calculator className="h-4 w-4" /> Orçamento Técnico
-            </CardTitle>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="bg-slate-50 border-slate-200">
+          <CardHeader className="py-3">
+            <CardTitle className="text-[9px] font-black uppercase tracking-widest text-slate-500">Módulos</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-black">{formatCurrency(quote?.total_value)}</div>
-            <p className="text-xs mt-2 opacity-70 italic">
-              {quote ? `Baseado na revisão ${quote.version || '1'}` : "*Aguardando cálculo técnico"}
+            <p className="text-2xl font-black text-slate-900">{modules?.data?.length || 0}</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-slate-50 border-slate-200">
+          <CardHeader className="py-3">
+            <CardTitle className="text-[9px] font-black uppercase tracking-widest text-slate-500">Total Peças</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-black text-slate-900">
+              {parts?.filter(p => p.kind === 'peca' || p.kind === 'chapa').length || 0}
             </p>
           </CardContent>
         </Card>
-
-        <Card className="rounded-3xl border-none shadow-xl bg-white">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-slate-500">
-              <Layers className="h-4 w-4" /> Resumo de Materiais (XML)
-            </CardTitle>
+        <Card className="bg-slate-50 border-slate-200">
+          <CardHeader className="py-3">
+            <CardTitle className="text-[9px] font-black uppercase tracking-widest text-slate-500">Ferragens</CardTitle>
           </CardHeader>
           <CardContent>
-            {materialSummary && Object.keys(materialSummary).length > 0 ? (
-              Object.entries(materialSummary).map(([material, qty]) => (
-                <div key={material} className="flex justify-between items-center py-2 border-b">
-                  <span className="text-sm font-bold text-slate-700 truncate mr-2">{material}</span>
-                  <Badge variant="outline">{qty} itens</Badge>
-                </div>
-              ))
-            ) : (
-              <p className="text-xs text-slate-400 italic py-4">Nenhum material extraído do XML.</p>
-            )}
+            <p className="text-2xl font-black text-slate-900">
+              {parts?.filter(p => p.kind === 'ferragem').length || 0}
+            </p>
           </CardContent>
         </Card>
-
-        <Card className="rounded-3xl border-none shadow-xl bg-white">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-slate-500">
-              <Building2 className="h-4 w-4" /> Impostos e Taxas
-            </CardTitle>
+        <Card className="bg-slate-50 border-slate-200">
+          <CardHeader className="py-3">
+            <CardTitle className="text-[9px] font-black uppercase tracking-widest text-slate-500">Acessórios</CardTitle>
           </CardHeader>
           <CardContent>
-            {/* 15% estimated if tax_value not available */}
-            <div className="text-2xl font-black text-slate-900">
-              {formatCurrency(quote?.total_value ? quote.total_value * 0.15 : null)}
-            </div>
-            <p className="text-xs mt-1 text-slate-400">ICMS/IPI + Encargos Industriais</p>
+            <p className="text-2xl font-black text-slate-900">
+              {parts?.filter(p => p.kind === 'acessorio').length || 0}
+            </p>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="rounded-3xl border-none shadow-xl bg-white">
-        <CardHeader className="flex flex-row items-center justify-between border-b">
-          <CardTitle className="text-lg font-black uppercase text-slate-900">Itens e Composição</CardTitle>
-          <div className="flex gap-2">
-            <Button variant="outline" className="rounded-full gap-2" disabled={!quote}>
-              <FileText className="h-4 w-4" /> Gerar Contrato
-            </Button>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-full gap-2" disabled={!quote}>
-              <Download className="h-4 w-4" /> Proposta Comercial
-            </Button>
-          </div>
+      <Card className="border-slate-200">
+        <CardHeader className="border-b py-3 bg-slate-950">
+          <CardTitle className="text-[10px] font-black uppercase tracking-widest text-white">Inventário Industrial (Fonte: Banco de Dados)</CardTitle>
         </CardHeader>
-        <CardContent className="pt-6">
+        <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="font-black uppercase text-[10px] tracking-widest">Descrição</TableHead>
-                <TableHead className="font-black uppercase text-[10px] tracking-widest">Ref. Técnica</TableHead>
-                <TableHead className="font-black uppercase text-[10px] tracking-widest text-right">Valor</TableHead>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="text-[9px] font-black uppercase">Peça</TableHead>
+                <TableHead className="text-[9px] font-black uppercase">UID</TableHead>
+                <TableHead className="text-[9px] font-black uppercase">Material</TableHead>
+                <TableHead className="text-[9px] font-black uppercase">Espessura</TableHead>
+                <TableHead className="text-[9px] font-black uppercase">Largura</TableHead>
+                <TableHead className="text-[9px] font-black uppercase">Comprimento</TableHead>
+                <TableHead className="text-[9px] font-black uppercase text-center">Qtd</TableHead>
+                <TableHead className="text-[9px] font-black uppercase">Fonte</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {quote ? (
-                <TableRow>
-                  <TableCell className="font-bold">Total do Projeto</TableCell>
-                  <TableCell>{quote.id.slice(0, 8)}</TableCell>
-                  <TableCell className="text-right font-black">{formatCurrency(quote.total_value)}</TableCell>
+              {parts?.map((part: any) => (
+                <TableRow key={part.id} className="text-[11px]">
+                  <TableCell className="font-bold uppercase">{part.name}</TableCell>
+                  <TableCell className="text-[9px] font-mono">{(part.metadata as any)?.id_xml || '-'}</TableCell>
+                  <TableCell>{part.material || "Não informado no XML"}</TableCell>
+                  <TableCell>{part.thickness_mm ? `${part.thickness_mm} mm` : "Não informado no XML"}</TableCell>
+                  <TableCell>{part.width_mm ? `${part.width_mm} mm` : "N/I"}</TableCell>
+                  <TableCell>{part.length_mm ? `${part.length_mm} mm` : "N/I"}</TableCell>
+                  <TableCell className="text-center font-bold">{part.quantity}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="text-[8px] uppercase">{part.data_source || 'XML'}</Badge>
+                  </TableCell>
                 </TableRow>
-              ) : (
+              ))}
+              {(!parts || parts.length === 0) && (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center py-8 text-slate-400 italic">
-                    Orçamento em fase de processamento industrial.
+                  <TableCell colSpan={8} className="text-center py-12 text-slate-400 italic">
+                    Nenhum dado persistido encontrado para este projeto.
                   </TableCell>
                 </TableRow>
               )}

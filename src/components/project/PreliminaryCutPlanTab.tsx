@@ -1,125 +1,104 @@
-import { Scissors, LockKeyhole, FileCheck2, ShieldCheck } from "lucide-react";
+import { Scissors, ShieldCheck, Ruler, Layers } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 
 export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
+  const { data: parts, isLoading } = useQuery({
+    queryKey: ["parts_cutplan", projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("parts")
+        .select("*")
+        .eq("project_id", projectId)
+        .order("thickness_mm", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  if (isLoading) return <div className="p-8 text-center text-xs text-slate-500">Processando lista de corte...</div>;
+
+  const panels = parts?.filter(p => p.kind === 'peca' || p.kind === 'chapa') || [];
+  
+  // Agrupar por espessura
+  const groups = panels.reduce((acc: Record<string, typeof panels>, part) => {
+    const thickness = part.thickness_mm ? `${part.thickness_mm} mm` : "Não informado no XML";
+    const material = part.material || "Não informado no XML";
+    const key = `${material} | ${thickness}`;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(part);
+    return acc;
+  }, {});
+
   return (
-    <div className="space-y-4">
-      <Alert className="rounded-lg border-amber-200 bg-amber-50 text-amber-950">
+    <div className="space-y-6">
+      <Alert className="rounded-lg border-blue-200 bg-blue-50 text-blue-950">
         <ShieldCheck className="h-4 w-4" />
         <AlertTitle className="text-xs font-black uppercase tracking-wide">
-          Limite de autoridade
+          Plano de Corte Consolidado (MVP)
         </AlertTitle>
         <AlertDescription className="text-xs leading-relaxed">
-          O pré-plano local é apenas estimativo. A autoridade de peças e medidas permanece no XML; a
-          produção exige saída oficial do CutPlanning/Cut Pro e conferência técnica. Nenhuma
-          importação libera CNC automaticamente.
+          Este plano é gerado diretamente do banco de dados (PARTS). A quantidade de chapas não é calculada nesta fase.
         </AlertDescription>
       </Alert>
 
-      <div className="grid gap-3 lg:grid-cols-2">
-        <CutPlanBoundary
-          icon={Scissors}
-          eyebrow="Referência interna"
-          title="Pré-plano local"
-          status="Estimativo"
-          tone="amber"
-          items={[
-            "Apoia análise preliminar",
-            "Não é ordem de corte",
-            "Não contém liberação de usinagem",
-          ]}
-        />
-        <CutPlanBoundary
-          icon={FileCheck2}
-          eyebrow="Autoridade industrial"
-          title="CutPlanning / Cut Pro"
-          status="Exige evidência"
-          tone="slate"
-          items={[
-            "Resultado deve vir do software oficial",
-            "Conferir revisão e identidade do XML",
-            "Liberação permanece sujeita aos gates industriais",
-          ]}
-        />
-      </div>
+      {Object.entries(groups).length > 0 ? (
+        Object.entries(groups).map(([groupKey, groupParts]) => {
+          const [material, thickness] = groupKey.split(" | ");
+          const totalArea = groupParts.reduce((sum, p) => 
+            sum + ((p.width_mm || 0) * (p.length_mm || 0) * (p.quantity || 1)) / 1000000, 0
+          );
 
-      <div className="flex flex-col gap-3 rounded-lg border border-red-200 bg-red-50 p-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex min-w-0 items-start gap-3">
-          <LockKeyhole className="mt-0.5 h-5 w-5 shrink-0 text-red-700" />
-          <div>
-            <p className="text-xs font-black uppercase tracking-wide text-red-900">
-              Gate de produção fechado por padrão
-            </p>
-            <p className="mt-1 text-xs text-red-800">
-              Confirme a saída oficial na aba Arquivos e conclua as validações técnicas antes de
-              qualquer operação de fábrica.
-            </p>
-          </div>
+          return (
+            <Card key={groupKey} className="overflow-hidden border-slate-200">
+              <CardHeader className="bg-slate-50 border-b py-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Layers className="h-4 w-4 text-blue-600" />
+                    <CardTitle className="text-xs font-black uppercase tracking-widest">
+                      {material} - {thickness}
+                    </CardTitle>
+                  </div>
+                  <Badge variant="outline" className="text-[10px]">Área Total: {totalArea.toFixed(2)} m²</Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead className="text-[9px] font-black uppercase">Peça</TableHead>
+                      <TableHead className="text-[9px] font-black uppercase">Largura</TableHead>
+                      <TableHead className="text-[9px] font-black uppercase">Comprimento</TableHead>
+                      <TableHead className="text-[9px] font-black uppercase text-center">Qtd</TableHead>
+                      <TableHead className="text-[9px] font-black uppercase">UID XML</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {groupParts.map((part) => (
+                      <TableRow key={part.id} className="text-[11px]">
+                        <TableCell className="font-bold uppercase">{part.name}</TableCell>
+                        <TableCell>{part.width_mm ? `${part.width_mm} mm` : "N/I"}</TableCell>
+                        <TableCell>{part.length_mm ? `${part.length_mm} mm` : "N/I"}</TableCell>
+                        <TableCell className="text-center font-bold">{part.quantity}</TableCell>
+                        <TableCell className="text-[9px] font-mono">{(part.metadata as any)?.id_xml || '-'}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          );
+        })
+      ) : (
+        <div className="p-12 text-center border-2 border-dashed border-slate-200 rounded-xl">
+          <Scissors className="h-8 w-8 text-slate-300 mx-auto mb-2" />
+          <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Nenhuma peça para corte localizada</p>
         </div>
-        <Badge
-          variant="outline"
-          className="w-fit shrink-0 border-red-300 bg-white text-[9px] font-black uppercase text-red-700"
-        >
-          Projeto {projectId.slice(0, 8)}
-        </Badge>
-      </div>
+      )}
     </div>
-  );
-}
-
-function CutPlanBoundary({
-  icon: Icon,
-  eyebrow,
-  title,
-  status,
-  tone,
-  items,
-}: {
-  icon: typeof Scissors;
-  eyebrow: string;
-  title: string;
-  status: string;
-  tone: "amber" | "slate";
-  items: string[];
-}) {
-  return (
-    <Card className="overflow-hidden rounded-xl border-slate-200 shadow-sm">
-      <CardHeader className="border-b border-slate-200 bg-slate-50 p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-slate-950 text-white">
-              <Icon className="h-4 w-4" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[8px] font-black uppercase tracking-[0.16em] text-slate-500">
-                {eyebrow}
-              </p>
-              <CardTitle className="mt-1 text-sm font-black uppercase text-slate-950">
-                {title}
-              </CardTitle>
-            </div>
-          </div>
-          <Badge
-            className={
-              tone === "amber" ? "bg-amber-100 text-amber-800" : "bg-slate-200 text-slate-700"
-            }
-          >
-            {status}
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="p-4">
-        <ul className="space-y-2">
-          {items.map((item) => (
-            <li key={item} className="flex gap-2 text-xs text-slate-600">
-              <span className="font-black text-blue-600">/</span>
-              {item}
-            </li>
-          ))}
-        </ul>
-      </CardContent>
-    </Card>
   );
 }
