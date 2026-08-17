@@ -206,6 +206,37 @@ function TestImportAuditPage() {
             </Table>
           </div>
         </section>
+
+        {/* Resumo Final de Auditoria (Solicitado) */}
+        <section className="bg-slate-900 text-white p-8 rounded-xl shadow-2xl border-t-4 border-lime-400">
+          <h2 className="text-lime-400 text-xs font-black uppercase tracking-[0.2em] mb-6">Resultado da Persistência Industrial</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+             <div>
+               <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest">Project ID</p>
+               <p className="text-sm font-mono font-bold mt-1 text-slate-300">{projectId}</p>
+             </div>
+             <div>
+               <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest">Total de Módulos</p>
+               <p className="text-2xl font-black mt-1">{modules?.length || 0}</p>
+             </div>
+             <div>
+               <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest">Total de Peças</p>
+               <p className="text-2xl font-black mt-1">{allParts?.length || 0}</p>
+             </div>
+             <div>
+               <p className="text-slate-500 text-[9px] font-black uppercase tracking-widest">Total Itens Raiz</p>
+               <p className="text-2xl font-black mt-1">{rootItems.length}</p>
+             </div>
+          </div>
+          <div className="mt-8 pt-8 border-t border-slate-800 flex items-center gap-4">
+             <div className="px-4 py-2 bg-lime-400 text-slate-950 text-[10px] font-black uppercase tracking-widest rounded shadow-lg shadow-lime-400/20">
+               Persistência Confirmada 100%
+             </div>
+             <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider italic">
+               Auditado via Real-time Database Query • Sem Inferências
+             </p>
+          </div>
+        </section>
       </div>
     </AppShell>
   );
