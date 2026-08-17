@@ -290,7 +290,7 @@ function ImportPage() {
         rpcAttempted = true;
         
         // 1. Criar Projeto e Registrar Arquivos
-        const { data: importedProjectId, error: projectError } = await supabase.rpc(
+        const { data: importedProjectId, error: importError } = await supabase.rpc(
           "import_client_project" as any,
           {
             _project_id: projectId,
@@ -308,7 +308,7 @@ function ImportPage() {
             _loose_parts: [],
           },
         );
-        if (projectError) throw projectError;
+        if (importError) throw importError;
 
         // 2. Distribuição Automática 4.0
         const modulesPayload = result.modules.map((module: PromobModule) => ({
@@ -356,13 +356,13 @@ function ImportPage() {
         );
         if (distributionError) throw distributionError;
         // Auditoria Pós-Importação 4.0: Validar persistência real
-        const { data: projectAudit, error: projectError } = await supabase
+        const { data: projectAudit, error: auditError } = await supabase
           .from("projects")
           .select("id")
           .eq("id", projectId)
           .maybeSingle();
 
-        if (projectError || !projectAudit) {
+        if (auditError || !projectAudit) {
            throw new Error("Falha na persistência industrial: o projeto não foi detectado no banco de dados.");
         }
 
