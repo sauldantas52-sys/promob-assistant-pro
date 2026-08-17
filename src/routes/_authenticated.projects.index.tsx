@@ -274,6 +274,36 @@ function ProjectsContent() {
         </Select>
       </section>
 
+      {role === "admin" && (
+        <Card className="border-blue-200 bg-blue-50/20">
+          <CardContent className="flex items-center justify-between p-4 sm:p-6">
+            <div className="flex items-center gap-4">
+              <div className="hidden h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 sm:flex">
+                <ShieldCheck className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-xs font-black uppercase tracking-wider text-blue-900">
+                  Health Check Industrial
+                </h3>
+                <p className="text-[10px] text-blue-700">
+                  Auditoria de visibilidade e integridade da carteira de obras.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 border-blue-200 bg-white text-[10px] font-bold uppercase tracking-wider text-blue-700 hover:bg-blue-50"
+                onClick={() => navigate({ to: "/debug/project-data" as any })}
+              >
+                Auditoria Forense
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {projects.isError ? null : projects.isLoading ? (
         <Loading label="Carregando obras" />
       ) : !projects.isError && filteredProjects.length === 0 ? (
