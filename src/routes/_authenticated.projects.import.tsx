@@ -361,7 +361,8 @@ function ImportPage() {
             _project_id: projectId,
             _modules: modulesPayload,
             _loose_parts: loosePartsPayload,
-            _is_test: data.name.toLowerCase().includes("closet") || data.client.toLowerCase().includes("closet")
+            _is_test: true
+
           }
         );
         if (distributionError) throw distributionError;

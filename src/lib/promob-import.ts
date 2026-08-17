@@ -87,10 +87,11 @@ function parsePartNode(node: Element): PromobPart {
     name,
     kind,
     material: getAttr(node, 'MATERIAL') || null,
-    thickness_mm: getNumericAttr(node, 'HEIGHT') || null,
+    thickness_mm: getNumericAttr(node, 'HEIGHT') || getNumericAttr(node, 'THICKNESS') || null,
     width_mm: getNumericAttr(node, 'WIDTH') || null,
     length_mm: getNumericAttr(node, 'DEPTH') || null,
-    quantity, // Preservamos QUANTITY separadamente de REPETITION no processamento final
+    quantity, 
+
     unit: metadata.unit,
     edge_banding: getAttr(node, 'EDGE_BANDING') || null,
     metadata
