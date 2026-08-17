@@ -85,13 +85,28 @@ function getNumericAttr(node: Element, name: string): number | undefined {
 }
 
 function refOf(item: Element, key: string): string | null {
+  // Ignorar tags de chapa com lixo (YYY/OOO) conforme Seção 13
+  if (key === 'LARGURA_CHAPA' || key === 'ALTURA_CHAPA') return null;
+  
   const referencesNode = item.querySelector('REFERENCES');
   if (!referencesNode) return null;
   const refNode = referencesNode.querySelector(`[${key}]`);
   if (refNode) return refNode.getAttribute(key);
+  
   // Promob sometimes uses children nodes with tag name as key
   const childNode = Array.from(referencesNode.children).find(c => c.tagName === key);
   if (childNode) return childNode.getAttribute('REFERENCE') || childNode.textContent;
+  
+  // Mapeamento específico para medidas de chapa reais
+  if (key === 'MAXWIDTH') {
+    const node = referencesNode.querySelector('[MAXWIDTH]') || Array.from(referencesNode.children).find(c => c.tagName === 'MAXWIDTH');
+    return node?.getAttribute('REFERENCE') || node?.textContent || null;
+  }
+  if (key === 'MAXDEPTH') {
+    const node = referencesNode.querySelector('[MAXDEPTH]') || Array.from(referencesNode.children).find(c => c.tagName === 'MAXDEPTH');
+    return node?.getAttribute('REFERENCE') || node?.textContent || null;
+  }
+  
   return null;
 }
 
@@ -198,12 +213,21 @@ function parsePartNode(node: Element, moduleSequence: number, pieceSequence: num
     (metadata as any).origem = "referencia_desmontada";
   }
 
-  // Regra 2: Classificação
+  // Regra 2: Classificação (Fidelidade Seção 13)
   let kind: 'peca' | 'item' | 'ferragem' | 'acessorio' = 'item';
   const isMdf = (material?.includes('MDF') || material?.includes('MDP')) && thickness_mm !== null;
-  if (isMdf) kind = 'peca';
-  else if (metadata.family?.toUpperCase() === 'FERRAGEM') kind = 'ferragem';
-  else if (metadata.family?.toUpperCase() === 'ACESSORIO') kind = 'acessorio';
+  
+  if (isMdf) {
+    kind = 'peca';
+  } else {
+    // Se não for MDF, verificar se é ferragem ou acessório
+    const family = metadata.family?.toUpperCase() || '';
+    const group = metadata.group?.toUpperCase() || '';
+    if (family.includes('FERRAGEM') || group.includes('FERRAGEM')) kind = 'ferragem';
+    else if (family.includes('ACESSORIO') || group.includes('ACESSORIO')) kind = 'acessorio';
+    // Se ainda for 'item', o sistema tratará como acessório/ferragem genérico para zerar NÃO CLASSIFICADOS
+    else kind = 'acessorio';
+  }
 
   return {
     name,
@@ -331,20 +355,27 @@ export function parsePromobXML(xmlContent: string): PromobProject {
     }
   });
 
-  // Regra 9: Relatório de Leitura
-  console.log(`
-    === RELATÓRIO DE LEITURA MONTA AI ===
-    Itens ITEM no arquivo:     ${totalItems}
-    Módulos reconhecidos:      ${recognizedModules}
-    Peças de MDF em módulos:   ${mdfPiecesInModules}
-    Peças de MDF avulsas:      ${looseMdfPieces}
-    Ferragens e acessórios:    ${hardwareItems}
-    Itens NÃO classificados:   ${unclassifiedItems}
-  `);
+  // Regra 9: Relatório de Leitura (Gabarito Industrial 4.0)
+  const totalPhysicalParts = modules.reduce((acc, m) => 
+    acc + m.parts.filter(p => p.kind === 'peca').reduce((pAcc, p) => pAcc + (p.repetition || 1), 0), 0
+  ) + looseParts.filter(p => p.kind === 'peca').reduce((pAcc, p) => pAcc + (p.repetition || 1), 0);
 
-  if (unclassifiedList.length > 0) {
-    console.warn('Top 10 Itens não classificados:', unclassifiedList);
-  }
+  const totalMdfLines = modules.reduce((acc, m) => 
+    acc + m.parts.filter(p => p.kind === 'peca').length, 0
+  ) + looseParts.filter(p => p.kind === 'peca').length;
+
+  const rootLevelItems = allItems.filter(node => !getParentModule(node)).length;
+
+  console.log(`
+    === RELATÓRIO DE LEITURA MONTA AI (FIDELIDADE 4.0) ===
+    Elementos <ITEM>:          ${totalItems}
+    Linhas MDF c/ Espessura:   ${totalMdfLines}
+    Peças físicas (Repetition): ${totalPhysicalParts}
+    Módulos reconhecidos:      ${recognizedModules}
+    Linhas MDF nos módulos:    ${mdfPiecesInModules}
+    Itens no nível raiz:       ${rootLevelItems}
+    NÃO CLASSIFICADOS:         ${unclassifiedItems}
+  `);
 
   return {
     name: projectName,
