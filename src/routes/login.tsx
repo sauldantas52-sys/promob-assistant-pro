@@ -308,7 +308,7 @@ function LoginPage() {
 
                     <Button
                       type="submit"
-                      className="h-14 sm:h-16 w-full text-base sm:text-lg font-black uppercase tracking-widest rounded-xl sm:rounded-2xl bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-600/20"
+                      className="h-14 sm:h-16 w-full text-base sm:text-lg font-black uppercase tracking-widest rounded-xl sm:rounded-2xl bg-[var(--sidebar-industrial)] hover:bg-slate-800 text-white shadow-xl shadow-slate-900/20"
                       disabled={busy}
                     >
                       {busy ? <Loader2 className="animate-spin" /> : "Iniciar Turno"}
