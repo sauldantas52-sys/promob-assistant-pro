@@ -492,7 +492,7 @@ function ProjectDetail() {
                   ? officialCutStored
                     ? officialCutEvidence.file_name
                     : `${officialCutEvidence.file_name} · artefato não armazenado`
-                  : "Saída oficial ausente: gate fechado"
+                  : "Saída oficial pendente (Modo Piloto)"
               }
               ok={officialCutStored}
             />
