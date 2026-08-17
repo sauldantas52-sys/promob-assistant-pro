@@ -329,27 +329,39 @@ function TestImportAuditPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 text-xs font-mono">
              <div className="flex justify-between border-b border-slate-800 pb-1">
                <span className="text-slate-500">Elementos &lt;ITEM&gt;</span>
-               <span className="font-bold text-lime-400">352 (G: 352)</span>
+                <span className={cnUtil("font-bold", (allParts?.length || 0) === 352 ? "text-lime-400" : "text-amber-400")}>
+                 {allParts?.length || 0} (G: 352)
+               </span>
              </div>
              <div className="flex justify-between border-b border-slate-800 pb-1">
                <span className="text-slate-500">Linhas MDF com THICKNESS</span>
-               <span className="font-bold text-lime-400">275 (G: 275)</span>
+                <span className={cnUtil("font-bold", mdfParts.length === 275 ? "text-lime-400" : "text-amber-400")}>
+                 {mdfParts.length} (G: 275)
+               </span>
              </div>
              <div className="flex justify-between border-b border-slate-800 pb-1">
                <span className="text-slate-500">Peças físicas (com REPETITION)</span>
-               <span className="font-bold text-lime-400">409 (G: 409)</span>
+                <span className={cnUtil("font-bold", physicalPartsCount === 409 ? "text-lime-400" : "text-amber-400")}>
+                 {physicalPartsCount} (G: 409)
+               </span>
              </div>
              <div className="flex justify-between border-b border-slate-800 pb-1">
                <span className="text-slate-500">Módulos reconhecidos</span>
-               <span className="font-bold text-lime-400">13 (G: 13)</span>
+                <span className={cnUtil("font-bold", (modules?.length || 0) === 13 ? "text-lime-400" : "text-amber-400")}>
+                 {modules?.length || 0} (G: 13)
+               </span>
              </div>
              <div className="flex justify-between border-b border-slate-800 pb-1">
                <span className="text-slate-500">Linhas MDF dentro dos módulos</span>
-               <span className="font-bold text-lime-400">253 (G: 253)</span>
+                <span className={cnUtil("font-bold", moduleParts.length === 253 ? "text-lime-400" : "text-amber-400")}>
+                 {moduleParts.length} (G: 253)
+               </span>
              </div>
              <div className="flex justify-between border-b border-slate-800 pb-1">
                <span className="text-slate-500">Itens no nível raiz</span>
-               <span className="font-bold text-lime-400">45 (G: 45)</span>
+                <span className={cnUtil("font-bold", rootItemsCount === 45 ? "text-lime-400" : "text-amber-400")}>
+                 {rootItemsCount} (G: 45)
+               </span>
              </div>
              <div className="flex justify-between border-b border-slate-800 pb-1">
                <span className="text-slate-500">NÃO CLASSIFICADOS</span>
