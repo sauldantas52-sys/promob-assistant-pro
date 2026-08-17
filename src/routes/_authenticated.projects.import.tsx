@@ -407,6 +407,7 @@ function ImportPage() {
           throw new Error(`Falha na persistência industrial: nenhum arquivo foi registrado.`);
         }
         
+        navigate({ to: "/projects/test-import" as any });
         return projectId;
       } catch (error) {
         if (rpcAttempted) {
