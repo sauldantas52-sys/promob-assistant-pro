@@ -109,10 +109,14 @@ function ProjectsContent() {
       .filter(Boolean)
       .join(" ")
       .toLocaleLowerCase("pt-BR");
-    return (
-      (!normalizedSearch || searchable.includes(normalizedSearch)) &&
-      (statusFilter === "all" || project.status === statusFilter)
-    );
+    
+    const matchesSearch = !normalizedSearch || searchable.includes(normalizedSearch);
+    const matchesStatus = statusFilter === "all" || project.status === statusFilter;
+    const matchesType = typeFilter === "all" || 
+                       (typeFilter === "test" && project.isTest) || 
+                       (typeFilter === "real" && !project.isTest);
+
+    return matchesSearch && matchesStatus && matchesType;
   });
   const cuttingNow = (projects.data ?? []).filter(
     (project) =>
