@@ -129,6 +129,15 @@ export function VisualFeedingMode({ projectId, projectName }: VisualFeedingModeP
                           <Badge variant="secondary" className="bg-slate-100 text-slate-500 text-[8px] uppercase font-black px-2">
                             {module.parts?.length || 0} Peças
                           </Badge>
+                          {moduleDXF ? (
+                            <Badge className="bg-emerald-100 text-emerald-600 border-none text-[8px] uppercase font-black px-2">
+                              DXF Detectado
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-amber-100 text-amber-600 border-none text-[8px] uppercase font-black px-2">
+                              Sem DXF Técnico
+                            </Badge>
+                          )}
                         </div>
                       </div>
                     </div>
