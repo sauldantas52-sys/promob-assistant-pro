@@ -180,8 +180,8 @@ function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-slate-50 p-4 sm:p-6">
       <div className="w-full max-w-lg">
         <div className="mb-8 sm:mb-16 flex flex-col items-center text-center">
-          <div className="mb-4 sm:mb-8 flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-[2rem] sm:rounded-[3rem] bg-blue-600 text-white shadow-2xl shadow-blue-600/30 ring-4 sm:ring-8 ring-blue-600/5">
-            <Boxes className="h-10 w-10 sm:h-14 sm:w-14" />
+          <div className="mb-4 sm:mb-8 flex h-20 w-20 sm:h-28 sm:w-28 items-center justify-center rounded-[2rem] sm:rounded-[3rem] bg-[var(--sidebar-industrial)] text-white shadow-2xl shadow-slate-900/30 ring-4 sm:ring-8 ring-slate-900/5">
+            <Boxes className="h-10 w-10 sm:h-14 sm:w-14 text-[var(--lime-industrial)]" />
           </div>
           <h1 className="text-4xl sm:text-6xl font-black text-slate-900 uppercase tracking-tighter leading-none mb-2 sm:mb-4">
             Monta AI
