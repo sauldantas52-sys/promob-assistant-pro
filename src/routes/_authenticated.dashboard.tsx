@@ -196,6 +196,11 @@ function DashboardContent() {
                         </Badge>
                       </td>
                       <td className="px-6 py-4 text-right">
+                        <span className="text-[10px] font-bold text-slate-400">
+                          {project.updated_at ? new Date(project.updated_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '-'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
                         {project.machining_blocked ? (
                           <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-red-50 text-red-600 border border-red-100">
                             <ShieldCheck className="h-3 w-3" />
