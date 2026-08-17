@@ -196,11 +196,6 @@ function DashboardContent() {
                         </Badge>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <span className="text-[10px] font-bold text-slate-400">
-                          {project.updated_at ? new Date(project.updated_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '-'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
                         {project.machining_blocked ? (
                           <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-red-50 text-red-600 border border-red-100">
                             <ShieldCheck className="h-3 w-3" />
@@ -212,6 +207,11 @@ function DashboardContent() {
                             <span className="text-[9px] font-bold uppercase">Liberada</span>
                           </div>
                         )}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <span className="text-[10px] font-bold text-slate-400">
+                          {project.updated_at ? new Date(project.updated_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '-'}
+                        </span>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <Button asChild variant="ghost" size="sm" className="h-8 px-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50">
