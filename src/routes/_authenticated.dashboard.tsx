@@ -55,7 +55,7 @@ function DashboardContent() {
   });
 
   const list = projects.data ?? [];
-  const activeCount = list.filter(p => p.operational_status !== 'finalizado' && p.operational_status !== 'assistencia').length;
+  const activeCount = list.filter(p => p.operational_status !== 'finalizado' && (p.operational_status as string) !== 'assistencia').length;
   const decisionRequired = list.filter(p => p.operational_status === 'divergencia_encontrada' || p.operational_status === 'conferencia_pendente').length;
   const validationPending = list.filter(p => p.is_validated === false && p.operational_status !== 'finalizado').length;
   
@@ -175,7 +175,7 @@ function DashboardContent() {
                 <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
                     <th className="px-6 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider">Projeto / Cliente</th>
-                    <th className="px-6 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider">Etapa</th>
+                    <th className="px-6 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider">Status Operacional</th>
                     <th className="px-6 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider text-right">Segurança</th>
                     <th className="px-6 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider text-right">Última Ref.</th>
                     <th className="px-6 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider text-right">Ação</th>
@@ -191,8 +191,8 @@ function DashboardContent() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <Badge className={cn("rounded px-2 py-0.5 text-[9px] font-bold uppercase border-none", statusTone(project.status))}>
-                          {statusLabel(project.status)}
+                        <Badge className={cn("rounded px-2 py-0.5 text-[9px] font-bold uppercase border-none", statusTone(project.operational_status))}>
+                          {statusLabel(project.operational_status)}
                         </Badge>
                       </td>
                       <td className="px-6 py-4 text-right">
