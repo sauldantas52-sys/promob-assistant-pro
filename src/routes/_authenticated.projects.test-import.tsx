@@ -155,7 +155,7 @@ function TestImportAuditPage() {
             </div>
             <div>
               <p className="text-[9px] font-black text-slate-400 uppercase">DB Root Items</p>
-              <p className="font-black text-lg text-slate-900">{rootItems.length}</p>
+              <p className="font-black text-lg text-slate-900">{rootItemsCount}</p>
             </div>
           </CardContent>
         </Card>
