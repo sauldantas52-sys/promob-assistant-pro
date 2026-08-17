@@ -638,6 +638,7 @@ function ProjectDetail() {
             <TabTrigger value="technical3d" icon={Box} label="Gêmeo DXF" />
             <TabTrigger value="parts" icon={ClipboardList} label="Lista Técnica" />
             <TabTrigger value="commercial" icon={FileText} label="Comercial" />
+            <TabTrigger value="budget" icon={Building2} label="Inventário XML" />
             <TabTrigger value="cutplan" icon={Scissors} label="Plano de Corte" />
             <TabTrigger value="engineering" icon={Settings} label="Usinagem" />
             <TabTrigger value="sketchup" icon={ArrowRightLeft} label="Ponte SKP" />
@@ -650,6 +651,7 @@ function ProjectDetail() {
             <TabTrigger value="files" icon={FileUp} label="Arquivos" />
           </TabsList>
         </div>
+
 
         <TabsContent value="visual-intake" className="mt-6">
           <VisualFeedingMode 
@@ -1287,10 +1289,6 @@ function ProjectDetail() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="estimate" className="mt-6">
-          <VisualEstimateTab projectId={projectId} />
-        </TabsContent>
-
         <TabsContent value="budget" className="mt-6">
           <BudgetTab projectId={projectId} />
         </TabsContent>
@@ -1298,6 +1296,7 @@ function ProjectDetail() {
         <TabsContent value="cutting_beta" className="mt-6">
           <PreliminaryCutPlanTab projectId={projectId} />
         </TabsContent>
+
       </Tabs>
     </div>
   );
