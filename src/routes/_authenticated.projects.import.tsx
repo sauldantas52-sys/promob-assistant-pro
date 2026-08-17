@@ -69,7 +69,7 @@ function classifyFolder(selectedFiles: File[]): ClassifiedFolder {
     selectedFiles.find((file) => predicate(file, normalizedFileName(file))) ?? null;
   const isPdf = (file: File) => file.name.toLowerCase().endsWith(".pdf");
 
-  return {
+  const result: ClassifiedFolder = {
     xml: find((file) => file.name.toLowerCase().endsWith(".xml")),
     cotas: find((file, normalized) => isPdf(file) && (normalized.includes("cotas") || normalized.includes("manual") || normalized.includes("desenho") || normalized.includes("tecnico"))),
     listaCompra: find((file, normalized) => isPdf(file) && (normalized.includes("listacompra") || normalized.includes("insumos") || normalized.includes("compra"))),
@@ -77,8 +77,20 @@ function classifyFolder(selectedFiles: File[]): ClassifiedFolder {
     previewCorte: find((file, normalized) => isPdf(file) && (normalized.includes("previewcorte") || normalized.includes("mapa") || normalized.includes("nesting"))),
     image: find((file) => /\.(jpe?g|png|webp)$/i.test(file.name)),
     dxf: find((file) => file.name.toLowerCase().endsWith(".dxf")),
-    xmk: find((file) => file.name.toLowerCase().endsWith(".xmk")),
+    promob: find((file) => file.name.toLowerCase().endsWith(".promob")),
+    allFiles: selectedFiles,
+    others: [],
   };
+
+  // Identify others (files not matching the primary categories)
+  const classifiedPaths = new Set([
+    result.xml, result.cotas, result.listaCompra, result.listaCorte, 
+    result.previewCorte, result.image, result.dxf, result.promob
+  ].filter(Boolean).map(f => f!.name));
+
+  result.others = selectedFiles.filter(f => !classifiedPaths.has(f.name));
+
+  return result;
 }
 
 function parseFolderIdentity(folderName: string) {
