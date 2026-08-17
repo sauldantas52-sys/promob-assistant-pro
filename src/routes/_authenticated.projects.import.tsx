@@ -156,11 +156,10 @@ function ImportPage() {
     { label: "Imagem", file: classification.image, required: false },
     { label: "Arquivo .PROMOB", file: classification.promob, required: true },
   ];
-  const hasRequiredFiles = true; // Ignorar validação rígida de arquivos para o Piloto conforme solicitado
+  const hasRequiredFiles = true; // Ingestão não bloqueada por gates
   const intakeReady =
     folderFileCount > 0 &&
     identity.hasValidIdentity &&
-    hasRequiredFiles &&
     !!destination &&
     !!files.xml;
 
@@ -288,6 +287,30 @@ function ImportPage() {
           });
         }
 
+        rpcAttempted = true;
+        
+        // 1. Criar Projeto e Registrar Arquivos
+        const { data: importedProjectId, error: projectError } = await supabase.rpc(
+          "import_client_project" as any,
+          {
+            _project_id: projectId,
+            _project: {
+              name: data.name || files.xml.name.replace(/\.xml$/i, ""),
+              client_name: data.client,
+              environment: data.env,
+              notes:
+                destination === "cutplanning"
+                  ? "Destino de produção: CutPlanning (terceirização)"
+                  : "Destino de produção: fábrica própria",
+            },
+            _files: storedFiles,
+            _modules: [], // Não alimentar módulos aqui, usar nova RPC de distribuição
+            _loose_parts: [],
+          },
+        );
+        if (projectError) throw projectError;
+
+        // 2. Distribuição Automática 4.0
         const modulesPayload = result.modules.map((module: PromobModule) => ({
           name: module.name,
           environment: module.environment ?? null,
@@ -308,6 +331,7 @@ function ImportPage() {
             metadata: part.metadata ?? {},
           })),
         }));
+        
         const loosePartsPayload = result.loose_parts.map((part: PromobPart) => ({
           kind: part.kind,
           name: part.name,
@@ -321,26 +345,16 @@ function ImportPage() {
           metadata: part.metadata ?? {},
         }));
 
-        rpcAttempted = true;
-        const { data: importedProjectId, error: importError } = await supabase.rpc(
-          "import_client_project" as any,
+        const { error: distributionError } = await supabase.rpc(
+          "ingest_and_distribute_project" as any,
           {
             _project_id: projectId,
-            _project: {
-              name: data.name || files.xml.name.replace(/\.xml$/i, ""),
-              client_name: data.client,
-              environment: data.env,
-              notes:
-                destination === "cutplanning"
-                  ? "Destino de produção: CutPlanning (terceirização)"
-                  : "Destino de produção: fábrica própria",
-            },
-            _files: storedFiles,
+            _company_id: companyId,
             _modules: modulesPayload,
             _loose_parts: loosePartsPayload,
-          },
+          }
         );
-        if (importError) throw importError;
+        if (distributionError) throw distributionError;
         // Auditoria Pós-Importação 4.0: Validar persistência real
         const { data: projectAudit, error: projectError } = await supabase
           .from("projects")
@@ -855,7 +869,7 @@ function ImportPage() {
                 <AlertTriangle className="h-5 w-5 shrink-0" />
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-wider">
-                    Modo Piloto: Requisitos Pendentes
+                    Modo Piloto: Pendências de Conferência
                   </p>
                   <p className="mt-1 text-xs leading-relaxed">
                     A Pasta do Cliente possui divergências de nomenclatura ou arquivos. 
@@ -897,7 +911,7 @@ function ImportPage() {
                 ) : (
                   <Upload className="h-4 w-4" />
                 )}{" "}
-                Criar projeto (Modo Piloto)
+                Criar projeto
               </Button>
               <p className="mt-3 text-center text-[9px] font-bold uppercase leading-relaxed tracking-[0.1em] text-slate-400">
                 Somente arquivos da pasta serão interpretados. Fidelidade Industrial 100%.

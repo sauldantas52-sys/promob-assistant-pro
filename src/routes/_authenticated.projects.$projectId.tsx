@@ -126,13 +126,25 @@ function ProjectDetail() {
   const [filterType, setFilterType] = useState<string>("all");
   const [searchPart, setSearchPart] = useState("");
 
+  const distribution = useQuery({
+    queryKey: ["project_distribution", projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("project_distribution" as any)
+        .select("*")
+        .eq("project_id", projectId);
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const project = useQuery({
     queryKey: ["project", projectId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
         .select(
-          "id, name, client_name, environment, status, notes, created_at, company_id, cutting_status, machining_status, is_cutting_edge_released, machining_blocked, is_validated",
+          "id, name, client_name, environment, status, operational_status, notes, created_at, company_id, cutting_status, machining_status, is_cutting_edge_released, machining_blocked, is_validated",
         )
         .eq("id", projectId)
         .maybeSingle();
@@ -563,6 +575,9 @@ function ProjectDetail() {
           )}
         </CardContent>
       </Card>
+
+      {/* Central Visual de Distribuição 4.0 */}
+      <ProjectDistributionFlow distribution={distribution.data || []} project={project.data} />
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
         <ProjectMetric
