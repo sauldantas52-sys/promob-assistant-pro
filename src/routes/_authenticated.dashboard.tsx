@@ -93,27 +93,34 @@ function DashboardContent() {
             <CardContent className="pt-6">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <p className="text-5xl font-black tracking-tighter">{activeCount}</p>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1">Projetos em Operação</p>
-                </div>
-                  <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-right">
-                    <div>
-                      <p className="text-lg font-bold text-[var(--status-corte)]">{countByStatus('corte')}</p>
-                      <p className="text-[9px] text-slate-500 uppercase font-bold">Corte</p>
-                    </div>
-                    <div>
-                      <p className="text-lg font-bold text-[var(--status-usinagem)]">{countByStatus('usinagem')}</p>
-                      <p className="text-[9px] text-slate-500 uppercase font-bold">Usinagem</p>
-                    </div>
-                    <div className="mt-2">
-                      <p className="text-lg font-bold text-[var(--status-montagem)]">{countByStatus('montagem')}</p>
-                      <p className="text-[9px] text-slate-500 uppercase font-bold">Montagem</p>
-                    </div>
-                    <div className="mt-2">
-                      <p className="text-lg font-bold text-[var(--status-expedicao)]">{countByStatus('expedicao')}</p>
-                      <p className="text-[9px] text-slate-500 uppercase font-bold">Carga</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-5xl font-black tracking-tighter">{activeCount}</p>
+                    <div className="flex flex-col">
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Projetos Ativos</p>
+                      <Badge className="bg-emerald-500/10 text-emerald-500 border-none rounded px-1.5 py-0 text-[8px] font-bold uppercase">
+                        Real-time Ingestion
+                      </Badge>
                     </div>
                   </div>
+                </div>
+                <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-right">
+                  <div>
+                    <p className="text-lg font-bold text-[var(--status-corte)]">{countByStatus('corte')}</p>
+                    <p className="text-[9px] text-slate-500 uppercase font-bold">Corte</p>
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-[var(--status-usinagem)]">{countByStatus('usinagem')}</p>
+                    <p className="text-[9px] text-slate-500 uppercase font-bold">Usinagem</p>
+                  </div>
+                  <div className="mt-2">
+                    <p className="text-lg font-bold text-[var(--status-montagem)]">{countByStatus('montagem')}</p>
+                    <p className="text-[9px] text-slate-500 uppercase font-bold">Montagem</p>
+                  </div>
+                  <div className="mt-2">
+                    <p className="text-lg font-bold text-[var(--status-expedicao)]">{countByStatus('expedicao')}</p>
+                    <p className="text-[9px] text-slate-500 uppercase font-bold">Carga</p>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -131,9 +138,11 @@ function DashboardContent() {
                 <div>
                   <div className="flex items-baseline gap-2">
                     <p className="text-5xl font-black tracking-tighter text-slate-900">{decisionRequired}</p>
-                    <p className="text-xs font-bold text-slate-400">Bloqueios</p>
+                    <div className="flex flex-col">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Bloqueios CNC</p>
+                      <p className="text-[8px] font-bold text-red-500 uppercase">Aguardando Auditoria</p>
+                    </div>
                   </div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">Usinagem Interrompida</p>
                 </div>
                 <div className="flex flex-col items-end gap-1">
                   <div className="flex items-center gap-2 mb-1">
