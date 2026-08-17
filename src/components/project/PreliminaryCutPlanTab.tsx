@@ -1,4 +1,4 @@
-import { Scissors, ShieldCheck, Layers, Package, Tool, AlertCircle, Ruler } from "lucide-react";
+import { Scissors, ShieldCheck, Layers, Package, Settings as Tool, AlertCircle, Ruler } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -157,7 +157,7 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
 
       {/* Grupos de Corte */}
       <div className="space-y-6">
-        {Object.keys(thicknessGroups).sort().map(t => renderCutGroup(t, thicknessGroups[t]))}
+        {Object.keys(thicknessGroups).sort().map(t => renderCutGroup(t, thicknessGroups[t] || []))}
       </div>
 
       {/* Tabela de Auditoria solicitada */}
