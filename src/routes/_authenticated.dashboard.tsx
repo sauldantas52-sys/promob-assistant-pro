@@ -46,7 +46,12 @@ function DashboardContent() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
-        .select("id, name, client_name, status, operational_status, environment, created_at, machining_blocked, is_validated, company_id, updated_at")
+        .select(`
+          id, name, client_name, status, operational_status, environment, created_at, 
+          machining_blocked, is_validated, company_id, updated_at,
+          modules(count),
+          parts(count)
+        `)
         .eq("company_id", companyId as string)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -175,9 +180,9 @@ function DashboardContent() {
                 <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
                     <th className="px-6 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider">Projeto / Cliente</th>
-                    <th className="px-6 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider">Status Operacional</th>
+                    <th className="px-6 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider text-right">Módulos / Peças</th>
+                    <th className="px-6 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider">Status / Etapa</th>
                     <th className="px-6 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider text-right">Segurança</th>
-                    <th className="px-6 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider text-right">Última Ref.</th>
                     <th className="px-6 py-3 text-[9px] font-bold text-slate-400 uppercase tracking-wider text-right">Ação</th>
                   </tr>
                 </thead>
@@ -190,10 +195,23 @@ function DashboardContent() {
                           <span className="text-[10px] text-slate-400 font-medium uppercase tracking-tighter">{project.client_name || "Sem cliente"}</span>
                         </div>
                       </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex flex-col items-end">
+                          <span className="text-[11px] font-black text-slate-900">
+                            {(project as any).modules?.[0]?.count || 0} / {(project as any).parts?.[0]?.count || 0}
+                          </span>
+                          <span className="text-[8px] text-slate-400 font-bold uppercase">Módulos / Peças</span>
+                        </div>
+                      </td>
                       <td className="px-6 py-4">
-                        <Badge className={cn("rounded px-2 py-0.5 text-[9px] font-bold uppercase border-none", statusTone(project.operational_status))}>
-                          {statusLabel(project.operational_status)}
-                        </Badge>
+                        <div className="flex flex-col gap-1">
+                          <Badge className={cn("w-fit rounded px-2 py-0.5 text-[9px] font-bold uppercase border-none", statusTone(project.status))}>
+                            {statusLabel(project.status)}
+                          </Badge>
+                          <span className="text-[8px] text-slate-400 font-bold uppercase px-1">
+                            {statusLabel(project.operational_status)}
+                          </span>
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-right">
                         {project.machining_blocked ? (
@@ -207,11 +225,6 @@ function DashboardContent() {
                             <span className="text-[9px] font-bold uppercase">Liberada</span>
                           </div>
                         )}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <span className="text-[10px] font-bold text-slate-400">
-                          {project.updated_at ? new Date(project.updated_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '-'}
-                        </span>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <Button asChild variant="ghost" size="sm" className="h-8 px-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50">
