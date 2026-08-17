@@ -46,7 +46,7 @@ function DashboardContent() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
-        .select("id, name, client_name, status, environment, created_at, machining_blocked, is_validated, company_id, updated_at")
+        .select("id, name, client_name, status, operational_status, environment, created_at, machining_blocked, is_validated, company_id, updated_at")
         .eq("company_id", companyId as string)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -55,9 +55,9 @@ function DashboardContent() {
   });
 
   const list = projects.data ?? [];
-  const activeCount = list.filter(p => p.status !== 'expedido' && p.status !== 'assistencia' && p.status !== 'concluido').length;
-  const decisionRequired = list.filter(p => (p.machining_blocked === true || p.status === 'novo') && p.status !== 'concluido').length;
-  const validationPending = list.filter(p => p.is_validated === false && p.status !== 'concluido').length;
+  const activeCount = list.filter(p => p.operational_status !== 'finalizado' && p.operational_status !== 'assistencia').length;
+  const decisionRequired = list.filter(p => p.operational_status === 'divergencia_encontrada' || p.operational_status === 'conferencia_pendente').length;
+  const validationPending = list.filter(p => p.is_validated === false && p.operational_status !== 'finalizado').length;
   
   const countByStatus = (status: string) => list.filter((p) => p.status === status).length;
 
