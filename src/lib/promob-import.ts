@@ -194,7 +194,7 @@ function parsePartNode(node: Element, moduleSequence: number, pieceSequence: num
     piece_code: getAttr(node, 'PIECE_CODE'),
   };
 
-  if (!refOf(node, 'MATERIAL') && !refOf(node, 'THICKNESS')) {
+  if ((!rawMaterial || !rawThickness) && (planoB.material || planoB.thickness)) {
     (metadata as any).origem = "referencia_desmontada";
   }
 
