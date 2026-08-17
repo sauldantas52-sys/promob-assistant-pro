@@ -194,7 +194,7 @@ function TestImportAuditPage() {
                     <TableCell className="text-[11px]">
                       <span className="font-black">{part.unit}</span> | Q: <span className="font-black">{part.quantity}</span> | R: <span className="font-black">{(part.metadata as any)?.repetition}</span>
                     </TableCell>
-                    <TableCell className="text-[11px] font-mono">
+                    <TableCell className="text-[11px] font-mono whitespace-nowrap">
                       {part.width_mm || 0} x {part.thickness_mm || 0} x {part.length_mm || 0}
                     </TableCell>
                     <TableCell className="text-[10px] text-slate-500">
