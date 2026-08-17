@@ -429,7 +429,10 @@ function ImportPage() {
             .select("id")
             .eq("id", projectId)
             .maybeSingle();
-          if (reconciledProject) return reconciledProject.id;
+          if (reconciledProject) {
+            navigate({ to: "/projects/test-import" as any });
+            return reconciledProject.id;
+          }
           throw new Error(
             verificationError || reconciliationError
               ? "Estado da importação indeterminado por falha de rede. Os arquivos foram preservados e a sessão foi marcada para reconciliação."
