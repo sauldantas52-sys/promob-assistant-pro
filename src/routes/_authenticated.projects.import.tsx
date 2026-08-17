@@ -851,15 +851,15 @@ function ImportPage() {
             </Card>
 
             {!intakeReady && folderFileCount > 0 && (
-              <div className="flex gap-3 rounded-md border border-red-200 bg-red-50 p-4 text-red-800">
+              <div className="flex gap-3 rounded-md border border-amber-200 bg-amber-50 p-4 text-amber-800">
                 <AlertTriangle className="h-5 w-5 shrink-0" />
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-wider">
-                    Criação bloqueada
+                    Modo Piloto: Requisitos Pendentes
                   </p>
                   <p className="mt-1 text-xs leading-relaxed">
-                    Corrija o nome da pasta, inclua todos os arquivos obrigatórios e selecione o
-                    destino de produção.
+                    A Pasta do Cliente possui divergências de nomenclatura ou arquivos. 
+                    Confirme o destino de produção para prosseguir com a ingestão em Modo Piloto.
                   </p>
                 </div>
               </div>
@@ -879,7 +879,7 @@ function ImportPage() {
                   <p className="text-[9px] font-black uppercase tracking-wider text-slate-400">
                     Usinagem
                   </p>
-                  <p className="mt-1 font-black text-slate-950">Bloqueada</p>
+                  <p className="mt-1 font-black text-slate-950">Liberada (Modo Piloto)</p>
                 </div>
               </div>
               {isProcessing && (
@@ -897,7 +897,7 @@ function ImportPage() {
                 ) : (
                   <Upload className="h-4 w-4" />
                 )}{" "}
-                Criar projeto bloqueado
+                Criar projeto (Modo Piloto)
               </Button>
               <p className="mt-3 text-center text-[9px] font-bold uppercase leading-relaxed tracking-[0.1em] text-slate-400">
                 Somente arquivos da pasta serão interpretados. Fidelidade Industrial 100%.

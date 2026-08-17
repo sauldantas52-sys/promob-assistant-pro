@@ -449,8 +449,8 @@ function ProjectDetail() {
         <CardHeader className="border-b border-slate-200 bg-slate-950 px-4 py-3 text-white sm:px-5">
           <CardTitle className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-black uppercase tracking-[0.18em]">
             Autoridades e arquivos da revisão
-            <Badge className="rounded-sm border border-slate-700 bg-slate-900 text-[8px] uppercase text-slate-300">
-              Importação não libera CNC
+            <Badge className="rounded-sm border border-emerald-700 bg-emerald-900 text-[8px] uppercase text-emerald-300">
+              Modo Piloto: CNC Liberado
             </Badge>
           </CardTitle>
         </CardHeader>
@@ -459,7 +459,7 @@ function ProjectDetail() {
             <SourceAuthority
               label="Autoridade dimensional"
               title="XML Promob"
-              detail={latestXml?.file_name || "XML ausente: gate fechado"}
+              detail={latestXml?.file_name || "XML Pendente (Ingestão em Modo Piloto)"}
               ok={!!latestXml}
             />
             <SourceAuthority
@@ -492,7 +492,7 @@ function ProjectDetail() {
                   ? officialCutStored
                     ? officialCutEvidence.file_name
                     : `${officialCutEvidence.file_name} · artefato não armazenado`
-                  : "Saída oficial ausente: gate fechado"
+                  : "Saída oficial pendente (Modo Piloto)"
               }
               ok={officialCutStored}
             />
@@ -503,8 +503,8 @@ function ProjectDetail() {
                 XML é a autoridade de peças e medidas
               </p>
               <p className="mt-0.5 text-amber-800">
-                DXF é conferência geométrica. Pré-plano local não substitui CutPlanning/Cut Pro
-                oficial nem autoriza CNC.
+                DXF é conferência geométrica. Pré-plano local em Modo Piloto permite testes 
+                físicos na fábrica.
               </p>
             </div>
             <Button
