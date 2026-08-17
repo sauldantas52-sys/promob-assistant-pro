@@ -48,11 +48,12 @@ function DashboardContent() {
         .from("projects")
         .select(`
           id, name, client_name, status, operational_status, environment, created_at, 
-          machining_blocked, is_validated, company_id, updated_at,
+          machining_blocked, is_validated, company_id, updated_at, is_test,
           modules(count),
           parts(count)
         `)
         .eq("company_id", companyId as string)
+        .eq("is_test", false)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
