@@ -32,6 +32,11 @@ export const generateAuditReport = createServerFn({ method: "POST" })
         .select("*")
         .eq("project_id", data.projectId);
 
+      const { data: visualIdentifications } = await sb
+        .from("visual_identifications")
+        .select("*, modules(name)")
+        .eq("project_id", data.projectId);
+
       const { data: logs } = await sb
         .from("production_logs")
         .select("*")
