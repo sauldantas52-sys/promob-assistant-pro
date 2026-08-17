@@ -3026,6 +3026,16 @@ export type Database = {
         }
         Returns: undefined
       }
+      persist_industrial_project_bypass_v3: {
+        Args: {
+          _client_name: string
+          _company_id: string
+          _name: string
+          _project_id: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
       prepare_store_credit_purchase: {
         Args: {
           _account_id: string
