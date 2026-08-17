@@ -86,16 +86,31 @@ function parsePartNode(node: Element): PromobPart {
   const name = getAttr(node, 'DESCRIPTION') || getAttr(node, 'NAME') || 'Peça Sem Nome';
   const family = getAttr(node, 'FAMILY')?.toUpperCase();
   
+  // Extração de Bordas
+  const edgeTop = getNumericAttr(node, 'EDGE_TOP') || 0;
+  const edgeBottom = getNumericAttr(node, 'EDGE_BOTTOM') || 0;
+  const edgeLeft = getNumericAttr(node, 'EDGE_LEFT') || 0;
+  const edgeRight = getNumericAttr(node, 'EDGE_RIGHT') || 0;
+
   const metadata: PartMetadata = {
     unique_id: getAttr(node, 'UNIQUEID'),
     unique_parent_id: getAttr(node, 'UNIQUEPARENTID'),
     repetition: getNumericAttr(node, 'REPETITION') || 1,
+    quantity_raw: getNumericAttr(node, 'QUANTITY'),
     text_dimension: getAttr(node, 'TEXTDIMENSION'),
     unit: getAttr(node, 'UNIT') || 'un',
     family: family,
     group: getAttr(node, 'GROUP'),
     reference: getAttr(node, 'REFERENCE'),
     id_xml: getAttr(node, 'ID'),
+    color: getAttr(node, 'COLOR') || getAttr(node, 'MODEL'),
+    supplier: getAttr(node, 'SUPPLIER'),
+    edge_top: edgeTop,
+    edge_bottom: edgeBottom,
+    edge_left: edgeLeft,
+    edge_right: edgeRight,
+    edge_name_general: getAttr(node, 'EDGE_NAME'),
+    piece_code: getAttr(node, 'PIECE_CODE'),
   };
 
   const quantity = getNumericAttr(node, 'QUANTITY') || 1;
@@ -112,10 +127,19 @@ function parsePartNode(node: Element): PromobPart {
     width_mm: getNumericAttr(node, 'WIDTH') || null,
     length_mm: getNumericAttr(node, 'DEPTH') || null,
     quantity, 
-
     unit: metadata.unit,
-    edge_banding: getAttr(node, 'EDGE_BANDING') || null,
-    metadata
+    edge_banding: getAttr(node, 'EDGE_BANDING') || (edgeTop || edgeBottom || edgeLeft || edgeRight ? 'Sim' : null),
+    metadata,
+    color: metadata.color,
+    supplier: metadata.supplier,
+    edge_top: edgeTop,
+    edge_bottom: edgeBottom,
+    edge_left: edgeLeft,
+    edge_right: edgeRight,
+    id_xml: metadata.id_xml,
+    parent_id_xml: metadata.unique_parent_id,
+    repetition: metadata.repetition,
+    quantity_raw: metadata.quantity_raw,
   };
 }
 
