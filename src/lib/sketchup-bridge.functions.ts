@@ -127,7 +127,7 @@ export const processSkpPackage = createServerFn({ method: "POST" })
           depth_mm: mod.depth,
           quantity: 1,
           data_source: 'SKP_BRIDGE',
-          machining_blocked: true,
+          machining_blocked: false, // Liberado por padrão no Modo Piloto
           status: 'Não confirmado',
           metadata: { 
             skp_guid: mod.guid, 
@@ -151,7 +151,7 @@ export const processSkpPackage = createServerFn({ method: "POST" })
               depth_mm: p.depth,
               quantity: 1,
               data_source: 'SKP_BRIDGE',
-              machining_blocked: true,
+              machining_blocked: false, // Liberado por padrão no Modo Piloto
               status: 'Não confirmado',
               metadata: { 
                 parent_guid: mod.guid,
@@ -171,7 +171,7 @@ export const processSkpPackage = createServerFn({ method: "POST" })
       // Update global project block
       await admin.from("projects")
         .update({ 
-          machining_blocked: true,
+          machining_blocked: false, // Liberado por padrão no Modo Piloto
           status: 'conferencia'
         })
         .eq("id", projectId);

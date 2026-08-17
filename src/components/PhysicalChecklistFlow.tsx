@@ -239,9 +239,9 @@ export function PhysicalChecklistFlow({ projectId }: PhysicalChecklistFlowProps)
       </div>
 
       {!pilotChecks?.some(c => c.gate_id === 'gate2' && c.status === 'concluido') && (
-        <div className="flex items-center gap-2 p-4 rounded-xl bg-amber-50 border border-amber-100 text-amber-700 text-xs font-bold uppercase tracking-widest">
-          <AlertTriangle className="h-4 w-4" />
-          Atenção: Gate 2 físico pendente — CNC Bloqueado
+        <div className="flex items-center gap-2 p-4 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-widest">
+          <ShieldCheck className="h-4 w-4" />
+          Modo Piloto: CNC Liberado para Testes
         </div>
       )}
     </div>
