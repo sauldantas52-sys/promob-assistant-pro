@@ -338,8 +338,12 @@ function ImportPage() {
             edge_bottom: part.edge_bottom ?? 0,
             edge_left: part.edge_left ?? 0,
             edge_right: part.edge_right ?? 0,
+            edge_name_general: (part.metadata as any)?.edge_name_general ?? null,
+            edge_name_front: (part.metadata as any)?.edge_name_front ?? null,
             repetition: part.repetition ?? 1,
             quantity_raw: part.quantity_raw ?? null,
+            module_sequence: (part.metadata as any)?.module_sequence ?? null,
+            piece_sequence: (part.metadata as any)?.piece_sequence ?? null,
             metadata: {
               ...part.metadata,
               source: "XML"
@@ -367,8 +371,12 @@ function ImportPage() {
           edge_bottom: part.edge_bottom ?? 0,
           edge_left: part.edge_left ?? 0,
           edge_right: part.edge_right ?? 0,
+          edge_name_general: (part.metadata as any)?.edge_name_general ?? null,
+          edge_name_front: (part.metadata as any)?.edge_name_front ?? null,
           repetition: part.repetition ?? 1,
           quantity_raw: part.quantity_raw ?? null,
+          module_sequence: (part.metadata as any)?.module_sequence ?? null,
+          piece_sequence: (part.metadata as any)?.piece_sequence ?? null,
           metadata: {
             ...part.metadata,
             source: "XML"
