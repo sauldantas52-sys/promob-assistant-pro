@@ -79,6 +79,8 @@ export type ProjectSummary = {
   deliveryAt: string | null;
   completedSteps: number;
   totalSteps: number;
+  modulesCount: number;
+  partsCount: number;
 };
 
 export type CreateProjectInput = {
@@ -121,7 +123,11 @@ export async function fetchProjectClients(companyId: string): Promise<ProjectCli
 export async function fetchProjectsDashboard(companyId: string): Promise<ProjectSummary[]> {
   const { data: projects, error } = await supabase
     .from("projects")
-    .select("id, name, client_id, client_name, environment, status, cutting_status, created_at")
+    .select(`
+      id, name, client_id, client_name, environment, status, cutting_status, created_at,
+      modules(count),
+      parts(count)
+    `)
     .eq("company_id", companyId)
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -187,6 +193,8 @@ export async function fetchProjectsDashboard(companyId: string): Promise<Project
       deliveryAt: delivery?.scheduled_at ?? null,
       completedSteps: steps.filter((step) => step.status === "concluido").length,
       totalSteps: steps.length,
+      modulesCount: (project as any).modules?.[0]?.count || 0,
+      partsCount: (project as any).parts?.[0]?.count || 0,
     };
   });
 }
