@@ -7,25 +7,38 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info, CheckCircle2, AlertTriangle, Scissors } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { z } from "zod";
+
+const searchSchema = z.object({
+  projectId: z.string().optional(),
+});
 
 export const Route = createFileRoute("/_authenticated/projects/test-import")({
+  validateSearch: searchSchema,
   component: TestImportAuditPage,
 });
 
 function TestImportAuditPage() {
   const { companyId } = useAuth();
+  const { projectId: queryProjectId } = Route.useSearch();
 
-  // 1. Consulta o projeto mais recente (deve ser o Closet importado)
+  // 1. Consulta o projeto específico (ou o mais recente se não informado, para manter compatibilidade)
   const { data: project, isLoading: projectLoading } = useQuery({
-    queryKey: ["audit-project", companyId],
+    queryKey: ["audit-project", companyId, queryProjectId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("projects")
         .select("*")
-        .eq("company_id", companyId as string)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .eq("company_id", companyId as string);
+      
+      if (queryProjectId) {
+        query = query.eq("id", queryProjectId);
+      } else {
+        query = query.order("created_at", { ascending: false }).limit(1);
+      }
+
+      const { data, error } = await query.maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -112,6 +125,10 @@ function TestImportAuditPage() {
           <div>
             <h1 className="text-3xl font-black uppercase tracking-tight text-slate-900">Auditoria Técnica de Importação</h1>
             <p className="text-slate-500 font-bold uppercase text-[10px] tracking-widest mt-1">Industrial Design System 4.0 • Persistência Garantida</p>
+            <div className="mt-2 flex items-center gap-2">
+              <span className="bg-slate-900 text-white text-[10px] px-2 py-0.5 rounded font-black uppercase">{project.name}</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase">{project.client_name || "Sem Cliente"}</span>
+            </div>
           </div>
           <div className="text-right">
             <p className="text-[10px] font-black text-slate-400 uppercase">Project ID</p>

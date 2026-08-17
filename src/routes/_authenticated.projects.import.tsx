@@ -345,6 +345,7 @@ function ImportPage() {
                 destination === "cutplanning"
                   ? "Destino de produção: CutPlanning (terceirização)"
                   : "Destino de produção: fábrica própria",
+              is_test: true, // Forçando is_test para garantir persistência na auditoria
             },
             _files: storedFiles,
             _modules: [], 
