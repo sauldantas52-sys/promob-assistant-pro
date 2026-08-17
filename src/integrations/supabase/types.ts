@@ -1884,6 +1884,7 @@ export type Database = {
           ingestion_completed_at: string | null
           is_cutting_edge_released: boolean | null
           is_machining_assembly_blocked: boolean | null
+          is_test: boolean | null
           is_validated: boolean
           machining_blocked: boolean | null
           machining_status: string | null
@@ -1913,6 +1914,7 @@ export type Database = {
           ingestion_completed_at?: string | null
           is_cutting_edge_released?: boolean | null
           is_machining_assembly_blocked?: boolean | null
+          is_test?: boolean | null
           is_validated?: boolean
           machining_blocked?: boolean | null
           machining_status?: string | null
@@ -1942,6 +1944,7 @@ export type Database = {
           ingestion_completed_at?: string | null
           is_cutting_edge_released?: boolean | null
           is_machining_assembly_blocked?: boolean | null
+          is_test?: boolean | null
           is_validated?: boolean
           machining_blocked?: boolean | null
           machining_status?: string | null
