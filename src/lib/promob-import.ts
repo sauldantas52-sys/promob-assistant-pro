@@ -86,7 +86,7 @@ function parsePartNode(node: Element): PromobPart {
   return {
     name,
     kind,
-    material: getAttr(node, 'MATERIAL') || getAttr(node, 'COLOR') || null,
+    material: getAttr(node, 'MATERIAL') || null,
     thickness_mm: getNumericAttr(node, 'HEIGHT') || null,
     width_mm: getNumericAttr(node, 'WIDTH') || null,
     length_mm: getNumericAttr(node, 'DEPTH') || null,
