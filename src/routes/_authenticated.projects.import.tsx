@@ -197,6 +197,7 @@ function ImportPage() {
       if (dxfGeometry.length === 0)
         throw new Error("O DXF obrigatório não contém geometria reconhecível.");
 
+      const projectId = crypto.randomUUID();
       const packageCandidates: Array<{
         file: File | null;
         type: string;
