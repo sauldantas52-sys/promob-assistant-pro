@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info, CheckCircle2, AlertTriangle, Scissors } from "lucide-react";
 import { z } from "zod";
-import { cn } from "@/lib/utils";
+import { cn as cnUtil } from "@/lib/utils";
 
 const searchSchema = z.object({
   projectId: z.string().optional(),
@@ -299,10 +299,10 @@ function TestImportAuditPage() {
                     </TableCell>
                     <TableCell className="text-[10px] font-mono">
                       <div className="grid grid-cols-2 gap-1 w-20">
-                        <span className={cn("px-1 rounded text-center", part.edge_top ? "bg-blue-100 text-blue-700 font-bold" : "text-slate-300")}>{part.edge_top || 0}</span>
-                        <span className={cn("px-1 rounded text-center", part.edge_bottom ? "bg-blue-100 text-blue-700 font-bold" : "text-slate-300")}>{part.edge_bottom || 0}</span>
-                        <span className={cn("px-1 rounded text-center", part.edge_left ? "bg-blue-100 text-blue-700 font-bold" : "text-slate-300")}>{part.edge_left || 0}</span>
-                        <span className={cn("px-1 rounded text-center", part.edge_right ? "bg-blue-100 text-blue-700 font-bold" : "text-slate-300")}>{part.edge_right || 0}</span>
+                        <span className={cnUtil("px-1 rounded text-center", part.edge_top ? "bg-blue-100 text-blue-700 font-bold" : "text-slate-300")}>{part.edge_top || 0}</span>
+                        <span className={cnUtil("px-1 rounded text-center", part.edge_bottom ? "bg-blue-100 text-blue-700 font-bold" : "text-slate-300")}>{part.edge_bottom || 0}</span>
+                        <span className={cnUtil("px-1 rounded text-center", part.edge_left ? "bg-blue-100 text-blue-700 font-bold" : "text-slate-300")}>{part.edge_left || 0}</span>
+                        <span className={cnUtil("px-1 rounded text-center", part.edge_right ? "bg-blue-100 text-blue-700 font-bold" : "text-slate-300")}>{part.edge_right || 0}</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-[11px]">
