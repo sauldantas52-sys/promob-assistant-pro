@@ -361,6 +361,7 @@ function ImportPage() {
             _project_id: projectId,
             _modules: modulesPayload,
             _loose_parts: loosePartsPayload,
+            _is_test: data.name.toLowerCase().includes("closet") || data.client.toLowerCase().includes("closet")
           }
         );
         if (distributionError) throw distributionError;
@@ -407,6 +408,7 @@ function ImportPage() {
           throw new Error(`Falha na persistência industrial: nenhum arquivo foi registrado.`);
         }
         
+        navigate({ to: "/projects/test-import" as any });
         return projectId;
       } catch (error) {
         if (rpcAttempted) {
@@ -429,7 +431,10 @@ function ImportPage() {
             .select("id")
             .eq("id", projectId)
             .maybeSingle();
-          if (reconciledProject) return reconciledProject.id;
+          if (reconciledProject) {
+            navigate({ to: "/projects/test-import" as any });
+            return reconciledProject.id;
+          }
           throw new Error(
             verificationError || reconciliationError
               ? "Estado da importação indeterminado por falha de rede. Os arquivos foram preservados e a sessão foi marcada para reconciliação."

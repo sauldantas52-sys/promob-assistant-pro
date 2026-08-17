@@ -55,7 +55,9 @@ function getAttr(node: Element, name: string): string | undefined {
 function getNumericAttr(node: Element, name: string): number | undefined {
   const val = node.getAttribute(name);
   if (!val) return undefined;
-  const num = parseFloat(val.replace(',', '.'));
+  // Preserva a precisão original do XML
+  const cleanVal = val.replace(',', '.');
+  const num = parseFloat(cleanVal);
   return isNaN(num) ? undefined : num;
 }
 
@@ -84,10 +86,10 @@ function parsePartNode(node: Element): PromobPart {
   return {
     name,
     kind,
-    material: getAttr(node, 'MATERIAL') || getAttr(node, 'COLOR') || null,
-    thickness_mm: getNumericAttr(node, 'HEIGHT') || getNumericAttr(node, 'THICKNESS') || null,
+    material: getAttr(node, 'MATERIAL') || null,
+    thickness_mm: getNumericAttr(node, 'HEIGHT') || null,
     width_mm: getNumericAttr(node, 'WIDTH') || null,
-    length_mm: getNumericAttr(node, 'DEPTH') || getNumericAttr(node, 'LENGTH') || null,
+    length_mm: getNumericAttr(node, 'DEPTH') || null,
     quantity, // Preservamos QUANTITY separadamente de REPETITION no processamento final
     unit: metadata.unit,
     edge_banding: getAttr(node, 'EDGE_BANDING') || null,
