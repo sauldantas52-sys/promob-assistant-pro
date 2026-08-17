@@ -171,12 +171,13 @@ function TestImportAuditPage() {
             <Table>
               <TableHeader className="bg-slate-50">
                 <TableRow>
-                  <TableHead className="text-[9px] font-black uppercase">UID / Parent</TableHead>
-                  <TableHead className="text-[9px] font-black uppercase">Descrição</TableHead>
-                  <TableHead className="text-[9px] font-black uppercase">Ref / Family / Group</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase">XML ID / Parent</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase">Descrição / Material</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase">Dim (CxLxe)</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase">Cor / Supplier</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase">Bordas (T/B/L/R)</TableHead>
                   <TableHead className="text-[9px] font-black uppercase">Unit / Qty / Rep</TableHead>
-                  <TableHead className="text-[9px] font-black uppercase">Dim (WxHxD)</TableHead>
-                  <TableHead className="text-[9px] font-black uppercase">TxtDim</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase">Origem</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
