@@ -252,10 +252,12 @@ function LoginPage() {
 
                 <TabsContent value="operator">
                   <form onSubmit={handleOperatorSignIn} className="space-y-4 sm:space-y-6">
-                    <div className="flex flex-col items-center mb-4 sm:mb-6 text-blue-600">
-                      <HardHat className="h-8 w-8 sm:h-12 sm:w-12 mb-2" />
+                    <div className="flex flex-col items-center mb-4 sm:mb-6 text-slate-900">
+                      <div className="p-4 rounded-full bg-slate-100 mb-2">
+                        <HardHat className="h-8 w-8 sm:h-12 sm:w-12 text-slate-600" />
+                      </div>
                       <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em]">
-                        Acesso Industrial
+                        Terminal de Produção
                       </span>
                     </div>
 
