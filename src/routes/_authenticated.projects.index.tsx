@@ -14,6 +14,8 @@ import {
   Plus,
   Search,
   Upload,
+  ShieldCheck,
+  CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
@@ -71,6 +73,7 @@ function ProjectsContent() {
   const [creationKey, setCreationKey] = useState(0);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState<"all" | "real" | "test">("all");
 
   const projects = useQuery({
     queryKey: ["projects-dashboard", companyId],
@@ -108,10 +111,14 @@ function ProjectsContent() {
       .filter(Boolean)
       .join(" ")
       .toLocaleLowerCase("pt-BR");
-    return (
-      (!normalizedSearch || searchable.includes(normalizedSearch)) &&
-      (statusFilter === "all" || project.status === statusFilter)
-    );
+    
+    const matchesSearch = !normalizedSearch || searchable.includes(normalizedSearch);
+    const matchesStatus = statusFilter === "all" || project.status === statusFilter;
+    const matchesType = typeFilter === "all" || 
+                       (typeFilter === "test" && project.isTest) || 
+                       (typeFilter === "real" && !project.isTest);
+
+    return matchesSearch && matchesStatus && matchesType;
   });
   const cuttingNow = (projects.data ?? []).filter(
     (project) =>
@@ -223,7 +230,7 @@ function ProjectsContent() {
         </section>
       )}
 
-      <section className="grid gap-2 rounded-lg border border-slate-200 bg-white p-2 sm:grid-cols-[1fr_230px]">
+      <section className="grid gap-2 rounded-lg border border-slate-200 bg-white p-2 sm:grid-cols-[1fr_200px_200px]">
         <div className="relative min-w-0">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <Input
@@ -234,6 +241,21 @@ function ProjectsContent() {
             onChange={(event) => setSearch(event.target.value)}
           />
         </div>
+
+        <Select value={typeFilter} onValueChange={(v: any) => setTypeFilter(v)}>
+          <SelectTrigger className="h-11 border-slate-200 text-[11px] font-black uppercase tracking-[0.12em]">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
+              <SelectValue placeholder="Tipo" />
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os tipos</SelectItem>
+            <SelectItem value="real">Produção Real</SelectItem>
+            <SelectItem value="test">Teste / Piloto</SelectItem>
+          </SelectContent>
+        </Select>
+
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="h-11 border-slate-200 text-[11px] font-black uppercase tracking-[0.12em]">
             <div className="flex items-center gap-2">
@@ -251,6 +273,36 @@ function ProjectsContent() {
           </SelectContent>
         </Select>
       </section>
+
+      {role === "admin" && (
+        <Card className="border-blue-200 bg-blue-50/20">
+          <CardContent className="flex items-center justify-between p-4 sm:p-6">
+            <div className="flex items-center gap-4">
+              <div className="hidden h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 sm:flex">
+                <ShieldCheck className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="text-xs font-black uppercase tracking-wider text-blue-900">
+                  Health Check Industrial
+                </h3>
+                <p className="text-[10px] text-blue-700">
+                  Auditoria de visibilidade e integridade da carteira de obras.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 border-blue-200 bg-white text-[10px] font-bold uppercase tracking-wider text-blue-700 hover:bg-blue-50"
+                onClick={() => navigate({ to: "/debug/project-data" as any })}
+              >
+                Auditoria Forense
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {projects.isError ? null : projects.isLoading ? (
         <Loading label="Carregando obras" />
@@ -341,12 +393,22 @@ function ProjectCard({ project }: { project: ProjectSummary }) {
     : 0;
   return (
     <Link to="/projects/$projectId" params={{ projectId: project.id }} className="min-w-0">
-      <Card className="group h-full overflow-hidden border-slate-200 bg-white shadow-none transition-colors hover:border-slate-950">
+      <Card className={cn(
+        "group h-full overflow-hidden border-slate-200 bg-white shadow-none transition-colors hover:border-slate-950",
+        project.isTest && "border-blue-200 bg-blue-50/30"
+      )}>
         <CardContent className="p-0">
           <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 sm:px-5">
-            <span className="font-mono text-[9px] font-bold tracking-[0.16em] text-slate-400">
-              PRJ-{project.id.slice(0, 8).toUpperCase()}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[9px] font-bold tracking-[0.16em] text-slate-400">
+                PRJ-{project.id.slice(0, 8).toUpperCase()}
+              </span>
+              {project.isTest && (
+                <Badge variant="outline" className="h-4 border-blue-200 bg-blue-100 px-1 text-[8px] font-bold uppercase text-blue-700">
+                  Teste
+                </Badge>
+              )}
+            </div>
             <Badge
               className={cn(
                 "rounded-sm px-2 py-1 text-[9px] font-black uppercase tracking-[0.12em] shadow-none",
