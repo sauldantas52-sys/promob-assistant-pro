@@ -186,8 +186,8 @@ function LoginPage() {
           <h1 className="text-4xl sm:text-6xl font-black text-slate-900 uppercase tracking-tighter leading-none mb-2 sm:mb-4">
             Monta AI
           </h1>
-          <p className="text-[10px] sm:text-[12px] font-black text-blue-600 uppercase tracking-[0.3em] sm:tracking-[0.5em]">
-            Protocolo Piloto Ativo
+          <p className="text-[10px] sm:text-[12px] font-black text-slate-500 uppercase tracking-[0.3em] sm:tracking-[0.5em]">
+            Protocolo Industrial 4.0
           </p>
         </div>
 
