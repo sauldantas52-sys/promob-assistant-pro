@@ -41,6 +41,7 @@ import { VisualEstimateTab } from "@/components/project/VisualEstimateTab";
 import { AuditIntegrationTab } from "@/components/project/AuditIntegrationTab";
 import { PhysicalChecklistFlow } from "@/components/PhysicalChecklistFlow";
 import { Technical3DView } from "@/components/project/Technical3DView";
+import { VisualFeedingMode } from "@/components/project/VisualFeedingMode";
 import { parseDXF } from "@/lib/dxf-parser";
 
 import { Button } from "@/components/ui/button";
