@@ -259,7 +259,7 @@ export function VisualFeedingMode({ projectId, projectName }: VisualFeedingModeP
                 </p>
               )}
             </div>
-          </aside>
+          </Card>
         </div>
       </div>
     </div>
