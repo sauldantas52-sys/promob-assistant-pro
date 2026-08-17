@@ -4,6 +4,7 @@ export const PartMetadataSchema = z.object({
   unique_id: z.string().optional().nullable(),
   unique_parent_id: z.string().optional().nullable(),
   repetition: z.number().default(1),
+  quantity_raw: z.number().optional().nullable(),
   text_dimension: z.string().optional().nullable(),
   unit: z.string().default('un'),
   family: z.string().optional().nullable(),
@@ -11,6 +12,15 @@ export const PartMetadataSchema = z.object({
   reference: z.string().optional().nullable(),
   materials: z.array(z.string()).optional().nullable(),
   id_xml: z.string().optional().nullable(),
+  color: z.string().optional().nullable(),
+  supplier: z.string().optional().nullable(),
+  edge_top: z.number().default(0),
+  edge_bottom: z.number().default(0),
+  edge_left: z.number().default(0),
+  edge_right: z.number().default(0),
+  edge_name_general: z.string().optional().nullable(),
+  edge_name_front: z.string().optional().nullable(),
+  piece_code: z.string().optional().nullable(),
 });
 
 export type PartMetadata = z.infer<typeof PartMetadataSchema>;
@@ -26,6 +36,17 @@ export interface PromobPart {
   unit: string;
   edge_banding?: string | null;
   metadata?: PartMetadata;
+  // Campos técnicos diretos para facilitar o mapeamento no RPC
+  color?: string | null;
+  supplier?: string | null;
+  edge_top?: number;
+  edge_bottom?: number;
+  edge_left?: number;
+  edge_right?: number;
+  id_xml?: string | null;
+  parent_id_xml?: string | null;
+  repetition?: number;
+  quantity_raw?: number | null;
 }
 
 export interface PromobModule {
