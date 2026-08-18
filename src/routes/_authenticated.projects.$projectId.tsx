@@ -370,7 +370,7 @@ function ProjectDetail() {
         <nav className="flex-1 space-y-1 px-3 py-6 overflow-y-auto custom-scrollbar">
           {[
             { value: "preliminary-cut-plan", icon: Scissors, label: "Plano de Corte Pro" },
-            { value: "modules", icon: LayoutGrid, label: "Módulos e Peças" },
+            { value: "modules", icon: LayoutGrid, label: "Módulos e Peças Real" },
             { value: "operational3d", icon: Box, label: "Ambiente 3D Operacional" },
             { value: "labels", icon: Printer, label: "Etiquetas Industriais" },
             { value: "shipping", icon: Truck, label: "Expedição e Volumes" },
