@@ -132,6 +132,16 @@ export function IndustrialLabelsTab({ pieces, project }: { pieces: PhysicalPiece
         
         <div className="flex items-center gap-2">
           <Button 
+            variant="outline"
+            size="sm" 
+            className="text-[10px] font-black uppercase tracking-widest gap-2 border-blue-200 text-blue-700 hover:bg-blue-50"
+            asChild
+          >
+            <Link to="/factory-wallboard">
+              <Monitor className="h-3.5 w-3.5" /> Painel TV
+            </Link>
+          </Button>
+          <Button 
             variant={showClientTag ? "default" : "outline"}
             size="sm" 
             className={cn(
@@ -171,7 +181,6 @@ export function IndustrialLabelsTab({ pieces, project }: { pieces: PhysicalPiece
           >
             <Printer className="h-3.5 w-3.5" /> Imprimir
           </Button>
-
         </div>
       </div>
 
