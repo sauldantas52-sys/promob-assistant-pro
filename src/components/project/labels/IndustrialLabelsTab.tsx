@@ -193,15 +193,20 @@ export function IndustrialLabelsTab({ pieces }: { pieces: PhysicalPiece[] }) {
   );
 }
 
-function IndustrialLabel({ piece, width, height }: { piece: PhysicalPiece, width: number, height: number }) {
+function IndustrialLabel({ piece, width, height, presetId }: { piece: PhysicalPiece, width: number, height: number, presetId?: string }) {
   const data = generateLabelData(piece);
   const edgeData = getEdgeData(piece);
   const qrSize = Math.max(10, Math.min(17, Math.min(height * 0.58, width * 0.22)));
   const fontSize = height * 0.31;
 
+  // Lógica de "Balizador" para evitar que as etiquetas saiam da folha (Remac/Zebra)
+  // Aplica margens de segurança internas e garante que o conteúdo não transborde os limites físicos
+  const isFolha = presetId?.includes('remac') || presetId?.includes('folha');
+  const padding = isFolha ? '4mm' : '3mm';
+
   return (
     <div 
-      className="bg-white border border-slate-200 relative p-3 overflow-hidden print:border-slate-300 print:shadow-none shadow-sm rounded-lg print:rounded-none flex flex-col justify-between print:m-0"
+      className="bg-white border border-slate-200 relative overflow-hidden print:border-slate-300 print:shadow-none shadow-sm rounded-lg print:rounded-none flex flex-col justify-between print:m-0"
       style={{ 
         width: `${width}mm`, 
         height: `${height}mm`,
@@ -209,8 +214,11 @@ function IndustrialLabel({ piece, width, height }: { piece: PhysicalPiece, width
         maxHeight: `${height}mm`,
         minWidth: `${width}mm`,
         minHeight: `${height}mm`,
+        padding: padding,
         pageBreakInside: 'avoid',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column'
       }}
     >
       {/* Top Header */}
