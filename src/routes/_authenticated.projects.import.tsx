@@ -430,6 +430,7 @@ function ImportPage() {
           },
         );
         if (importError) throw importError;
+        rpcAttempted = true;
 
         await (supabase as any)
           .from("project_import_sessions")
