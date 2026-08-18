@@ -321,7 +321,6 @@ export function Operational3DView({
                 "rounded-xl h-10 px-4 font-black text-[10px] uppercase tracking-widest shadow-sm",
                 isXRay ? "bg-blue-600 text-white" : "bg-white/90 backdrop-blur text-slate-900"
               )}
-              disabled={!selectedModuleId}
               onClick={() => setIsXRay(!isXRay)}
             >
               <Layers className="mr-2 h-4 w-4" />
