@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import type { PartMetadata } from "@/lib/promob-import";
+
 
 interface AssemblyBookTabProps {
   projectId: string;
@@ -159,11 +161,12 @@ export function AssemblyBookTab({ projectId, onView3D }: AssemblyBookTabProps) {
                   <div className="flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100">
                     <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Concluído</span>
                     <Checkbox 
-                      checked={mod.is_completed}
+                      checked={!!mod.is_completed}
                       onCheckedChange={(checked) => toggleModuleCompletion.mutate({ moduleId: mod.id, completed: !!checked })}
                       className="h-5 w-5 rounded-md border-slate-300 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500"
                     />
                   </div>
+
                 </div>
               </div>
             </CardHeader>
@@ -180,40 +183,44 @@ export function AssemblyBookTab({ projectId, onView3D }: AssemblyBookTabProps) {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
-                    {mod.parts.map((part) => (
-                      <tr key={part.id} className="hover:bg-slate-50/30 transition-colors group">
-                        <td className="px-8 py-4">
-                          <p className="text-xs font-black text-slate-900 uppercase group-hover:text-blue-600 transition-colors">{part.name}</p>
-                          <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{part.metadata?.piece_code || 'ID: ' + part.id.slice(0, 8)}</p>
-                        </td>
-                        <td className="px-8 py-4 text-xs font-bold text-slate-600">
-                          {part.width_mm} x {part.length_mm} <span className="text-[9px] text-slate-400 ml-1">mm</span>
-                        </td>
-                        <td className="px-8 py-4">
-                          <Badge variant="outline" className="rounded-md font-black text-[9px] border-slate-200">
-                            {part.thickness_mm}mm
-                          </Badge>
-                        </td>
-                        <td className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-tight">
-                          {part.material || '-'}
-                        </td>
-                        <td className="px-8 py-4">
-                          {part.edge_banding ? (
-                            <div className="flex gap-1">
-                              {part.metadata?.edge_top > 0 && <Badge className="bg-blue-100 text-blue-600 border-none text-[8px] font-black font-mono">F1</Badge>}
-                              {part.metadata?.edge_bottom > 0 && <Badge className="bg-blue-100 text-blue-600 border-none text-[8px] font-black font-mono">F2</Badge>}
-                              {part.metadata?.edge_left > 0 && <Badge className="bg-blue-100 text-blue-600 border-none text-[8px] font-black font-mono">F3</Badge>}
-                              {part.metadata?.edge_right > 0 && <Badge className="bg-blue-100 text-blue-600 border-none text-[8px] font-black font-mono">F4</Badge>}
-                              {!part.metadata?.edge_top && !part.metadata?.edge_bottom && !part.metadata?.edge_left && !part.metadata?.edge_right && (
-                                <span className="text-[9px] font-bold text-slate-400">Sim</span>
-                              )}
-                            </div>
-                          ) : (
-                            <span className="text-[9px] font-bold text-slate-300">Sem Fita</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
+                    {mod.parts.map((part) => {
+                      const metadata = (part.metadata as any) as PartMetadata | undefined;
+                      return (
+                        <tr key={part.id} className="hover:bg-slate-50/30 transition-colors group">
+                          <td className="px-8 py-4">
+                            <p className="text-xs font-black text-slate-900 uppercase group-hover:text-blue-600 transition-colors">{part.name}</p>
+                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{metadata?.piece_code || 'ID: ' + part.id.slice(0, 8)}</p>
+                          </td>
+                          <td className="px-8 py-4 text-xs font-bold text-slate-600">
+                            {part.width_mm} x {part.length_mm} <span className="text-[9px] text-slate-400 ml-1">mm</span>
+                          </td>
+                          <td className="px-8 py-4">
+                            <Badge variant="outline" className="rounded-md font-black text-[9px] border-slate-200">
+                              {part.thickness_mm}mm
+                            </Badge>
+                          </td>
+                          <td className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-tight">
+                            {part.material || '-'}
+                          </td>
+                          <td className="px-8 py-4">
+                            {part.edge_banding ? (
+                              <div className="flex gap-1">
+                                {(metadata?.edge_top ?? 0) > 0 && <Badge className="bg-blue-100 text-blue-600 border-none text-[8px] font-black font-mono">F1</Badge>}
+                                {(metadata?.edge_bottom ?? 0) > 0 && <Badge className="bg-blue-100 text-blue-600 border-none text-[8px] font-black font-mono">F2</Badge>}
+                                {(metadata?.edge_left ?? 0) > 0 && <Badge className="bg-blue-100 text-blue-600 border-none text-[8px] font-black font-mono">F3</Badge>}
+                                {(metadata?.edge_right ?? 0) > 0 && <Badge className="bg-blue-100 text-blue-600 border-none text-[8px] font-black font-mono">F4</Badge>}
+                                {!(metadata?.edge_top) && !(metadata?.edge_bottom) && !(metadata?.edge_left) && !(metadata?.edge_right) && (
+                                  <span className="text-[9px] font-bold text-slate-400">Sim</span>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-[9px] font-bold text-slate-300">Sem Fita</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+
                   </tbody>
                 </table>
               </div>
