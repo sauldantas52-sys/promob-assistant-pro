@@ -213,6 +213,7 @@ export function IndustrialLabelsTab({ pieces }: { pieces: PhysicalPiece[] }) {
 
       {/* Grid de Etiquetas */}
       <div 
+        ref={labelContainerRef}
         className="grid gap-4 print:gap-0 print:grid-cols-[repeat(var(--cols),1fr)] print:w-full no-print-margin print:block" 
         style={{ 
           '--cols': customConfig.cols,
@@ -221,15 +222,17 @@ export function IndustrialLabelsTab({ pieces }: { pieces: PhysicalPiece[] }) {
         } as React.CSSProperties}
       >
         {sortedPieces.map((piece) => (
-          <IndustrialLabel 
-            key={piece.physicalId} 
-            piece={piece} 
-            width={customConfig.width}
-            height={customConfig.height}
-            presetId={selectedPreset}
-          />
+          <div key={piece.physicalId} className="etq-wrapper">
+            <IndustrialLabel 
+              piece={piece} 
+              width={customConfig.width}
+              height={customConfig.height}
+              presetId={selectedPreset}
+            />
+          </div>
         ))}
       </div>
+
 
       <style>{`
         @media print {
