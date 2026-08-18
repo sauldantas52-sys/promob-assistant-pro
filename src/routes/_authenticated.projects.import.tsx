@@ -371,9 +371,11 @@ function ImportPage() {
             }));
 
             await initializeProjectProduction({
-              projectId,
-              companyId: companyId,
-              steps: trackingPayload
+              data: {
+                projectId,
+                companyId: companyId,
+                steps: trackingPayload
+              }
             });
 
             console.log(`[Fidelity 5.0] Estimated production tracking initialized for ${allPhysicalPieces.length} pieces.`);

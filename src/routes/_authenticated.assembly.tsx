@@ -210,8 +210,8 @@ function AssemblyContent() {
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <Badge className="bg-slate-900 text-blue-400 border-none font-black uppercase tracking-[0.2em] text-[9px] px-4 py-2.5 rounded-lg flex items-center gap-2">
-              <ScanLine className="h-4 w-4" /> LER QR PIEZA
+            <Badge className="bg-slate-900 text-blue-400 border-none font-black uppercase tracking-[0.2em] text-[9px] px-4 py-2.5 rounded-lg flex items-center gap-2 cursor-pointer hover:bg-slate-800 transition-colors">
+              <ScanLine className="h-4 w-4" /> LER QR PEÇA
             </Badge>
             <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-slate-200 bg-slate-200 sm:w-64 shadow-sm">
               <Metric label="Obras ativas" value={list.length} />
