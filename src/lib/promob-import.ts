@@ -205,8 +205,11 @@ function parsePartNode(node: Element, moduleSequence: number, pieceSequence: num
     piece_code: getAttr(node, 'PIECE_CODE'),
   };
 
-  if ((!rawMaterial || !rawThickness) && (planoB.material || planoB.thickness)) {
-    (metadata as any).origem = "referencia_desmontada";
+  // Auditoria de discrepância (Technical Hint)
+  if ((!material || !thickness_mm) && (planoB.material || planoB.thickness)) {
+    (metadata as any).origem = "candidato_legado_desmontado";
+    (metadata as any).candidateMaterial = planoB.material;
+    (metadata as any).candidateThickness = planoB.thickness;
   }
 
   // Regra 2: Classificação (Fidelidade Seção 13)
