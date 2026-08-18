@@ -77,7 +77,7 @@ export function AssemblyBookTab({ projectId, onView3D }: AssemblyBookTabProps) {
 
   const modulesWithParts = (modules || []).map(m => ({
     ...m,
-    parts: (parts || []).filter(p => p.module_id === m.id || p.metadata?.id_xml === m.id_xml)
+    parts: (parts || []).filter(p => p.module_id === m.id || (p.metadata as any)?.id_xml === (m as any).id_xml)
   }));
 
   const looseParts = (parts || []).filter(p => !p.module_id && p.kind === 'peca');
