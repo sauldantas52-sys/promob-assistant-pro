@@ -33,6 +33,7 @@ import {
   Eye,
   Building2,
   Ruler,
+  Printer,
 } from "lucide-react";
 import { Parser } from "@json2csv/plainjs";
 import { EngineeringTab } from "@/components/EngineeringTab";
