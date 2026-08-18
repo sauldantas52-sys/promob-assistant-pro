@@ -112,14 +112,20 @@ function SceneContent({
   modules, 
   selectedId, 
   isIsolated, 
+  isXRay,
   onSelect 
 }: { 
   modules: Module3D[]; 
   selectedId: string | null;
   isIsolated: boolean;
+  isXRay: boolean;
   onSelect: (id: string) => void;
 }) {
   const bounds = useBounds();
+
+  if (typeof window !== 'undefined') {
+    (window as any).isXRayActive = isXRay;
+  }
 
   return (
     <Bounds fit clip observe margin={1.2}>
