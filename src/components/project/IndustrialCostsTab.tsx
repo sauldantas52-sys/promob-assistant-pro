@@ -54,10 +54,38 @@ export function IndustrialCostsTab({ projectId }: { projectId: string }) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard label="Total de Peças" value={metricas.pieces} icon={Calculator} />
-        <MetricCard label="Folhas de Chapa" value={metricas.planSheets} icon={LayersIcon} />
-        <MetricCard label="Metros de Fita" value={`${metricas.edgeMeters.toFixed(1)}m`} icon={Info} />
-        <MetricCard label="Cortes Totais" value={metricas.cuts} icon={Info} />
+        <Card className="bg-slate-50 border-slate-200">
+          <CardHeader className="py-3">
+            <CardTitle className="text-[9px] font-black uppercase tracking-widest text-slate-500">Módulos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-black text-slate-900">{metricas.pieces > 0 ? Math.ceil(metricas.pieces / 15) : 0}</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-slate-50 border-slate-200">
+          <CardHeader className="py-3">
+            <CardTitle className="text-[9px] font-black uppercase tracking-widest text-slate-500">Total Peças</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-black text-slate-900">{metricas.pieces}</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-slate-50 border-slate-200">
+          <CardHeader className="py-3">
+            <CardTitle className="text-[9px] font-black uppercase tracking-widest text-slate-500">Metros Fita</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-black text-slate-900">{metricas.edgeMeters.toFixed(1)}m</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-slate-50 border-slate-200">
+          <CardHeader className="py-3">
+            <CardTitle className="text-[9px] font-black uppercase tracking-widest text-slate-500">Cortes Totais</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-black text-slate-900">{metricas.cuts}</p>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
