@@ -28,7 +28,7 @@ import {
 } from "lucide-react";
 import { parsePromobXML, type PromobModule, type PromobPart } from "@/lib/promob-import";
 import { parseDXF } from "@/lib/dxf-parser";
-import { cn } from "@/lib/utils";
+import { cn, sanitizeStoragePath } from "@/lib/utils";
 
 type ClassifiedFolder = {
   xml: File | null;
@@ -284,19 +284,20 @@ function ImportPage() {
       });
 
       const preparedFiles = allProjectFiles.map((item) => {
-        const safeName = item.file.name
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .replace(/[^a-zA-Z0-9._-]/g, "_");
-          
-        // Use relative path for storage if available, otherwise just safe name
-        const storagePath = `${companyId}/${projectId}/${item.file.webkitRelativePath || safeName}`;
+        // Use relative path for storage if available, otherwise just original name
+        const rawPath = item.file.webkitRelativePath || item.file.name;
+        
+        // Sanitize every segment of the path to avoid "Invalid key" in Supabase Storage
+        const sanitizedRelativePath = sanitizeStoragePath(rawPath);
+        
+        const storagePath = `${companyId}/${projectId}/${sanitizedRelativePath}`;
         
         return {
           ...item,
           storagePath,
         };
       });
+
 
       const { data: authData } = await supabase.auth.getUser();
       if (!authData.user) throw new Error("Sessão expirada. Entre novamente antes de importar.");
