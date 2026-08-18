@@ -226,12 +226,6 @@ function IndustrialLabel({ piece, width, height, presetId }: { piece: PhysicalPi
   };
 
   const qrSizeMm = Math.max(10, Math.min(17, Math.min(height * 0.58, width * 0.22)));
-  const qrSvgString = `<svg width="100%" height="100%" viewBox="0 0 128 128" style="display:block">
-    <path d="M0,0h128v128h-128z" fill="#fff"/>
-    <path d="M10,10h30v10h-20v20h-10z M90,10h30v30h-10v-20h-20z M10,90h10v20h20v10h-30z M120,90h-30v10h20v20h10z" fill="#000"/>
-    <rect x="30" y="30" width="68" height="68" fill="#eee" rx="4"/>
-    <text x="64" y="68" font-size="20" font-weight="bold" text-anchor="middle" fill="#999">QR</text>
-  </svg>`;
 
   const html = pieceLabelHtml(pieceForHtml, {
     larguraMm: width,
