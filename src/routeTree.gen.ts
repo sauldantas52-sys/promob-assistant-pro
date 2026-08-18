@@ -27,6 +27,7 @@ import { Route as AuthenticatedProjectsProjectIdRouteImport } from './routes/_au
 import { Route as AuthenticatedProjectsImportRouteImport } from './routes/_authenticated.projects.import'
 import { Route as AuthenticatedProjectsTestImportRouteImport } from './routes/_authenticated.projects.test-import'
 import { Route as AuthenticatedSettingsUsersRouteImport } from './routes/_authenticated.settings.users'
+import { Route as AuthenticatedAssemblyPiecePhysicalIdRouteImport } from './routes/_authenticated.assembly.piece.$physicalId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -125,11 +126,17 @@ const AuthenticatedSettingsUsersRoute =
     path: '/settings/users',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedAssemblyPiecePhysicalIdRoute =
+  AuthenticatedAssemblyPiecePhysicalIdRouteImport.update({
+    id: '/piece/$physicalId',
+    path: '/piece/$physicalId',
+    getParentRoute: () => AuthenticatedAssemblyRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/assembly': typeof AuthenticatedAssemblyRoute
+  '/assembly': typeof AuthenticatedAssemblyRouteWithChildren
   '/business': typeof AuthenticatedBusinessRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/factory-wallboard': typeof AuthenticatedFactoryWallboardRoute
@@ -144,11 +151,12 @@ export interface FileRoutesByFullPath {
   '/projects/test-import': typeof AuthenticatedProjectsTestImportRoute
   '/settings/users': typeof AuthenticatedSettingsUsersRoute
   '/projects/': typeof AuthenticatedProjectsIndexRoute
+  '/assembly/piece/$physicalId': typeof AuthenticatedAssemblyPiecePhysicalIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/assembly': typeof AuthenticatedAssemblyRoute
+  '/assembly': typeof AuthenticatedAssemblyRouteWithChildren
   '/business': typeof AuthenticatedBusinessRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/factory-wallboard': typeof AuthenticatedFactoryWallboardRoute
@@ -163,13 +171,14 @@ export interface FileRoutesByTo {
   '/projects/test-import': typeof AuthenticatedProjectsTestImportRoute
   '/settings/users': typeof AuthenticatedSettingsUsersRoute
   '/projects': typeof AuthenticatedProjectsIndexRoute
+  '/assembly/piece/$physicalId': typeof AuthenticatedAssemblyPiecePhysicalIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
-  '/_authenticated/assembly': typeof AuthenticatedAssemblyRoute
+  '/_authenticated/assembly': typeof AuthenticatedAssemblyRouteWithChildren
   '/_authenticated/business': typeof AuthenticatedBusinessRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/factory-wallboard': typeof AuthenticatedFactoryWallboardRoute
@@ -184,6 +193,7 @@ export interface FileRoutesById {
   '/_authenticated/projects/test-import': typeof AuthenticatedProjectsTestImportRoute
   '/_authenticated/settings/users': typeof AuthenticatedSettingsUsersRoute
   '/_authenticated/projects/': typeof AuthenticatedProjectsIndexRoute
+  '/_authenticated/assembly/piece/$physicalId': typeof AuthenticatedAssemblyPiecePhysicalIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -205,6 +215,7 @@ export interface FileRouteTypes {
     | '/projects/test-import'
     | '/settings/users'
     | '/projects/'
+    | '/assembly/piece/$physicalId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -224,6 +235,7 @@ export interface FileRouteTypes {
     | '/projects/test-import'
     | '/settings/users'
     | '/projects'
+    | '/assembly/piece/$physicalId'
   id:
     | '__root__'
     | '/'
@@ -244,6 +256,7 @@ export interface FileRouteTypes {
     | '/_authenticated/projects/test-import'
     | '/_authenticated/settings/users'
     | '/_authenticated/projects/'
+    | '/_authenticated/assembly/piece/$physicalId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -381,11 +394,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsUsersRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/assembly/piece/$physicalId': {
+      id: '/_authenticated/assembly/piece/$physicalId'
+      path: '/piece/$physicalId'
+      fullPath: '/assembly/piece/$physicalId'
+      preLoaderRoute: typeof AuthenticatedAssemblyPiecePhysicalIdRouteImport
+      parentRoute: typeof AuthenticatedAssemblyRoute
+    }
   }
 }
 
+interface AuthenticatedAssemblyRouteChildren {
+  AuthenticatedAssemblyPiecePhysicalIdRoute: typeof AuthenticatedAssemblyPiecePhysicalIdRoute
+}
+
+const AuthenticatedAssemblyRouteChildren: AuthenticatedAssemblyRouteChildren = {
+  AuthenticatedAssemblyPiecePhysicalIdRoute:
+    AuthenticatedAssemblyPiecePhysicalIdRoute,
+}
+
+const AuthenticatedAssemblyRouteWithChildren =
+  AuthenticatedAssemblyRoute._addFileChildren(
+    AuthenticatedAssemblyRouteChildren,
+  )
+
 interface AuthenticatedRouteChildren {
-  AuthenticatedAssemblyRoute: typeof AuthenticatedAssemblyRoute
+  AuthenticatedAssemblyRoute: typeof AuthenticatedAssemblyRouteWithChildren
   AuthenticatedBusinessRoute: typeof AuthenticatedBusinessRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedFactoryWallboardRoute: typeof AuthenticatedFactoryWallboardRoute
@@ -402,7 +436,7 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedAssemblyRoute: AuthenticatedAssemblyRoute,
+  AuthenticatedAssemblyRoute: AuthenticatedAssemblyRouteWithChildren,
   AuthenticatedBusinessRoute: AuthenticatedBusinessRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedFactoryWallboardRoute: AuthenticatedFactoryWallboardRoute,

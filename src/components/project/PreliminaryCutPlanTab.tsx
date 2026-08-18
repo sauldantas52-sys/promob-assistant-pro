@@ -112,7 +112,7 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
         }));
 
         const { error: piecesError } = await supabase
-          .from('cut_sheets') // Usamos cut_sheets para persistir as peças individuais do plano
+          .from('cut_sheets')
           .insert(physicalPieces.map((pp: any) => ({
              project_id: pp.project_id,
              cut_plan_id: pp.cut_plan_id,
@@ -127,9 +127,46 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
           })));
           
         if (piecesError) console.error("Erro ao persistir peças oficiais:", piecesError);
+
+        // FIDELITY 5.0 - Initialize production tracking for the official physical pieces
+        try {
+          const { initializeProjectProduction } = await import("@/lib/production");
+          
+          // Map to find the corresponding part_id for each physical piece from the CSV
+          // Since CSV might not have part_id, we need to match by technical attributes if possible
+          // or use the ones from the XML if we have a mapping.
+          // For now, we'll try to find parts in the current project.
+          const { data: projectParts } = await supabase.from('parts').select('id, name, id_xml').eq('project_id', projectId);
+          
+          const trackingPayload = result.pieces.map((p: any) => {
+            // Logic to find partId: try exact name match or fallback to a dummy if necessary (not ideal)
+            // In a real scenario, the CSV should carry the part_id or id_xml.
+            const matchedPart = projectParts?.find(pp => pp.name === p.name || pp.id_xml === p.idXml);
+            return {
+              physicalId: p.physicalId,
+              partId: matchedPart?.id || p.partId || '',
+              moduleId: p.moduleId || null
+            };
+          }).filter((item: any) => item.partId);
+
+          if (trackingPayload.length > 0) {
+            await initializeProjectProduction({
+              data: {
+                projectId,
+                companyId: profile.company_id,
+                steps: trackingPayload
+              }
+            });
+            console.log(`[Fidelity 5.0] Production tracking initialized for ${trackingPayload.length} pieces.`);
+          }
+
+        } catch (trackErr) {
+          console.error("Erro ao inicializar rastreabilidade Fidelity 5.0:", trackErr);
+        }
       }
 
       return planId as string;
+
     },
     onSuccess: () => {
       toast.success("Plano Cut Pro oficial importado com sucesso!");

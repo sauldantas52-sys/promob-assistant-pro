@@ -1,6 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 
-export type ProductionStepType = 'corte' | 'usinagem' | 'borda' | 'separacao' | 'montagem';
+export type ProductionStepType = 'corte' | 'usinagem' | 'borda' | 'separacao' | 'montagem' | 'expedicao';
 export type ProductionStatus = 'pendente' | 'em_andamento' | 'concluido' | 'bloqueado';
 
 export interface ProductionStep {
@@ -8,6 +10,7 @@ export interface ProductionStep {
   project_id: string;
   module_id?: string | null;
   part_id?: string | null;
+  physical_id?: string | null;
   step_type: ProductionStepType;
   status: ProductionStatus;
   notes?: string | null;
@@ -15,11 +18,32 @@ export interface ProductionStep {
   completed_at?: string | null;
 }
 
+export const initializeProjectProduction = createServerFn({ method: "POST" })
+  .inputValidator((data) => z.object({
+    projectId: z.string(),
+    companyId: z.string(),
+    steps: z.array(z.object({
+      physicalId: z.string(),
+      partId: z.string(),
+      moduleId: z.string().nullable(),
+    }))
+  }).parse(data))
+  .handler(async ({ data }) => {
+    const { error } = await supabase.rpc('initialize_production_tracking', {
+      p_project_id: data.projectId,
+      p_company_id: data.companyId,
+      p_steps: data.steps
+    });
+    
+    if (error) throw error;
+    return { success: true };
+  });
+
 export async function logProductionAction(projectId: string, action: string, metadata: any = {}) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
-  await supabase.from('production_logs').insert({
+  await (supabase.from('production_logs') as any).insert({
     project_id: projectId,
     user_id: user.id,
     action,
@@ -35,7 +59,6 @@ export async function updateStepStatus(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Usuário não autenticado");
 
-  // Buscar informações da etapa para o log
   const { data: step, error: stepError } = await supabase
     .from('production_steps')
     .select('project_id, status')
@@ -64,8 +87,6 @@ export async function updateStepStatus(
 
   if (error) throw error;
 
-  // Registrar log de auditoria
-  // Usamos casting para 'any' para evitar erros de tipo até que o gerador de tipos do Supabase atualize
   await (supabase.from('production_logs') as any).insert({
     project_id: step.project_id,
     user_id: user.id,
@@ -75,3 +96,4 @@ export async function updateStepStatus(
     notes: notes || null
   });
 }
+

@@ -354,6 +354,35 @@ function ImportPage() {
         );
         if (importError) throw importError;
 
+        // FIDELITY 5.0 - Initialize estimation tracking for the internal engine
+        try {
+          const { initializeProjectProduction } = await import("@/lib/production");
+          const { IndustrialCutPlanEngine } = await import("@/lib/cut-plan/engine");
+          
+          const groups = await IndustrialCutPlanEngine.generateForProject(projectId);
+          const allPhysicalPieces = groups.flatMap(g => g.pieces);
+          
+          if (allPhysicalPieces.length > 0) {
+            const trackingPayload = allPhysicalPieces.map(p => ({
+              physicalId: p.physicalId,
+              partId: p.partId,
+              moduleId: p.moduleId || null
+            }));
+
+            await initializeProjectProduction({
+              data: {
+                projectId,
+                companyId: companyId,
+                steps: trackingPayload
+              }
+            });
+            console.log(`[Fidelity 5.0] Estimated production tracking initialized for ${allPhysicalPieces.length} pieces.`);
+          }
+        } catch (estimErr) {
+          console.error("Erro ao inicializar rastreabilidade de estimativa:", estimErr);
+        }
+
+
         // 2. Distribuição Automática 4.0 (MVP Requisitado)
         // Mapeamento rigoroso conforme requisitos do usuário
         const modulesPayload = result.modules.map((module: PromobModule) => ({
