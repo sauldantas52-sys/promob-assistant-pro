@@ -61,10 +61,9 @@ export const Route = createFileRoute('/_authenticated')({
     });
 
     if (!role || !profile?.company_id) {
-      if (location.pathname !== '/dashboard') {
+      if (location.pathname !== '/dashboard' && location.pathname !== '/projects/import' && !location.pathname.startsWith('/projects/')) {
         console.log("Auth Guard: Missing role or company, redirecting to dashboard");
-        // Desativado redirecionamento agressivo para permitir navegação em projetos existentes
-        // throw redirect({ to: '/dashboard' });
+        throw redirect({ to: '/dashboard' });
       }
     }
 
