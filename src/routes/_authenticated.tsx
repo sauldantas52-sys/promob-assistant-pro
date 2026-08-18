@@ -34,19 +34,14 @@ export const Route = createFileRoute('/_authenticated')({
     const role = (roleData?.role as any) || null;
     const mustChangePassword = !!profile?.must_change_password;
 
-    console.log(`[Auth:Guard] Path: ${location.pathname}, Role: ${role}, MustChange: ${mustChangePassword}`);
-
     // Bloqueio operacional se troca de senha for obrigatória
     if (mustChangePassword && location.pathname !== '/force-password-change') {
-      console.log("[Auth:Guard] REDIRECT -> /force-password-change");
       throw redirect({
         to: '/force-password-change',
       });
     }
 
     // Redirecionamento de segurança (RBAC)
-    // O redirecionamento só deve ocorrer se a role for explicitamente INVÁLIDA para o path.
-    // Se a role ainda não estiver carregada (null), permitimos o carregamento para que a tela trate o loading.
     const isImportPath = location.pathname.startsWith('/projects/import') || location.pathname.startsWith('/projects/test-import');
     if (isImportPath && role) {
       const allowedRoles = ['admin', 'escritorio', 'projetista'];
