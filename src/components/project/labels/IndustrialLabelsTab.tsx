@@ -39,7 +39,7 @@ const PRESETS: LabelPreset[] = [
   { id: 'manual', name: 'Manual', width: 100, height: 50, cols: 1, type: 'rolo' },
 ];
 
-export function IndustrialLabelsTab({ pieces }: { pieces: PhysicalPiece[] }) {
+export function IndustrialLabelsTab({ pieces, project }: { pieces: PhysicalPiece[], project?: any }) {
   const [selectedPreset, setSelectedPreset] = useState<string>(PRESETS[0]!.id);
   const [customConfig, setCustomConfig] = useState(PRESETS[0]!);
   const [showSettings, setShowSettings] = useState(false);
