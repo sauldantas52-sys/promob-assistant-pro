@@ -264,7 +264,6 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
       </div>
 
       <Tabs defaultValue="plano" className="w-full no-print">
-        <TabsList className="grid w-full grid-cols-2 bg-slate-100 p-1 rounded-xl h-12">
         <div className="flex flex-col lg:flex-row gap-4 mb-6">
           <TabsList className="grid w-full grid-cols-2 bg-slate-100 p-1 rounded-xl h-12 flex-1">
             <TabsTrigger value="plano" className="rounded-lg text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-slate-900">
