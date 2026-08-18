@@ -101,7 +101,7 @@ export const Route = createFileRoute("/_authenticated/projects/$projectId")({
   validateSearch: (search: Record<string, unknown>) => {
     return {
       tab: (search.tab as string) || undefined,
-    } as const;
+    };
   },
   head: () => ({
     meta: [
