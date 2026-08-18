@@ -9,8 +9,13 @@ import { cn } from "@/lib/utils";
 import { IndustrialCutPlanEngine, CutPlanGroup, Sheet, Placement } from "@/lib/cut-plan/engine";
 
 export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
-  const { data: allParts, isLoading } = useQuery({
-    queryKey: ["parts_cutplan_real", projectId],
+  const { data: cutPlanGroups, isLoading } = useQuery({
+    queryKey: ["industrial_cut_plan", projectId],
+    queryFn: () => IndustrialCutPlanEngine.generateForProject(projectId),
+  });
+
+  const { data: allParts, isLoading: partsLoading } = useQuery({
+    queryKey: ["parts_audit", projectId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("parts")
@@ -21,15 +26,14 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
     },
   });
 
-  if (isLoading) return <div className="p-8 text-center text-xs text-slate-500 font-bold uppercase tracking-widest animate-pulse">Consultando banco de dados industrial...</div>;
+  if (isLoading || partsLoading) return <div className="p-8 text-center text-xs text-slate-500 font-bold uppercase tracking-widest animate-pulse">Calculando Nesting Industrial Real...</div>;
 
-  // Filtros Rigorosos
+  // Filtros de Auditoria
   const cutParts = allParts?.filter(p => (p.kind === 'peca' || p.kind === 'chapa') && p.thickness_mm) || [];
   const hardware = allParts?.filter(p => p.kind === 'ferragem') || [];
   const accessories = allParts?.filter(p => p.kind === 'acessorio') || [];
   const noMaterial = allParts?.filter(p => (p.kind === 'peca' || p.kind === 'chapa') && !p.material) || [];
   const noThickness = allParts?.filter(p => (p.kind === 'peca' || p.kind === 'chapa') && !p.thickness_mm) || [];
-  const noDimensions = allParts?.filter(p => (p.kind === 'peca' || p.kind === 'chapa') && (!p.width_mm || !p.length_mm)) || [];
 
   const excluded = allParts?.filter(p => 
     !cutParts.find(cp => cp.id === p.id) && 
@@ -37,15 +41,9 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
     !accessories.find(a => a.id === p.id)
   ) || [];
 
-  // Agrupamento por Espessura (MDF 6, 15, 18)
-  const thicknessGroups = cutParts.reduce((acc: Record<string, typeof cutParts>, part) => {
-    const thickness = `${part.thickness_mm} MM`;
-    if (!acc[thickness]) acc[thickness] = [];
-    acc[thickness].push(part);
-    return acc;
-  }, {});
-
-  const renderCutGroup = (thickness: string, groupParts: typeof cutParts) => {
+  const renderCutGroup = (group: CutPlanGroup) => {
+    const { supplier, material, color, thicknessMm, sheets, stats } = group;
+    const label = `${color} ${thicknessMm}mm`;
     const totalItems = groupParts.length;
     const totalRepetitions = groupParts.reduce((sum, p) => sum + ((p.metadata as any)?.repetition || 1), 0);
     const totalArea = groupParts.reduce((sum, p) => 
