@@ -18,10 +18,10 @@ export interface PhysicalPiece {
   idXml: string;
   parentIdXml: string;
   repetitionIndex: number;
-  moduleSequence?: number;
-  pieceSequence?: number;
-  moduleId?: string;
-  moduleName?: string;
+  moduleSequence?: number | null;
+  pieceSequence?: number | null;
+  moduleId?: string | null;
+  moduleName?: string | null;
   name: string;
   lengthMm: number;
   widthMm: number;
