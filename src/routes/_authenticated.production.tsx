@@ -337,7 +337,7 @@ function ProductionContent() {
 
                   {/* Pipeline Visual */}
                   <div
-                    className="grid grid-cols-5 gap-1 sm:grid-cols-9"
+                    className="grid grid-cols-4 gap-1 sm:grid-cols-8"
                     aria-label="Fluxo de produção"
                   >
                     {Object.entries(flow).filter(([key]) => key !== 'novo' && key !== 'orcamento' && key !== 'concluido').map(([key, value]) => {
