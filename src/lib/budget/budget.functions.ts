@@ -24,12 +24,12 @@ export function getConfidenceLevel(score: number): ConfidenceLevel {
  * Dados nascem como source = 'ai_estimate' e is_confirmed = false.
  */
 export const analyzeBudgetDocument = createServerFn({ method: "POST" })
-  .inputValidator(z.object({
+  .inputValidator((data: any) => z.object({
     documentId: z.string(),
     companyId: z.string(),
     projectId: z.string().optional(),
     fileUrl: z.string(),
-  }).parse)
+  }).parse(data))
   .handler(async ({ data }) => {
     // 1. Criar cabeçalho do orçamento se não existir (Rule 4)
     const { data: budget, error: budgetError } = await supabaseAdmin
