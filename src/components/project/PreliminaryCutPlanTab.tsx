@@ -327,8 +327,19 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
               <TableHeader className="bg-slate-100"><TableRow><TableHead className="text-[9px] font-black px-4">Peça</TableHead><TableHead className="text-center text-[9px] font-black">Dim</TableHead><TableHead className="text-right text-[9px] font-black px-4">Área</TableHead></TableRow></TableHeader>
               <TableBody>
                 {pieces.map((part) => (
-                  <TableRow key={part.physicalId} className="text-[10px]">
-                    <TableCell className="px-4 py-2 font-black uppercase">{part.name}</TableCell>
+                  <TableRow 
+                    key={part.physicalId} 
+                    className={cn(
+                      "text-[10px] transition-colors",
+                      highlightedPieceId === part.physicalId ? "bg-blue-50 border-l-4 border-l-blue-500" : ""
+                    )}
+                  >
+                    <TableCell className="px-4 py-2 font-black uppercase flex items-center gap-2">
+                      {part.name}
+                      {highlightedPieceId === part.physicalId && (
+                        <Badge className="bg-blue-500 text-white text-[7px] h-4 px-1">SELECIONADA</Badge>
+                      )}
+                    </TableCell>
                     <TableCell className="text-center font-mono">{part.widthMm}x{part.lengthMm}</TableCell>
                     <TableCell className="text-right px-4 font-bold">{((part.widthMm * part.lengthMm) / 1000000).toFixed(3)} m²</TableCell>
                   </TableRow>
