@@ -45,7 +45,7 @@ export const Route = createFileRoute('/_authenticated')({
       session,
       userRole: role,
       companyId: profile?.company_id || null,
-      companyName: (profile?.companies as any)?.name || null,
+      companyName: profile?.companies ? (profile.companies as any).name : null,
       role: role,
       fullName: profile?.full_name || session.user.email,
     };
