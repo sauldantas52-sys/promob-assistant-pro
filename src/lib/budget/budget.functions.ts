@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { aiGateway } from "@lovable/ai-gateway"; // Hypothetical/Conceptual for Lovable AI Gateway usage
 
 /**
  * THRESHOLDS DE CONFIANÇA (Rule 6)
@@ -51,42 +52,48 @@ export const analyzeBudgetDocument = createServerFn({ method: "POST" })
     if (budgetError) throw budgetError;
 
     // SIMULAÇÃO DE PROCESSAMENTO IA (lovable-vision-4.0)
-    // Em produção, isso chamaria a Lovable AI Gateway para ler a imagem/PDF.
-    // Inserindo itens mockados para demonstração da Fidelity 5.1/5.2
+    // Em produção real, integraríamos com: aiGateway.vision.analyze({ image: data.fileUrl })
     const mockItems = [
       { 
         budget_id: budget.id, 
-        name: "ARMÁRIO CLOSET - MÓDULO 01", 
+        name: "MÓDULO TORRE - ARMÁRIO 01", 
         quantity: 1, 
-        unit_price: 1850.00, 
-        category: "MÓDULOS", 
-        confidence: 0.95, 
+        unit_price: 2450.00, 
+        total_price: 2450.00,
+        category: "MARCENARIA", 
+        confidence: 0.98, 
         is_confirmed: false,
         source: 'ai_estimate'
       },
       { 
         budget_id: budget.id, 
-        name: "PUXADOR PERFIL ALUMÍNIO 2000MM", 
-        quantity: 4, 
-        unit_price: 125.00, 
+        name: "KIT CORREDIAÇAS TELESCÓPICAS 450MM", 
+        quantity: 6, 
+        unit_price: 85.00, 
+        total_price: 510.00,
         category: "FERRAGENS", 
-        confidence: 0.72, 
+        confidence: 0.88, 
         is_confirmed: false,
         source: 'ai_estimate'
       },
       { 
         budget_id: budget.id, 
-        name: "CABIDEIRO BASCULANTE", 
+        name: "PORTA RIPADA MDF FREIJÓ", 
         quantity: 2, 
-        unit_price: 450.00, 
-        category: "ACESSÓRIOS", 
-        confidence: 0.45, 
+        unit_price: 680.00, 
+        total_price: 1360.00,
+        category: "ACABAMENTOS", 
+        confidence: 0.55, 
         is_confirmed: false,
         source: 'ai_estimate'
       }
     ];
 
     await supabaseAdmin.from('budget_items').insert(mockItems);
+
+    // Atualizar o valor total estimado no cabeçalho
+    const estimatedTotal = mockItems.reduce((acc, item) => acc + item.total_price, 0);
+    await supabaseAdmin.from('budgets').update({ total_value: estimatedTotal }).eq('id', budget.id);
 
     return { 
       success: true, 
@@ -121,5 +128,14 @@ export const confirmBudgetItem = createServerFn({ method: "POST" })
       .eq('id', data.itemId);
 
     if (error) throw error;
+
+    // Recalcular total do orçamento após confirmação
+    const { data: item } = await supabaseAdmin.from('budget_items').select('budget_id').eq('id', data.itemId).single();
+    if (item) {
+      const { data: allItems } = await supabaseAdmin.from('budget_items').select('total_price').eq('budget_id', item.budget_id).eq('is_confirmed', true);
+      const newTotal = allItems?.reduce((acc, i) => acc + (i.total_price || 0), 0) || 0;
+      await supabaseAdmin.from('budgets').update({ total_value: newTotal }).eq('id', item.budget_id);
+    }
+
     return { success: true };
   });

@@ -54,7 +54,7 @@ export function RevisionPanel({ budgetId, companyId }: { budgetId: string; compa
       toast.success("Item confirmado com sucesso.");
       setEditingId(null);
       queryClient.invalidateQueries({ queryKey: ["budget-items", budgetId] });
-      queryClient.invalidateQueries({ queryKey: ["budgets", companyId] });
+      queryClient.invalidateQueries({ queryKey: ["budgets"] }); // Invalidate all budgets to update totals
     },
     onError: (error: any) => {
       toast.error(`Erro ao confirmar: ${error.message}`);
