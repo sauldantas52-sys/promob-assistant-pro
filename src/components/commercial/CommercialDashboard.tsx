@@ -31,6 +31,7 @@ import type { AppRole } from "@/lib/auth";
 import { commercialSupabase } from "@/lib/commercial/client";
 import { importLegacyStoreCredits } from "@/lib/commercial/legacy-credit.functions";
 import { sendOutsourcingOrderWhatsApp } from "@/lib/commercial/whatsapp.functions";
+import { AIQuoteWizard } from "@/components/budget/AIQuoteWizard";
 import {
   extractDocumentText,
   parseCommercialDocument,
