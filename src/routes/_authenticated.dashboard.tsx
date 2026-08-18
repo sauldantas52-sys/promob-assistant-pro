@@ -241,7 +241,7 @@ function DashboardContent() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <Button asChild variant="ghost" size="sm" className="h-8 px-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50">
-                          <Link to="/projects/$projectId" params={{ projectId: project.id }} search={{ tab: 'modules' }}>
+                          <Link to="/projects/$projectId" params={{ projectId: project.id }} search={{ tab: 'preliminary-cut-plan' }}>
                             <ChevronRight className="h-4 w-4" />
                           </Link>
                         </Button>
@@ -259,7 +259,7 @@ function DashboardContent() {
                   key={project.id}
                   to="/projects/$projectId"
                   params={{ projectId: project.id }}
-                  search={{ tab: 'modules' }}
+                  search={{ tab: 'preliminary-cut-plan' }}
                   className="block p-4 active:bg-slate-50 transition-colors"
                 >
                   <div className="flex justify-between items-start mb-2">
