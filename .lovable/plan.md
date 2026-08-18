@@ -1,38 +1,35 @@
 ---
-name: Módulos do Projeto e Caderno de Montagem
-description: Correção do carregamento de módulos e peças no fluxo industrial, garantindo visibilidade e persistência após importação.
+name: Correção do Carregamento de Módulos e Sidebar
+description: Resolver falha na visibilidade de módulos reais e persistência de dados técnicos após a importação.
 type: feature
 ---
 
-# Módulos e Peças não carregando
+# Diagnóstico Técnico
+O problema de "módulos não carregando" e botões da sidebar sumindo é causado por um desalinhamento entre o estado de autenticação (role/companyId) e as políticas de RLS no banco de dados, agravado por uma falha de vínculo na persistência durante o Wizard de Importação.
 
-O usuário reportou que os módulos não estão carregando, e as auditorias técnicas via Playwright confirmaram que a sidebar e as abas de módulos/peças estão vazias ou inacessíveis em projetos reais, sugerindo uma falha na persistência, RLS ou na lógica de visibilidade por perfil.
+1.  **Sidebar Vazia:** O `AppShell.tsx` filtra `navItems` baseando-se no `role`. Se o `useAuth` demorar a resolver ou se o `user_roles` não estiver mapeado corretamente, a sidebar fica vazia.
+2.  **Módulos Invisíveis:** As consultas em `ProjectDetailPage` e `AssemblyBookTab` usam filtros rigorosos (`project_id`, `kind='peca'`). Se o parser XML não persistir o `is_industrial_module: true` ou se o `module_id` nas peças estiver nulo, os módulos não aparecem.
+3.  **RLS Deadlock:** As políticas de `modules` e `parts` dependem de `has_role`, que pode falhar em ambientes de produção se não for `SECURITY DEFINER`.
 
-## Diagnóstico
-1. **RLS e Permissões:** O sistema de permissões em `src/lib/permissions.ts` e o guard de autenticação em `src/routes/_authenticated.tsx` podem estar filtrando dados ou bloqueando a renderização da sidebar se o papel do usuário não estiver perfeitamente alinhado com as rotas.
-2. **Persistência na Importação:** Embora o `parsePromobXML` funcione no frontend, a persistência via `project_import_sessions` ou `import_client_project` pode estar falhando silenciosamente ou não vinculando as peças aos `module_id` corretamente.
-3. **Visibilidade da Sidebar:** O `AppShell.tsx` filtra itens por `role`. Se o `useAuth` não resolver o `role` corretamente a tempo, a navegação lateral desaparece.
-4. **Filtro de Peças:** A query de peças em `ProjectDetailPage` usa `eq("kind", "peca")`. Se o parser marcar as peças com outro `kind` ou se o `module_id` estiver nulo, elas podem sumir das abas específicas.
+# Plano de Ação
 
-## Plano de Ação
+## 1. Infraestrutura e Segurança (Banco de Dados)
+- Atualizar a função `has_role` para garantir que seja `SECURITY DEFINER` e use o `search_path` correto.
+- Revisar as políticas de RLS para `modules` e `parts` para garantir que o papel `admin` e `projetista` tenham acesso total via `company_id`.
 
-### 1. Auditoria e Correção de RLS
-- Verificar se a tabela `modules` e `parts` possuem políticas de RLS que permitem `SELECT` para todos os papéis industriais (`admin`, `projetista`, `escritorio`, `fabrica`, `montador`, `auditor`).
-- Garantir que `has_role` não está causando recursão infinita ou falhando para papéis recém-criados.
+## 2. Ingestão e Persistência (`src/routes/_authenticated.projects.import.tsx`)
+- Garantir que o `RPC import_client_project` receba e persista corretamente a flag `is_industrial_module` na tabela `modules`.
+- Reforçar o vínculo `module_id` -> `parts` durante o loop de inserção.
+- Adicionar logs de persistência para rastrear falhas silenciosas no Supabase.
 
-### 2. Reforço na Ingestão de Dados (`src/lib/promob-import.ts`)
-- Garantir que cada peça (`PromobPart`) receba obrigatoriamente um `unique_id` e que a relação com o `parent_id` seja preservada.
-- Validar se a marcação `is_industrial_module: true` está sendo persistida para que a query de módulos os encontre.
+## 3. Visibilidade da Interface (`src/components/AppShell.tsx` e `src/routes/_authenticated.projects.$projectId.tsx`)
+- Remover o carregamento condicional agressivo da sidebar; mostrar um "Skeleton" ou estado de carregamento enquanto o perfil é resolvido.
+- Em `ProjectDetailPage`, adicionar um `fallback` para a query de módulos: se `modules.data` for vazio mas o projeto existir, exibir um botão de "Reprocessar Pasta do Cliente".
+- Corrigir a query em `AssemblyBookTab` para incluir peças sem `module_id` como "Itens Avulsos".
 
-### 3. Ajuste na UI de Navegação (`src/components/AppShell.tsx`)
-- Adicionar logs de depuração para o `role` e `visibleNavItems`.
-- Garantir que a sidebar não desapareça enquanto os dados de perfil estão sendo carregados (loading state).
+## 4. Estabilização do Wizard
+- O botão "Criar e Produzir Agora" deve aguardar a confirmação de que os arquivos foram movidos do bucket temporário para o permanente antes de redirecionar.
 
-### 4. Correção da Página de Detalhes (`src/routes/_authenticated.projects.$projectId.tsx`)
-- Revisar as queries de `modules` e `parts` para garantir que não estão sendo filtradas agressivamente.
-- Adicionar estados de "Empty" mais claros para diagnosticar se o problema é "Sem dados" ou "Erro de carregamento".
-
-## Próximos Passos
-1. Executar migration para revisar RLS.
-2. Atualizar logic de importação para garantir vínculo `module_id` -> `parts`.
-3. Validar visibilidade da sidebar para todos os papéis.
+# Validação
+- Testar importação do XML `CLOSET-18-07-2026.xml` e verificar se os 13 módulos aparecem na sidebar.
+- Simular login com papéis `fabrica` e `montador` para garantir que a sidebar se ajuste corretamente.
