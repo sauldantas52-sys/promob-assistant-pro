@@ -154,9 +154,9 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
               data: {
                 projectId,
                 companyId: profile.company_id,
-                steps: trackingPayload.map(tp => ({
+                steps: trackingPayload.map((tp: any) => ({
                   ...tp,
-                  needsEdge: false // Official plan needs detailed mapping later
+                  needsEdge: false
                 }))
               }
             });
