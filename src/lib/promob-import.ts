@@ -112,10 +112,10 @@ function refOf(item: Element, key: string): string | null {
 
 function parsePartNode(node: Element, moduleSequence: number, pieceSequence: number): PromobPart {
   const name = getAttr(node, 'DESCRIPTION') || getAttr(node, 'NAME') || 'Peça Sem Nome';
-  // Use "REFERENCE" attribute as fallback (Plano B)
+  // Use "REFERENCE" attribute as fallback (Plano B) - APENAS PARA AUDITORIA
   const reference = getAttr(node, 'REFERENCE') || '';
   
-  // Rule 4: Plano B - Desmontar Referência
+  // Heurística de Auditoria (Plano B) - Não deve ser usada como dado primário confirmado
   const desmontarReferencia = (ref: string) => {
     if (!ref) return { material: null, thickness: null, color: null };
     const segments = ref.split('.');
@@ -132,7 +132,6 @@ function parsePartNode(node: Element, moduleSequence: number, pieceSequence: num
         material = seg.includes('MDF') ? 'MDF' : 'MDP';
         materialIdx = i;
       }
-      // Check if the segment is exactly a valid thickness
       const num = parseInt(segments[i] || '0');
       if (segments[i] === num.toString() && validThicknesses.includes(num)) {
         thickness = num;
@@ -148,14 +147,11 @@ function parsePartNode(node: Element, moduleSequence: number, pieceSequence: num
 
   const planoB = desmontarReferencia(reference);
 
-  // Regra 3: Campos e Origens Corretas
-  const rawMaterial = refOf(node, 'MATERIAL');
-  const material = rawMaterial || planoB.material;
-  
+  // Regra 3: Campos e Origens Corretas - PRIORIDADE DADO TÉCNICO
+  const material = refOf(node, 'MATERIAL') || null;
   const rawThickness = refOf(node, 'THICKNESS');
-  const thickness_mm = rawThickness ? parseFloat(rawThickness.replace(',', '.')) : planoB.thickness;
-  
-  const color = refOf(node, 'MODEL') || refOf(node, 'MODEL_DESCRIPTION') || planoB.color;
+  const thickness_mm = rawThickness ? parseFloat(rawThickness.replace(',', '.')) : null;
+  const color = refOf(node, 'MODEL') || refOf(node, 'MODEL_DESCRIPTION') || null;
   const supplier = refOf(node, 'SUPPLIER') || refOf(node, 'SUPPLIER_EXT');
   
   const edgeTop = parseInt(refOf(node, 'FITA_BORDA_1') || '0');
@@ -209,8 +205,11 @@ function parsePartNode(node: Element, moduleSequence: number, pieceSequence: num
     piece_code: getAttr(node, 'PIECE_CODE'),
   };
 
-  if ((!rawMaterial || !rawThickness) && (planoB.material || planoB.thickness)) {
-    (metadata as any).origem = "referencia_desmontada";
+  // Auditoria de discrepância (Technical Hint)
+  if ((!material || !thickness_mm) && (planoB.material || planoB.thickness)) {
+    (metadata as any).origem = "candidato_legado_desmontado";
+    (metadata as any).candidateMaterial = planoB.material;
+    (metadata as any).candidateThickness = planoB.thickness;
   }
 
   // Regra 2: Classificação (Fidelidade Seção 13)
