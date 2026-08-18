@@ -60,7 +60,7 @@ export const analyzeBudgetDocument = createServerFn({ method: "POST" })
  * REVISÃO HUMANA OBRIGATÓRIA (Rule 25, 26)
  */
 export const confirmBudgetItem = createServerFn({ method: "POST" })
-  .inputValidator(z.object({
+  .inputValidator((data: any) => z.object({
     itemId: z.string(),
     data: z.object({
       name: z.string().optional().nullable(),
@@ -69,7 +69,7 @@ export const confirmBudgetItem = createServerFn({ method: "POST" })
       category: z.string().optional().nullable(),
       is_confirmed: z.boolean().default(true),
     }),
-  }).parse)
+  }).parse(data))
   .handler(async ({ data }) => {
     const { error } = await supabaseAdmin
       .from('budget_items')
