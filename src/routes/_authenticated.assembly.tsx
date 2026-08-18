@@ -498,7 +498,7 @@ function AssemblyContent() {
                       <Link 
                         to="/projects/$projectId" 
                         params={{ projectId: project.id }}
-                        search={{ tab: '3d' }}
+                        search={{ tab: 'operational3d' }}
                       >
                         <Boxes className="mr-2 h-4 w-4" /> Ver no 3D
                       </Link>
