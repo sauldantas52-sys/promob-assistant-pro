@@ -98,7 +98,7 @@ interface PieceLabelOpts {
  * @returns {string} HTML pronto da etiqueta
  */
 export function pieceLabelHtml(piece: any, opts: PieceLabelOpts) {
-  const { larguraMm: W, alturaMm: H, qrSvg = '', mdfOverride } = opts;
+  const { larguraMm: W, alturaMm: H, qrSvg = '', mdfOverride, projectInfo } = opts;
   const FS = Math.max(8.5, Math.min(15.2, H * 0.31));
   const k = (FS / 12) * 1.08; // escala do desenho de fita, proporcional ao tamanho da etiqueta
 
