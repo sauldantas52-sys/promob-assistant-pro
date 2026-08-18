@@ -62,6 +62,8 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
                   <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Itens: {totalItems}</span>
                   <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Repetições: {totalRepetitions}</span>
                   <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Chapas: {stats.sheetCount}</span>
+                  <span className="text-[9px] font-bold text-lime-400 uppercase tracking-widest ml-2 border-l border-slate-700 pl-2">Área Útil: 2740 x 1820 mm</span>
+                  <span className="text-[9px] font-bold text-blue-400 uppercase tracking-widest ml-2 border-l border-slate-700 pl-2">Kerf: 4mm</span>
                 </div>
               </div>
             </div>
@@ -78,7 +80,10 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
               <div key={idx} className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-[10px] font-black uppercase text-slate-400">Chapa {idx + 1}</span>
-                  <span className="text-[9px] font-bold text-slate-400 italic">2750 x 1830 mm</span>
+                  <div className="flex gap-2">
+                    <Badge variant="outline" className="text-[8px] font-bold text-slate-400 border-slate-200">REFILO 5mm</Badge>
+                    <span className="text-[9px] font-bold text-slate-400 italic">2750 x 1830 mm</span>
+                  </div>
                 </div>
                 <div 
                   className="relative bg-white border-2 border-slate-300 rounded shadow-inner overflow-hidden"
@@ -87,22 +92,50 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
                     width: '100%'
                   }}
                 >
+                  {/* Linha de Refilo (Tracejada) */}
+                  <div 
+                    className="absolute border border-dashed border-slate-300 pointer-events-none z-10"
+                    style={{
+                      left: `${(5 / 2750) * 100}%`,
+                      top: `${(5 / 1830) * 100}%`,
+                      right: `${(5 / 2750) * 100}%`,
+                      bottom: `${(5 / 1830) * 100}%`,
+                    }}
+                  />
+
                   {/* Placements */}
                   {sheet.shelves.flatMap(s => s.placements).map((p, pIdx) => (
                     <div 
                       key={pIdx}
-                      className="absolute border border-slate-900 bg-lime-100 flex items-center justify-center overflow-hidden hover:bg-lime-200 transition-colors cursor-help group"
-                      title={`${p.piece.name} (${p.w}x${p.h})`}
+                      className="absolute border border-slate-900 flex flex-col items-center justify-center overflow-hidden hover:opacity-80 transition-opacity cursor-help group p-0.5"
+                      title={`${p.piece.name} (${p.w}x${p.h}) - Módulo: ${p.piece.moduleName || 'N/A'}`}
                       style={{
                         left: `${(p.x / 2750) * 100}%`,
                         top: `${(p.y / 1830) * 100}%`,
                         width: `${(p.w / 2750) * 100}%`,
-                        height: `${(p.h / 1830) * 100}%`
+                        height: `${(p.h / 1830) * 100}%`,
+                        backgroundColor: `hsla(${(Number(p.piece.moduleId?.split('-')[0] || 0) * 57) % 360}, 70%, 90%, 0.8)`,
+                        borderColor: `hsl(${(Number(p.piece.moduleId?.split('-')[0] || 0) * 57) % 360}, 70%, 40%)`
                       }}
                     >
-                      <span className="text-[6px] font-black uppercase text-slate-800 scale-75 group-hover:scale-100 transition-transform">
-                        {p.w}x{p.h}
-                      </span>
+                      {/* Identificação da Peça */}
+                      <div className="w-full h-full flex flex-col relative pointer-events-none">
+                         {/* Top row */}
+                         <div className="flex justify-between w-full px-0.5 pt-0.5">
+                            <span className="text-[5px] font-black opacity-60">G{(p.piece.moduleSequence || 0)}</span>
+                            <span className="text-[5px] font-black opacity-60">#{p.piece.pieceSequence}{p.rotated ? ' ↻' : ''}</span>
+                         </div>
+                         
+                         {/* Center content */}
+                         <div className="flex-1 flex flex-col items-center justify-center text-center overflow-hidden">
+                            {p.w > 40 && p.h > 20 && (
+                              <span className="text-[6px] font-bold truncate w-full px-1">{p.piece.name}</span>
+                            )}
+                            {p.w > 30 && p.h > 15 && (
+                              <span className="text-[7px] font-black">{p.w}x{p.h}</span>
+                            )}
+                         </div>
+                      </div>
                     </div>
                   ))}
                 </div>
