@@ -33,8 +33,8 @@ export interface PhysicalPiece {
   edgeBottom: number;
   edgeLeft: number;
   edgeRight: number;
-  edgeNameGeneral?: string;
-  edgeNameFront?: string;
+  edgeNameGeneral?: string | null;
+  edgeNameFront?: string | null;
   metadata?: any;
   // Dimensions for packing
   lo: number; // Major side
