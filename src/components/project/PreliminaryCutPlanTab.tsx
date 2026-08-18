@@ -19,6 +19,9 @@ import { toast } from "sonner";
 export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
   const [integrityStatus, setIntegrityStatus] = useState<'validating' | 'pass' | 'fail'>('validating');
   const [integrityErrors, setIntegrityErrors] = useState<string[]>([]);
+  const [activePlanSource, setActivePlanSource] = useState<'estimativa' | 'cutpro_oficial'>('estimativa');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
 
   const { data: cutPlanGroups, isLoading } = useQuery({
     queryKey: ["industrial_cut_plan", projectId],
