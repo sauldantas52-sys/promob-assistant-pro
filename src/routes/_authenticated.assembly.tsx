@@ -701,53 +701,6 @@ function KitCard({
   );
 }
 
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </div>
-      <div className="grid gap-px border-t border-slate-200 bg-slate-200 sm:grid-cols-[1fr_1fr_1fr_auto]">
-        <Gate
-          icon={ClipboardCheck}
-          label="Pecas conferidas"
-          value={`${completed}/${parts.length}`}
-          ok={parts.length > 0 && completed === parts.length}
-        />
-        <Gate
-          icon={ShieldCheck}
-          label="Evidencias"
-          value={group?.conference_status ?? "pendente"}
-          ok={group?.conference_status === "concluida"}
-        />
-        <Gate
-          icon={PackageCheck}
-          label="Responsavel"
-          value={group?.sealed_by ? "registrado" : "pendente"}
-          ok={!!group?.sealed_by}
-        />
-        <div className="flex min-w-28 items-center gap-2 bg-white px-3 py-2">
-          <Progress value={progress} className="h-1.5" />
-          <span className="text-[9px] font-black">{Math.round(progress)}%</span>
-        </div>
-      </div>
-      <div className="border-t border-slate-200 bg-slate-50 p-3">
-        <Button asChild variant="outline" className="h-11 w-full text-[9px] font-black uppercase">
-          <a href={assistanceUrl(project.id, module.id)}>
-            <AlertTriangle className="mr-2 h-4 w-4" /> Abrir assistência deste módulo
-          </a>
-        </Button>
-      </div>
-      <ConferenceDialog
-        open={conferenceOpen}
-        onOpenChange={setConferenceOpen}
-        projectId={project.id}
-        projectPartIds={project.parts?.map((part) => part.id) || []}
-        moduleName={module.name}
-        group={group ?? null}
-        parts={parts}
       />
     </div>
   );
