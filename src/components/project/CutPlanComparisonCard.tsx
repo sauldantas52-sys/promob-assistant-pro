@@ -40,7 +40,7 @@ export function CutPlanComparisonCard({ stats }: CutPlanComparisonProps) {
         </div>
       </CardHeader>
       <CardContent className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {/* Peças */}
           <div className="space-y-2">
             <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Total de Peças</p>
@@ -50,7 +50,7 @@ export function CutPlanComparisonCard({ stats }: CutPlanComparisonProps) {
                 "flex items-center gap-1 text-[10px] font-bold mb-1",
                 deltaPieces === 0 ? "text-emerald-400" : "text-amber-400"
               )}>
-                {deltaPieces === 0 ? "CONFERE" : `${deltaPieces > 0 ? '+' : ''}${deltaPieces}`}
+                {deltaPieces === 0 ? "PEÇAS = CONFERE" : `PEÇAS = DIVERGE (${deltaPieces > 0 ? '+' : ''}${deltaPieces})`}
               </div>
             </div>
             <p className="text-[10px] text-slate-500 font-medium">Estimado: {stats.pieces.estimated}</p>
@@ -66,7 +66,7 @@ export function CutPlanComparisonCard({ stats }: CutPlanComparisonProps) {
                 deltaSheets <= 0 ? "text-emerald-400" : "text-red-400"
               )}>
                 {deltaSheets > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                {deltaSheets === 0 ? "IGUAL" : `${Math.abs(deltaSheets)} chapa${Math.abs(deltaSheets) > 1 ? 's' : ''}`}
+                {deltaSheets === 0 ? "DELTA = 0" : `DELTA = ${deltaSheets > 0 ? '+' : ''}${deltaSheets}`}
               </div>
             </div>
             <p className="text-[10px] text-slate-500 font-medium">Estimado: {stats.sheets.estimated}</p>
@@ -82,10 +82,22 @@ export function CutPlanComparisonCard({ stats }: CutPlanComparisonProps) {
                 deltaUtilization >= 0 ? "text-emerald-400" : "text-amber-400"
               )}>
                 {deltaUtilization > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                {deltaUtilization.toFixed(1)}%
+                {deltaUtilization > 0 ? '+' : ''}{deltaUtilization.toFixed(1)} p.p.
               </div>
             </div>
             <p className="text-[10px] text-slate-500 font-medium">Estimado: {stats.utilization.estimated.toFixed(1)}%</p>
+          </div>
+
+          {/* Cortes */}
+          <div className="space-y-2">
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Total de Cortes</p>
+            <div className="flex items-end gap-3">
+              <span className="text-2xl font-black text-slate-200">{stats.cuts.official}</span>
+              <div className="text-[10px] font-bold mb-1 text-slate-400">
+                OFICIAL
+              </div>
+            </div>
+            <p className="text-[10px] text-slate-500 font-medium">Cortes estimados não calculados</p>
           </div>
         </div>
 

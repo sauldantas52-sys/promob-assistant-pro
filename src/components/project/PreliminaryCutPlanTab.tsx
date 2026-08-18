@@ -377,13 +377,19 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
         )}
 
         <TabsContent value="plano" className="mt-6">
-          <div className="mb-4">
+          <div className="flex items-center justify-between mb-4">
              <Badge variant={activePlanSource === 'cutpro_oficial' ? 'default' : 'secondary'} className={cn(
                "uppercase text-[9px] font-black tracking-widest py-1 px-3 rounded-full",
                activePlanSource === 'cutpro_oficial' ? "bg-lime-500 text-slate-900" : "bg-slate-200 text-slate-600"
              )}>
                {activePlanSource === 'cutpro_oficial' ? 'MODO: CUT PRO OFICIAL' : 'MODO: ESTIMATIVA MONTA AI'}
              </Badge>
+
+             {activePlanSource === 'cutpro_oficial' && !officialPlan && (
+               <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest text-amber-500 border-amber-200 bg-amber-50">
+                 VALIDAÇÃO CUT PRO REAL = PENDENTE
+               </Badge>
+             )}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
             {activePlanSource === 'cutpro_oficial' && officialPlan ? (

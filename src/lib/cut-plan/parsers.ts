@@ -67,10 +67,14 @@ export const CutProParser = {
       total_cuts: pieces.length * 4, // Estimativa conservadora de cortes
       utilization_percent: utilizationPercent,
       pieces,
+      headers: headers,
+      delimiter: delimiter,
+      line_count: lines.length,
       metadata: {
-        parser_version: '4.3.1',
+        parser_version: '4.3.2',
         total_area_m2: totalArea,
-        detected_delimiter: delimiter
+        detected_delimiter: delimiter,
+        detected_headers: headers
       }
     };
   }

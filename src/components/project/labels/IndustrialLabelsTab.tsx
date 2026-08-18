@@ -148,7 +148,7 @@ export function IndustrialLabelsTab({ pieces }: { pieces: PhysicalPiece[] }) {
 
       {/* Grid de Etiquetas */}
       <div 
-        className="grid gap-4 print:gap-0 print:grid-cols-[repeat(var(--cols),1fr)]" 
+        className="grid gap-4 print:gap-0 print:grid-cols-[repeat(var(--cols),1fr)] print:w-full no-print-margin" 
         style={{ 
           '--cols': customConfig.cols,
           display: 'grid',
@@ -175,6 +175,12 @@ export function IndustrialLabelsTab({ pieces }: { pieces: PhysicalPiece[] }) {
             left: 0;
             top: 0;
             width: 100%;
+            padding: 0;
+            margin: 0;
+          }
+          .no-print-margin {
+             margin: 0 !important;
+             padding: 0 !important;
           }
           @page {
             margin: 0;
@@ -194,11 +200,16 @@ function IndustrialLabel({ piece, width, height }: { piece: PhysicalPiece, width
 
   return (
     <div 
-      className="bg-white border border-slate-200 relative p-3 overflow-hidden print:border-slate-300 print:shadow-none shadow-sm rounded-lg print:rounded-none flex flex-col justify-between"
+      className="bg-white border border-slate-200 relative p-3 overflow-hidden print:border-slate-300 print:shadow-none shadow-sm rounded-lg print:rounded-none flex flex-col justify-between print:m-0"
       style={{ 
         width: `${width}mm`, 
         height: `${height}mm`,
-        pageBreakInside: 'avoid'
+        maxWidth: `${width}mm`,
+        maxHeight: `${height}mm`,
+        minWidth: `${width}mm`,
+        minHeight: `${height}mm`,
+        pageBreakInside: 'avoid',
+        boxSizing: 'border-box'
       }}
     >
       {/* Top Header */}
