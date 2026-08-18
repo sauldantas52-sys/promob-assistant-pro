@@ -586,8 +586,8 @@ function ImportPage() {
           .update({ step: "completed", status: "finished" })
           .eq("id", projectId);
 
-        // Redireciona para o Pipeline de Produção diretamente (vontade do usuário: "torne o aap sem travas")
-        navigate({ to: "/production" });
+        // Redireciona para os detalhes técnicos do projeto (Fidelity 5.7)
+        navigate({ to: `/projects/${projectId}`, search: { tab: "preliminary-cut-plan" } });
         return projectId;
       } catch (error) {
         await (supabase as any)
