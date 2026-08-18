@@ -85,6 +85,7 @@ export interface CutPlanGroup {
 }
 
 const KERF = 4;
+const DEFAULT_TRIM = 5;
 const DEFAULT_SHEET_WIDTH = 2750;
 const DEFAULT_SHEET_HEIGHT = 1830;
 
@@ -172,6 +173,8 @@ export const IndustrialCutPlanEngine = {
       });
 
       const sheets: Sheet[] = [];
+      const usableWidth = DEFAULT_SHEET_WIDTH - (DEFAULT_TRIM * 2);
+      const usableHeight = DEFAULT_SHEET_HEIGHT - (DEFAULT_TRIM * 2);
       
       for (const piece of sortedPieces) {
         let placed = false;
@@ -179,7 +182,7 @@ export const IndustrialCutPlanEngine = {
         // Try to place in existing sheets and shelves
         for (const sheet of sheets) {
           for (const shelf of sheet.shelves) {
-            if (this.canFitInShelf(piece, shelf, sheet.width)) {
+            if (this.canFitInShelf(piece, shelf, usableWidth)) {
               this.placeInShelf(piece, shelf);
               placed = true;
               break;
@@ -188,8 +191,8 @@ export const IndustrialCutPlanEngine = {
           if (placed) break;
 
           // Try to open a new shelf in current sheet
-          if (this.canOpenShelfInSheet(piece, sheet, DEFAULT_SHEET_HEIGHT, DEFAULT_SHEET_WIDTH)) {
-            this.openShelfAndPlace(piece, sheet, DEFAULT_SHEET_WIDTH);
+          if (this.canOpenShelfInSheet(piece, sheet, usableHeight, usableWidth)) {
+            this.openShelfAndPlace(piece, sheet, usableWidth);
             placed = true;
             break;
           }
@@ -204,7 +207,7 @@ export const IndustrialCutPlanEngine = {
             usedHeight: 0,
             shelves: []
           };
-          this.openShelfAndPlace(piece, newSheet, DEFAULT_SHEET_WIDTH);
+          this.openShelfAndPlace(piece, newSheet, usableWidth);
           sheets.push(newSheet);
         }
       }
@@ -249,14 +252,14 @@ export const IndustrialCutPlanEngine = {
 
   placeInShelf(piece: PhysicalPiece, shelf: Shelf) {
     // Prefer normal orientation if fits, otherwise rotated
-    const rotated = !(piece.sh <= shelf.height && (shelf.usedWidth + piece.lo + KERF) <= (DEFAULT_SHEET_WIDTH));
+    const rotated = !(piece.sh <= shelf.height && (shelf.usedWidth + piece.lo + KERF) <= (DEFAULT_SHEET_WIDTH - (DEFAULT_TRIM * 2)));
     const w = rotated ? piece.sh : piece.lo;
     const h = rotated ? piece.lo : piece.sh;
 
     shelf.placements.push({
       physicalId: piece.physicalId,
-      x: shelf.usedWidth,
-      y: shelf.y,
+      x: shelf.usedWidth + DEFAULT_TRIM,
+      y: shelf.y + DEFAULT_TRIM,
       w,
       h,
       rotated,
@@ -292,8 +295,8 @@ export const IndustrialCutPlanEngine = {
 
     newShelf.placements.push({
       physicalId: piece.physicalId,
-      x: 0,
-      y: newShelf.y,
+      x: DEFAULT_TRIM,
+      y: newShelf.y + DEFAULT_TRIM,
       w,
       h,
       rotated,
