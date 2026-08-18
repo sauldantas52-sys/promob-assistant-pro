@@ -373,9 +373,48 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
 
   return (
     <div className="space-y-8 max-w-[1400px] mx-auto p-4 lg:p-0 print:p-0">
-      <div className="no-print">
+      <div className="no-print space-y-6">
+        {/* Painel Central de Comando Industrial */}
+        <Card className="border-none shadow-2xl bg-slate-900 overflow-hidden rounded-[2rem]">
+          <div className="p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="space-y-4 text-center md:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Motor de Corte Ativo</span>
+              </div>
+              <h2 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tighter leading-none">
+                Plano de Corte <span className="text-[var(--lime-industrial)]">Pro</span>
+              </h2>
+              <p className="text-slate-400 text-xs font-bold uppercase tracking-wider max-w-md mx-auto md:mx-0">
+                Cálculo de Nesting Industrial com Refilo de 10mm e Kerf de 4mm. Alimentação automática via Pasta do Cliente.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap justify-center md:justify-end gap-3">
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 text-center min-w-[100px]">
+                <p className="text-[9px] font-black text-slate-500 uppercase mb-1">Peças</p>
+                <p className="text-2xl font-black text-white">{allPieces.length}</p>
+              </div>
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 text-center min-w-[100px]">
+                <p className="text-[9px] font-black text-slate-500 uppercase mb-1">Chapas</p>
+                <p className="text-2xl font-black text-white">
+                  {cutPlanGroups?.reduce((acc, g) => acc + g.stats.sheetCount, 0) || 0}
+                </p>
+              </div>
+              <div className="bg-[var(--lime-industrial)] rounded-2xl p-4 text-center min-w-[100px] shadow-[0_0_20px_rgba(190,242,33,0.3)]">
+                <p className="text-[9px] font-black text-slate-900/60 uppercase mb-1">Eficiência</p>
+                <p className="text-2xl font-black text-slate-950">
+                  {cutPlanGroups && cutPlanGroups.length > 0 
+                    ? (cutPlanGroups.reduce((acc, g) => acc + g.stats.utilizationPercent, 0) / cutPlanGroups.length).toFixed(1)
+                    : 0}%
+                </p>
+              </div>
+            </div>
+          </div>
+        </Card>
+
         {integrityStatus === 'fail' ? (
-          <Alert variant="destructive" className="rounded-xl border-2 border-red-500 bg-red-50 shadow-sm mb-6">
+          <Alert variant="destructive" className="rounded-xl border-2 border-red-500 bg-red-50 shadow-sm">
             <AlertCircle className="h-5 w-5" />
             <div>
               <AlertTitle className="text-sm font-black uppercase tracking-widest">Falha de Integridade Industrial</AlertTitle>
@@ -388,7 +427,7 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
             </div>
           </Alert>
         ) : (
-          <Alert className="rounded-xl border-2 border-blue-500 bg-blue-50 text-blue-900 shadow-sm mb-6">
+          <Alert className="rounded-xl border-2 border-blue-500 bg-blue-50 text-blue-900 shadow-sm">
             <ShieldCheck className="h-5 w-5 text-blue-600" />
             <div>
               <AlertTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
