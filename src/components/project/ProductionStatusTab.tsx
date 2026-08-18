@@ -154,9 +154,12 @@ export function ProductionStatusTab({ projectId }: { projectId: string }) {
           <div className="flex items-center justify-between">
             <CardTitle className="text-[10px] font-black uppercase tracking-[0.3em] text-white/80">Listagem Detalhada de Peças</CardTitle>
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-white/5 rounded-full border border-white/10">
+              <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/10">
                 <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-[8px] font-black text-white/60 uppercase tracking-widest">Sincronização Ativa</span>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1 bg-slate-800 rounded-full border border-white/5">
+                <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">Gabarito: 409 Peças</span>
               </div>
             </div>
           </div>
