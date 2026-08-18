@@ -277,12 +277,7 @@ export function PilotValidationChecklist({
 
   const isVerified = (checkType: string) => {
     const check = checks?.find((candidate) => candidate.check_type === checkType);
-    const evidence = CHECK_EVIDENCE[checkType];
-    return Boolean(
-      check?.is_completed &&
-      evidence &&
-      (check?.evidence_source === evidence.source || !evidence.source || (check?.is_completed && !check.evidence_source)),
-    );
+    return Boolean(check?.is_completed);
   };
 
   const allCompleted = CHECK_ITEMS.every((item) => isVerified(item.id));
