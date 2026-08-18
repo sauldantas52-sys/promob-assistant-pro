@@ -3,10 +3,10 @@ import { supabase } from '@/integrations/supabase/client';
 
 export const Route = createFileRoute('/_authenticated')({
   beforeLoad: async ({ location }) => {
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     
-    if (!session) {
-      console.log("[AuthGuard] No session, redirecting to /login");
+    if (sessionError || !session) {
+      console.log("[AuthGuard] No session found, redirecting to login:", sessionError?.message);
       throw redirect({
         to: '/login',
         search: {
