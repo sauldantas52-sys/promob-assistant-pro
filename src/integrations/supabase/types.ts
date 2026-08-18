@@ -3091,6 +3091,19 @@ export type Database = {
         Args: { _project_id: string }
         Returns: undefined
       }
+      save_official_cut_plan: {
+        Args: {
+          p_company_id: string
+          p_metadata?: Json
+          p_project_id: string
+          p_source: string
+          p_total_cuts: number
+          p_total_pieces: number
+          p_total_sheets: number
+          p_utilization_percent: number
+        }
+        Returns: string
+      }
     }
     Enums: {
       app_role:
