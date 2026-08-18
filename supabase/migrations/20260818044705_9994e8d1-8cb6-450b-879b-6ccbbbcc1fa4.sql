@@ -1,0 +1,1 @@
+UPDATE public.projects SET machining_blocked = true, is_validated = false WHERE id = '8321961c-9b09-4300-b594-048ecfa27ac6';

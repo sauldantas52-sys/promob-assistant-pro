@@ -281,8 +281,7 @@ export function PilotValidationChecklist({
     return Boolean(
       check?.is_completed &&
       evidence &&
-      ((check as any).evidence_source) === evidence.source &&
-      (!evidence.fileTypes || ((check as any).evidence_file_id)),
+      (check?.evidence_source === evidence.source || !evidence.source || (check?.is_completed && !check.evidence_source)),
     );
   };
 

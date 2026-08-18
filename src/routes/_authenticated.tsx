@@ -41,13 +41,21 @@ export const Route = createFileRoute('/_authenticated')({
       });
     }
 
-    return {
+    const authContext = {
       session,
       userRole: role,
       companyId: profile?.company_id || null,
-      companyName: (profile?.companies as any)?.name || null,
+      companyName: profile?.companies ? (profile.companies as any).name : null,
       role: role,
       fullName: profile?.full_name || session.user.email,
     };
+    
+    console.log("Auth Guard Data:", { 
+      path: location.pathname, 
+      hasRole: !!role, 
+      hasCompany: !!profile?.company_id 
+    });
+
+    return authContext;
   },
 });

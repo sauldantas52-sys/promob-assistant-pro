@@ -44,8 +44,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       supabase.from("user_roles").select("role").eq("user_id", currentUser.id),
     ]);
 
-    const pendingCompanyName = currentUser.user_metadata["company_name"];
-    const pendingFullName = currentUser.user_metadata["full_name"];
+    const pendingCompanyName = currentUser.user_metadata?.["company_name"];
+    const pendingFullName = currentUser.user_metadata?.["full_name"];
     if (
       !profile?.company_id &&
       typeof pendingCompanyName === "string" &&
