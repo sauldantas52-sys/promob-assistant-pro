@@ -154,7 +154,10 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
               data: {
                 projectId,
                 companyId: profile.company_id,
-                steps: trackingPayload
+                steps: trackingPayload.map(tp => ({
+                  ...tp,
+                  needsEdge: false // Official plan needs detailed mapping later
+                }))
               }
             });
             console.log(`[Fidelity 5.0] Production tracking initialized for ${trackingPayload.length} pieces.`);
