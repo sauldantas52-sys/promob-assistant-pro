@@ -262,6 +262,7 @@ export function Operational3DView({
                 modules={processedModules} 
                 selectedId={selectedModuleId}
                 isIsolated={isIsolated}
+                isXRay={isXRay}
                 onSelect={setSelectedModuleId}
               />
               <Environment preset="city" />
