@@ -147,7 +147,7 @@ function ImportPage() {
   const [folderName, setFolderName] = useState("");
   const [folderFileCount, setFolderFileCount] = useState(0);
   const [classification, setClassification] = useState<ClassifiedFolder>(emptyClassification);
-  const [destination, setDestination] = useState<"cutplanning" | "factory" | "factory">("factory"); // Default para fábrica conforme solicitado (sem travas)
+  const [destination, setDestination] = useState<"cutplanning" | "factory">("factory");
 
   const identity = parseFolderIdentity(folderName);
   const requiredFiles = [
