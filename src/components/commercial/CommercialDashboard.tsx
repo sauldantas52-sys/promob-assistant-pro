@@ -189,7 +189,7 @@ export function CommercialDashboard({
         <div className="mx-auto flex max-w-[1600px] flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <div className="mb-3 flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.24em] text-lime-400">
-              <span className="h-1.5 w-8 bg-lime-400" /> Central de compras e crédito
+              <span className="h-1.5 w-8 bg-lime-400" /> Comando Comercial Avançado
             </div>
             <h1 className="text-3xl font-black uppercase tracking-[-0.05em] sm:text-5xl">
               Comercial <span className="text-slate-500">360</span>
