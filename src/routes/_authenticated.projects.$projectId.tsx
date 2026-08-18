@@ -189,7 +189,7 @@ function ProjectDetail() {
         throw error;
       }
       
-      console.log(`[ProjectDetail] ${data?.length || 0} módulos encontrados.`);
+      console.log(`[ProjectDetail] ${data?.length || 0} módulos encontrados:`, data?.map(m => ({ id: m.id, id_xml: m.id_xml, name: m.name })));
       return data;
     },
     // Forçar refetch se o estado de importação mudar
