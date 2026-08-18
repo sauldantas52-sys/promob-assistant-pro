@@ -151,12 +151,15 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
 
           if (trackingPayload.length > 0) {
             await initializeProjectProduction({
-              projectId,
-              companyId: profile.company_id,
-              steps: trackingPayload
+              data: {
+                projectId,
+                companyId: profile.company_id,
+                steps: trackingPayload
+              }
             });
             console.log(`[Fidelity 5.0] Production tracking initialized for ${trackingPayload.length} pieces.`);
           }
+
         } catch (trackErr) {
           console.error("Erro ao inicializar rastreabilidade Fidelity 5.0:", trackErr);
         }
