@@ -240,18 +240,23 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
 
   if (isLoading || partsLoading) {
     return (
-      <div className="flex flex-col items-center justify-center p-20 space-y-4">
+      <div className="flex flex-col items-center justify-center p-20 space-y-8 bg-slate-900 rounded-[2rem] border-none shadow-2xl">
         <div className="relative">
-          <div className="h-16 w-16 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin"></div>
+          <div className="h-24 w-24 border-4 border-white/10 border-t-[var(--lime-industrial)] rounded-full animate-spin"></div>
           <div className="absolute inset-0 flex items-center justify-center">
-            <Layers className="h-6 w-6 text-blue-600 animate-pulse" />
+            <Layers className="h-8 w-8 text-[var(--lime-industrial)] animate-pulse" />
           </div>
         </div>
-        <div className="text-center space-y-2">
-          <h3 className="text-sm font-black uppercase tracking-widest text-slate-900">Alimentando Sistema Industrial...</h3>
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider animate-pulse">
-            Calculando Nesting Real • Refilo 10mm • Kerf 4mm
-          </p>
+        <div className="text-center space-y-4">
+          <h3 className="text-xl font-black uppercase tracking-[0.2em] text-white">Alimentando Sistema Industrial...</h3>
+          <div className="flex flex-col gap-2">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest animate-pulse">
+              Calculando Nesting Real • Refilo 10mm • Kerf 4mm
+            </p>
+            <div className="h-1 w-48 bg-white/5 rounded-full mx-auto overflow-hidden">
+              <div className="h-full bg-[var(--lime-industrial)] animate-progress-indefinite" />
+            </div>
+          </div>
         </div>
       </div>
     );
