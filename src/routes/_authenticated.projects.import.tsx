@@ -336,7 +336,6 @@ function ImportPage() {
           .update({ step: "xml_parse" })
           .eq("id", projectId);
 
-        rpcAttempted = true;
         
         // 2. Distribuição Automática 4.0 (MVP Requisitado)
         // Mapeamento rigoroso conforme requisitos do usuário
