@@ -62,7 +62,11 @@ function ModuleMesh({
   const depth = mmToSceneUnits(module.depth);
 
   // Se estiver isolado e não for o selecionado, fica invisível ou muito translúcido
-  const opacity = isIsolated ? (isSelected ? 1 : 0.05) : (isSelected ? 1 : 0.4);
+  // Se estiver em modo X-Ray e selecionado, fica translúcido
+  const opacity = isIsolated 
+    ? (isSelected ? 1 : 0.05) 
+    : (isSelected ? 1 : 0.4);
+    
   const visible = isIsolated ? isSelected : true;
 
   if (!visible) return null;
