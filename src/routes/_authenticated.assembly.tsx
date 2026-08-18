@@ -620,34 +620,87 @@ function KitCard({
                 </Button>
               </DialogTrigger>
 
-            <DialogContent className="max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Etiquetas do grupo {group?.code}</DialogTitle>
-              </DialogHeader>
-              <div className="flex flex-col items-center gap-4">
-                {parts.map((part) => (
-                  <div key={part.id} className="space-y-2">
-                    <AssemblyLabel
-                      moduleCode={group?.code ?? "???"}
-                      moduleName={module.name}
-                      color={group?.color ?? "#000"}
-                      partName={part.name}
-                      dimensions={`${part.width_mm}x${part.length_mm}mm`}
-                      material={part.material ?? null}
-                      thickness={part.thickness_mm ?? null}
-                      edgeBanding={part.edge_banding ?? null}
-                      storageLocation={part.storage_location ?? null}
-                      qrValue={`montaai://${project.id}/${part.id}`}
-                      projectId={project.id}
-                    />
-                    <Button
-                      asChild
-                      variant="outline"
-                      className="h-10 w-full text-[9px] font-black uppercase"
-                    >
-                      <a href={assistanceUrl(project.id, module.id, part.id)}>
-                        <AlertTriangle className="mr-2 h-3.5 w-3.5" /> Assistência desta peça
-                      </a>
+              <DialogContent className="max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Etiquetas do grupo {group?.code}</DialogTitle>
+                </DialogHeader>
+                <div className="flex flex-col items-center gap-4">
+                  {parts.map((part) => (
+                    <div key={part.id} className="space-y-2">
+                      <AssemblyLabel
+                        moduleCode={group?.code ?? "???"}
+                        moduleName={module.name}
+                        color={group?.color ?? "#000"}
+                        partName={part.name}
+                        dimensions={`${part.width_mm}x${part.length_mm}mm`}
+                        material={part.material ?? null}
+                        thickness={part.thickness_mm ?? null}
+                        edgeBanding={part.edge_banding ?? null}
+                        storageLocation={part.storage_location ?? null}
+                        qrValue={`montaai://${project.id}/${part.id}`}
+                        projectId={project.id}
+                      />
+                      <Button
+                        asChild
+                        variant="outline"
+                        className="h-10 w-full text-[9px] font-black uppercase"
+                      >
+                        <a href={assistanceUrl(project.id, module.id, part.id)}>
+                          <AlertTriangle className="mr-2 h-3.5 w-3.5" /> Assistência desta peça
+                        </a>
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+      </div>
+      <div className="grid gap-px border-t border-slate-200 bg-slate-200 sm:grid-cols-[1fr_1fr_1fr_auto]">
+        <Gate
+          icon={ClipboardCheck}
+          label="Pecas conferidas"
+          value={`${completedParts}/${parts.length}`}
+          ok={parts.length > 0 && completedParts === parts.length}
+        />
+        <Gate
+          icon={ShieldCheck}
+          label="Evidencias"
+          value={group?.conference_status ?? "pendente"}
+          ok={group?.conference_status === "concluida"}
+        />
+        <Gate
+          icon={PackageCheck}
+          label="Responsavel"
+          value={group?.sealed_by ? "registrado" : "pendente"}
+          ok={!!group?.sealed_by}
+        />
+        <div className="flex min-w-28 items-center gap-2 bg-white px-3 py-2">
+          <Progress value={progress} className="h-1.5" />
+          <span className="text-[9px] font-black">{Math.round(progress)}%</span>
+        </div>
+      </div>
+      <div className="border-t border-slate-200 bg-slate-50 p-3">
+        <Button asChild variant="outline" className="h-11 w-full text-[9px] font-black uppercase">
+          <a href={assistanceUrl(project.id, module.id)}>
+            <AlertTriangle className="mr-2 h-4 w-4" /> Abrir assistência deste módulo
+          </a>
+        </Button>
+      </div>
+      <ConferenceDialog
+        open={conferenceOpen}
+        onOpenChange={setConferenceOpen}
+        projectId={project.id}
+        projectPartIds={project.parts?.map((part) => part.id) || []}
+        moduleName={module.name}
+        group={group ?? null}
+        parts={parts}
+      />
+    </div>
+  );
+}
+
                     </Button>
                   </div>
                 ))}
