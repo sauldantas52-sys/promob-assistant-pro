@@ -353,6 +353,11 @@ export function CommercialDashboard({
               canCreate={canCreateOperational}
             />
           </TabsContent>
+          <TabsContent value="ai_quotes" className="mt-4">
+            <div className="mx-auto max-w-5xl">
+              <AIQuoteWizard companyId={companyId} />
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
     </main>
