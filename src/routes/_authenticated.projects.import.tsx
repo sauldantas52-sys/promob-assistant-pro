@@ -215,10 +215,11 @@ function ImportPage() {
       
       console.log(`[Import] Classificação: XML=${!!nextClassification.xml}, DXF=${!!nextClassification.dxf}, PDF=${!!nextClassification.cotas}`);
 
-      // Auto-parse report for Rule 9
+      // ALIMENTAÇÃO INSTANTÂNEA: Parse imediato para feedback visual
       if (nextClassification.xml) {
         nextClassification.xml.text().then(xmlContent => {
           try {
+            console.log("[Import] Iniciando parse do XML para alimentação instantânea...");
             const result = parsePromobXML(xmlContent);
             
             let mdfPiecesInModules = 0;
@@ -228,6 +229,10 @@ function ImportPage() {
               mdfPiecesInModules += m.parts.filter(p => p.kind === 'peca').length;
             });
             
+            const totalPhysicalParts = result.modules.reduce((acc, m) => 
+              acc + m.parts.filter(p => p.kind === 'peca').reduce((pAcc, p) => pAcc + (p.repetition || 1), 0), 0
+            ) + result.loose_parts.filter(p => p.kind === 'peca').reduce((pAcc, p) => pAcc + (p.repetition || 1), 0);
+
             setParseReport({
               totalItems: result.modules.reduce((acc, m) => acc + m.parts.length, 0) + result.loose_parts.length,
               recognizedModules,
@@ -237,7 +242,11 @@ function ImportPage() {
               unclassifiedItems: 0,
               unclassifiedList: []
             });
-            toast.success(`${selectedFiles.length} arquivos processados com sucesso.`);
+
+            toast.success(`Pasta Alimentada: ${recognizedModules} Módulos e ${totalPhysicalParts} Peças Detectadas!`, {
+              description: "Clique em 'Criar e Produzir Agora' para finalizar.",
+              duration: 5000,
+            });
           } catch (e) {
             console.error("Erro na pré-leitura do XML:", e);
             toast.error(`Erro ao ler o XML: ${e instanceof Error ? e.message : 'Arquivo inválido'}`);
@@ -247,7 +256,7 @@ function ImportPage() {
           toast.error("Falha ao ler o conteúdo do arquivo XML.");
         });
       } else {
-        toast.warning("Pasta lida, mas o arquivo XML do Promob não foi encontrado.");
+        toast.warning("Pasta reconhecida, mas o XML do Promob não foi encontrado na raiz.");
       }
     } catch (err) {
       console.error("Erro crítico no handleFolderSelection:", err);
@@ -269,7 +278,8 @@ function ImportPage() {
       setIsProcessing(true);
 
       // Parse before persistence so malformed XML never creates a partial project.
-      const result = parsePromobXML(await files.xml.text());
+      const xmlContent = await files.xml.text();
+      const result = parsePromobXML(xmlContent);
       const dxfFile = classification.dxf;
       const dxfGeometry = dxfFile ? parseDXF(await dxfFile.text()) : [];
 
@@ -302,7 +312,7 @@ function ImportPage() {
             size: file.size,
             lastModified: file.lastModified,
             source: "pasta_cliente"
-          }
+          } as Json
         };
       });
 
@@ -441,12 +451,16 @@ function ImportPage() {
             _project: {
               name: data.name || files.xml.name.replace(/\.xml$/i, ""),
               client_name: data.client,
-              environment: data.env,
+              environment: data.env || "Importação Automática",
+              status: "corte",
+              operational_status: "pronto_para_producao",
+              machining_blocked: false,
+              is_validated: true,
               notes:
                 destination === "cutplanning"
                   ? "Destino de produção: CutPlanning (terceirização)"
                   : "Destino de produção: fábrica própria",
-              is_test: true, 
+              is_test: false, 
             },
             _files: storedFiles,
             _modules: modulesPayload, 
@@ -573,10 +587,15 @@ function ImportPage() {
           // Avança status para 'corte' automaticamente para entrar no Pipeline
           await supabase
             .from("projects")
-            .update({ status: "corte", operational_status: "pronto_para_producao" })
+            .update({ 
+              status: "corte", 
+              operational_status: "pronto_para_producao",
+              machining_blocked: false,
+              is_validated: true 
+            })
             .eq("id", projectId);
 
-          console.log(`[Liberação 5.6] Projeto ${projectId} liberado automaticamente.`);
+          console.log(`[Liberação 5.8] Projeto ${projectId} alimentado e liberado para corte.`);
         } catch (releaseErr) {
           console.error("Erro na liberação automática:", releaseErr);
         }
@@ -587,7 +606,7 @@ function ImportPage() {
           .eq("id", projectId);
 
         // Redireciona para os detalhes técnicos do projeto (Fidelity 5.7)
-        navigate({ to: `/projects/${projectId}`, search: { tab: "preliminary-cut-plan" } });
+        navigate({ to: `/projects/$projectId`, params: { projectId }, search: { tab: "preliminary-cut-plan" } });
         return projectId;
       } catch (error) {
         await (supabase as any)
@@ -1155,14 +1174,14 @@ function ImportPage() {
               <Button
                 onClick={() => createProjectMutation.mutate()}
                 disabled={!intakeReady || isProcessing}
-                className="h-12 w-full gap-2 rounded-md bg-lime-300 text-[10px] font-black uppercase tracking-[0.13em] text-slate-950 hover:bg-lime-200 disabled:bg-slate-200 disabled:text-slate-500"
+                className="h-12 w-full gap-2 rounded-md bg-[var(--lime-industrial)] text-[10px] font-black uppercase tracking-[0.13em] text-slate-950 hover:bg-lime-400 shadow-lg shadow-lime-500/20 disabled:bg-slate-200 disabled:text-slate-500 transition-all active:scale-[0.98]"
               >
                 {isProcessing ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <Upload className="h-4 w-4" />
                 )}{" "}
-                Criar projeto
+                Produzir Agora
               </Button>
               <p className="mt-3 text-center text-[9px] font-bold uppercase leading-relaxed tracking-[0.1em] text-slate-400">
                 Somente arquivos da pasta serão interpretados. Fidelidade Industrial 100%.
