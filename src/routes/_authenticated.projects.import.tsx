@@ -536,7 +536,7 @@ function ImportPage() {
             .eq("id", projectId)
             .maybeSingle();
           if (reconciledProject) {
-            navigate({ to: "/projects/$projectId", params: { projectId: projectId } });
+            navigate({ to: "/projects/$projectId", params: { projectId: projectId }, search: { tab: 'modules' } });
             return reconciledProject.id;
           }
           throw new Error(
