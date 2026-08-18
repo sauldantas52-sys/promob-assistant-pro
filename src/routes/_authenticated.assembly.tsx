@@ -492,6 +492,19 @@ function AssemblyContent() {
                     </Button>
                     <Button
                       asChild
+                      variant="outline"
+                      className="h-11 rounded-md text-[10px] font-black uppercase tracking-wider border-blue-200 text-blue-700 hover:bg-blue-50"
+                    >
+                      <Link 
+                        to="/projects/$projectId" 
+                        params={{ projectId: project.id }}
+                        search={{ tab: '3d' }}
+                      >
+                        <Boxes className="mr-2 h-4 w-4" /> Ver no 3D
+                      </Link>
+                    </Button>
+                    <Button
+                      asChild
                       className="h-12 rounded-md bg-slate-900 text-[10px] font-black uppercase tracking-wider"
                     >
                       <a href={assistanceUrl(project.id)}>
