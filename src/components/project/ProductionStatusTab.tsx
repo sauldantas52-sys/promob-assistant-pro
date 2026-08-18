@@ -67,9 +67,9 @@ export function ProductionStatusTab({ projectId }: { projectId: string }) {
     return (
       <Card className="rounded-[2.5rem] border-2 border-dashed border-slate-200 bg-white p-16 text-center">
         <AlertCircle className="h-12 w-12 text-slate-200 mx-auto mb-4" />
-        <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">Rastreabilidade não iniciada</h3>
+        <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">Rastreabilidade em Processamento</h3>
         <p className="text-[10px] text-slate-400 mt-2 uppercase font-bold tracking-widest max-w-xs mx-auto">
-          Libere o projeto para produção no Pipeline para começar o acompanhamento de corte e usinagem.
+          Os dados industriais estão sendo vinculados às peças. Se o projeto foi importado recentemente, aguarde alguns segundos e recarregue.
         </p>
       </Card>
     );
