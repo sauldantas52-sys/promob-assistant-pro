@@ -163,9 +163,16 @@ export function Operational3DView({
 
     return rawModules.map((m, index) => {
       // Mock de posicionamento ilustrativo se não houver coordenadas
-      // Em produção, isso viria do metadata do Promob se existisse
-      const x = (index % 5) * 1.5 - 3;
-      const z = Math.floor(index / 5) * 1.5;
+      const basePos: [number, number, number] = [
+        (index % 5) * 1.5 - 3, 
+        0, 
+        Math.floor(index / 5) * 1.5
+      ];
+      
+      // Aplicar AFASTAR visualmente (Apenas visual, Fidelity 5.1 Regra 11)
+      const visualPosition: [number, number, number] = offsetModuleId === m.id 
+        ? [basePos[0], basePos[1] + 0.5, basePos[2] + 0.5] // Deslocamento visual
+        : basePos;
 
       const moduleParts = rawParts?.filter(p => p.module_id === m.id) || [];
       const pieces: PhysicalPiece3D[] = moduleParts.map(p => ({
@@ -192,7 +199,7 @@ export function Operational3DView({
         height: m.height_mm || 700,
         depth: m.depth_mm || 550,
         positionConfirmed: false,
-        position: [x, 0, z] as [number, number, number],
+        position: visualPosition,
         pieces
       };
     });
