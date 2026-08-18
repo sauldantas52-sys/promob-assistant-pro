@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRightLeft, TrendingDown, TrendingUp, Layers, Box } from "lucide-react";
+import { ArrowRightLeft, TrendingDown, TrendingUp, Layers } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ComparisonStats {
@@ -19,9 +19,9 @@ interface CutPlanComparisonProps {
 }
 
 export function CutPlanComparisonCard({ stats }: CutPlanComparisonProps) {
-  const deltaSheets = stats.official.sheets - stats.estimated.sheets;
-  const deltaUtilization = stats.official.utilization - stats.estimated.utilization;
-  const deltaPieces = stats.official.pieces - stats.estimated.pieces;
+  const deltaSheets = stats.sheets.official - stats.sheets.estimated;
+  const deltaUtilization = stats.utilization.official - stats.utilization.estimated;
+  const deltaPieces = stats.pieces.official - stats.pieces.estimated;
 
   return (
     <Card className="border-2 border-slate-900 bg-slate-950 text-white shadow-2xl overflow-hidden">
@@ -45,7 +45,7 @@ export function CutPlanComparisonCard({ stats }: CutPlanComparisonProps) {
           <div className="space-y-2">
             <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Total de Peças</p>
             <div className="flex items-end gap-3">
-              <span className="text-2xl font-black">{stats.official.pieces}</span>
+              <span className="text-2xl font-black">{stats.pieces.official}</span>
               <div className={cn(
                 "flex items-center gap-1 text-[10px] font-bold mb-1",
                 deltaPieces === 0 ? "text-emerald-400" : "text-amber-400"
@@ -53,14 +53,14 @@ export function CutPlanComparisonCard({ stats }: CutPlanComparisonProps) {
                 {deltaPieces === 0 ? "CONFERE" : `${deltaPieces > 0 ? '+' : ''}${deltaPieces}`}
               </div>
             </div>
-            <p className="text-[10px] text-slate-500 font-medium">Estimado: {stats.estimated.pieces}</p>
+            <p className="text-[10px] text-slate-500 font-medium">Estimado: {stats.pieces.estimated}</p>
           </div>
 
           {/* Chapas */}
           <div className="space-y-2">
             <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Consumo de Chapas</p>
             <div className="flex items-end gap-3">
-              <span className="text-2xl font-black">{stats.official.sheets}</span>
+              <span className="text-2xl font-black">{stats.sheets.official}</span>
               <div className={cn(
                 "flex items-center gap-1 text-[10px] font-bold mb-1",
                 deltaSheets <= 0 ? "text-emerald-400" : "text-red-400"
@@ -69,14 +69,14 @@ export function CutPlanComparisonCard({ stats }: CutPlanComparisonProps) {
                 {deltaSheets === 0 ? "IGUAL" : `${Math.abs(deltaSheets)} chapa${Math.abs(deltaSheets) > 1 ? 's' : ''}`}
               </div>
             </div>
-            <p className="text-[10px] text-slate-500 font-medium">Estimado: {stats.estimated.sheets}</p>
+            <p className="text-[10px] text-slate-500 font-medium">Estimado: {stats.sheets.estimated}</p>
           </div>
 
           {/* Aproveitamento */}
           <div className="space-y-2">
             <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Aproveitamento Final</p>
             <div className="flex items-end gap-3">
-              <span className="text-2xl font-black text-lime-400">{stats.official.utilization.toFixed(1)}%</span>
+              <span className="text-2xl font-black text-lime-400">{stats.utilization.official.toFixed(1)}%</span>
               <div className={cn(
                 "flex items-center gap-1 text-[10px] font-bold mb-1",
                 deltaUtilization >= 0 ? "text-emerald-400" : "text-amber-400"
@@ -85,7 +85,7 @@ export function CutPlanComparisonCard({ stats }: CutPlanComparisonProps) {
                 {deltaUtilization.toFixed(1)}%
               </div>
             </div>
-            <p className="text-[10px] text-slate-500 font-medium">Estimado: {stats.estimated.utilization.toFixed(1)}%</p>
+            <p className="text-[10px] text-slate-500 font-medium">Estimado: {stats.utilization.estimated.toFixed(1)}%</p>
           </div>
         </div>
 
@@ -93,7 +93,7 @@ export function CutPlanComparisonCard({ stats }: CutPlanComparisonProps) {
           <div className="mt-6 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg flex items-start gap-3">
             <Layers className="h-4 w-4 text-amber-500 mt-0.5" />
             <p className="text-[10px] text-amber-200 font-medium leading-relaxed">
-              Divergência detectada na contagem física de peças. O Cut Pro oficial reporta {stats.official.pieces} peças, enquanto a estimativa do Monta AI previu {stats.estimated.pieces}. 
+              Divergência detectada na contagem física de peças. O Cut Pro oficial reporta {stats.pieces.official} peças, enquanto a estimativa do Monta AI previu {stats.pieces.estimated}. 
               Verifique se todas as peças físicas (409 esperadas para o Closet) foram corretamente importadas no Cut Pro.
             </p>
           </div>
