@@ -327,7 +327,8 @@ export function parsePromobXML(xmlContent: string): PromobProject {
               unique_id: parentId,
               reference: parentNode.getAttribute('REFERENCE'),
               is_industrial_module: true
-            }
+            },
+            id_xml: parentNode.getAttribute('ID') || parentId,
           };
           moduleMap.set(parentId, newModule);
           modulesOrder.push(parentId);
