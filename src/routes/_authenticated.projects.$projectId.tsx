@@ -98,10 +98,10 @@ import { hasPermission } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId")({
-  validateSearch: (search: Record<string, unknown>): { tab?: string } => {
+  validateSearch: (search: Record<string, unknown>) => {
     return {
       tab: (search.tab as string) || undefined,
-    };
+    } as Record<string, any>;
   },
   head: () => ({
     meta: [
