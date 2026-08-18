@@ -194,10 +194,15 @@ export function IndustrialLabelsTab({ pieces }: { pieces: PhysicalPiece[] }) {
             size: auto;
           }
           
-          /* Força o balizador de folha para evitar transbordamento */
-          .print-area {
-            overflow: hidden;
+          /* Otimização para rolo: evita quebras e garante alinhamento */
+          .etq {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
             page-break-after: always;
+          }
+
+          .print-area {
+            overflow: visible;
           }
         }
       `}</style>
