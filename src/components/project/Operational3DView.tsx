@@ -350,12 +350,15 @@ export function Operational3DView({
                 selectedId={selectedModuleId}
                 isIsolated={isIsolated}
                 isXRay={isXRay}
-                onSelectModule={setSelectedModuleId}
+                onSelectModule={(id) => {
+                  setSelectedModuleId(id);
+                  setSelectedPieceId(null);
+                }}
                 onSelectPiece={(physicalId) => {
+                  setSelectedPieceId(physicalId);
                   window.dispatchEvent(new CustomEvent('highlight-piece', { 
                     detail: { physicalId } 
                   }));
-                  toast.info(`Peça destacada: ${physicalId}`);
                 }}
               />
               <Environment preset="city" />
