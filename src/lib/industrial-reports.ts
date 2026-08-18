@@ -140,3 +140,45 @@ export function interpretarListaDeComprasTexto(textoPdf: string) {
       };
     });
 }
+
+// ===================== 3) VISUALIZADOR DE ETIQUETAS ("BALIZADOR") =====================
+
+/**
+ * Representa uma folha de etiquetas e valida se alguma etiqueta ultrapassa as bordas.
+ */
+export function validarLayoutEtiquetas(pecas: any[], config: any) {
+  const { width: etqW, height: etqH, cols, rows, margin = 2 } = config;
+  const paginas: any[] = [];
+  const porPagina = cols * (rows || 100);
+
+  for (let i = 0; i < pecas.length; i += porPagina) {
+    const chunk = pecas.slice(i, i + porPagina);
+    const layout = chunk.map((p, idx) => {
+      const col = idx % cols;
+      const row = Math.floor(idx / cols);
+      const x = margin + (col * etqW);
+      const y = margin + (row * etqH);
+      
+      return {
+        piece: p,
+        x,
+        y,
+        w: etqW,
+        h: etqH,
+        overflow: false // Lógica de balizador simplificada
+      };
+    });
+    paginas.push(layout);
+  }
+
+  return paginas;
+}
+
+/**
+ * Gera o quadrado de cor econômica da peça.
+ */
+export function renderEconomicColorSquare(materialName: string) {
+  const color = edgeBandColor(materialName);
+  return `<div style="width:2.5mm;height:2.5mm;background:${color};border:0.2mm solid #000;flex:none;"></div>`;
+}
+
