@@ -642,7 +642,7 @@ function ProjectDetail() {
         value={activeTab} 
         onValueChange={(v) => {
           setActiveTab(v);
-          navigate({ search: { tab: v }, replace: true });
+          navigate({ search: (prev: any) => ({ ...prev, tab: v }), replace: true });
         }}
         className="min-w-0 space-y-4"
       >
