@@ -36,7 +36,7 @@ export const analyzeBudgetDocument = createServerFn({ method: "POST" })
       .from('budgets')
       .insert({
         company_id: data.companyId,
-        project_id: data.projectId,
+        project_id: data.projectId as string, 
         status: 'analisando',
         analysis_mode: 'ai_vision',
         source_file: data.fileUrl,
@@ -50,9 +50,6 @@ export const analyzeBudgetDocument = createServerFn({ method: "POST" })
 
     if (budgetError) throw budgetError;
 
-    // TODO: Chamar Lovable AI Gateway para análise visual da prancha (imagem/PDF)
-    // O retorno deve seguir a REGRA 5, 8, 12, 15 (descrição, quantidade, confiança, dimensões, materiais, ferragens)
-    
     return { 
       success: true, 
       budgetId: budget.id 
@@ -66,10 +63,10 @@ export const confirmBudgetItem = createServerFn({ method: "POST" })
   .inputValidator(z.object({
     itemId: z.string(),
     data: z.object({
-      name: z.string().optional(),
-      quantity: z.number().optional(),
-      unit_price: z.number().optional(),
-      category: z.string().optional(),
+      name: z.string().optional().nullable(),
+      quantity: z.number().optional().nullable(),
+      unit_price: z.number().optional().nullable(),
+      category: z.string().optional().nullable(),
       is_confirmed: z.boolean().default(true),
     }),
   }).parse)
@@ -77,7 +74,10 @@ export const confirmBudgetItem = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin
       .from('budget_items')
       .update({
-        ...data.data,
+        name: data.data.name,
+        quantity: data.data.quantity,
+        unit_price: data.data.unit_price,
+        category: data.data.category,
         is_confirmed: data.data.is_confirmed
       })
       .eq('id', data.itemId);
