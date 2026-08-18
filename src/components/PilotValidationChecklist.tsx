@@ -324,6 +324,54 @@ export function PilotValidationChecklist({
           >
             {completedCount} / {CHECK_ITEMS.length} VALIDADOS
           </Badge>
+          {canApprove && (
+            <Button
+              size="sm"
+              className="h-8 rounded-xl bg-slate-900 text-white font-black uppercase text-[9px] tracking-widest hover:bg-lime-600 transition-colors"
+              onClick={async () => {
+                if (!confirm("Deseja realizar a liberação industrial global deste projeto? Todos os gates serão marcados como concluídos e a usinagem será desbloqueada.")) return;
+                
+                try {
+                  const checkTypes = GATES.flatMap(g => g.items.map(i => i.id));
+                  const { data: userData } = await supabase.auth.getUser();
+                  
+                  const checksPayload = checkTypes.map(type => ({
+                    project_id: projectId,
+                    check_type: type,
+                    is_completed: true,
+                    completed_by: userData.user?.id,
+                    completed_at: new Date().toISOString(),
+                    evidence_source: "manual_global_release",
+                    updated_at: new Date().toISOString()
+                  }));
+
+                  await (supabase as any).from("validation_checks").upsert(checksPayload, { onConflict: "project_id,check_type" });
+                  
+                  await supabase.rpc("release_project_machining" as any, {
+                    _project_id: projectId,
+                  });
+
+                  await supabase
+                    .from("projects")
+                    .update({ 
+                      status: "corte", 
+                      operational_status: "pronto_para_producao",
+                      machining_blocked: false,
+                      is_validated: true 
+                    })
+                    .eq("id", projectId);
+
+                  toast.success("Projeto liberado globalmente para produção.");
+                  queryClient.invalidateQueries({ queryKey: ["validation-checks", projectId] });
+                  queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+                } catch (err) {
+                  toast.error("Erro na liberação global.");
+                }
+              }}
+            >
+              Liberação Global
+            </Button>
+          )}
         </div>
       </CardHeader>
       <CardContent className="p-8 space-y-10">
