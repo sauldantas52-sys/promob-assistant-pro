@@ -44,6 +44,7 @@ import { VisualEstimateTab } from "@/components/project/VisualEstimateTab";
 import { AuditIntegrationTab } from "@/components/project/AuditIntegrationTab";
 import { PhysicalChecklistFlow } from "@/components/PhysicalChecklistFlow";
 import { Technical3DView } from "@/components/project/Technical3DView";
+import { Operational3DView } from "@/components/project/Operational3DView";
 import { VisualFeedingMode } from "@/components/project/VisualFeedingMode";
 import { parseDXF } from "@/lib/dxf-parser";
 
@@ -635,6 +636,7 @@ function ProjectDetail() {
           <TabsList className="flex h-12 w-max min-w-full justify-start rounded-none bg-transparent p-1">
             <TabTrigger value="modules" icon={LayoutGrid} label="Módulos" />
             <TabTrigger value="visual-intake" icon={Eye} label="Alimentação Visual" />
+            <TabTrigger value="operational3d" icon={Box} label="Ambiente 3D" />
             <TabTrigger value="technical3d" icon={Box} label="Gêmeo DXF" />
             <TabTrigger value="parts" icon={ClipboardList} label="Lista Técnica" />
             <TabTrigger value="commercial" icon={FileText} label="Comercial" />
@@ -657,6 +659,14 @@ function ProjectDetail() {
           <VisualFeedingMode 
             projectId={projectId} 
             projectName={project.data?.name}
+          />
+        </TabsContent>
+
+        <TabsContent value="operational3d" className="mt-6">
+          <Operational3DView 
+            projectId={projectId}
+            modules={modules.data || []}
+            parts={allParts}
           />
         </TabsContent>
 
