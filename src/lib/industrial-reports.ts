@@ -12,7 +12,7 @@
  *     se alguma etiqueta ultrapassa a borda.
  */
 
-import { esc, num, toNum, CUT_CONFIG } from './cut-plan/parsers/promob-pro';
+import { esc, num, toNum, CUT_CONFIG, edgeBandColor } from './cut-plan/parsers/promob-pro';
 
 // ===================== 1) MÉTRICAS E CUSTOS =====================
 
