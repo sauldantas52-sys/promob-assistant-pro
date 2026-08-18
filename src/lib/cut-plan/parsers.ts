@@ -1,5 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { PhysicalPiece } from "./engine";
 
 /**
  * CutProParser - Especialista em interpretar exportações do Cut Pro.
@@ -14,7 +13,10 @@ export const CutProParser = {
     const lines = csvText.split('\n').map(l => l.trim()).filter(l => l);
     if (lines.length < 2) throw new Error("Arquivo CSV inválido ou vazio.");
 
-    const headers = lines[0].split(';').map(h => h.trim().toLowerCase());
+    const firstLine = lines[0];
+    if (!firstLine) throw new Error("Cabeçalho do CSV não encontrado.");
+
+    const headers = firstLine.split(';').map(h => h.trim().toLowerCase());
     
     // Identificar colunas críticas
     const idxWidth = headers.findIndex(h => h.includes('largura') || h.includes('width'));
