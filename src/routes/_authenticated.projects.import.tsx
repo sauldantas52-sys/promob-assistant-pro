@@ -1052,10 +1052,12 @@ function ImportPage() {
                     Relatório de Leitura Monta AI
                   </p>
                   <div className="grid grid-cols-2 gap-y-1 font-mono text-[9px]">
-                    <span className="text-slate-400">Itens ITEM:</span>
+                    <span className="text-slate-400">Total de Itens:</span>
                     <span className="text-right font-bold text-slate-700">{parseReport.totalItems}</span>
                     <span className="text-slate-400">Módulos:</span>
                     <span className="text-right font-bold text-slate-700">{parseReport.recognizedModules}</span>
+                    <span className="text-slate-400">Peças MDF:</span>
+                    <span className="text-right font-bold text-slate-700">{parseReport.mdfPiecesInModules + parseReport.looseMdfPieces}</span>
                   </div>
                   <p className="text-[8px] leading-relaxed text-slate-400 italic">
                     A classificação de MDF, Ferragens e Módulos é confirmada durante a ingestão.
