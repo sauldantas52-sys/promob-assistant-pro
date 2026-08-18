@@ -44,16 +44,15 @@ export const Route = createFileRoute('/_authenticated')({
       });
     }
 
-    // Redirecionamento de segurança para a rota de importação
-    // IMPORTANTE: Adicionada verificação de trailing slash para compatibilidade com TanStack Router
-    const isImportPath = location.pathname.startsWith('/projects/import');
+    // Redirecionamento de segurança: se o usuário tentar acessar importação mas não for admin/escritorio/projetista,
+    // ou se o sistema detectar uma tentativa de acesso a rota protegida sem a role carregada no context
+    const isImportPath = location.pathname.startsWith('/projects/import') || location.pathname.startsWith('/projects/test-import');
     if (isImportPath) {
       const allowedRoles = ['admin', 'escritorio', 'projetista'];
       if (!role || !allowedRoles.includes(role)) {
         console.warn(`[Security] Usuário ${session.user.id} com role ${role} tentou acessar importação.`);
         throw redirect({ to: '/dashboard' });
       }
-      console.log(`[Security] Acesso permitido para importação (Role: ${role})`);
     }
 
     return {
