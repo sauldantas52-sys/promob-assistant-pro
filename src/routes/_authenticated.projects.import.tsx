@@ -512,7 +512,7 @@ function ImportPage() {
         }
         
         // Redireciona para o detalhe do projeto que agora contém a aba de Plano de Corte
-        navigate({ to: "/projects/$projectId", params: { projectId: projectId } });
+        navigate({ to: "/projects/$projectId", params: { projectId: projectId }, search: { tab: 'modules' } });
         return projectId;
       } catch (error) {
         if (rpcAttempted) {
