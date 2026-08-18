@@ -44,6 +44,12 @@ const navItems = [
     roles: ["admin", "projetista", "comercial", "escritorio", "auditor"],
   },
   {
+    to: "/projects/import",
+    label: "Abrir Minha Pasta Real",
+    icon: Upload,
+    roles: ["admin", "projetista", "escritorio"],
+  },
+  {
     to: "/business",
     label: "Comercial 360",
     icon: Briefcase,
@@ -54,12 +60,6 @@ const navItems = [
     label: "Orçamentos IA",
     icon: BadgeDollarSign,
     roles: ["admin", "projetista", "comercial", "escritorio", "auditor"],
-  },
-  {
-    to: "/projects/import",
-    label: "Pasta do Cliente",
-    icon: Upload,
-    roles: ["admin", "projetista", "escritorio"],
   },
   { to: "/production", label: "Produção", icon: Factory, roles: ["admin", "fabrica", "auditor"] },
   {
