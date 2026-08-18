@@ -1,24 +1,27 @@
-# Plano de Implementação: Estudo de Arquivos e Extração Industrial 6.5
+# Plano de Implementação: Análise Técnica e Extração Industrial 6.6
 
-O objetivo é realizar um estudo técnico aprofundado nos novos arquivos enviados (PDFs, XML, DXF, PROMOB) para extrair geometria, materiais, fitas de borda e furações, alimentando o Plano de Corte Pro, Caderno de Montagem e Ambiente 3D com precisão industrial.
+Este plano detalha o estudo e extração de dados dos arquivos industriais enviados para alimentar de forma definitiva o ecossistema do **Monta AI**.
 
-## 1. Análise Técnica dos Arquivos
-- **CLOSET-18-07-2026.xml**: Extração de `UNIQUEID` (UniqueId do Promob) para vincular módulos e peças. Mapeamento de `MATERIAL`, `THICKNESS`, `MODEL` e fitas `FITA_BORDA_1-4`.
-- **PRODUÇÃO-CLOSET-SAPATEIRA-MOD-22-07-2026.dxf**: Extração de coordenadas de furação e usinagem.
-- **ListaCorte.pdf / ListaCompra.pdf**: Validação cruzada de quantidades e bitolas para garantir que o sistema não "invente" dados.
-- **Cliente-nao-informado...COTAS.pdf**: Referência visual para validação de dimensões externas dos módulos.
+## 1. Auditoria de Geometria e Estrutura (XML + DXF)
+- **Extração de Módulos (Gabarito 13 Módulos)**:
+  - Analisar `CLOSET-18-07-2026.xml` para mapear os 13 módulos reais do projeto `CLOSET`.
+  - Usar o UniqueId do Promob como âncora de integridade.
+- **Extração de Peças (Gabarito 409 Itens)**:
+  - Mapear cada uma das 409 peças físicas, capturando material, espessura e fitas de borda.
+- **Usinagem e Furação (DXF)**:
+  - Mapear as coordenadas do arquivo `PRODUÇÃO-CLOSET-SAPATEIRA-MOD-22-07-2026.dxf` para habilitar a visualização de furos no Ambiente 3D e etiquetas.
 
-## 2. Refinamento do Processamento Industrial
-- **Parser XML Industrial**: Atualizar `src/lib/promob-import.ts` para capturar metadados estritos de fita de borda (F1-F4) e associar `raw_name` real do Promob.
-- **Sincronização de Peças**: Garantir que o `id_xml` seja a chave primária de vínculo entre o banco de dados e as visualizações (3D e Caderno).
-- **Motor de Plano de Corte**: Validar as regras de refilo (5mm em cada lado) e kerf (4mm) contra as listas de corte PDF enviadas.
+## 2. Validação Industrial (PDFs)
+- **Conferência de Bitolas**: Comparar as dimensões extraídas do XML com as tabelas de `ListaCorte.pdf`.
+- **Regra de Refilo e Kerf**: Aplicar 5mm de refilo em cada lado e 4mm de kerf conforme configurado, validando contra o `PreviewCorte.pdf`.
+- **Lista de Compras**: Sincronizar as ferragens e acessórios identificados no XML com o `ListaCompra.pdf`.
 
-## 3. Melhorias na Interface e Visualização
-- **Caderno de Montagem**: Exibição clara dos grupos G1-G5 e identificação de peças via QR Code (`physical_id`).
-- **Ambiente 3D**: Renderização volumétrica fiel baseada nas dimensões `WIDTH`, `HEIGHT`, `DEPTH` do XML.
-- **Painel de Produção**: Liberação automática de fluxos (Corte, Borda, Usinagem) ao detectar integridade total nos arquivos importados.
+## 3. Persistência e Visibilidade (Industrial Core)
+- **Ingestão em Tempo Real**: Garantir que ao clicar em "Importar", os dados fluam imediatamente para o banco de dados via RPC industrial.
+- **Sincronização Sidebar**: Garantir que as abas "Plano de Corte Pro", "Ambiente 3D" e "Caderno de Montagem" sejam liberadas e alimentadas com os dados técnicos.
+- **Etiquetas de Produção**: Habilitar a geração de etiquetas industriais (Zebra/Remac) com os metadados reais extraídos.
 
 ## Detalhes Técnicos
-- Utilização de `DOMParser` para processamento escalável de grandes arquivos XML (>8000 linhas).
-- Integração de metadados redundantes no Supabase (`modules` e `parts`) para evitar órfãos em reconciliações assíncronas.
-- Manutenção do padrão **Industrial Design System 4.0** (Typography SF Pro, Dark/Light mode).
+- O parser em `src/lib/promob-import.ts` será o motor central, tratando discrepâncias entre `DESCRIPTION` e `REFERENCE`.
+- As visualizações em `AssemblyBookTab.tsx` e `Operational3DView.tsx` utilizarão a estratégia de triple-link (`module_id`, `id_xml`, `metadata.id_xml`) para garantir zero perda de dados.
+- Todo o fluxo seguirá o **Industrial Design System 4.0**.
