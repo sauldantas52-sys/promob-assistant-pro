@@ -122,22 +122,22 @@ export async function generateExecutivePDF(project: ProjectData, modules: any[],
     doc.text(dims, 15, 40);
 
     // Área para Imagens (Fidelidade 5.4 - Imagens da Pasta do Cliente)
-    // Procurar arquivos relacionados ao módulo
     const moduleImages = files.filter(f => 
       f.file_name.toLowerCase().includes(mod.name.toLowerCase()) ||
-      (f.summary && f.summary.toLowerCase().includes(mod.name.toLowerCase()))
-    ).filter(f => ['image/jpeg', 'image/png', 'application/pdf'].includes(f.file_type || ''));
+      (f.summary && typeof f.summary === 'object' && (f.summary as any).relativePath?.toLowerCase().includes(mod.name.toLowerCase()))
+    ).filter(f => ['image/jpeg', 'image/png', 'imagem_referencia'].includes(f.file_type || ''));
 
     doc.setDrawColor(200);
-    doc.rect(15, 45, 180, 100); // Placeholder moldura
+    doc.rect(15, 45, 180, 100); 
     
     if (moduleImages.length > 0) {
       doc.setFontSize(10);
       doc.setTextColor(accentColor);
-      doc.text("IMAGEM TÉCNICA LOCALIZADA NA PASTA DO CLIENTE", 105, 95, { align: "center" });
+      doc.text("IMAGEM TÉCNICA LOCALIZADA NA PASTA DO CLIENTE", 105, 90, { align: "center" });
       doc.setFontSize(8);
       doc.setTextColor(150);
-      doc.text(`Arquivo: ${moduleImages[0].file_name}`, 105, 100, { align: "center" });
+      doc.text(`Arquivo: ${moduleImages[0].file_name}`, 105, 95, { align: "center" });
+      doc.text("(A imagem real seria renderizada aqui em ambiente com URL pública)", 105, 105, { align: "center" });
     } else {
       doc.setFontSize(10);
       doc.setTextColor(150);
