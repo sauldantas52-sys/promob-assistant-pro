@@ -1170,14 +1170,14 @@ function ImportPage() {
               <Button
                 onClick={() => createProjectMutation.mutate()}
                 disabled={!intakeReady || isProcessing}
-                className="h-12 w-full gap-2 rounded-md bg-lime-300 text-[10px] font-black uppercase tracking-[0.13em] text-slate-950 hover:bg-lime-200 disabled:bg-slate-200 disabled:text-slate-500"
+                className="h-12 w-full gap-2 rounded-md bg-[var(--lime-industrial)] text-[10px] font-black uppercase tracking-[0.13em] text-slate-950 hover:bg-lime-400 shadow-lg shadow-lime-500/20 disabled:bg-slate-200 disabled:text-slate-500 transition-all active:scale-[0.98]"
               >
                 {isProcessing ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <Upload className="h-4 w-4" />
                 )}{" "}
-                Criar projeto
+                Produzir Agora
               </Button>
               <p className="mt-3 text-center text-[9px] font-bold uppercase leading-relaxed tracking-[0.1em] text-slate-400">
                 Somente arquivos da pasta serão interpretados. Fidelidade Industrial 100%.
