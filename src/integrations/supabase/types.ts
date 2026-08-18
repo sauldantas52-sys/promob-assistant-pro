@@ -928,6 +928,7 @@ export type Database = {
           id: string
           id_xml: string | null
           is_completed: boolean | null
+          is_industrial_module: boolean | null
           metadata: Json
           name: string
           project_id: string
@@ -945,6 +946,7 @@ export type Database = {
           id?: string
           id_xml?: string | null
           is_completed?: boolean | null
+          is_industrial_module?: boolean | null
           metadata?: Json
           name: string
           project_id: string
@@ -962,6 +964,7 @@ export type Database = {
           id?: string
           id_xml?: string | null
           is_completed?: boolean | null
+          is_industrial_module?: boolean | null
           metadata?: Json
           name?: string
           project_id?: string

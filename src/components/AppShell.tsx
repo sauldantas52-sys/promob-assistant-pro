@@ -169,10 +169,12 @@ export function AppShell({ children }: { children: ReactNode }) {
     );
   }
 
-  const visibleNavItems = role ? navItems.filter((item) => item.roles.includes(role)) : [];
-  const activeNavPath = visibleNavItems
-    .filter((item) => pathname === item.to || pathname.startsWith(`${item.to}/`))
-    .sort((left, right) => right.to.length - left.to.length)[0]?.to;
+  const visibleNavItems = role ? navItems.filter((item) => item.roles.includes(role)) : navItems.filter(i => i.roles.includes('fabrica')); // Fallback para visibilidade básica enquanto carrega
+  const activeNavPath = visibleNavItems.length > 0 
+    ? visibleNavItems
+        .filter((item) => pathname === item.to || pathname.startsWith(`${item.to}/`))
+        .sort((left, right) => right.to.length - left.to.length)[0]?.to
+    : undefined;
 
   return (
     <div className="flex min-h-dvh w-full flex-col overflow-x-hidden bg-slate-50 lg:flex-row">

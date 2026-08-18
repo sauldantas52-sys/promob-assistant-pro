@@ -380,6 +380,7 @@ function ImportPage() {
           height_mm: module.height_mm ?? null,
           depth_mm: module.depth_mm ?? null,
           quantity: module.quantity,
+          is_industrial_module: true, // Garantir flag de módulo industrial
           parts: module.parts.map((part: PromobPart) => ({
             kind: part.kind,
             name: part.name,
