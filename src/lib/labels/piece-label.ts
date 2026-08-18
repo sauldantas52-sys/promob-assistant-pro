@@ -107,6 +107,7 @@ export function pieceLabelHtml(piece: any, opts: PieceLabelOpts) {
         '<div class="etq-main-black" style="min-width:0">' +
           '<div style="display:flex;align-items:center;gap:0.3em;margin-bottom:0.05em">' +
             '<div style="flex:none;width:' + SQ.toFixed(1) + 'mm;height:' + SQ.toFixed(1) + 'mm;background:' + moduleColor(piece.modNum) + ';border:1px solid #000;border-radius:1px;display:flex;align-items:center;justify-content:center;font-size:0.75em;font-weight:900;color:#000">G' + piece.modNum + '</div>' +
+            '<div style="width:2.5mm;height:2.5mm;background:' + edgeBandColor(piece.model) + ';border:0.2mm solid #000;flex:none;"></div>' +
             '<div style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:1.25em;letter-spacing:-0.03em;color:#000">#' + piece.code + '</div>' +
           '</div>' +
           '<div style="font-size:0.65em;color:#000;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(piece.masterUid, 16) + ' · G' + piece.modNum + '-P' + piece.modulePieceNumber + (piece.group ? ' · ' + piece.group : '') + '</div>' +
