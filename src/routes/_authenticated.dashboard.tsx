@@ -256,6 +256,7 @@ function DashboardContent() {
                   key={project.id}
                   to="/projects/$projectId"
                   params={{ projectId: project.id }}
+                  search={{ tab: 'modules' }}
                   className="block p-4 active:bg-slate-50 transition-colors"
                 >
                   <div className="flex justify-between items-start mb-2">
