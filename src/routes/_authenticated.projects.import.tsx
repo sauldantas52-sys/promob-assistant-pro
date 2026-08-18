@@ -639,7 +639,7 @@ function ImportPage() {
 
               <div className="flex gap-3 mt-6">
                 <Button 
-                  onClick={() => navigate({ to: "/projects/$projectId", params: { projectId: createProjectMutation.data } })}
+                  onClick={() => navigate({ to: "/projects/$projectId", params: { projectId: createProjectMutation.data }, search: { tab: 'modules' } })}
                   className="bg-slate-950 text-white font-black uppercase text-[10px] tracking-widest px-8"
                 >
                   Abrir Engenharia
