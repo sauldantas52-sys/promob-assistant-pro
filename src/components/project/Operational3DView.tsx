@@ -340,7 +340,7 @@ export function Operational3DView({
               disabled={!selectedModuleId}
               onClick={() => setOffsetModuleId(offsetModuleId ? null : selectedModuleId)}
             >
-              <Maximize2 className="mr-2 h-4 w-4" />
+              <Maximize2 className={cn("mr-2 h-4 w-4", offsetModuleId ? "animate-pulse" : "")} />
               {offsetModuleId ? "Reagrupar" : "Afastar"}
             </Button>
           </div>
@@ -432,6 +432,10 @@ export function Operational3DView({
                               <Link 
                                 to="/assembly/piece/$physicalId" 
                                 params={{ physicalId: piece.physicalId }}
+                                className="flex items-center gap-1"
+                              >
+                                <Badge className="bg-slate-900 text-white text-[7px] h-5 hover:bg-slate-800">PRODUÇÃO</Badge>
+                              </Link>
                               >
                                 Produção
                               </Link>
