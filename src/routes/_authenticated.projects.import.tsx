@@ -840,7 +840,6 @@ function ImportPage() {
                         if (input) {
                           input.setAttribute("webkitdirectory", "");
                           input.setAttribute("directory", "");
-                          // Remove any filter that might restrict extensions
                           input.removeAttribute("accept");
                         }
                       }}
@@ -849,28 +848,28 @@ function ImportPage() {
                     <FolderOpen className="h-8 w-8 text-slate-950 group-hover:text-lime-700" />
                     <div className="min-w-0">
                       <p className="truncate text-sm font-black uppercase text-slate-950">
-                        {folderName || "Selecionar pasta raiz"}
+                        {folderName || "Abrir Minha Pasta Real"}
                       </p>
                       <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
                         {folderFileCount
                           ? `${folderFileCount} arquivos lidos`
-                          : "webkitdirectory / acesso local"}
+                          : "Escolher arquivos da minha empresa"}
                       </p>
                     </div>
                   </label>
-                  <div className="flex min-h-40 flex-col justify-between rounded-md border border-slate-200 bg-slate-100 p-4 text-slate-500 sm:p-5">
+                  <div className="flex min-h-40 flex-col justify-between rounded-md border border-slate-200 bg-white p-4 text-slate-950 sm:p-5 shadow-sm">
                     <div className="flex items-start justify-between gap-3">
-                      <Cloud className="h-8 w-8" />
-                      <span className="rounded-sm border border-amber-300 bg-amber-50 px-2 py-1 text-[9px] font-black uppercase tracking-wider text-amber-800">
-                        Não conectado
+                      <Briefcase className="h-8 w-8 text-blue-600" />
+                      <span className="rounded-sm border border-blue-300 bg-blue-50 px-2 py-1 text-[9px] font-black uppercase tracking-wider text-blue-800">
+                        Empresa Ativa
                       </span>
                     </div>
                     <div>
-                      <p className="flex items-center gap-2 text-sm font-black uppercase text-slate-700">
-                        <ServerOff className="h-4 w-4" /> Inbox na nuvem
+                      <p className="flex items-center gap-2 text-sm font-black uppercase text-slate-900">
+                        <ShieldCheck className="h-4 w-4 text-emerald-600" /> Multitenancy 4.0
                       </p>
-                      <p className="mt-1 text-[10px] font-bold uppercase leading-relaxed tracking-[0.1em] text-slate-400">
-                        Configuração pendente. Não há monitoramento ou sincronização ativa.
+                      <p className="mt-1 text-[10px] font-bold uppercase leading-relaxed tracking-[0.1em] text-slate-600">
+                        Vinculado à unidade ID: <span className="font-mono text-blue-600">{companyId?.split('-')[0]}...</span>
                       </p>
                     </div>
                   </div>
