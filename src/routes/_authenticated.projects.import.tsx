@@ -521,10 +521,19 @@ function ImportPage() {
           throw new Error(`Falha na persistência industrial: nenhum arquivo foi registrado.`);
         }
         
+        await (supabase as any)
+          .from("project_import_sessions")
+          .update({ step: "completed", status: "finished" })
+          .eq("id", projectId);
+
         // Redireciona para o detalhe do projeto que agora contém a aba de Plano de Corte
         navigate({ to: "/projects/$projectId", params: { projectId: projectId }, search: { tab: 'modules' } });
         return projectId;
       } catch (error) {
+        await (supabase as any)
+          .from("project_import_sessions")
+          .update({ status: "failed" })
+          .eq("id", projectId);
         if (rpcAttempted) {
           const { data: committedProject, error: verificationError } = await supabase
             .from("projects")
