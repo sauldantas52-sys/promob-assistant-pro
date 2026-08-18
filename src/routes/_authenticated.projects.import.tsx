@@ -468,6 +468,15 @@ function ImportPage() {
           },
         );
         if (importError) throw importError;
+        
+        // Registrar Log de Ingestão Industrial 5.8
+        await supabase.from('production_logs').insert({
+          project_id: projectId,
+          action: 'ingestao_industrial_completa',
+          notes: 'Ingestão da pasta do cliente realizada. Plano de corte e 3D alimentados.',
+          company_id: companyId
+        } as any);
+
         rpcAttempted = true;
 
         await (supabase as any)
