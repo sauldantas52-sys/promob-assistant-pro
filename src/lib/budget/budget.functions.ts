@@ -50,6 +50,44 @@ export const analyzeBudgetDocument = createServerFn({ method: "POST" })
 
     if (budgetError) throw budgetError;
 
+    // SIMULAÇÃO DE PROCESSAMENTO IA (lovable-vision-4.0)
+    // Em produção, isso chamaria a Lovable AI Gateway para ler a imagem/PDF.
+    // Inserindo itens mockados para demonstração da Fidelity 5.1/5.2
+    const mockItems = [
+      { 
+        budget_id: budget.id, 
+        name: "ARMÁRIO CLOSET - MÓDULO 01", 
+        quantity: 1, 
+        unit_price: 1850.00, 
+        category: "MÓDULOS", 
+        confidence: 0.95, 
+        is_confirmed: false,
+        source: 'ai_estimate'
+      },
+      { 
+        budget_id: budget.id, 
+        name: "PUXADOR PERFIL ALUMÍNIO 2000MM", 
+        quantity: 4, 
+        unit_price: 125.00, 
+        category: "FERRAGENS", 
+        confidence: 0.72, 
+        is_confirmed: false,
+        source: 'ai_estimate'
+      },
+      { 
+        budget_id: budget.id, 
+        name: "CABIDEIRO BASCULANTE", 
+        quantity: 2, 
+        unit_price: 450.00, 
+        category: "ACESSÓRIOS", 
+        confidence: 0.45, 
+        is_confirmed: false,
+        source: 'ai_estimate'
+      }
+    ];
+
+    await supabaseAdmin.from('budget_items').insert(mockItems);
+
     return { 
       success: true, 
       budgetId: budget.id 
