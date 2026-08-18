@@ -420,7 +420,7 @@ function ProjectDetail() {
       <main className="flex min-w-0 flex-1 flex-col bg-slate-50">
         <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
           <div className="mx-auto max-w-[1400px]">
-            {activeTab === "preliminary-cut-plan" && <PreliminaryCutPlanTab projectId={projectId} />}
+            {activeTab === "preliminary-cut-plan" && <PreliminaryCutPlanTab projectId={projectId} project={project.data} />}
             {activeTab === "costs" && <IndustrialCostsTab projectId={projectId} />}
             {activeTab === "shipping" && <ProjectShippingTab projectId={projectId} />}
             {activeTab === "physical-pilot" && <PhysicalChecklistFlow projectId={projectId} />}

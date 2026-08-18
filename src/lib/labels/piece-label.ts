@@ -80,6 +80,11 @@ interface PieceLabelOpts {
   alturaMm: number;
   qrSvg: string;
   mdfOverride?: string;
+  projectInfo?: {
+    clientName?: string | null;
+    contact?: string | null;
+    dueDate?: string | null;
+  };
 }
 
 /**
@@ -93,7 +98,7 @@ interface PieceLabelOpts {
  * @returns {string} HTML pronto da etiqueta
  */
 export function pieceLabelHtml(piece: any, opts: PieceLabelOpts) {
-  const { larguraMm: W, alturaMm: H, qrSvg = '', mdfOverride } = opts;
+  const { larguraMm: W, alturaMm: H, qrSvg = '', mdfOverride, projectInfo } = opts;
   const FS = Math.max(8.5, Math.min(15.2, H * 0.31));
   const k = (FS / 12) * 1.08; // escala do desenho de fita, proporcional ao tamanho da etiqueta
 
@@ -101,7 +106,7 @@ export function pieceLabelHtml(piece: any, opts: PieceLabelOpts) {
   const SQ = Math.max(5, Math.min(8.5, H * 0.19)); // tamanho do quadrado "G<n>"
   const QR = Math.max(10, Math.min(17, H * 0.58, W * 0.22)); // tamanho do QR
 
-  return (
+  const labelContent = (
     '<div class="etq" style="width:' + W + 'mm;height:' + H + 'mm;box-sizing:border-box;overflow:hidden;display:flex;flex-direction:column;font-size:' + FS.toFixed(1) + 'px;font-weight:900;line-height:1.1;border:1px solid #000;background:#fff;border-radius:2px;padding:0.3em 0.4em">' +
       '<div style="display:grid;grid-template-columns:minmax(0,1fr) ' + QR.toFixed(1) + 'mm;gap:1mm;align-items:start">' +
         '<div class="etq-main-black" style="min-width:0">' +
@@ -130,4 +135,35 @@ export function pieceLabelHtml(piece: any, opts: PieceLabelOpts) {
       '</div>' +
     '</div>'
   );
+
+  // Se for a etiqueta final (cliente), adicionamos um overlay ou layout alternativo
+  if (piece.isClientTag && projectInfo) {
+    return (
+      '<div class="etq etq-client" style="width:' + W + 'mm;height:' + H + 'mm;box-sizing:border-box;overflow:hidden;display:flex;flex-direction:column;font-size:' + (FS * 0.9).toFixed(1) + 'px;font-weight:900;line-height:1.2;border:2px solid #000;background:#fff;border-radius:4px;padding:0.6em 0.8em">' +
+        '<div style="border-bottom:1.5px solid #000;padding-bottom:0.3em;margin-bottom:0.5em;display:flex;justify-content:between;align-items:center">' +
+          '<div style="font-size:1.2em;color:#000;text-transform:uppercase">Identificação do Cliente</div>' +
+          '<div style="font-size:0.8em;background:#000;color:#fff;padding:0.1em 0.4em;border-radius:2px">PROJETO FINAL</div>' +
+        '</div>' +
+        '<div style="flex:1;display:flex;flex-direction:column;gap:0.4em">' +
+          '<div>' +
+            '<div style="font-size:0.7em;color:#666;text-transform:uppercase;letter-spacing:0.05em">Cliente / Obra</div>' +
+            '<div style="font-size:1.4em;color:#000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(projectInfo.clientName || 'Não informado') + '</div>' +
+          '</div>' +
+          '<div>' +
+            '<div style="font-size:0.7em;color:#666;text-transform:uppercase;letter-spacing:0.05em">Contato</div>' +
+            '<div style="font-size:1.1em;color:#000">' + esc(projectInfo.contact || '-') + '</div>' +
+          '</div>' +
+          '<div style="margin-top:auto;display:flex;justify-content:between;align-items:flex-end">' +
+            '<div>' +
+              '<div style="font-size:0.7em;color:#666;text-transform:uppercase;letter-spacing:0.05em">Data de Vencimento</div>' +
+              '<div style="font-size:1.3em;color:#d00">' + (projectInfo.dueDate || '-') + '</div>' +
+            '</div>' +
+            '<div style="font-size:0.6em;color:#aaa;text-align:right">Gerado por Monta AI</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  return labelContent;
 }
