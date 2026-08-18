@@ -282,16 +282,22 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
                   <div className="absolute border border-dashed border-slate-300 pointer-events-none z-10"
                     style={{ left: '0.18%', top: '0.27%', right: '0.18%', bottom: '0.27%' }}
                   />
-                  {sheet.shelves.flatMap(s => s.placements).map((p, pIdx) => (
-                    <div key={pIdx} className="absolute border border-slate-900 flex flex-col items-center justify-center overflow-hidden hover:opacity-80 transition-opacity cursor-help p-0.5"
+                  {sheet.shelves.flatMap(s => s.placements).map((p, pIdx) => {
+                    const isHighlighted = highlightedPieceId === p.physicalId;
+                    return (
+                      <div key={pIdx} className={cn(
+                        "absolute border border-slate-900 flex flex-col items-center justify-center overflow-hidden hover:opacity-80 transition-all cursor-help p-0.5",
+                        isHighlighted ? "ring-4 ring-blue-500 z-50 scale-105" : "z-0"
+                      )}
                       title={`${p.piece.name} (${p.w}x${p.h})`}
                       style={{
                         left: `${(p.x / 2750) * 100}%`,
                         top: `${(p.y / 1830) * 100}%`,
                         width: `${(p.w / 2750) * 100}%`,
                         height: `${(p.h / 1830) * 100}%`,
-                        backgroundColor: `hsla(${(pIdx * 57) % 360}, 70%, 90%, 0.8)`,
-                        borderColor: `hsl(${(pIdx * 57) % 360}, 70%, 40%)`
+                        backgroundColor: isHighlighted ? "#3b82f6" : `hsla(${(pIdx * 57) % 360}, 70%, 90%, 0.8)`,
+                        borderColor: isHighlighted ? "#1e3a8a" : `hsl(${(pIdx * 57) % 360}, 70%, 40%)`,
+                        color: isHighlighted ? "#fff" : "inherit"
                       }}
                     >
                       <div className="w-full h-full flex flex-col relative pointer-events-none items-center justify-center text-center">
