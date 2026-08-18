@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Link } from '@tanstack/react-router';
 import { 
   Scissors, 
   Drill, 
@@ -10,7 +12,8 @@ import {
   Clock, 
   AlertCircle,
   Layers,
-  ChevronRight
+  ChevronRight,
+  Activity
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";

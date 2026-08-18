@@ -35,6 +35,7 @@ import {
   Ruler,
   Printer,
   Calculator,
+  Activity,
 } from "lucide-react";
 import { Parser } from "@json2csv/plainjs";
 import { EngineeringTab } from "@/components/EngineeringTab";
@@ -52,6 +53,7 @@ import { IndustrialLabelsTab } from "@/components/project/labels/IndustrialLabel
 import { IndustrialCutPlanEngine } from "@/lib/cut-plan/engine";
 import { parseDXF } from "@/lib/dxf-parser";
 import { IndustrialCostsTab } from "@/components/project/IndustrialCostsTab";
+import { ProductionStatusTab } from "@/components/project/ProductionStatusTab";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -378,6 +380,7 @@ function ProjectDetail() {
             { value: "commercial", icon: FileText, label: "Caderno Executivo" },
             { value: "costs", icon: Calculator, label: "Relatório Geral de Custos" },
             { value: "integration_audit", icon: History, label: "Histórico de Auditoria" },
+            { value: "production-status", icon: Activity, label: "Status de Produção" },
             { value: "assistance", icon: MessageSquare, label: "Assistência Técnica" },
           ].map((item) => {
             const active = activeTab === item.value;
@@ -422,6 +425,7 @@ function ProjectDetail() {
             {activeTab === "shipping" && <ProjectShippingTab projectId={projectId} />}
             {activeTab === "physical-pilot" && <PhysicalChecklistFlow projectId={projectId} />}
             {activeTab === "operational3d" && <Operational3DView projectId={projectId} modules={modules.data || []} parts={parts.data || []} />}
+            {activeTab === "production-status" && <ProductionStatusTab projectId={projectId} />}
             {activeTab === "modules" && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
