@@ -367,14 +367,14 @@ function ProjectDetail() {
           {[
             { value: "preliminary-cut-plan", icon: Scissors, label: "Plano de Corte Pro" },
             { value: "modules", icon: LayoutGrid, label: "Módulos e Peças" },
+            { value: "operational3d", icon: Box, label: "Ambiente 3D Operacional" },
             { value: "labels", icon: Printer, label: "Etiquetas Industriais" },
-            { value: "operational3d", icon: Box, label: "Ambiente 3D" },
-            { value: "parts", icon: ClipboardList, label: "Lista Técnica" },
+            { value: "shipping", icon: Truck, label: "Expedição e Volumes" },
+            { value: "physical-pilot", icon: ShieldCheck, label: "Teste Físico (Piloto)" },
             { value: "files", icon: FileUp, label: "Arquivos do Projeto" },
             { value: "engineering", icon: Settings, label: "Usinagem CNC" },
-            { value: "sketchup", icon: ArrowRightLeft, label: "Ponte SketchUp" },
-            { value: "commercial", icon: FileText, label: "Comercial / Orçamentos" },
-            { value: "integration_audit", icon: History, label: "Relatórios de Auditoria" },
+            { value: "commercial", icon: FileText, label: "Caderno Executivo / Orçamentos" },
+            { value: "integration_audit", icon: History, label: "Histórico de Auditoria" },
             { value: "assistance", icon: MessageSquare, label: "Assistência Técnica" },
           ].map((item) => {
             const active = activeTab === item.value;
@@ -415,6 +415,9 @@ function ProjectDetail() {
         <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
           <div className="mx-auto max-w-[1400px]">
             {activeTab === "preliminary-cut-plan" && <PreliminaryCutPlanTab projectId={projectId} />}
+            {activeTab === "shipping" && <ProjectShippingTab projectId={projectId} />}
+            {activeTab === "physical-pilot" && <PhysicalChecklistFlow projectId={projectId} />}
+            {activeTab === "operational3d" && <Operational3DView projectId={projectId} modules={modules.data || []} parts={parts.data || []} />}
             {activeTab === "modules" && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
