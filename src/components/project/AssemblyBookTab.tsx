@@ -31,6 +31,7 @@ export function AssemblyBookTab({ projectId, onView3D }: AssemblyBookTabProps) {
   const { data: modules, isLoading: loadingModules } = useQuery({
     queryKey: ["modules_assembly", projectId],
     queryFn: async () => {
+      console.log(`[AssemblyBook] Buscando módulos para ${projectId}`);
       const { data, error } = await supabase
         .from("modules")
         .select("*")
@@ -44,12 +45,12 @@ export function AssemblyBookTab({ projectId, onView3D }: AssemblyBookTabProps) {
   const { data: parts, isLoading: loadingParts } = useQuery({
     queryKey: ["parts_assembly", projectId],
     queryFn: async () => {
+      console.log(`[AssemblyBook] Buscando peças para ${projectId}`);
       const { data, error } = await supabase
         .from("parts")
         .select("*")
         .eq("project_id", projectId)
-        .eq("kind", "peca")
-        .order("created_at");
+        .order("created_at"); // Removido filtro de kind para auditoria completa
       if (error) throw error;
       return data;
     },
@@ -78,6 +79,8 @@ export function AssemblyBookTab({ projectId, onView3D }: AssemblyBookTabProps) {
     ...m,
     parts: (parts || []).filter(p => p.module_id === m.id)
   }));
+
+  const looseParts = (parts || []).filter(p => !p.module_id && p.kind === 'peca');
 
   const totalModules = modulesWithParts.length;
   const completedModules = modulesWithParts.filter(m => m.is_completed).length;
@@ -227,6 +230,46 @@ export function AssemblyBookTab({ projectId, onView3D }: AssemblyBookTabProps) {
             </CardContent>
           </Card>
         ))}
+
+        {looseParts.length > 0 && (
+          <Card className="rounded-[2.5rem] border-2 border-dashed border-slate-200 bg-slate-50/30 overflow-hidden">
+            <CardHeader className="p-6 md:p-8 border-b border-slate-100">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shadow-sm">
+                  <Layers className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Itens Avulsos / Sem Módulo</h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                    {looseParts.length} Peças identificadas fora da estrutura de módulos Promob
+                  </p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                   <thead>
+                    <tr className="bg-slate-50/50">
+                      <th className="px-8 py-4 text-[9px] font-black uppercase tracking-widest text-slate-400">Peça</th>
+                      <th className="px-8 py-4 text-[9px] font-black uppercase tracking-widest text-slate-400">Dimensões</th>
+                      <th className="px-8 py-4 text-[9px] font-black uppercase tracking-widest text-slate-400">Material</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {looseParts.map(part => (
+                      <tr key={part.id} className="hover:bg-white transition-colors">
+                        <td className="px-8 py-4 text-xs font-black uppercase text-slate-700">{part.name}</td>
+                        <td className="px-8 py-4 text-xs font-bold text-slate-500">{part.width_mm}x{part.length_mm}mm</td>
+                        <td className="px-8 py-4 text-xs font-bold text-slate-500 uppercase">{part.material || '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

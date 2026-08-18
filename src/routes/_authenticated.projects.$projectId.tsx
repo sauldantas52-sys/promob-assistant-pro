@@ -177,16 +177,23 @@ function ProjectDetail() {
   const modules = useQuery({
     queryKey: ["modules", projectId],
     queryFn: async () => {
+      console.log(`[ProjectDetail] Buscando módulos para projeto ${projectId}`);
       const { data, error } = await supabase
         .from("modules")
-        .select(
-          "id, name, environment, width_mm, height_mm, depth_mm, quantity, is_completed, data_source",
-        )
+        .select("*")
         .eq("project_id", projectId)
         .order("created_at");
-      if (error) throw error;
+      
+      if (error) {
+        console.error("[ProjectDetail] Erro ao buscar módulos:", error);
+        throw error;
+      }
+      
+      console.log(`[ProjectDetail] ${data?.length || 0} módulos encontrados.`);
       return data;
     },
+    // Forçar refetch se o estado de importação mudar
+    refetchOnWindowFocus: true,
   });
 
   const parts = useQuery({
@@ -389,6 +396,12 @@ function ProjectDetail() {
           ].map((item) => {
 
             const active = activeTab === item.value;
+            // Ocultar abas técnicas se não houver módulos (exceto a aba de arquivos)
+            const hasModules = (modules.data?.length ?? 0) > 0;
+            const isTechnicalTab = ["modules", "assembly-book", "preliminary-cut-plan", "labels", "engineering", "costs"].includes(item.value);
+            
+            if (isTechnicalTab && !hasModules && !modules.isLoading) return null;
+
             return (
               <button
                 key={item.value}
@@ -408,6 +421,14 @@ function ProjectDetail() {
               </button>
             );
           })}
+          
+          {(!modules.isLoading && (modules.data?.length ?? 0) === 0) && (
+            <div className="mt-4 px-4 py-3 bg-amber-500/10 border border-amber-500/20 rounded-lg mx-2">
+              <p className="text-[9px] font-black text-amber-500 uppercase leading-tight">
+                Dados Técnicos não encontrados. Reprocesse a Pasta do Cliente na aba Arquivos.
+              </p>
+            </div>
+          )}
         </nav>
 
         <div className="border-t border-white/5 p-4 bg-black/20">
