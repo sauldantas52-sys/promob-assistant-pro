@@ -31,8 +31,11 @@ export const Route = createFileRoute('/_authenticated')({
 
     if (roleError) console.error("RBAC Fetch Error:", roleError);
 
+    const role = (roleData?.role as any) || null;
+    const mustChangePassword = !!profile?.must_change_password;
+
     // Bloqueio operacional se troca de senha for obrigatória
-    if (profile?.must_change_password && location.pathname !== '/force-password-change') {
+    if (mustChangePassword && location.pathname !== '/force-password-change') {
       throw redirect({
         to: '/force-password-change',
       });
@@ -40,12 +43,11 @@ export const Route = createFileRoute('/_authenticated')({
 
     return {
       session,
-      userRole: (roleData?.role as any) || null,
+      userRole: role,
       companyId: profile?.company_id || null,
       companyName: (profile?.companies as any)?.name || null,
-      role: (roleData?.role as any) || null,
+      role: role,
       fullName: profile?.full_name || session.user.email,
     };
-
   },
 });

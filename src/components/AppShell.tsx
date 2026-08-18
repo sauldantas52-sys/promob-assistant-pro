@@ -137,7 +137,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [companyId]);
 
   useEffect(() => {
-    if (!loading && !user) navigate({ to: "/login" });
+    if (!loading && !user) {
+      console.log("[AppShell] User not authenticated, redirecting to login");
+      navigate({ to: "/login" });
+    }
   }, [loading, user, navigate]);
 
   useEffect(() => {
