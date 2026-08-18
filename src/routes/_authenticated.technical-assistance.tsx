@@ -465,7 +465,7 @@ function TicketCard({ ticket, canTreat }: { ticket: Ticket; canTreat: boolean })
             variant="outline"
             className="h-9 rounded-sm text-[9px] font-black uppercase"
           >
-            <Link to="/projects/$projectId" params={{ projectId: ticket.project_id }}>
+            <Link to="/projects/$projectId" params={{ projectId: ticket.project_id }} search={{ tab: 'modules' }}>
               <FileText className="mr-1.5 h-3.5 w-3.5" /> Dossie
             </Link>
           </Button>
