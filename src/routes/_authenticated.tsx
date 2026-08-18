@@ -6,16 +6,18 @@ export const Route = createFileRoute('/_authenticated')({
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     
     if (sessionError || !session) {
-      console.log("[AuthGuard] Redirecionando para login. Path:", location.pathname);
+      console.log("[AuthGuard] No session found, redirecting to /login");
       throw redirect({
         to: '/login',
-        search: { redirect: location.href },
+        search: {
+          redirect: location.href,
+        },
       });
     }
     
     const { data: profile } = await supabase
       .from('profiles')
-      .select('company_id, must_change_password')
+      .select('full_name, must_change_password, company_id, companies(id, name)')
       .eq('id', session.user.id)
       .maybeSingle();
 
@@ -29,23 +31,26 @@ export const Route = createFileRoute('/_authenticated')({
     const mustChangePassword = !!profile?.must_change_password;
 
     if (mustChangePassword && location.pathname !== '/force-password-change') {
-      throw redirect({ to: '/force-password-change' });
+      throw redirect({
+        to: '/force-password-change',
+      });
     }
 
-    console.log("Auth Guard Check:", { 
+    const authContext = {
+      session,
+      userRole: role,
+      companyId: profile?.company_id || null,
+      companyName: profile?.companies ? (profile.companies as any).name : null,
+      role: role,
+      fullName: profile?.full_name || session.user.email,
+    };
+    
+    console.log("Auth Guard Data:", { 
       path: location.pathname, 
       role: role, 
       companyId: profile?.company_id 
     });
 
-    // Removido qualquer redirecionamento automático para o dashboard
-    // para garantir que o usuário chegue na página que solicitou se estiver autenticado.
-    
-    return {
-      session,
-      userRole: role,
-      companyId: profile?.company_id || null,
-      role: role,
-    };
+    return authContext;
   },
 });
