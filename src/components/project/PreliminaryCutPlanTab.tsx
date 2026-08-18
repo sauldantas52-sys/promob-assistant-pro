@@ -40,6 +40,59 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
     },
   });
 
+  const { data: cutPlans, isLoading: plansLoading } = useQuery({
+    queryKey: ["cut_plans", projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("cut_plans")
+        .select("*")
+        .eq("project_id", projectId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const officialPlan = cutPlans?.find(p => p.is_official);
+  const estimationPlan = cutPlans?.find(p => p.source === 'estimativa');
+
+  useEffect(() => {
+    if (officialPlan) {
+      setActivePlanSource('cutpro_oficial');
+    }
+  }, [officialPlan]);
+
+  const importCutPro = useMutation({
+    mutationFn: async (file: File) => {
+      const text = await file.text();
+      const result = await CutProParser.parseCSV(projectId, text);
+      
+      const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', (await supabase.auth.getUser()).data.user?.id).single();
+      if (!profile) throw new Error("Perfil não encontrado");
+
+      const { data: planId, error } = await supabase.rpc('save_official_cut_plan', {
+        p_project_id: projectId,
+        p_company_id: profile.company_id,
+        p_source: 'cutpro_oficial',
+        p_total_pieces: result.total_pieces,
+        p_total_sheets: 0, // Mock por enquanto
+        p_total_cuts: 0,
+        p_utilization_percent: 0,
+        p_metadata: result.metadata
+      });
+
+      if (error) throw error;
+      return planId;
+    },
+    onSuccess: () => {
+      toast.success("Plano Cut Pro oficial importado com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["cut_plans", projectId] });
+    },
+    onError: (err: any) => {
+      toast.error(`Erro na importação: ${err.message}`);
+    }
+  });
+
   useEffect(() => {
     if (cutPlanGroups && allParts) {
       validateIntegrity(cutPlanGroups);
