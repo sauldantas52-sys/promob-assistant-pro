@@ -80,6 +80,21 @@ function DashboardContent() {
         </div>
         
         <div className="flex gap-2 w-full sm:w-auto">
+          <Button 
+            className="h-10 px-6 rounded-md bg-purple-600 hover:bg-purple-700 text-white font-bold uppercase tracking-wider text-[11px] shadow-sm transition-all active:scale-95"
+            onClick={async () => {
+              try {
+                const { testChecklistLogic } = await import("@/lib/test-db-logic");
+                const result = await testChecklistLogic();
+                if (result.success) toast.success("DB Logic Test Passed!");
+                else toast.error("DB Logic Test Failed: " + JSON.stringify(result.error));
+              } catch (e: any) {
+                toast.error("Test Error: " + e.message);
+              }
+            }}
+          >
+            Testar DB Checklist
+          </Button>
           <Button asChild className="h-10 px-6 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-bold uppercase tracking-wider text-[11px] shadow-sm transition-all active:scale-95">
             <Link to="/projects">Todos Projetos</Link>
           </Button>
