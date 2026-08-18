@@ -164,8 +164,7 @@ function ImportPage() {
   const intakeReady =
     folderFileCount > 0 &&
     (identity.client.length > 0 || folderName.length > 0) &&
-    !!destination &&
-    !!files.xml;
+    !!destination;
 
 
   const [parseReport, setParseReport] = useState<{
