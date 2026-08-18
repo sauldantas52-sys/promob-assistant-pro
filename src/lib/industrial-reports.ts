@@ -123,7 +123,7 @@ export function interpretarListaDeComprasTexto(textoPdf: string) {
       const prices = [...line.matchAll(/R\$\s*([\d.]+(?:,\d{1,2})?)/gi)].map(match => toNum(match[1]));
       const quantity = line.match(/(?:^|\s)(\d+(?:[.,]\d+)?)\s*(un|und|unid|pc|p[cç]|m|m2|m²|kg|cx|jg|par)\b/i);
       const qty = quantity ? toNum(quantity[1]) : 1;
-      const unit = quantity ? (quantity[2].toLowerCase() === 'und' ? 'un' : quantity[2]) : 'un';
+      const unit = (quantity && quantity[2]) ? (quantity[2].toLowerCase() === 'und' ? 'un' : quantity[2]) : 'un';
 
       let description = line
         .replace(/R\$\s*[\d.]+(?:,\d{1,2})?/gi, '')
