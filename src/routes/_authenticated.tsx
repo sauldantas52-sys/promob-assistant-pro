@@ -31,6 +31,8 @@ export const Route = createFileRoute('/_authenticated')({
 
     if (roleError) console.error("RBAC Fetch Error:", roleError);
 
+    const role = (roleData?.role as any) || null;
+
     // Bloqueio operacional se troca de senha for obrigatória
     if (profile?.must_change_password && location.pathname !== '/force-password-change') {
       throw redirect({
@@ -38,12 +40,22 @@ export const Route = createFileRoute('/_authenticated')({
       });
     }
 
+    // Redirecionamento de segurança: se o usuário tentar acessar importação mas não for admin/escritorio/projetista, 
+    // ou se o sistema detectar uma tentativa de acesso a rota protegida sem a role carregada no context
+    if (location.pathname.startsWith('/projects/import')) {
+      const allowedRoles = ['admin', 'escritorio', 'projetista'];
+      if (!role || !allowedRoles.includes(role)) {
+        console.warn(`[Security] Usuário ${session.user.id} com role ${role} tentou acessar importação.`);
+        throw redirect({ to: '/dashboard' });
+      }
+    }
+
     return {
       session,
-      userRole: (roleData?.role as any) || null,
+      userRole: role,
       companyId: profile?.company_id || null,
       companyName: (profile?.companies as any)?.name || null,
-      role: (roleData?.role as any) || null,
+      role: role,
       fullName: profile?.full_name || session.user.email,
     };
 
