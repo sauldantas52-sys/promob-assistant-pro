@@ -631,7 +631,7 @@ function ImportPage() {
     },
   });
 
-  if (!hasPermission(role, "projects", "import")) {
+  if (!loading && !hasPermission(role, "projects", "import")) {
     return (
       <AppShell>
         <div className="mx-auto max-w-xl p-5 sm:p-8">
@@ -641,11 +641,29 @@ function ImportPage() {
               <div>
                 <h1 className="text-sm font-black uppercase">Acesso bloqueado</h1>
                 <p className="mt-1 text-xs">
-                  Seu perfil não possui permissão para receber a Pasta do Cliente.
+                  Seu perfil ({role}) não possui permissão para receber a Pasta do Cliente.
                 </p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-4 border-red-200 text-red-900 hover:bg-red-100"
+                  onClick={() => navigate({ to: "/dashboard" })}
+                >
+                  Voltar ao Dashboard
+                </Button>
               </div>
             </CardContent>
           </Card>
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (loading) {
+    return (
+      <AppShell>
+        <div className="flex min-h-[50vh] items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
         </div>
       </AppShell>
     );
