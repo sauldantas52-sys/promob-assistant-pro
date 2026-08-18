@@ -103,6 +103,17 @@ export const IndustrialCutPlanEngine = {
     if (error) throw error;
     if (!parts || parts.length === 0) return [];
 
+    // Fetch modules to resolve module names for labels
+    const { data: modules, error: modulesError } = await supabase
+      .from("modules")
+      .select("id, name")
+      .eq("project_id", projectId);
+
+    if (modulesError) throw modulesError;
+    const moduleNameById = new Map(
+      (modules || []).map((mod) => [mod.id, mod.name] as [string, string]),
+    );
+
     // 2. Industrial Filtering & Repetition Expansion
     const physicalPieces: PhysicalPiece[] = [];
     
@@ -136,6 +147,7 @@ export const IndustrialCutPlanEngine = {
           moduleSequence: (metadata.module_sequence as number) ?? null,
           pieceSequence: (metadata.piece_sequence as number) ?? null,
           moduleId: part.module_id || null,
+          moduleName: part.module_id ? moduleNameById.get(part.module_id) ?? null : null,
           name: part.name || "Peça Sem Nome",
           lengthMm: part.length_mm,
           widthMm: part.width_mm,
