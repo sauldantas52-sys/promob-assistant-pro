@@ -14,6 +14,7 @@ import { hasPermission } from "@/lib/permissions";
 import {
   AlertTriangle,
   ArrowLeft,
+  Briefcase,
   Check,
   Cloud,
   Factory,
