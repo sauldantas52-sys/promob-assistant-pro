@@ -1,17 +1,19 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { renderToString } from 'react-dom/server';
 import { QRCodeSVG } from 'qrcode.react';
 import { PhysicalPiece } from '@/lib/cut-plan/engine';
 import { generateLabelData } from '@/lib/labels/engine';
 import { pieceLabelHtml } from '@/lib/labels/piece-label';
-import { getEdgeColor, getEdgeData } from '@/lib/cut-plan/edges';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Printer, Settings, Eye, Check } from 'lucide-react';
+import { Printer, Settings, FileDown, Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
+import { toast } from 'sonner';
 
 interface LabelPreset {
   id: string;
