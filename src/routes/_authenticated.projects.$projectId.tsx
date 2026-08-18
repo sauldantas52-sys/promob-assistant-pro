@@ -47,6 +47,8 @@ import { PhysicalChecklistFlow } from "@/components/PhysicalChecklistFlow";
 import { Technical3DView } from "@/components/project/Technical3DView";
 import { Operational3DView } from "@/components/project/Operational3DView";
 import { VisualFeedingMode } from "@/components/project/VisualFeedingMode";
+import { IndustrialLabelsTab } from "@/components/project/labels/IndustrialLabelsTab";
+import { IndustrialCutPlanEngine } from "@/lib/cut-plan/engine";
 import { parseDXF } from "@/lib/dxf-parser";
 
 import { Button } from "@/components/ui/button";
