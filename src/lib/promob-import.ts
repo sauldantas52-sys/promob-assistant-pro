@@ -321,12 +321,13 @@ export function parsePromobXML(xmlContent: string): PromobProject {
             height_mm: getNumericAttr(parentNode, 'HEIGHT') || null,
             depth_mm: getNumericAttr(parentNode, 'DEPTH') || null,
             quantity: getNumericAttr(parentNode, 'QUANTITY') || 1,
-            id_xml: parentNode.getAttribute('ID') || parentId,
+            id_xml: parentId, // Usar o UniqueId/ID do Promob como âncora
             parts: [],
             metadata: {
               unique_id: parentId,
               reference: parentNode.getAttribute('REFERENCE'),
-              is_industrial_module: true
+              is_industrial_module: true,
+              raw_name: parentNode.getAttribute('NAME')
             },
           };
           moduleMap.set(parentId, newModule);
