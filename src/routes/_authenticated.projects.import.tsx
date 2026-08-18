@@ -278,7 +278,8 @@ function ImportPage() {
       setIsProcessing(true);
 
       // Parse before persistence so malformed XML never creates a partial project.
-      const result = parsePromobXML(await files.xml.text());
+      const xmlContent = await files.xml.text();
+      const result = parsePromobXML(xmlContent);
       const dxfFile = classification.dxf;
       const dxfGeometry = dxfFile ? parseDXF(await dxfFile.text()) : [];
 
@@ -311,7 +312,7 @@ function ImportPage() {
             size: file.size,
             lastModified: file.lastModified,
             source: "pasta_cliente"
-          }
+          } as Json
         };
       });
 
