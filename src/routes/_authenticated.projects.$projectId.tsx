@@ -373,7 +373,8 @@ function ProjectDetail() {
             { value: "physical-pilot", icon: ShieldCheck, label: "Teste Físico (Piloto)" },
             { value: "files", icon: FileUp, label: "Pasta do Cliente" },
             { value: "engineering", icon: Settings, label: "Usinagem CNC" },
-            { value: "commercial", icon: FileText, label: "Caderno Executivo / Orçamentos" },
+            { value: "commercial", icon: FileText, label: "Caderno Executivo" },
+            { value: "costs", icon: Calculator, label: "Relatório Geral de Custos" },
             { value: "integration_audit", icon: History, label: "Histórico de Auditoria" },
             { value: "assistance", icon: MessageSquare, label: "Assistência Técnica" },
           ].map((item) => {
