@@ -662,6 +662,14 @@ function ProjectDetail() {
           />
         </TabsContent>
 
+        <TabsContent value="operational3d" className="mt-6">
+          <Operational3DView 
+            projectId={projectId}
+            modules={modules.data || []}
+            parts={allParts}
+          />
+        </TabsContent>
+
         <TabsContent value="technical3d" className="mt-6">
           <Technical3DView 
             geometries={dxfContent.data ? parseDXF(dxfContent.data) : []} 
