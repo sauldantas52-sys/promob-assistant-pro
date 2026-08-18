@@ -120,6 +120,8 @@ function ProjectDetailPage() {
 function ProjectDetail() {
   const { projectId } = Route.useParams();
   const navigate = useNavigate();
+  const search = Route.useSearch() as { tab?: string };
+  const [activeTab, setActiveTab] = useState(search.tab || "modules");
   const { role } = useAuth();
   const queryClient = useQueryClient();
   const fileInput = useRef<HTMLInputElement>(null);
