@@ -238,7 +238,24 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
     }
   };
 
-  if (isLoading || partsLoading) return <div className="p-8 text-center text-xs text-slate-500 font-bold uppercase tracking-widest animate-pulse">Calculando Nesting Industrial Real...</div>;
+  if (isLoading || partsLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center p-20 space-y-4">
+        <div className="relative">
+          <div className="h-16 w-16 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin"></div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Layers className="h-6 w-6 text-blue-600 animate-pulse" />
+          </div>
+        </div>
+        <div className="text-center space-y-2">
+          <h3 className="text-sm font-black uppercase tracking-widest text-slate-900">Alimentando Sistema Industrial...</h3>
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider animate-pulse">
+            Calculando Nesting Real • Refilo 10mm • Kerf 4mm
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // Filtros de Auditoria
   const cutParts = allParts?.filter(p => (p.kind === 'peca' || p.kind === 'chapa') && p.thickness_mm) || [];
