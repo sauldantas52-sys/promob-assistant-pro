@@ -396,11 +396,11 @@ function ProjectDetail() {
           ].map((item) => {
 
             const active = activeTab === item.value;
-            // Ocultar abas técnicas se não houver módulos (exceto a aba de arquivos)
-            const hasModules = (modules.data?.length ?? 0) > 0;
-            const isTechnicalTab = ["modules", "assembly-book", "preliminary-cut-plan", "labels", "engineering", "costs"].includes(item.value);
+            // Garantir que abas técnicas sejam visíveis se houver módulos OU peças
+            const hasData = (modules.data?.length ?? 0) > 0 || (parts.data?.length ?? 0) > 0;
+            const isTechnicalTab = ["modules", "assembly-book", "preliminary-cut-plan", "labels", "engineering", "costs", "production-status", "operational3d"].includes(item.value);
             
-            if (isTechnicalTab && !hasModules && !modules.isLoading) return null;
+            if (isTechnicalTab && !hasData && !modules.isLoading && !parts.isLoading) return null;
 
             return (
               <button
