@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { PhysicalPiece } from '@/lib/cut-plan/engine';
 import { generateLabelData } from '@/lib/labels/engine';
