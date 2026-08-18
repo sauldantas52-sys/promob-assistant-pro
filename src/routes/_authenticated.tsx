@@ -31,7 +31,7 @@ export const Route = createFileRoute('/_authenticated')({
 
     if (roleError) console.error("RBAC Fetch Error:", roleError);
 
-    const role = (roleData?.role as any) || (profile ? 'admin' : null); // Fallback for first admin in pilot
+    const role = (roleData?.role as any) || null;
     const mustChangePassword = !!profile?.must_change_password;
 
     // Bloqueio operacional se troca de senha for obrigatória
@@ -41,7 +41,7 @@ export const Route = createFileRoute('/_authenticated')({
       });
     }
 
-    return {
+    const authContext = {
       session,
       userRole: role,
       companyId: profile?.company_id || null,
@@ -49,5 +49,13 @@ export const Route = createFileRoute('/_authenticated')({
       role: role,
       fullName: profile?.full_name || session.user.email,
     };
+    
+    console.log("Auth Guard Data:", { 
+      path: location.pathname, 
+      hasRole: !!role, 
+      hasCompany: !!profile?.company_id 
+    });
+
+    return authContext;
   },
 });
