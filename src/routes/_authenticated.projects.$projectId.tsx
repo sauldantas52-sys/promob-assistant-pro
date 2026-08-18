@@ -248,6 +248,11 @@ function ProjectDetail() {
   const handleImport = async (file: File) => {
     navigate({ to: "/projects/import" });
   };
+  
+  const { data: cutPlanGroups } = useQuery({
+    queryKey: ["industrial_cut_plan", projectId],
+    queryFn: () => IndustrialCutPlanEngine.generateForProject(projectId),
+  });
 
   const allParts = parts.data ?? [];
   const panels = allParts.filter((p) => p.kind === "peca" || p.kind === "chapa");
