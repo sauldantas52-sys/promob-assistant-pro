@@ -214,6 +214,8 @@ export function Operational3DView({
     setSelectedModuleId(null);
     setIsIsolated(false);
     setViewMode('standard');
+    setIsXRay(false);
+    setOffsetModuleId(null);
   };
 
   return (
