@@ -1,10 +1,12 @@
 import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
+import { updateStepStatus } from "@/lib/production";
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Link } from '@tanstack/react-router';
+import { toast } from "sonner";
 import { 
   Scissors, 
   Drill, 
@@ -13,7 +15,8 @@ import {
   AlertCircle,
   Layers,
   ChevronRight,
-  Activity
+  Activity,
+  Zap
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
@@ -115,8 +118,16 @@ export function ProductionStatusTab({ projectId }: { projectId: string }) {
       </div>
 
       <Card className="rounded-[2rem] border-none shadow-sm overflow-hidden">
-        <CardHeader className="bg-slate-900 py-4 px-6">
-          <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-white">Listagem Detalhada de Peças</CardTitle>
+        <CardHeader className="bg-slate-950 py-4 px-8 border-b border-white/5">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-[10px] font-black uppercase tracking-[0.3em] text-white/80">Listagem Detalhada de Peças</CardTitle>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-white/5 rounded-full border border-white/10">
+                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[8px] font-black text-white/60 uppercase tracking-widest">Sincronização Ativa</span>
+              </div>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -170,11 +181,41 @@ export function ProductionStatusTab({ projectId }: { projectId: string }) {
                         );
                       })}
                       <td className="px-6 py-4 text-right">
-                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 rounded-lg hover:bg-white hover:shadow-sm" asChild>
-                           <Link to="/production">
-                             <ChevronRight className="h-4 w-4 text-slate-400" />
-                           </Link>
-                        </Button>
+                        <div className="flex justify-end items-center gap-2">
+                          <Button 
+                            variant="secondary" 
+                            size="sm" 
+                            className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-none transition-all active:scale-95"
+                            onClick={async () => {
+                              const stepsToComplete = pieceSteps.filter(s => s.status !== 'concluido');
+                              if (stepsToComplete.length === 0) {
+                                toast.info("Peça já está concluída em todas as etapas.");
+                                return;
+                              }
+                              
+                              try {
+                                toast.promise(
+                                  Promise.all(stepsToComplete.map(s => updateStepStatus(s.id, 'concluido', 'Finalização rápida por lote'))),
+                                  {
+                                    loading: 'Finalizando peça...',
+                                    success: 'Peça finalizada com sucesso!',
+                                    error: 'Erro ao finalizar peça.'
+                                  }
+                                );
+                              } catch (err) {
+                                console.error(err);
+                              }
+                            }}
+                          >
+                            <CheckCircle2 className="h-3 w-3 mr-1.5" />
+                            Finalizar
+                          </Button>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-lg hover:bg-white hover:shadow-sm" asChild title="Abrir Fluxo de Produção">
+                             <Link to="/production">
+                               <ChevronRight className="h-4 w-4 text-slate-400" />
+                             </Link>
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   );
