@@ -45,6 +45,7 @@ interface Module3D {
   positionConfirmed: boolean;
   position: [number, number, number];
   pieces: PhysicalPiece3D[];
+  selectedPieceId?: string | null;
 }
 
 // Componente para renderizar uma peça individual
