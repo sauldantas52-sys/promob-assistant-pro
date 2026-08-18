@@ -359,6 +359,7 @@ function ProjectDetail() {
           {[
             { value: "preliminary-cut-plan", icon: Scissors, label: "Plano de Corte Pro" },
             { value: "modules", icon: LayoutGrid, label: "Módulos e Peças" },
+            { value: "labels", icon: Printer, label: "Etiquetas Industriais" },
             { value: "operational3d", icon: Box, label: "Ambiente 3D" },
             { value: "parts", icon: ClipboardList, label: "Lista Técnica" },
             { value: "files", icon: FileUp, label: "Arquivos do Projeto" },
@@ -366,6 +367,7 @@ function ProjectDetail() {
             { value: "sketchup", icon: ArrowRightLeft, label: "Ponte SketchUp" },
             { value: "commercial", icon: FileText, label: "Comercial / Orçamentos" },
             { value: "integration_audit", icon: History, label: "Relatórios de Auditoria" },
+            { value: "assistance", icon: MessageSquare, label: "Assistência Técnica" },
           ].map((item) => {
             const active = activeTab === item.value;
             return (
