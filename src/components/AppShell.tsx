@@ -50,6 +50,12 @@ const navItems = [
     roles: ["admin", "projetista", "comercial", "escritorio", "auditor"],
   },
   {
+    to: "/budgets",
+    label: "Orçamentos IA",
+    icon: BadgeDollarSign,
+    roles: ["admin", "projetista", "comercial", "escritorio", "auditor"],
+  },
+  {
     to: "/projects/import",
     label: "Pasta do Cliente",
     icon: Upload,
