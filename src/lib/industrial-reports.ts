@@ -136,7 +136,7 @@ export function interpretarListaDeComprasTexto(textoPdf: string) {
         qty,
         unit,
         price: prices[0] || 0,
-        total: prices[1] || (qty * (prices[0] || 0))
+        total: (prices.length > 1 ? prices[1] : (qty * (prices[0] || 0)))
       };
     });
 }
