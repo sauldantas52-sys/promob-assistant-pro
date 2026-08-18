@@ -137,12 +137,27 @@ export function IndustrialLabelsTab({ pieces }: { pieces: PhysicalPiece[] }) {
             <Settings className="h-3.5 w-3.5" /> Ajustes
           </Button>
           <Button 
+            variant="outline"
+            size="sm" 
+            className="border-indigo-200 text-indigo-700 hover:bg-indigo-50 text-[10px] font-black uppercase tracking-widest gap-2"
+            onClick={handleExportPDF}
+            disabled={isExporting}
+          >
+            {isExporting ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <FileDown className="h-3.5 w-3.5" />
+            )}
+            Exportar PDF
+          </Button>
+          <Button 
             size="sm" 
             className="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase tracking-widest gap-2"
             onClick={handlePrint}
           >
-            <Printer className="h-3.5 w-3.5" /> Imprimir Tudo
+            <Printer className="h-3.5 w-3.5" /> Imprimir
           </Button>
+
         </div>
       </div>
 
