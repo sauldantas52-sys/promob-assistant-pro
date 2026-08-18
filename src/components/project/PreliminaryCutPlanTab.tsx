@@ -1,4 +1,4 @@
-import { Scissors, ShieldCheck, Layers, Package, Settings as Tool, AlertCircle, Ruler } from "lucide-react";
+import { Scissors, ShieldCheck, Layers, Package, Settings as Tool, AlertCircle, Ruler, Box } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -6,6 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { IndustrialCutPlanEngine, CutPlanGroup, Sheet, Placement } from "@/lib/cut-plan/engine";
 
 export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
   const { data: allParts, isLoading } = useQuery({
