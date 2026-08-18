@@ -351,25 +351,59 @@ function ProjectDetail() {
               <p className="text-[10px] font-black uppercase tracking-[0.22em] text-blue-600">
                 Projeto ativo · engenharia
               </p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 rounded-md px-2.5 text-[9px] font-black uppercase tracking-wider"
-                onClick={async () => {
-                  try {
-                    const { generateAuditReport } = await import("@/lib/audit-report.functions");
-                    const result = await generateAuditReport({ data: { projectId: projectId } });
-                    if (result.success) {
-                      toast.success("Dossiê consolidado com sucesso!");
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 rounded-md px-2.5 text-[9px] font-black uppercase tracking-wider"
+                  onClick={async () => {
+                    try {
+                      const { generateAuditReport } = await import("@/lib/audit-report.functions");
+                      const result = await generateAuditReport({ data: { projectId: projectId } });
+                      if (result.success) {
+                        toast.success("Dossiê consolidado com sucesso!");
+                      }
+                    } catch (err) {
+                      toast.error("Erro ao gerar dossiê.");
                     }
-                  } catch (err) {
-                    toast.error("Erro ao gerar dossiê.");
-                  }
-                }}
-              >
-                <Download className="mr-1.5 h-3 w-3" />
-                Dossiê
-              </Button>
+                  }}
+                >
+                  <Download className="mr-1.5 h-3 w-3" />
+                  Dossiê
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="h-7 rounded-md border-slate-900 bg-slate-900 px-2.5 text-[9px] font-black uppercase tracking-wider text-white hover:bg-slate-800"
+                  onClick={async () => {
+                    const loadingToast = toast.loading("Preparando Caderno Executivo...");
+                    try {
+                      const { getExecutiveBookData } = await import("@/lib/executive-book.functions");
+                      const { generateExecutivePDF } = await import("@/lib/executive-book-generator");
+                      
+                      const data = await getExecutiveBookData({ data: { projectId: projectId } });
+                      
+                      if (data.success) {
+                        await generateExecutivePDF(
+                          data.project as any, 
+                          data.modules, 
+                          data.parts, 
+                          data.files
+                        );
+                        toast.dismiss(loadingToast);
+                        toast.success("Caderno Executivo gerado!");
+                      }
+                    } catch (err) {
+                      console.error(err);
+                      toast.dismiss(loadingToast);
+                      toast.error("Erro ao gerar Caderno Executivo.");
+                    }
+                  }}
+                >
+                  <FileText className="mr-1.5 h-3 w-3" />
+                  Caderno Executivo
+                </Button>
+              </div>
             </div>
             <h1 className="break-words text-3xl font-black uppercase leading-none tracking-tight text-slate-950 sm:text-4xl md:text-5xl">
               {project.data?.name}
