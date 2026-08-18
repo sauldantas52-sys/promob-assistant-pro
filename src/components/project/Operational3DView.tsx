@@ -243,6 +243,7 @@ export function Operational3DView({
   parts: any[];
 }) {
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
+  const [selectedPieceId, setSelectedPieceId] = useState<string | null>(null);
   const [isIsolated, setIsIsolated] = useState(false);
   const [viewMode, setViewMode] = useState<'standard' | 'xray'>('standard');
   const [isXRay, setIsXRay] = useState(false);
