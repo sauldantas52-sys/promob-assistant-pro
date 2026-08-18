@@ -565,28 +565,34 @@ function ImportPage() {
           );
         }
 
-        try {
-          const { data: projectExists } = await supabase
-            .from("projects")
-            .select("id")
-            .eq("id", projectId)
-            .maybeSingle();
+        // FIDELITY 5.4 - Apenas descarta se o erro ocorrer ANTES do rpcAttempted
+        // Se rpcAttempted for true, significa que o import_client_project foi chamado
+        // e qualquer erro posterior deve ser tratado como falha de pós-processamento,
+        // mantendo os arquivos para auditoria/reconciliação.
+        if (!rpcAttempted) {
+          try {
+            const { data: projectExists } = await supabase
+              .from("projects")
+              .select("id")
+              .eq("id", projectId)
+              .maybeSingle();
 
-          if (!projectExists) {
-            console.warn("Limpando rastros de importação falha...");
-            
-            if (preparedFiles.length > 0) {
-              await supabase.storage
-                .from("project-files")
-                .remove(preparedFiles.map((item) => item.storagePath));
+            if (!projectExists) {
+              console.warn("Limpando rastros de importação falha (pré-persistência)...");
+              
+              if (preparedFiles.length > 0) {
+                await supabase.storage
+                  .from("project-files")
+                  .remove(preparedFiles.map((item) => item.storagePath));
+              }
+
+              await supabase.rpc("discard_import_session", {
+                _session_id: projectId,
+              });
             }
-
-            await supabase.rpc("discard_import_session", {
-              _session_id: projectId,
-            });
+          } catch (cleanupError) {
+            console.error("Erro na limpeza pós-falha:", cleanupError);
           }
-        } catch (cleanupError) {
-          console.error("Erro na limpeza pós-falha:", cleanupError);
         }
         
         throw error;
