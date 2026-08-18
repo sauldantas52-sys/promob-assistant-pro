@@ -168,24 +168,34 @@ export function IndustrialLabelsTab({ pieces }: { pieces: PhysicalPiece[] }) {
 
       <style>{`
         @media print {
-          body * { visibility: hidden; }
-          .no-print { display: none !important; }
-          .print-area, .print-area * { visibility: visible; }
-          .print-area {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            padding: 0;
-            margin: 0;
-          }
-          .no-print-margin {
+          body {
+             background: white !important;
              margin: 0 !important;
              padding: 0 !important;
           }
+          body * { visibility: hidden; }
+          .no-print { display: none !important; }
+          .print-area, .print-area *, .no-print-margin, .no-print-margin * { visibility: visible; }
+          
+          .no-print-margin {
+             position: absolute !important;
+             left: 0 !important;
+             top: 0 !important;
+             width: 100% !important;
+             margin: 0 !important;
+             padding: 0 !important;
+             display: block !important;
+          }
+
           @page {
             margin: 0;
             size: auto;
+          }
+          
+          /* Força o balizador de folha para evitar transbordamento */
+          .print-area {
+            overflow: hidden;
+            page-break-after: always;
           }
         }
       `}</style>
