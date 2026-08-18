@@ -3,10 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 
 export const Route = createFileRoute('/_authenticated')({
   beforeLoad: async ({ location }) => {
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    const { data: { session } } = await supabase.auth.getSession();
     
-    if (sessionError || !session) {
-      console.log("[AuthGuard] No session found, redirecting to /login");
+    if (!session) {
       throw redirect({
         to: '/login',
         search: {
@@ -50,16 +49,6 @@ export const Route = createFileRoute('/_authenticated')({
       role: role, 
       companyId: profile?.company_id 
     });
-
-    if (!role || !profile?.company_id) {
-      const allowedPaths = ['/dashboard', '/projects/import', '/force-password-change'];
-      const isProjectDetail = location.pathname.startsWith('/projects/') && location.pathname.split('/').length === 3;
-      
-      if (!allowedPaths.includes(location.pathname) && !isProjectDetail) {
-         console.log("Auth Guard: Incomplete profile, redirecting to dashboard");
-         throw redirect({ to: '/dashboard' });
-      }
-    }
 
     return authContext;
   },
