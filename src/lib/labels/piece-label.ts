@@ -47,7 +47,7 @@ function fitaBox(p: any, scale?: number) {
   const names = (p.bandNames || []) as string[];
   const rl = (a: number, b: number, c: number, d: number, name: string) => '<line x1="' + a + '" y1="' + b + '" x2="' + c + '" y2="' + d + '" stroke="' + edgeBandColor(name) + '" stroke-width="' + sw + '" stroke-linecap="round"/>';
   const fs = Math.max(7, Math.round(8 * sc));
-  const tag = (x: number, y: number, label: string, rotate: number) => '<text x="' + x + '" y="' + y + '" text-anchor="middle" dominant-baseline="middle" font-size="' + fs + '" font-weight="800" fill="#111" stroke="#fff" stroke-width="2" paint-order="stroke"' + (rotate ? ' transform="rotate(' + rotate + ' ' + x + ' ' + y + ')"' : '') + '>' + label + '</text>';
+  const tag = (x: number, y: number, label: string, rotate: number) => '<text x="' + x + '" y="' + y + '" text-anchor="middle" dominant-baseline="middle" font-size="' + fs + '" font-weight="900" fill="#000" stroke="#fff" stroke-width="2" paint-order="stroke"' + (rotate ? ' transform="rotate(' + rotate + ' ' + x + ' ' + y + ')"' : '') + '>' + label + '</text>';
 
   let s = '<svg width="' + W + '" height="' + H + '" style="flex:none">';
   s += '<rect x="' + x0 + '" y="' + y0 + '" width="' + (x1 - x0) + '" height="' + (y1 - y0) + '" fill="#fff" stroke="#999" stroke-width="1.2"/>';
@@ -102,28 +102,28 @@ export function pieceLabelHtml(piece: any, opts: PieceLabelOpts) {
   const QR = Math.max(10, Math.min(17, H * 0.58, W * 0.22)); // tamanho do QR
 
   return (
-    '<div class="etq" style="width:' + W + 'mm;height:' + H + 'mm;box-sizing:border-box;overflow:hidden;display:flex;flex-direction:column;font-size:' + FS.toFixed(1) + 'px;font-weight:700;line-height:1.13;border:1px solid #777;background:#fff;border-radius:6px;padding:0.4em 0.55em">' +
-      '<div style="display:grid;grid-template-columns:minmax(0,1fr) ' + QR.toFixed(1) + 'mm;gap:1.5mm;align-items:start">' +
+    '<div class="etq" style="width:' + W + 'mm;height:' + H + 'mm;box-sizing:border-box;overflow:hidden;display:flex;flex-direction:column;font-size:' + FS.toFixed(1) + 'px;font-weight:900;line-height:1.1;border:1px solid #000;background:#fff;border-radius:2px;padding:0.3em 0.4em">' +
+      '<div style="display:grid;grid-template-columns:minmax(0,1fr) ' + QR.toFixed(1) + 'mm;gap:1mm;align-items:start">' +
         '<div class="etq-main-black" style="min-width:0">' +
-          '<div style="display:flex;align-items:center;gap:0.3em;margin-bottom:0.1em">' +
-            '<div style="flex:none;width:' + SQ.toFixed(1) + 'mm;height:' + SQ.toFixed(1) + 'mm;background:' + moduleColor(piece.modNum) + ';border:0.8pt solid ' + moduleStroke(piece.modNum) + ';border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:0.7em;color:' + moduleStroke(piece.modNum) + '">G' + piece.modNum + '</div>' +
-            '<div style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:1.15em;letter-spacing:-0.02em">#' + piece.code + '</div>' +
+          '<div style="display:flex;align-items:center;gap:0.3em;margin-bottom:0.05em">' +
+            '<div style="flex:none;width:' + SQ.toFixed(1) + 'mm;height:' + SQ.toFixed(1) + 'mm;background:' + moduleColor(piece.modNum) + ';border:1px solid #000;border-radius:1px;display:flex;align-items:center;justify-content:center;font-size:0.75em;font-weight:900;color:#000">G' + piece.modNum + '</div>' +
+            '<div style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:1.25em;letter-spacing:-0.03em;color:#000">#' + piece.code + '</div>' +
           '</div>' +
-          '<div style="font-size:0.65em;color:#666;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(piece.masterUid, 14) + ' · G' + piece.modNum + '-P' + piece.modulePieceNumber + (piece.group ? ' · ' + piece.group : '') + '</div>' +
-          '<div style="font-size:0.65em;color:#666;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">PLANO #' + piece.code + ' · PEÇA ' + esc(piece.uid, 8) + ' · ' + esc(piece.modName, 12) + '</div>' +
+          '<div style="font-size:0.65em;color:#000;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(piece.masterUid, 16) + ' · G' + piece.modNum + '-P' + piece.modulePieceNumber + (piece.group ? ' · ' + piece.group : '') + '</div>' +
+          '<div style="font-size:0.65em;color:#000;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">PEÇA ' + esc(piece.uid, 10) + ' · ' + esc(piece.modName, 15) + '</div>' +
         '</div>' +
-        '<div style="flex:none;width:' + QR.toFixed(1) + 'mm;height:' + QR.toFixed(1) + 'mm;display:flex;align-items:center;justify-content:center;background:#fff">' + qrSvg + '</div>' +
+        '<div style="flex:none;width:' + QR.toFixed(1) + 'mm;height:' + QR.toFixed(1) + 'mm;display:flex;align-items:center;justify-content:center;background:#fff;border:0.5px solid #eee">' + qrSvg + '</div>' +
       '</div>' +
-      '<div style="flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;margin:0.1em 0">' +
-        '<div style="font-size:1.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#000">' + esc(piece.desc || piece.pdfName) + '</div>' +
-        '<div style="font-size:1.15em;color:#000">' + Math.round(piece.lo) + ' × ' + Math.round(piece.sh) + ' × ' + piece.thick + ' mm</div>' +
-        '<div style="font-size:0.85em;color:#444;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(effectiveMdfColor(piece.model, mdfOverride)) + '</div>' +
+      '<div style="flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;margin:0.05em 0">' +
+        '<div style="font-size:1.1em;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#000">' + esc(piece.desc || piece.pdfName) + '</div>' +
+        '<div style="font-size:1.3em;font-weight:900;color:#000;letter-spacing:-0.02em">' + Math.round(piece.lo) + ' × ' + Math.round(piece.sh) + ' × ' + piece.thick + ' mm</div>' +
+        '<div style="font-size:0.9em;color:#000;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(effectiveMdfColor(piece.model, mdfOverride)) + '</div>' +
       '</div>' +
-      '<div style="display:flex;align-items:flex-end;gap:0.5em;margin-top:auto">' +
+      '<div style="display:flex;align-items:flex-end;gap:0.4em;margin-top:auto">' +
         '<div style="flex:1;min-width:0;padding-bottom:0.1em">' +
-          '<div style="font-size:0.75em;color:' + (f.has ? '#111' : '#aaa') + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">FITA: ' + f.txt + '</div>' +
-          (piece.obs ? '<div style="font-size:0.65em;color:#c00;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">OBS: ' + esc(piece.obs) + '</div>' : '') +
-          (piece.operatorName ? '<div style="font-size:0.55em;color:#888;margin-top:1px">OP: ' + esc(piece.operatorName, 20) + '</div>' : '') +
+          '<div style="font-size:0.8em;font-weight:900;color:' + (f.has ? '#000' : '#888') + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">FITA: ' + f.txt + '</div>' +
+          (piece.obs ? '<div style="font-size:0.7em;font-weight:900;color:#d00;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">OBS: ' + esc(piece.obs) + '</div>' : '') +
+          (piece.operatorName ? '<div style="font-size:0.6em;font-weight:900;color:#444;margin-top:1px">OP: ' + esc(piece.operatorName, 20) + '</div>' : '') +
         '</div>' +
         fitaBox(piece, k) +
       '</div>' +
