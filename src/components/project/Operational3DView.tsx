@@ -292,7 +292,8 @@ export function Operational3DView({
         depth: m.depth_mm || 550,
         positionConfirmed: false,
         position: visualPosition,
-        pieces
+        pieces,
+        selectedPieceId: selectedModuleId === m.id ? selectedPieceId : null
       };
     });
   }, [rawModules, rawParts]);
