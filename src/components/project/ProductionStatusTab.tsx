@@ -1,10 +1,12 @@
 import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
+import { updateStepStatus } from "@/lib/production";
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Link } from '@tanstack/react-router';
+import { toast } from "sonner";
 import { 
   Scissors, 
   Drill, 
@@ -13,7 +15,8 @@ import {
   AlertCircle,
   Layers,
   ChevronRight,
-  Activity
+  Activity,
+  Zap
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
@@ -77,11 +80,43 @@ export function ProductionStatusTab({ projectId }: { projectId: string }) {
       <div className="flex items-center justify-between px-2">
         <div>
           <h2 className="text-xl font-black uppercase tracking-tighter text-slate-900 flex items-center gap-2">
-            <Layers className="h-6 w-6 text-indigo-600" /> Status de Produção Real
+            <Layers className="h-6 w-6 text-indigo-600" /> Fluxo de Produção Industrial 4.0
           </h2>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-            Monitoramento de Peças em Tempo Real • Chão de Fábrica
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 flex items-center gap-2">
+            <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" /> Monitoramento em Tempo Real • Chão de Fábrica
           </p>
+        </div>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="h-10 rounded-2xl border-slate-200 text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all shadow-sm group"
+            onClick={async () => {
+              const pendingSteps = steps.filter(s => s.status !== 'concluido');
+              if (pendingSteps.length === 0) {
+                toast.info("Toda a produção já está concluída.");
+                return;
+              }
+              
+              if (!confirm(`Deseja finalizar TODAS as ${pendingSteps.length} etapas pendentes deste projeto?`)) return;
+
+              try {
+                toast.promise(
+                  Promise.all(pendingSteps.map(s => updateStepStatus(s.id, 'concluido', 'Finalização global via painel industrial'))),
+                  {
+                    loading: 'Finalizando projeto completo...',
+                    success: 'Projeto finalizado com sucesso!',
+                    error: 'Erro na finalização global.'
+                  }
+                );
+              } catch (err) {
+                console.error(err);
+              }
+            }}
+          >
+            <Zap className="h-3.5 w-3.5 mr-2 text-amber-500 group-hover:text-amber-400" />
+            Finalizar Lote Completo
+          </Button>
         </div>
       </div>
 
@@ -115,8 +150,19 @@ export function ProductionStatusTab({ projectId }: { projectId: string }) {
       </div>
 
       <Card className="rounded-[2rem] border-none shadow-sm overflow-hidden">
-        <CardHeader className="bg-slate-900 py-4 px-6">
-          <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-white">Listagem Detalhada de Peças</CardTitle>
+        <CardHeader className="bg-slate-950 py-4 px-8 border-b border-white/5">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-[10px] font-black uppercase tracking-[0.3em] text-white/80">Listagem Detalhada de Peças</CardTitle>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/10">
+                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[8px] font-black text-white/60 uppercase tracking-widest">Sincronização Ativa</span>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1 bg-slate-800 rounded-full border border-white/5">
+                <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">Gabarito: 409 Peças</span>
+              </div>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -170,11 +216,41 @@ export function ProductionStatusTab({ projectId }: { projectId: string }) {
                         );
                       })}
                       <td className="px-6 py-4 text-right">
-                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 rounded-lg hover:bg-white hover:shadow-sm" asChild>
-                           <Link to="/production">
-                             <ChevronRight className="h-4 w-4 text-slate-400" />
-                           </Link>
-                        </Button>
+                        <div className="flex justify-end items-center gap-2">
+                          <Button 
+                            variant="secondary" 
+                            size="sm" 
+                            className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-none transition-all active:scale-95"
+                            onClick={async () => {
+                              const stepsToComplete = pieceSteps.filter(s => s.status !== 'concluido');
+                              if (stepsToComplete.length === 0) {
+                                toast.info("Peça já está concluída em todas as etapas.");
+                                return;
+                              }
+                              
+                              try {
+                                toast.promise(
+                                  Promise.all(stepsToComplete.map(s => updateStepStatus(s.id, 'concluido', 'Finalização rápida por lote'))),
+                                  {
+                                    loading: 'Finalizando peça...',
+                                    success: 'Peça finalizada com sucesso!',
+                                    error: 'Erro ao finalizar peça.'
+                                  }
+                                );
+                              } catch (err) {
+                                console.error(err);
+                              }
+                            }}
+                          >
+                            <CheckCircle2 className="h-3 w-3 mr-1.5" />
+                            Finalizar
+                          </Button>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-lg hover:bg-white hover:shadow-sm" asChild title="Abrir Fluxo de Produção">
+                             <Link to="/production">
+                               <ChevronRight className="h-4 w-4 text-slate-400" />
+                             </Link>
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   );
