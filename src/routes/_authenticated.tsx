@@ -34,11 +34,12 @@ export const Route = createFileRoute('/_authenticated')({
     const role = (roleData?.role as any) || null;
     const mustChangePassword = !!profile?.must_change_password;
 
-    console.log(`[Auth:Guard] Path: ${location.pathname}, Role: ${role}, MustChange: ${mustChangePassword}`);
+    console.log(`[Auth:Guard] Checking Path: ${location.pathname}`);
+    console.log(`[Auth:Guard] Role: ${role}, MustChange: ${mustChangePassword}`);
 
     // Bloqueio operacional se troca de senha for obrigatória
     if (mustChangePassword && location.pathname !== '/force-password-change') {
-      console.log("[Auth:Guard] Redirecionando para troca de senha obrigatória.");
+      console.log("[Auth:Guard] REDIRECT -> /force-password-change");
       throw redirect({
         to: '/force-password-change',
       });
