@@ -3111,6 +3111,10 @@ export type Database = {
         Returns: undefined
       }
       is_admin: { Args: never; Returns: boolean }
+      mark_import_cleanup_required: {
+        Args: { _session_id: string }
+        Returns: undefined
+      }
       persist_industrial_project_bypass: {
         Args: {
           _client_name: string
