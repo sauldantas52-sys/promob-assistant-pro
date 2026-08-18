@@ -20,8 +20,21 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
   const [integrityStatus, setIntegrityStatus] = useState<'validating' | 'pass' | 'fail'>('validating');
   const [integrityErrors, setIntegrityErrors] = useState<string[]>([]);
   const [activePlanSource, setActivePlanSource] = useState<'estimativa' | 'cutpro_oficial'>('estimativa');
+  const [highlightedPieceId, setHighlightedPieceId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
+
+  // Escutar eventos de destaque (Fidelity 5.1)
+  useEffect(() => {
+    const handleHighlight = (e: any) => {
+      if (e.detail?.physicalId) {
+        setHighlightedPieceId(e.detail.physicalId);
+        toast.info(`Peça destacada: ${e.detail.physicalId}`);
+      }
+    };
+    window.addEventListener('highlight-piece', handleHighlight);
+    return () => window.removeEventListener('highlight-piece', handleHighlight);
+  }, []);
 
   const { data: cutPlanGroups, isLoading } = useQuery({
     queryKey: ["industrial_cut_plan", projectId],
