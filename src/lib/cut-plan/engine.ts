@@ -84,8 +84,9 @@ export interface CutPlanGroup {
   };
 }
 
+// Configurações industriais extraídas do Plano de Corte Pro
 const KERF = 4;
-const DEFAULT_TRIM = 5;
+const DEFAULT_TRIM = 10; // Atualizado para 10mm conforme lógica do Plano de Corte Pro
 const DEFAULT_SHEET_WIDTH = 2750;
 const DEFAULT_SHEET_HEIGHT = 1830;
 
@@ -115,8 +116,15 @@ export const IndustrialCutPlanEngine = {
       const metadata = (part.metadata as any) || {};
 
       for (let i = 0; i < repetition; i++) {
-        const lo = Math.max(part.length_mm, part.width_mm);
-        const sh = Math.min(part.length_mm, part.width_mm);
+        // Ordenação Industrial: maior x mediana (lo x sh)
+        const dims = [
+          Number(part.length_mm || 0),
+          Number(part.width_mm || 0),
+          Number(part.thickness_mm || 0)
+        ].sort((a, b) => b - a);
+        
+        const lo = dims[0] || 0;
+        const sh = dims[1] || 0;
 
         physicalPieces.push({
           physicalId: `${part.id_xml || part.id}_rep${i}`,
