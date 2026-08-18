@@ -1497,12 +1497,14 @@ export type Database = {
       }
       production_steps: {
         Row: {
+          company_id: string | null
           completed_at: string | null
           id: string
           module_id: string | null
           notes: string | null
           operator_id: string | null
           part_id: string | null
+          physical_id: string | null
           project_id: string
           started_at: string | null
           status: string
@@ -1510,12 +1512,14 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          company_id?: string | null
           completed_at?: string | null
           id?: string
           module_id?: string | null
           notes?: string | null
           operator_id?: string | null
           part_id?: string | null
+          physical_id?: string | null
           project_id: string
           started_at?: string | null
           status?: string
@@ -1523,12 +1527,14 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          company_id?: string | null
           completed_at?: string | null
           id?: string
           module_id?: string | null
           notes?: string | null
           operator_id?: string | null
           part_id?: string | null
+          physical_id?: string | null
           project_id?: string
           started_at?: string | null
           status?: string
@@ -1536,6 +1542,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "production_steps_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "production_steps_module_id_fkey"
             columns: ["module_id"]
@@ -3039,6 +3052,10 @@ export type Database = {
       }
       ingest_and_distribute_project: {
         Args: { _loose_parts: Json[]; _modules: Json[]; _project_id: string }
+        Returns: undefined
+      }
+      initialize_production_tracking: {
+        Args: { p_company_id: string; p_project_id: string; p_steps: Json }
         Returns: undefined
       }
       is_admin: { Args: never; Returns: boolean }
