@@ -123,8 +123,8 @@ export const IndustrialCutPlanEngine = {
           Number(part.thickness_mm || 0)
         ].sort((a, b) => b - a);
         
-        const lo = dims[0];
-        const sh = dims[1];
+        const lo = dims[0] || 0;
+        const sh = dims[1] || 0;
 
         physicalPieces.push({
           physicalId: `${part.id_xml || part.id}_rep${i}`,
