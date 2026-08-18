@@ -122,10 +122,21 @@ export async function generateExecutivePDF(project: ProjectData, modules: any[],
     doc.text(dims, 15, 40);
 
     // Área para Imagens (Fidelidade 5.4 - Imagens da Pasta do Cliente)
-    const moduleImages = files.filter(f => 
-      f.file_name.toLowerCase().includes(mod.name.toLowerCase()) ||
-      (f.summary && typeof f.summary === 'object' && (f.summary as any).relativePath?.toLowerCase().includes(mod.name.toLowerCase()))
-    ).filter(f => ['image/jpeg', 'image/png', 'imagem_referencia'].includes(f.file_type || ''));
+    // Regra 5: Associação automática NÃO pode transformar correspondência incerta em confirmada.
+    const moduleImages = files.filter(f => {
+      const fileNameMatch = f.file_name.toLowerCase().includes(mod.name.toLowerCase());
+      const pathMatch = (f.summary && typeof f.summary === 'object' && (f.summary as any).relativePath?.toLowerCase().includes(mod.name.toLowerCase()));
+      
+      // Armazenar metadados de correspondência (Source de dados para Auditoria Humana)
+      if (fileNameMatch || pathMatch) {
+        // Marcamos como is_confirmed = false se for apenas heurística de nome
+        (f as any).match_method = fileNameMatch ? 'name_heuristic' : 'path_heuristic';
+        (f as any).match_confidence = 0.7; // Confiança média para heurística
+        (f as any).is_confirmed = false; // Exige revisão humana
+        return true;
+      }
+      return false;
+    }).filter(f => ['image/jpeg', 'image/png', 'imagem_referencia'].includes(f.file_type || ''));
 
     doc.setDrawColor(200);
     doc.rect(15, 45, 180, 100); 
@@ -133,7 +144,16 @@ export async function generateExecutivePDF(project: ProjectData, modules: any[],
     if (moduleImages.length > 0) {
       doc.setFontSize(10);
       doc.setTextColor(accentColor);
-      doc.text("IMAGEM TÉCNICA LOCALIZADA NA PASTA DO CLIENTE", 105, 90, { align: "center" });
+      
+      const isConfirmed = (moduleImages[0] as any).is_confirmed === true;
+      
+      if (!isConfirmed) {
+        doc.setTextColor(warningColor);
+        doc.text("IMAGEM NÃO CONFIRMADA (ASSOCIAÇÃO AUTOMÁTICA)", 105, 90, { align: "center" });
+      } else {
+        doc.text("IMAGEM TÉCNICA CONFIRMADA", 105, 90, { align: "center" });
+      }
+
       doc.setFontSize(8);
       doc.setTextColor(150);
       doc.text(`Arquivo: ${moduleImages[0].file_name}`, 105, 95, { align: "center" });
