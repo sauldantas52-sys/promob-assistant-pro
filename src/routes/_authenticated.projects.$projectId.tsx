@@ -514,10 +514,30 @@ function ProjectDetail() {
                  </Table>
                </div>
             )}
+            {activeTab === "labels" && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-black uppercase tracking-tight">Etiquetas Industriais</h3>
+                </div>
+                {cutPlanGroups && (
+                  <IndustrialLabelsTab pieces={cutPlanGroups.flatMap(g => g.pieces)} />
+                )}
+              </div>
+            )}
             {activeTab === "engineering" && <EngineeringTab projectId={projectId} parts={allParts as any} isValidated={project.data?.is_validated} />}
             {activeTab === "sketchup" && <SketchUpBridgeTab projectId={projectId} />}
             {activeTab === "commercial" && <BudgetTab projectId={projectId} />}
             {activeTab === "integration_audit" && <AuditIntegrationTab projectId={projectId} />}
+            {activeTab === "assistance" && (
+              <MaintenanceTab 
+                projectId={projectId} 
+                companyId={project.data?.company_id} 
+                allModules={modules.data || []}
+                allParts={allParts}
+                canCreate={true}
+                canTreat={role === 'admin' || role === 'escritorio'}
+              />
+            )}
           </div>
         </div>
       </main>
