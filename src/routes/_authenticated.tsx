@@ -52,9 +52,16 @@ export const Route = createFileRoute('/_authenticated')({
     
     console.log("Auth Guard Data:", { 
       path: location.pathname, 
-      hasRole: !!role, 
-      hasCompany: !!profile?.company_id 
+      role: role, 
+      companyId: profile?.company_id 
     });
+
+    if (!role || !profile?.company_id) {
+      if (location.pathname !== '/dashboard') {
+        console.log("Auth Guard: Missing role or company, redirecting to dashboard");
+        throw redirect({ to: '/dashboard' });
+      }
+    }
 
     return authContext;
   },
