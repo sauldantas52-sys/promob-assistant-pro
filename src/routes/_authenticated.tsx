@@ -6,7 +6,7 @@ export const Route = createFileRoute('/_authenticated')({
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     
     if (sessionError || !session) {
-      console.log("[AuthGuard] No session found, redirecting to login:", sessionError?.message);
+      console.log("[AuthGuard] No session found, redirecting to login:", sessionError?.message, "Path:", location.pathname);
       throw redirect({
         to: '/login',
         search: {
