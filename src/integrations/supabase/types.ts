@@ -590,6 +590,54 @@ export type Database = {
           },
         ]
       }
+      executive_books: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          project_id: string
+          status: string | null
+          updated_at: string | null
+          version: number | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          project_id: string
+          status?: string | null
+          updated_at?: string | null
+          version?: number | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          project_id?: string
+          status?: string | null
+          updated_at?: string | null
+          version?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "executive_books_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "executive_books_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financial_documents: {
         Row: {
           company_id: string
