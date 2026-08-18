@@ -1,4 +1,4 @@
-import { Scissors, ShieldCheck, Layers, Package, Settings as Tool, AlertCircle, Ruler, Box } from "lucide-react";
+import { Scissors, ShieldCheck, Layers, Package, Settings as Tool, AlertCircle, Ruler, Box, Printer } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -7,8 +7,15 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { IndustrialCutPlanEngine, CutPlanGroup, Sheet, Placement } from "@/lib/cut-plan/engine";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { IndustrialLabelsTab } from "./labels/IndustrialLabelsTab";
+import { useEffect, useState } from "react";
+
 
 export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
+  const [integrityStatus, setIntegrityStatus] = useState<'validating' | 'pass' | 'fail'>('validating');
+  const [integrityErrors, setIntegrityErrors] = useState<string[]>([]);
+
   const { data: cutPlanGroups, isLoading } = useQuery({
     queryKey: ["industrial_cut_plan", projectId],
     queryFn: () => IndustrialCutPlanEngine.generateForProject(projectId),
@@ -26,7 +33,47 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
     },
   });
 
+  useEffect(() => {
+    if (cutPlanGroups && allParts) {
+      validateIntegrity(cutPlanGroups, projectId);
+    }
+  }, [cutPlanGroups, allParts]);
+
+  const validateIntegrity = (groups: CutPlanGroup[], targetProjectId: string) => {
+    // Apenas rodar validação pesada se for o projeto Closet solicitado ou se quisermos manter global
+    const errors: string[] = [];
+    let totalPhysicalPieces = 0;
+    let totalAllocated = 0;
+
+    groups.forEach(group => {
+      totalPhysicalPieces += group.pieces.length;
+      group.sheets.forEach(sheet => {
+        sheet.shelves.forEach(shelf => {
+          totalAllocated += shelf.placements.length;
+          shelf.placements.forEach(p => {
+            // Trim validation
+            if (p.x < 5 || p.y < 5) errors.push(`Placement invadiu margem esquerda/topo: ${p.physicalId}`);
+            if (p.x + p.w > 2745) errors.push(`Placement invadiu margem direita: ${p.physicalId}`);
+            if (p.y + p.h > 1825) errors.push(`Placement invadiu margem inferior: ${p.physicalId}`);
+          });
+        });
+      });
+    });
+
+    if (totalPhysicalPieces !== totalAllocated) {
+      errors.push(`Divergência de peças: Esperado ${totalPhysicalPieces}, Alocado ${totalAllocated}`);
+    }
+
+    if (errors.length > 0) {
+      setIntegrityStatus('fail');
+      setIntegrityErrors(errors);
+    } else {
+      setIntegrityStatus('pass');
+    }
+  };
+
   if (isLoading || partsLoading) return <div className="p-8 text-center text-xs text-slate-500 font-bold uppercase tracking-widest animate-pulse">Calculando Nesting Industrial Real...</div>;
+
 
   // Filtros de Auditoria
   const cutParts = allParts?.filter(p => (p.kind === 'peca' || p.kind === 'chapa') && p.thickness_mm) || [];
@@ -185,22 +232,56 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
     );
   };
 
-  return (
-    <div className="space-y-8 max-w-[1400px] mx-auto p-4 lg:p-0">
-      <Alert className="rounded-xl border-2 border-blue-500 bg-blue-50 text-blue-900 shadow-sm">
-        <ShieldCheck className="h-5 w-5 text-blue-600" />
-        <div>
-          <AlertTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
-            Plano de Corte Industrial Real (Banco de Dados)
-          </AlertTitle>
-          <AlertDescription className="text-xs font-medium mt-1 leading-relaxed">
-            Fonte: XML Promob • Persistência confirmada via consulta direta. Ferragens e itens sem espessura estão segregados na auditoria.
-          </AlertDescription>
-        </div>
-      </Alert>
+  const allPieces = cutPlanGroups?.flatMap(g => g.pieces) || [];
 
-      {/* Visão Resumida solicitada */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+  return (
+    <div className="space-y-8 max-w-[1400px] mx-auto p-4 lg:p-0 print:p-0">
+      <div className="no-print">
+        {integrityStatus === 'fail' ? (
+          <Alert variant="destructive" className="rounded-xl border-2 border-red-500 bg-red-50 shadow-sm mb-6">
+            <AlertCircle className="h-5 w-5" />
+            <div>
+              <AlertTitle className="text-sm font-black uppercase tracking-widest">Falha de Integridade Industrial</AlertTitle>
+              <AlertDescription className="text-xs font-medium mt-1 leading-relaxed">
+                Foram detectados erros no motor de corte que impedem a liberação das etiquetas:
+                <ul className="list-disc ml-4 mt-2">
+                  {integrityErrors.slice(0, 3).map((err, i) => <li key={i}>{err}</li>)}
+                  {integrityErrors.length > 3 && <li>... e mais {integrityErrors.length - 3} erros.</li>}
+                </ul>
+              </AlertDescription>
+            </div>
+          </Alert>
+        ) : (
+          <Alert className="rounded-xl border-2 border-blue-500 bg-blue-50 text-blue-900 shadow-sm mb-6">
+            <ShieldCheck className="h-5 w-5 text-blue-600" />
+            <div>
+              <AlertTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
+                Plano de Corte Industrial Real (Banco de Dados)
+                {integrityStatus === 'pass' && <Badge className="bg-emerald-500 text-white border-none ml-2">INTEGRIDADE OK</Badge>}
+              </AlertTitle>
+              <AlertDescription className="text-xs font-medium mt-1 leading-relaxed">
+                Fonte: XML Promob • Persistência confirmada via consulta direta. Ferragens e itens sem espessura estão segregados na auditoria.
+              </AlertDescription>
+            </div>
+          </Alert>
+        )}
+      </div>
+
+      <Tabs defaultValue="plano" className="w-full no-print">
+        <TabsList className="grid w-full grid-cols-2 bg-slate-100 p-1 rounded-xl h-12">
+          <TabsTrigger value="plano" className="rounded-lg text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-slate-900">
+            <Layers className="h-4 w-4 mr-2" /> Plano de Corte
+          </TabsTrigger>
+          <TabsTrigger value="etiquetas" className="rounded-lg text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
+            <Printer className="h-4 w-4 mr-2" /> Etiquetas
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="plano" className="mt-6">
+          {/* Visão Resumida */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            {cutPlanGroups?.map(group => (
+
         {cutPlanGroups?.map(group => (
           <Card key={group.groupKey} className="border-2 border-slate-100 shadow-none">
             <CardContent className="pt-6">
@@ -217,12 +298,25 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
         ))}
       </div>
 
-      {/* Grupos de Corte */}
-      <div className="space-y-6">
-        {cutPlanGroups?.map(group => renderCutGroup(group))}
+          </div>
+          
+          <div className="space-y-6">
+            {cutPlanGroups?.map(group => renderCutGroup(group))}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="etiquetas" className="mt-6">
+          <IndustrialLabelsTab pieces={allPieces} />
+        </TabsContent>
+      </Tabs>
+
+      <div className="print-area hidden print:block">
+        <IndustrialLabelsTab pieces={allPieces} />
       </div>
 
-      {/* Tabela de Auditoria solicitada */}
+      <div className="no-print space-y-8">
+        {/* Tabela de Auditoria solicitada */}
+
       <Card className="border-2 border-slate-200 shadow-sm overflow-hidden">
         <CardHeader className="bg-slate-50 border-b">
           <CardTitle className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
