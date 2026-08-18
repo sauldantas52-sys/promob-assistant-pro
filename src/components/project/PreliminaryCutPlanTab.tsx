@@ -16,7 +16,7 @@ import { CutPlanComparisonCard } from "./CutPlanComparisonCard";
 import { CutProParser } from "@/lib/cut-plan/parsers";
 import { toast } from "sonner";
 
-export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
+export function PreliminaryCutPlanTab({ projectId, project }: { projectId: string, project?: any }) {
   const [integrityStatus, setIntegrityStatus] = useState<'validating' | 'pass' | 'fail'>('validating');
   const [integrityErrors, setIntegrityErrors] = useState<string[]>([]);
   const [activePlanSource, setActivePlanSource] = useState<'estimativa' | 'cutpro_oficial'>('estimativa');
@@ -609,7 +609,7 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
           </div>
         </TabsContent>
         <TabsContent value="etiquetas" className="mt-6">
-          <IndustrialLabelsTab pieces={allPieces} />
+            <IndustrialLabelsTab pieces={allPieces} project={project} />
         </TabsContent>
       </Tabs>
 
