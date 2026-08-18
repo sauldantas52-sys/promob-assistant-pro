@@ -34,8 +34,7 @@ export const Route = createFileRoute('/_authenticated')({
     const role = (roleData?.role as any) || null;
     const mustChangePassword = !!profile?.must_change_password;
 
-    console.log(`[Auth:Guard] Checking Path: ${location.pathname}`);
-    console.log(`[Auth:Guard] Role: ${role}, MustChange: ${mustChangePassword}`);
+    console.log(`[Auth:Guard] Path: ${location.pathname}, Role: ${role}, MustChange: ${mustChangePassword}`);
 
     // Bloqueio operacional se troca de senha for obrigatória
     if (mustChangePassword && location.pathname !== '/force-password-change') {
@@ -46,7 +45,9 @@ export const Route = createFileRoute('/_authenticated')({
     }
 
     // Redirecionamento de segurança para a rota de importação
-    if (location.pathname.startsWith('/projects/import')) {
+    // IMPORTANTE: Adicionada verificação de trailing slash para compatibilidade com TanStack Router
+    const isImportPath = location.pathname.startsWith('/projects/import');
+    if (isImportPath) {
       const allowedRoles = ['admin', 'escritorio', 'projetista'];
       if (!role || !allowedRoles.includes(role)) {
         console.warn(`[Security] Usuário ${session.user.id} com role ${role} tentou acessar importação.`);
