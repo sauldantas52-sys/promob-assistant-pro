@@ -217,7 +217,7 @@ function ImportPage() {
           looseMdfPieces = result.loose_parts.filter(p => p.kind === 'peca').length;
           
           setParseReport({
-            totalItems: 0, // Simplified for preview
+            totalItems: result.modules.reduce((acc, m) => acc + m.parts.length, 0) + result.loose_parts.length,
             recognizedModules,
             mdfPiecesInModules,
             looseMdfPieces,
@@ -307,6 +307,7 @@ function ImportPage() {
         created_by: authData.user.id,
         planned_paths: preparedFiles.map((item) => item.storagePath),
         status: "uploading",
+        step: "discovery",
       });
       if (sessionError) throw sessionError;
 
@@ -330,61 +331,13 @@ function ImportPage() {
           });
         }
 
+        await (supabase as any)
+          .from("project_import_sessions")
+          .update({ step: "xml_parse" })
+          .eq("id", projectId);
+
         rpcAttempted = true;
         
-        // 1. Criar Projeto e Registrar Arquivos
-        const { data: importedProjectId, error: importError } = await supabase.rpc(
-          "import_client_project" as any,
-          {
-            _project_id: projectId,
-            _project: {
-              name: data.name || files.xml.name.replace(/\.xml$/i, ""),
-              client_name: data.client,
-              environment: data.env,
-              notes:
-                destination === "cutplanning"
-                  ? "Destino de produção: CutPlanning (terceirização)"
-                  : "Destino de produção: fábrica própria",
-              is_test: true, // Forçando is_test para garantir persistência na auditoria
-            },
-            _files: storedFiles,
-            _modules: [], 
-            _loose_parts: [],
-          },
-        );
-        if (importError) throw importError;
-
-        // FIDELITY 5.0 - Initialize estimation tracking for the internal engine
-        try {
-          const { initializeProjectProduction } = await import("@/lib/production");
-          const { IndustrialCutPlanEngine } = await import("@/lib/cut-plan/engine");
-          
-          const groups = await IndustrialCutPlanEngine.generateForProject(projectId);
-          const allPhysicalPieces = groups.flatMap(g => g.pieces);
-          
-          if (allPhysicalPieces.length > 0) {
-            const trackingPayload = allPhysicalPieces.map(p => ({
-              physicalId: p.physicalId,
-              partId: p.partId,
-              moduleId: p.moduleId || null,
-              needsEdge: (p.edgeTop > 0 || p.edgeBottom > 0 || p.edgeLeft > 0 || p.edgeRight > 0)
-            }));
-
-            await initializeProjectProduction({
-              data: {
-                projectId,
-                companyId: companyId,
-                steps: trackingPayload
-              }
-            });
-
-            console.log(`[Fidelity 5.0] Estimated production tracking initialized for ${allPhysicalPieces.length} pieces.`);
-          }
-        } catch (estimErr) {
-          console.error("Erro ao inicializar rastreabilidade de estimativa:", estimErr);
-        }
-
-
         // 2. Distribuição Automática 4.0 (MVP Requisitado)
         // Mapeamento rigoroso conforme requisitos do usuário
         const modulesPayload = result.modules.map((module: PromobModule) => ({
@@ -457,6 +410,64 @@ function ImportPage() {
           },
         }));
 
+        // 1. Criar Projeto e Registrar Arquivos
+        const { data: importedProjectId, error: importError } = await supabase.rpc(
+          "import_client_project" as any,
+          {
+            _project_id: projectId,
+            _project: {
+              name: data.name || files.xml.name.replace(/\.xml$/i, ""),
+              client_name: data.client,
+              environment: data.env,
+              notes:
+                destination === "cutplanning"
+                  ? "Destino de produção: CutPlanning (terceirização)"
+                  : "Destino de produção: fábrica própria",
+              is_test: true, 
+            },
+            _files: storedFiles,
+            _modules: modulesPayload, 
+            _loose_parts: loosePartsPayload,
+          },
+        );
+        if (importError) throw importError;
+
+        await (supabase as any)
+          .from("project_import_sessions")
+          .update({ step: "persistence" })
+          .eq("id", projectId);
+
+        // FIDELITY 5.0 - Initialize estimation tracking for the internal engine
+        try {
+          const { initializeProjectProduction } = await import("@/lib/production");
+          const { IndustrialCutPlanEngine } = await import("@/lib/cut-plan/engine");
+          
+          const groups = await IndustrialCutPlanEngine.generateForProject(projectId);
+          const allPhysicalPieces = groups.flatMap(g => g.pieces);
+          
+          if (allPhysicalPieces.length > 0) {
+            const trackingPayload = allPhysicalPieces.map(p => ({
+              physicalId: p.physicalId,
+              partId: p.partId,
+              moduleId: p.moduleId || null,
+              needsEdge: (p.edgeTop > 0 || p.edgeBottom > 0 || p.edgeLeft > 0 || p.edgeRight > 0)
+            }));
+
+            await initializeProjectProduction({
+              data: {
+                projectId,
+                companyId: companyId,
+                steps: trackingPayload
+              }
+            });
+
+            console.log(`[Fidelity 5.0] Estimated production tracking initialized for ${allPhysicalPieces.length} pieces.`);
+          }
+        } catch (estimErr) {
+          console.error("Erro ao inicializar rastreabilidade de estimativa:", estimErr);
+        }
+
+
         const { error: distributionError } = await supabase.rpc(
           "ingest_and_distribute_project" as any,
           {
@@ -464,7 +475,6 @@ function ImportPage() {
             _modules: modulesPayload,
             _loose_parts: loosePartsPayload,
             _is_test: true
-
           }
         );
         if (distributionError) throw distributionError;
@@ -511,10 +521,19 @@ function ImportPage() {
           throw new Error(`Falha na persistência industrial: nenhum arquivo foi registrado.`);
         }
         
+        await (supabase as any)
+          .from("project_import_sessions")
+          .update({ step: "completed", status: "finished" })
+          .eq("id", projectId);
+
         // Redireciona para o detalhe do projeto que agora contém a aba de Plano de Corte
         navigate({ to: "/projects/$projectId", params: { projectId: projectId }, search: { tab: 'modules' } });
         return projectId;
       } catch (error) {
+        await (supabase as any)
+          .from("project_import_sessions")
+          .update({ status: "failed" })
+          .eq("id", projectId);
         if (rpcAttempted) {
           const { data: committedProject, error: verificationError } = await supabase
             .from("projects")
@@ -1033,10 +1052,12 @@ function ImportPage() {
                     Relatório de Leitura Monta AI
                   </p>
                   <div className="grid grid-cols-2 gap-y-1 font-mono text-[9px]">
-                    <span className="text-slate-400">Itens ITEM:</span>
+                    <span className="text-slate-400">Total de Itens:</span>
                     <span className="text-right font-bold text-slate-700">{parseReport.totalItems}</span>
                     <span className="text-slate-400">Módulos:</span>
                     <span className="text-right font-bold text-slate-700">{parseReport.recognizedModules}</span>
+                    <span className="text-slate-400">Peças MDF:</span>
+                    <span className="text-right font-bold text-slate-700">{parseReport.mdfPiecesInModules + parseReport.looseMdfPieces}</span>
                   </div>
                   <p className="text-[8px] leading-relaxed text-slate-400 italic">
                     A classificação de MDF, Ferragens e Módulos é confirmada durante a ingestão.
