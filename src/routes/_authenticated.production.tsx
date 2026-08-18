@@ -139,7 +139,7 @@ function ProductionContent() {
           validation_checks(id, check_type, is_completed)
         `,
         )
-        .in("status", ["pronto_para_producao", "corte", "borda", "usinagem", "separacao", "conferencia", "expedicao"])
+        .in("status", ["pronto_para_producao", "corte", "borda", "usinagem", "separacao", "conferencia", "expedicao", "montagem", "concluido"])
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -265,7 +265,7 @@ function ProductionContent() {
       >
         {Object.entries(flow)
           .filter(([status]) =>
-            ["pronto_para_producao", "corte", "borda", "usinagem", "separacao", "conferencia", "expedicao"].includes(
+            ["pronto_para_producao", "corte", "borda", "usinagem", "separacao", "conferencia", "expedicao", "montagem", "concluido"].includes(
               status,
             ),
           )
@@ -337,7 +337,7 @@ function ProductionContent() {
 
                   {/* Pipeline Visual */}
                   <div
-                    className="grid grid-cols-5 gap-1 sm:grid-cols-9"
+                    className="grid grid-cols-4 gap-1 sm:grid-cols-8"
                     aria-label="Fluxo de produção"
                   >
                     {Object.entries(flow).filter(([key]) => key !== 'novo' && key !== 'orcamento' && key !== 'concluido').map(([key, value]) => {

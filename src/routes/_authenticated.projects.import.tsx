@@ -545,13 +545,49 @@ function ImportPage() {
           throw new Error(`Falha na persistência industrial: nenhum arquivo foi registrado.`);
         }
         
+        // LIBERAÇÃO AUTOMÁTICA 5.6
+        // Ao importar, o sistema já preenche os gates e libera a usinagem por padrão
+        try {
+          const checkTypes = [
+            "xml_valido", "lista_corte", "nesting_dxf", "materiais",
+            "documentacao_tecnica", "cotas_furacao", "bitolas", "tags_skp", "visual_ingestion",
+            "usinagem_liberada", "pecas_conferidas", "ferragens_conferidas", "grupos_completos"
+          ];
+          
+          const checksPayload = checkTypes.map(type => ({
+            project_id: projectId,
+            check_type: type,
+            is_completed: true,
+            completed_by: authData.user.id,
+            completed_at: new Date().toISOString(),
+            evidence_source: "auto_liberacao_import",
+            updated_at: new Date().toISOString()
+          }));
+
+          await (supabase as any).from("validation_checks").upsert(checksPayload, { onConflict: "project_id,check_type" });
+          
+          await supabase.rpc("release_project_machining" as any, {
+            _project_id: projectId,
+          });
+
+          // Avança status para 'corte' automaticamente para entrar no Pipeline
+          await supabase
+            .from("projects")
+            .update({ status: "corte", operational_status: "pronto_para_producao" })
+            .eq("id", projectId);
+
+          console.log(`[Liberação 5.6] Projeto ${projectId} liberado automaticamente.`);
+        } catch (releaseErr) {
+          console.error("Erro na liberação automática:", releaseErr);
+        }
+
         await (supabase as any)
           .from("project_import_sessions")
           .update({ step: "completed", status: "finished" })
           .eq("id", projectId);
 
-        // Redireciona para o detalhe do projeto que agora contém a aba de Plano de Corte
-        navigate({ to: "/projects/$projectId", params: { projectId: projectId }, search: { tab: 'modules' } });
+        // Redireciona para o Pipeline de Produção diretamente (vontade do usuário: "torne o aap sem travas")
+        navigate({ to: "/production" });
         return projectId;
       } catch (error) {
         await (supabase as any)
