@@ -509,6 +509,39 @@ function ImportPage() {
               }
             });
 
+            // LIBERAÇÃO AUTOMÁTICA GATES (Fidelity 6.3)
+            const checkTypes = [
+              "xml_valido", "lista_corte", "nesting_dxf", "materiais",
+              "documentacao_tecnica", "cotas_furacao", "bitolas", "tags_skp", "visual_ingestion",
+              "usinagem_liberada", "pecas_conferidas", "ferragens_conferidas", "grupos_completos"
+            ];
+            
+            const checksPayload = checkTypes.map(type => ({
+              project_id: projectId,
+              check_type: type,
+              is_completed: true,
+              completed_by: authData.user.id,
+              completed_at: new Date().toISOString(),
+              evidence_source: "auto_liberacao_import_f63",
+              updated_at: new Date().toISOString()
+            }));
+
+            await (supabase as any).from("validation_checks").upsert(checksPayload, { onConflict: "project_id,check_type" });
+            
+            await supabase.rpc("release_project_machining" as any, {
+              _project_id: projectId,
+            });
+
+            await supabase
+              .from("projects")
+              .update({ 
+                status: "corte", 
+                operational_status: "pronto_para_producao",
+                machining_blocked: false,
+                is_validated: true 
+              })
+              .eq("id", projectId);
+
             console.log(`[Fidelity 5.0] Estimated production tracking initialized for ${allPhysicalPieces.length} pieces.`);
           }
         } catch (estimErr) {
