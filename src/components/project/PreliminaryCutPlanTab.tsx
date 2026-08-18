@@ -86,15 +86,55 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
         p_total_sheets: result.total_sheets,
         p_total_cuts: result.total_cuts,
         p_utilization_percent: result.utilization_percent,
-        p_metadata: result.metadata
+        p_metadata: {
+          ...result.metadata,
+          imported_at: new Date().toISOString(),
+          original_filename: file.name
+        }
       });
 
       if (error) throw error;
+
+      // Inserir as peças físicas oficiais baseadas no CSV
+      if (result.pieces && result.pieces.length > 0) {
+        const physicalPieces = result.pieces.map((p: any) => ({
+          project_id: projectId,
+          company_id: profile.company_id,
+          cut_plan_id: planId,
+          physical_id: p.physicalId,
+          name: p.name,
+          width_mm: p.width_mm,
+          length_mm: p.length_mm,
+          thickness_mm: p.thickness_mm,
+          material: p.material,
+          is_official: true,
+          metadata: { source: 'cutpro_csv' }
+        }));
+
+        const { error: piecesError } = await supabase
+          .from('cut_sheets') // Usamos cut_sheets para persistir as peças individuais do plano
+          .insert(physicalPieces.map(pp => ({
+             project_id: pp.project_id,
+             cut_plan_id: pp.cut_plan_id,
+             physical_id: pp.physical_id,
+             metadata: {
+               name: pp.name,
+               width_mm: pp.width_mm,
+               length_mm: pp.length_mm,
+               thickness_mm: pp.thickness_mm,
+               material: pp.material
+             }
+          })));
+          
+        if (piecesError) console.error("Erro ao persistir peças oficiais:", piecesError);
+      }
+
       return planId as string;
     },
     onSuccess: () => {
       toast.success("Plano Cut Pro oficial importado com sucesso!");
       queryClient.invalidateQueries({ queryKey: ["cut_plans", projectId] });
+      setActivePlanSource('cutpro_oficial');
     },
     onError: (err: any) => {
       toast.error(`Erro na importação: ${err.message}`);
