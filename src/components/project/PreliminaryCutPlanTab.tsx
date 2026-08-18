@@ -167,30 +167,26 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
       </Alert>
 
       {/* Visão Resumida solicitada */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {['6 MM', '15 MM', '18 MM'].map(thick => {
-          const parts = thicknessGroups[thick] || [];
-          const area = parts.reduce((sum, p) => sum + ((p.width_mm || 0) * (p.length_mm || 0) * (p.quantity || 1)) / 1000000, 0);
-          return (
-            <Card key={thick} className="border-2 border-slate-100 shadow-none">
-              <CardContent className="pt-6">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">MDF {thick}</p>
-                <div className="flex justify-between items-end">
-                  <div>
-                    <p className="text-2xl font-black text-slate-900">{area.toFixed(2)} <span className="text-xs text-slate-400">m²</span></p>
-                    <p className="text-[9px] font-bold text-slate-500 uppercase mt-1">{parts.length} ITENS CADASTRADOS</p>
-                  </div>
-                  <Ruler className="h-8 w-8 text-slate-100" />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {cutPlanGroups?.map(group => (
+          <Card key={group.groupKey} className="border-2 border-slate-100 shadow-none">
+            <CardContent className="pt-6">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{group.color} {group.thicknessMm}mm</p>
+              <div className="flex justify-between items-end">
+                <div>
+                  <p className="text-2xl font-black text-slate-900">{group.stats.totalAreaPieces.toFixed(2)} <span className="text-xs text-slate-400">m²</span></p>
+                  <p className="text-[9px] font-bold text-slate-500 uppercase mt-1">{group.stats.sheetCount} CHAPAS (NESTING)</p>
                 </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+                <Box className="h-8 w-8 text-slate-100" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* Grupos de Corte */}
       <div className="space-y-6">
-        {Object.keys(thicknessGroups).sort().map(t => renderCutGroup(t, thicknessGroups[t] || []))}
+        {cutPlanGroups?.map(group => renderCutGroup(group))}
       </div>
 
       {/* Tabela de Auditoria solicitada */}
