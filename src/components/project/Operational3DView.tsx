@@ -154,6 +154,8 @@ export function Operational3DView({
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
   const [isIsolated, setIsIsolated] = useState(false);
   const [viewMode, setViewMode] = useState<'standard' | 'xray'>('standard');
+  const [isXRay, setIsXRay] = useState(false);
+  const [offsetModuleId, setOffsetModuleId] = useState<string | null>(null);
 
   // Processamento dos dados para o 3D
   const processedModules = useMemo(() => {
