@@ -572,25 +572,22 @@ function ImportPage() {
             .remove(preparedFiles.map((item) => item.storagePath));
           cleanupFailed = !!cleanupError;
         }
-        if (cleanupFailed) {
-          const { error: trackingError } = await supabase.rpc("mark_import_cleanup_required" as any, {
+
+        // Only discard the session metadata if cleanup of physical files succeeded
+        // otherwise we keep it for audit.
+        if (!cleanupFailed) {
+          const { error: discardError } = await supabase.rpc("discard_import_session" as any, {
             _session_id: projectId,
           });
-          if (trackingError)
-            throw new Error(
-              "Falha na importação e não foi possível confirmar a reconciliação dos arquivos.",
-            );
-          throw new Error(
-            `${error instanceof Error ? error.message : "Falha na importação."} Limpeza automática pendente para auditoria.`,
-          );
+          if (discardError) {
+             console.error("Erro ao descartar sessão residual:", discardError);
+          }
+        } else {
+          await supabase.rpc("mark_import_cleanup_required" as any, {
+            _session_id: projectId,
+          });
         }
-        const { error: discardError } = await supabase.rpc("discard_import_session" as any, {
-          _session_id: projectId,
-        });
-        if (discardError)
-          throw new Error(
-            `${error instanceof Error ? error.message : "Falha na importação."} Arquivos removidos, mas a sessão residual exige auditoria.`,
-          );
+        
         throw error;
       }
     },

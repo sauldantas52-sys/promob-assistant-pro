@@ -3058,6 +3058,10 @@ export type Database = {
             Returns: string
           }
       current_company_id: { Args: never; Returns: string }
+      discard_import_session: {
+        Args: { _session_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
