@@ -1,5 +1,8 @@
 import { PhysicalPiece } from "@/lib/cut-plan/engine";
 import { getEdgeData } from "../cut-plan/edges";
+import { pieceLabelHtml } from "./piece-label";
+import { QRCodeSVG } from "qrcode.react";
+import * as ReactServer from "react-dom/server";
 
 export interface LabelData {
   physicalId: string;
@@ -34,4 +37,37 @@ export const generateLabelData = (piece: PhysicalPiece): LabelData => {
       u: piece.physicalId
     })
   };
+};
+
+/**
+ * Legacy helper for pieceLabelHtml (if still needed by older components)
+ */
+export const renderPieceLabel = (piece: PhysicalPiece, width: number, height: number): string => {
+  const data = generateLabelData(piece);
+  
+  // No Lovable/React environment, we can use a React-based approach or 
+  // simply pass a placeholder/svg for qrSvg if calling pieceLabelHtml.
+  // Note: pieceLabelHtml expects a raw string.
+  
+  return pieceLabelHtml({
+    ...piece,
+    modNum: piece.moduleSequence || 0,
+    code: `${piece.moduleSequence || 0}.${piece.pieceSequence || 0}`,
+    masterUid: data.masterUid,
+    uid: piece.physicalId,
+    modulePieceNumber: piece.pieceSequence || 0,
+    modName: piece.moduleName || 'Peça',
+    desc: piece.name,
+    lo: piece.lo,
+    sh: piece.sh,
+    thick: piece.thicknessMm,
+    model: piece.material,
+    fb: [piece.edgeTop, piece.edgeBottom, piece.edgeLeft, piece.edgeRight],
+    bandNames: [piece.edgeNameGeneral, piece.edgeNameFront, piece.edgeNameGeneral, piece.edgeNameGeneral],
+    obs: piece.metadata?.observations || ''
+  }, {
+    larguraMm: width,
+    alturaMm: height,
+    qrSvg: '<svg width="100%" height="100%" viewBox="0 0 100 100"><rect width="100" height="100" fill="#eee"/></svg>'
+  });
 };
