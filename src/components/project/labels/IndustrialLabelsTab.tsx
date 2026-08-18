@@ -325,7 +325,9 @@ function IndustrialLabel({ piece, width, height, presetId, project }: { piece: P
     fb: [piece.edgeTop, piece.edgeBottom, piece.edgeLeft, piece.edgeRight],
     bandNames: [piece.edgeNameGeneral || '', piece.edgeNameFront || '', piece.edgeNameGeneral || '', piece.edgeNameGeneral || ''],
     obs: piece.metadata?.observations || '',
-    group: piece.metadata?.group || `G${piece.moduleSequence || 0}`
+    group: piece.metadata?.group || `G${piece.moduleSequence || 0}`,
+    idXml: piece.metadata?.id_xml || '',
+    isClientTag: piece.isClientTag
   };
 
   const qrSizeMm = Math.max(10, Math.min(17, Math.min(height * 0.58, width * 0.22)));
