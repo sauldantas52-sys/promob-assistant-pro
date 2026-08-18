@@ -45,52 +45,135 @@ interface Module3D {
   positionConfirmed: boolean;
   position: [number, number, number];
   pieces: PhysicalPiece3D[];
+  selectedPieceId?: string | null;
 }
 
-// Componente para renderizar um módulo individual
-function ModuleMesh({ 
-  module, 
-  isSelected, 
-  isIsolated, 
-  onSelect 
-}: { 
-  module: Module3D; 
-  isSelected: boolean; 
+// Componente para renderizar uma peça individual
+function PieceMesh({
+  piece,
+  modulePosition,
+  index,
+  totalPieces,
+  isSelected,
+  isIsolated,
+  isXRay,
+  onSelect
+}: {
+  piece: PhysicalPiece3D;
+  modulePosition: [number, number, number];
+  index: number;
+  totalPieces: number;
+  isSelected: boolean;
   isIsolated: boolean;
-  onSelect: (id: string) => void;
+  isXRay: boolean;
+  onSelect: () => void;
 }) {
-  const width = mmToSceneUnits(module.width);
-  const height = mmToSceneUnits(module.height);
-  const depth = mmToSceneUnits(module.depth);
+  const width = mmToSceneUnits(piece.dimensions.w);
+  const height = mmToSceneUnits(piece.dimensions.h); // Thickness
+  const length = mmToSceneUnits(piece.dimensions.l);
 
-  // Se estiver isolado e não for o selecionado, fica invisível ou muito translúcido
-  // Se estiver em modo X-Ray e selecionado, fica translúcido
+  // Posicionamento algorítmico básico (Empilhamento visual dentro do módulo)
+  // Explodimos um pouco se estiver isolado para ver a composição
+  const spacing = isIsolated ? 0.2 : 0.02;
+  const xPos = modulePosition[0];
+  const yPos = modulePosition[1] + (index * spacing) - ((totalPieces * spacing) / 2);
+  const zPos = modulePosition[2];
+
   const opacity = isIsolated 
-    ? (isSelected ? 1 : 0.05) 
-    : (isSelected ? 1 : 0.4);
-    
-  const visible = isIsolated ? isSelected : true;
+    ? (isSelected ? 1 : 0.1) 
+    : (isSelected ? 1 : 0.6);
 
-  if (!visible) return null;
+  // Cor baseada no material ou fixa industrial
+  const color = piece.material.toLowerCase().includes('mdf') ? "#d4a373" : "#cbd5e1";
+  const finalColor = isSelected ? "#3b82f6" : color;
 
   return (
-    <group position={module.position} onClick={(e) => {
+    <group position={[xPos, yPos, zPos]} onClick={(e) => {
       e.stopPropagation();
-      onSelect(module.id);
+      onSelect();
     }}>
       <mesh castShadow receiveShadow>
-        <boxGeometry args={[width, height, depth]} />
+        <boxGeometry args={[length, height, width]} />
         <meshStandardMaterial 
-          color={isSelected ? "#3b82f6" : "#cbd5e1"} 
+          color={finalColor} 
           transparent 
-          opacity={opacity * ((window as any).isXRayActive ? 0.3 : 1)}
+          opacity={opacity * (isXRay ? 0.3 : 1)}
           metalness={0.1}
           roughness={0.5}
         />
       </mesh>
       
+      {isSelected && (
+        <mesh>
+          <boxGeometry args={[length + 0.01, height + 0.01, width + 0.01]} />
+          <meshBasicMaterial color="#3b82f6" wireframe transparent opacity={0.5} />
+        </mesh>
+      )}
+    </group>
+  );
+}
+
+// Componente para renderizar um módulo individual (agora como um container de peças)
+function ModuleGroup({ 
+  module, 
+  isSelected, 
+  isIsolated, 
+  isXRay,
+  onSelectModule,
+  onSelectPiece
+}: { 
+  module: Module3D; 
+  isSelected: boolean; 
+  isIsolated: boolean;
+  isXRay: boolean;
+  onSelectModule: (id: string) => void;
+  onSelectPiece: (physicalId: string) => void;
+}) {
+  const width = mmToSceneUnits(module.width);
+  const height = mmToSceneUnits(module.height);
+  const depth = mmToSceneUnits(module.depth);
+
+  const visible = isIsolated ? isSelected : true;
+  if (!visible) return null;
+
+  return (
+    <group>
+      {/* Container visual do Módulo (Envelope) */}
+      <mesh 
+        position={module.position} 
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelectModule(module.id);
+        }}
+      >
+        <boxGeometry args={[width, height, depth]} />
+        <meshStandardMaterial 
+          transparent 
+          opacity={0.05} 
+          color={isSelected ? "#3b82f6" : "#cbd5e1"} 
+          wireframe={!isSelected}
+        />
+      </mesh>
+
+      {/* Peças Reais */}
+      {module.pieces.map((piece, idx) => (
+        <PieceMesh
+          key={piece.physicalId}
+          piece={piece}
+          modulePosition={module.position}
+          index={idx}
+          totalPieces={module.pieces.length}
+          isSelected={isSelected && module.selectedPieceId === piece.physicalId}
+          isIsolated={isIsolated}
+          isXRay={isXRay}
+          onSelect={() => {
+            onSelectPiece(piece.physicalId);
+          }}
+        />
+      ))}
+      
       {/* Label do Módulo */}
-      <Html distanceFactor={10} position={[0, height / 2 + 0.1, 0]}>
+      <Html distanceFactor={10} position={[module.position[0], module.position[1] + height / 2 + 0.1, module.position[2]]}>
         <div className={cn(
           "px-2 py-1 rounded bg-slate-900/80 backdrop-blur text-[8px] font-black text-white uppercase tracking-widest whitespace-nowrap pointer-events-none select-none transition-opacity",
           isSelected ? "opacity-100" : "opacity-40"
@@ -98,14 +181,6 @@ function ModuleMesh({
           {module.sequence > 0 ? `G${module.sequence} · ` : ""}{module.name}
         </div>
       </Html>
-
-      {/* Wireframe de destaque */}
-      {isSelected && (
-        <mesh>
-          <boxGeometry args={[width + 0.01, height + 0.01, depth + 0.01]} />
-          <meshBasicMaterial color="#3b82f6" wireframe transparent opacity={0.3} />
-        </mesh>
-      )}
     </group>
   );
 }
@@ -115,13 +190,15 @@ function SceneContent({
   selectedId, 
   isIsolated, 
   isXRay,
-  onSelect 
+  onSelectModule,
+  onSelectPiece
 }: { 
   modules: Module3D[]; 
   selectedId: string | null;
   isIsolated: boolean;
   isXRay: boolean;
-  onSelect: (id: string) => void;
+  onSelectModule: (id: string) => void;
+  onSelectPiece: (physicalId: string) => void;
 }) {
   const bounds = useBounds();
 
@@ -133,12 +210,14 @@ function SceneContent({
     <Bounds fit clip observe margin={1.2}>
       <group>
         {modules.map((mod) => (
-          <ModuleMesh 
+          <ModuleGroup 
             key={mod.id} 
             module={mod} 
             isSelected={selectedId === mod.id}
             isIsolated={isIsolated}
-            onSelect={onSelect}
+            isXRay={isXRay}
+            onSelectModule={onSelectModule}
+            onSelectPiece={onSelectPiece}
           />
         ))}
       </group>
@@ -164,6 +243,7 @@ export function Operational3DView({
   parts: any[];
 }) {
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
+  const [selectedPieceId, setSelectedPieceId] = useState<string | null>(null);
   const [isIsolated, setIsIsolated] = useState(false);
   const [viewMode, setViewMode] = useState<'standard' | 'xray'>('standard');
   const [isXRay, setIsXRay] = useState(false);
@@ -212,7 +292,8 @@ export function Operational3DView({
         depth: m.depth_mm || 550,
         positionConfirmed: false,
         position: visualPosition,
-        pieces
+        pieces,
+        selectedPieceId: selectedModuleId === m.id ? selectedPieceId : null
       };
     });
   }, [rawModules, rawParts]);
@@ -224,6 +305,7 @@ export function Operational3DView({
 
   const restoreScene = () => {
     setSelectedModuleId(null);
+    setSelectedPieceId(null);
     setIsIsolated(false);
     setViewMode('standard');
     setIsXRay(false);
@@ -268,7 +350,16 @@ export function Operational3DView({
                 selectedId={selectedModuleId}
                 isIsolated={isIsolated}
                 isXRay={isXRay}
-                onSelect={setSelectedModuleId}
+                onSelectModule={(id) => {
+                  setSelectedModuleId(id);
+                  setSelectedPieceId(null);
+                }}
+                onSelectPiece={(physicalId) => {
+                  setSelectedPieceId(physicalId);
+                  window.dispatchEvent(new CustomEvent('highlight-piece', { 
+                    detail: { physicalId } 
+                  }));
+                }}
               />
               <Environment preset="city" />
             </Suspense>
@@ -310,7 +401,7 @@ export function Operational3DView({
                 "rounded-xl h-10 px-4 font-black text-[10px] uppercase tracking-widest shadow-sm",
                 isIsolated ? "bg-blue-600 text-white" : "bg-white/90 backdrop-blur text-slate-900"
               )}
-              disabled={!selectedModuleId}
+              disabled={!selectedModuleId && !selectedPieceId}
               onClick={() => setIsIsolated(!isIsolated)}
             >
               {isIsolated ? <Eye className="mr-2 h-4 w-4" /> : <EyeOff className="mr-2 h-4 w-4" />}
@@ -392,7 +483,14 @@ export function Operational3DView({
                     <p className="text-[9px] font-black text-slate-400 uppercase mb-3 tracking-widest">Composição ({selectedModule.pieces.length} peças)</p>
                     <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                       {selectedModule.pieces.map((piece) => (
-                        <div key={piece.physicalId} className="space-y-2 py-2 border-b border-slate-50 last:border-0 group">
+                        <div 
+                          key={piece.physicalId} 
+                          className={cn(
+                            "space-y-2 py-2 border-b border-slate-50 last:border-0 group cursor-pointer transition-colors",
+                            selectedPieceId === piece.physicalId ? "bg-blue-50/50" : ""
+                          )}
+                          onClick={() => setSelectedPieceId(piece.physicalId)}
+                        >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <div className="h-8 w-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
