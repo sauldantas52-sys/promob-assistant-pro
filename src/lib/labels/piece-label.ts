@@ -109,7 +109,7 @@ export function pieceLabelHtml(piece: any, opts: PieceLabelOpts) {
             '<div style="flex:none;width:' + SQ.toFixed(1) + 'mm;height:' + SQ.toFixed(1) + 'mm;background:' + moduleColor(piece.modNum) + ';border:0.8pt solid ' + moduleStroke(piece.modNum) + ';border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:0.7em;color:' + moduleStroke(piece.modNum) + '">G' + piece.modNum + '</div>' +
             '<div style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:1.15em;letter-spacing:-0.02em">#' + piece.code + '</div>' +
           '</div>' +
-          '<div style="font-size:0.65em;color:#666;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(piece.masterUid, 14) + ' · G' + piece.modNum + '-P' + piece.modulePieceNumber + '</div>' +
+          '<div style="font-size:0.65em;color:#666;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(piece.masterUid, 14) + ' · G' + piece.modNum + '-P' + piece.modulePieceNumber + (piece.group ? ' · ' + piece.group : '') + '</div>' +
           '<div style="font-size:0.65em;color:#666;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">PLANO #' + piece.code + ' · PEÇA ' + esc(piece.uid, 8) + ' · ' + esc(piece.modName, 12) + '</div>' +
         '</div>' +
         '<div style="flex:none;width:' + QR.toFixed(1) + 'mm;height:' + QR.toFixed(1) + 'mm;display:flex;align-items:center;justify-content:center;background:#fff">' + qrSvg + '</div>' +

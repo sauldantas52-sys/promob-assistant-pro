@@ -222,7 +222,8 @@ function IndustrialLabel({ piece, width, height, presetId }: { piece: PhysicalPi
     model: piece.material,
     fb: [piece.edgeTop, piece.edgeBottom, piece.edgeLeft, piece.edgeRight],
     bandNames: [piece.edgeNameGeneral || '', piece.edgeNameFront || '', piece.edgeNameGeneral || '', piece.edgeNameGeneral || ''],
-    obs: piece.metadata?.observations || ''
+    obs: piece.metadata?.observations || '',
+    group: piece.metadata?.group || `G${piece.moduleSequence || 0}`
   };
 
   const qrSizeMm = Math.max(10, Math.min(17, Math.min(height * 0.58, width * 0.22)));
