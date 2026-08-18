@@ -606,7 +606,7 @@ function ImportPage() {
           .eq("id", projectId);
 
         // Redireciona para os detalhes técnicos do projeto (Fidelity 5.7)
-        navigate({ to: `/projects/${projectId}`, search: { tab: "preliminary-cut-plan" } });
+        navigate({ to: `/projects/$projectId`, params: { projectId }, search: { tab: "preliminary-cut-plan" } });
         return projectId;
       } catch (error) {
         await (supabase as any)
