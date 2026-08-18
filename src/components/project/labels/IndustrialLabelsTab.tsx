@@ -7,7 +7,8 @@ import { generateLabelData } from '@/lib/labels/engine';
 import { pieceLabelHtml } from '@/lib/labels/piece-label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Printer, Settings, FileDown, Loader2, UserCheck } from 'lucide-react';
+import { Printer, Settings, FileDown, Loader2, UserCheck, Monitor } from 'lucide-react';
+import { Link } from '@tanstack/react-router';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -131,6 +132,16 @@ export function IndustrialLabelsTab({ pieces, project }: { pieces: PhysicalPiece
         
         <div className="flex items-center gap-2">
           <Button 
+            variant="outline"
+            size="sm" 
+            className="text-[10px] font-black uppercase tracking-widest gap-2 border-blue-200 text-blue-700 hover:bg-blue-50"
+            asChild
+          >
+            <Link to="/factory-wallboard">
+              <Monitor className="h-3.5 w-3.5" /> Painel TV
+            </Link>
+          </Button>
+          <Button 
             variant={showClientTag ? "default" : "outline"}
             size="sm" 
             className={cn(
@@ -170,7 +181,6 @@ export function IndustrialLabelsTab({ pieces, project }: { pieces: PhysicalPiece
           >
             <Printer className="h-3.5 w-3.5" /> Imprimir
           </Button>
-
         </div>
       </div>
 
