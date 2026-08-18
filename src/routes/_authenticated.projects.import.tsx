@@ -338,6 +338,78 @@ function ImportPage() {
 
         rpcAttempted = true;
         
+        // 2. Distribuição Automática 4.0 (MVP Requisitado)
+        // Mapeamento rigoroso conforme requisitos do usuário
+        const modulesPayload = result.modules.map((module: PromobModule) => ({
+          name: module.name,
+          environment: module.environment ?? null,
+          width_mm: module.width_mm ?? null,
+          height_mm: module.height_mm ?? null,
+          depth_mm: module.depth_mm ?? null,
+          quantity: module.quantity,
+          parts: module.parts.map((part: PromobPart) => ({
+            kind: part.kind,
+            name: part.name,
+            material: part.material ?? null,
+            thickness_mm: part.thickness_mm ?? null,
+            width_mm: part.width_mm ?? null,
+            length_mm: part.length_mm ?? null,
+            quantity: part.quantity,
+            unit: part.unit ?? "un",
+            edge_banding: part.edge_banding ?? null,
+            id_xml: part.id_xml ?? null,
+            parent_id_xml: part.parent_id_xml ?? null,
+            color: part.color ?? null,
+            supplier: part.supplier ?? null,
+            edge_top: part.edge_top ?? 0,
+            edge_bottom: part.edge_bottom ?? 0,
+            edge_left: part.edge_left ?? 0,
+            edge_right: part.edge_right ?? 0,
+            edge_name_general: (part.metadata as any)?.edge_name_general ?? null,
+            edge_name_front: (part.metadata as any)?.edge_name_front ?? null,
+            repetition: part.repetition ?? 1,
+            quantity_raw: part.quantity_raw ?? null,
+            module_sequence: (part.metadata as any)?.module_sequence ?? null,
+            piece_sequence: (part.metadata as any)?.piece_sequence ?? null,
+            metadata: {
+              ...part.metadata,
+              source: "XML"
+            },
+          })),
+          metadata: module.metadata || {},
+          id_xml: module.id_xml || null,
+        }));
+        
+        const loosePartsPayload = result.loose_parts.map((part: PromobPart) => ({
+          kind: part.kind,
+          name: part.name,
+          material: part.material ?? null,
+          thickness_mm: part.thickness_mm ?? null,
+          width_mm: part.width_mm ?? null,
+          length_mm: part.length_mm ?? null,
+          quantity: part.quantity,
+          unit: part.unit ?? "un",
+          edge_banding: part.edge_banding ?? null,
+          id_xml: part.id_xml ?? null,
+          parent_id_xml: part.parent_id_xml ?? null,
+          color: part.color ?? null,
+          supplier: part.supplier ?? null,
+          edge_top: part.edge_top ?? 0,
+          edge_bottom: part.edge_bottom ?? 0,
+          edge_left: part.edge_left ?? 0,
+          edge_right: part.edge_right ?? 0,
+          edge_name_general: (part.metadata as any)?.edge_name_general ?? null,
+          edge_name_front: (part.metadata as any)?.edge_name_front ?? null,
+          repetition: part.repetition ?? 1,
+          quantity_raw: part.quantity_raw ?? null,
+          module_sequence: (part.metadata as any)?.module_sequence ?? null,
+          piece_sequence: (part.metadata as any)?.piece_sequence ?? null,
+          metadata: {
+            ...part.metadata,
+            source: "XML"
+          },
+        }));
+
         // 1. Criar Projeto e Registrar Arquivos
         const { data: importedProjectId, error: importError } = await supabase.rpc(
           "import_client_project" as any,
