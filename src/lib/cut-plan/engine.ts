@@ -84,8 +84,9 @@ export interface CutPlanGroup {
   };
 }
 
+// Configurações industriais extraídas do Plano de Corte Pro
 const KERF = 4;
-const DEFAULT_TRIM = 5;
+const DEFAULT_TRIM = 10; // Atualizado para 10mm conforme lógica do Plano de Corte Pro
 const DEFAULT_SHEET_WIDTH = 2750;
 const DEFAULT_SHEET_HEIGHT = 1830;
 
