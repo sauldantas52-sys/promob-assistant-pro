@@ -44,6 +44,16 @@ export const Route = createFileRoute('/_authenticated')({
       });
     }
 
+    // Redirecionamento de segurança para a rota de importação
+    if (location.pathname.startsWith('/projects/import')) {
+      const allowedRoles = ['admin', 'escritorio', 'projetista'];
+      if (!role || !allowedRoles.includes(role)) {
+        console.warn(`[Security] Usuário ${session.user.id} com role ${role} tentou acessar importação.`);
+        throw redirect({ to: '/dashboard' });
+      }
+      console.log(`[Security] Acesso permitido para importação (Role: ${role})`);
+    }
+
     return {
       session,
       userRole: role,
