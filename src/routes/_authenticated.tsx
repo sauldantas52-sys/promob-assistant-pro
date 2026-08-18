@@ -14,27 +14,21 @@ export const Route = createFileRoute('/_authenticated')({
       });
     }
     
-    // Obter dados do perfil e função
-    const { data: profile, error: profileError } = await supabase
+    const { data: profile } = await supabase
       .from('profiles')
       .select('full_name, must_change_password, company_id, companies(id, name)')
       .eq('id', session.user.id)
       .maybeSingle();
 
-    if (profileError) console.error("Profile Fetch Error:", profileError);
-
-    const { data: roleData, error: roleError } = await supabase
+    const { data: roleData } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', session.user.id)
       .maybeSingle();
 
-    if (roleError) console.error("RBAC Fetch Error:", roleError);
-
     const role = (roleData?.role as any) || null;
     const mustChangePassword = !!profile?.must_change_password;
 
-    // Bloqueio operacional se troca de senha for obrigatória
     if (mustChangePassword && location.pathname !== '/force-password-change') {
       throw redirect({
         to: '/force-password-change',
@@ -52,8 +46,8 @@ export const Route = createFileRoute('/_authenticated')({
     
     console.log("Auth Guard Data:", { 
       path: location.pathname, 
-      hasRole: !!role, 
-      hasCompany: !!profile?.company_id 
+      role: role, 
+      companyId: profile?.company_id 
     });
 
     return authContext;
