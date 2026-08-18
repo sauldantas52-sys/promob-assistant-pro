@@ -218,9 +218,9 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
         sheet.shelves.forEach(shelf => {
           totalAllocated += shelf.placements.length;
           shelf.placements.forEach(p => {
-            if (p.x < 5 || p.y < 5) errors.push(`Placement invadiu margem esquerda/topo: ${p.physicalId}`);
-            if (p.x + p.w > 2745) errors.push(`Placement invadiu margem direita: ${p.physicalId}`);
-            if (p.y + p.h > 1825) errors.push(`Placement invadiu margem inferior: ${p.physicalId}`);
+            if (p.x < 10 || p.y < 10) errors.push(`Placement invadiu margem esquerda/topo: ${p.physicalId}`);
+            if (p.x + p.w > 2740) errors.push(`Placement invadiu margem direita: ${p.physicalId}`);
+            if (p.y + p.h > 1820) errors.push(`Placement invadiu margem inferior: ${p.physicalId}`);
           });
         });
       });
@@ -279,7 +279,7 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
                 <div className="flex justify-between items-center">
                   <span className="text-[10px] font-black uppercase text-slate-400">Chapa {idx + 1}</span>
                   <div className="flex gap-2">
-                    <Badge variant="outline" className="text-[8px] font-bold text-slate-400 border-slate-200">REFILO 5mm</Badge>
+                    <Badge variant="outline" className="text-[8px] font-bold text-slate-400 border-slate-200">REFILO 10mm</Badge>
                   </div>
                 </div>
                 <div 
