@@ -34,8 +34,7 @@ export const Route = createFileRoute('/_authenticated')({
     const role = (roleData?.role as any) || null;
     const mustChangePassword = !!profile?.must_change_password;
 
-    console.log(`[Auth:Guard] Checking Path: ${location.pathname}`);
-    console.log(`[Auth:Guard] Role: ${role}, MustChange: ${mustChangePassword}`);
+    console.log(`[Auth:Guard] Path: ${location.pathname}, Role: ${role}, MustChange: ${mustChangePassword}`);
 
     // Bloqueio operacional se troca de senha for obrigatória
     if (mustChangePassword && location.pathname !== '/force-password-change') {
@@ -45,7 +44,7 @@ export const Route = createFileRoute('/_authenticated')({
       });
     }
 
-    // REDIRECIONAMENTO DE SEGURANÇA (RBAC)
+    // Redirecionamento de segurança (RBAC)
     // O redirecionamento só deve ocorrer se a role for explicitamente INVÁLIDA para o path.
     // Se a role ainda não estiver carregada (null), permitimos o carregamento para que a tela trate o loading.
     const isImportPath = location.pathname.startsWith('/projects/import') || location.pathname.startsWith('/projects/test-import');
@@ -55,7 +54,6 @@ export const Route = createFileRoute('/_authenticated')({
         console.warn(`[Security] Usuário com role ${role} tentou acessar importação.`);
         throw redirect({ to: '/dashboard' });
       }
-      console.log(`[Security] Acesso permitido para importação (Role: ${role})`);
     }
 
     return {
