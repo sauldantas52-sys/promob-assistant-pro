@@ -80,6 +80,11 @@ interface PieceLabelOpts {
   alturaMm: number;
   qrSvg: string;
   mdfOverride?: string;
+  projectInfo?: {
+    clientName?: string | null;
+    contact?: string | null;
+    dueDate?: string | null;
+  };
 }
 
 /**
