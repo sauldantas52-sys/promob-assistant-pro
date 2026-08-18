@@ -585,7 +585,7 @@ function ImportPage() {
             .from("projects")
             .update({ 
               status: "corte", 
-              operational_status: "liberado_corte",
+              operational_status: "pronto_para_producao",
               machining_blocked: false,
               is_validated: true 
             })
