@@ -161,24 +161,6 @@ export function IndustrialCostsTab({ projectId }: { projectId: string }) {
   );
 }
 
-function MetricCard({ label, value, icon: Icon }: any) {
-  return (
-    <Card className="rounded-2xl border-none shadow-sm bg-white p-4">
-      <div className="flex items-center gap-3">
-        <div className="h-8 w-8 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
-          <Icon className="h-4 w-4" />
-        </div>
-        <div>
-          <p className="text-[8px] font-black uppercase tracking-widest text-slate-400">{label}</p>
-          <p className="text-lg font-black text-slate-900 tracking-tighter">{value}</p>
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-// Icons needed but not imported directly from lucide-react in main scope
-function LayersIcon(props: any) { return <Info {...props} />; }
 function Building2Icon(props: any) { return <Info {...props} />; }
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
