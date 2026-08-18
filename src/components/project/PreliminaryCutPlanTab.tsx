@@ -29,6 +29,11 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
     const handleHighlight = (e: any) => {
       if (e.detail?.physicalId) {
         setHighlightedPieceId(e.detail.physicalId);
+        // Scroll to the highlighted piece if needed
+        const element = document.querySelector(`[title*="${e.detail.physicalId}"]`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
         toast.info(`Peça destacada: ${e.detail.physicalId}`);
       }
     };
