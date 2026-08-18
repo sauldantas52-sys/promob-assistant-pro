@@ -331,6 +331,11 @@ function ImportPage() {
           });
         }
 
+        await (supabase as any)
+          .from("project_import_sessions")
+          .update({ step: "xml_parse" })
+          .eq("id", projectId);
+
         rpcAttempted = true;
         
         // 1. Criar Projeto e Registrar Arquivos
@@ -346,7 +351,7 @@ function ImportPage() {
                 destination === "cutplanning"
                   ? "Destino de produção: CutPlanning (terceirização)"
                   : "Destino de produção: fábrica própria",
-              is_test: true, // Forçando is_test para garantir persistência na auditoria
+              is_test: true, 
             },
             _files: storedFiles,
             _modules: [], 
@@ -354,6 +359,11 @@ function ImportPage() {
           },
         );
         if (importError) throw importError;
+
+        await (supabase as any)
+          .from("project_import_sessions")
+          .update({ step: "persistence" })
+          .eq("id", projectId);
 
         // FIDELITY 5.0 - Initialize estimation tracking for the internal engine
         try {
