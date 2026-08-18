@@ -51,6 +51,7 @@ import { VisualFeedingMode } from "@/components/project/VisualFeedingMode";
 import { IndustrialLabelsTab } from "@/components/project/labels/IndustrialLabelsTab";
 import { IndustrialCutPlanEngine } from "@/lib/cut-plan/engine";
 import { parseDXF } from "@/lib/dxf-parser";
+import { IndustrialCostsTab } from "@/components/project/IndustrialCostsTab";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
