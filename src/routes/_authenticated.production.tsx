@@ -139,7 +139,7 @@ function ProductionContent() {
           validation_checks(id, check_type, is_completed)
         `,
         )
-        .in("status", ["corte", "borda", "usinagem", "separacao", "conferencia", "expedicao"])
+        .in("status", ["pronto_para_producao", "corte", "borda", "usinagem", "separacao", "conferencia", "expedicao"])
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -265,7 +265,7 @@ function ProductionContent() {
       >
         {Object.entries(flow)
           .filter(([status]) =>
-            ["corte", "borda", "usinagem", "separacao", "conferencia", "expedicao"].includes(
+            ["pronto_para_producao", "corte", "borda", "usinagem", "separacao", "conferencia", "expedicao"].includes(
               status,
             ),
           )
@@ -340,7 +340,7 @@ function ProductionContent() {
                     className="grid grid-cols-5 gap-1 sm:grid-cols-9"
                     aria-label="Fluxo de produção"
                   >
-                    {Object.entries(flow).map(([key, value]) => {
+                    {Object.entries(flow).filter(([key]) => key !== 'novo' && key !== 'orcamento' && key !== 'concluido').map(([key, value]) => {
                       const isActive = project.status === key;
                       const Icon = value.icon;
                       return (
