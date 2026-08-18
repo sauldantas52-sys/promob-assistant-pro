@@ -190,13 +190,15 @@ function SceneContent({
   selectedId, 
   isIsolated, 
   isXRay,
-  onSelect 
+  onSelectModule,
+  onSelectPiece
 }: { 
   modules: Module3D[]; 
   selectedId: string | null;
   isIsolated: boolean;
   isXRay: boolean;
-  onSelect: (id: string) => void;
+  onSelectModule: (id: string) => void;
+  onSelectPiece: (physicalId: string) => void;
 }) {
   const bounds = useBounds();
 
@@ -208,12 +210,14 @@ function SceneContent({
     <Bounds fit clip observe margin={1.2}>
       <group>
         {modules.map((mod) => (
-          <ModuleMesh 
+          <ModuleGroup 
             key={mod.id} 
             module={mod} 
             isSelected={selectedId === mod.id}
             isIsolated={isIsolated}
-            onSelect={onSelect}
+            isXRay={isXRay}
+            onSelectModule={onSelectModule}
+            onSelectPiece={onSelectPiece}
           />
         ))}
       </group>
