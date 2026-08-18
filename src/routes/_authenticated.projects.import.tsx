@@ -440,7 +440,8 @@ function ImportPage() {
           piece_sequence: (part.metadata as any)?.piece_sequence ?? null,
           metadata: {
             ...part.metadata,
-            source: "XML"
+            source: "XML",
+            id_xml: part.id_xml // Garantir que id_xml esteja dentro do metadata também para redundância no frontend
           },
         }));
 
