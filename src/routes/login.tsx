@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Boxes, Loader2, HardHat, User } from "lucide-react";
+import { Boxes, Loader2, HardHat, User, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -228,6 +228,18 @@ function LoginPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="px-6 sm:px-16 pb-8 sm:pb-16 pt-6 sm:pt-12">
+              <div className="flex justify-center mb-6 sm:mb-8">
+                <a
+                  href="/guia-acesso-git-supabase.pdf"
+                  download
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-4 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-primary hover:bg-primary/10 transition-colors"
+                >
+                  <FileDown className="h-4 w-4" />
+                  Guia de Acesso (Git &amp; Supabase)
+                </a>
+              </div>
               <Tabs value={mode} onValueChange={(value) => setMode(value as LoginMode)}>
                 <TabsList className="mb-8 sm:mb-12 grid w-full grid-cols-3 p-1 sm:p-2 bg-slate-100 rounded-[1.2rem] sm:rounded-[2rem] h-14 sm:h-20 border border-slate-200 shadow-sm">
                   <TabsTrigger
