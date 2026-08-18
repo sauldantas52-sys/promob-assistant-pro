@@ -371,7 +371,7 @@ function ProjectDetail() {
             { value: "labels", icon: Printer, label: "Etiquetas Industriais" },
             { value: "shipping", icon: Truck, label: "Expedição e Volumes" },
             { value: "physical-pilot", icon: ShieldCheck, label: "Teste Físico (Piloto)" },
-            { value: "files", icon: FileUp, label: "Arquivos do Projeto" },
+            { value: "files", icon: FileUp, label: "Pasta do Cliente" },
             { value: "engineering", icon: Settings, label: "Usinagem CNC" },
             { value: "commercial", icon: FileText, label: "Caderno Executivo / Orçamentos" },
             { value: "integration_audit", icon: History, label: "Histórico de Auditoria" },
