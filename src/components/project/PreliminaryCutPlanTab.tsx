@@ -346,20 +346,61 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
              </Badge>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-            {cutPlanGroups?.map(group => (
-              <Card key={group.groupKey} className="border-2 border-slate-100 shadow-none">
-                <CardContent className="pt-6">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{group.color} {group.thicknessMm}mm</p>
-                  <div className="flex justify-between items-end">
-                    <div>
-                      <p className="text-2xl font-black text-slate-900">{group.stats.totalAreaPieces.toFixed(2)} <span className="text-xs text-slate-400">m²</span></p>
-                      <p className="text-[9px] font-bold text-slate-500 uppercase mt-1">{group.stats.sheetCount} CHAPAS</p>
+            {activePlanSource === 'cutpro_oficial' && officialPlan ? (
+              <>
+                <Card className="border-2 border-lime-200 bg-lime-50/30 shadow-none">
+                  <CardContent className="pt-6">
+                    <p className="text-[10px] font-black text-lime-600 uppercase tracking-widest mb-1">Total Peças</p>
+                    <div className="flex justify-between items-end">
+                      <p className="text-2xl font-black text-slate-900">{officialPlan.total_pieces}</p>
+                      <Package className="h-8 w-8 text-lime-200" />
                     </div>
-                    <Box className="h-8 w-8 text-slate-100" />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+                <Card className="border-2 border-lime-200 bg-lime-50/30 shadow-none">
+                  <CardContent className="pt-6">
+                    <p className="text-[10px] font-black text-lime-600 uppercase tracking-widest mb-1">Total Chapas</p>
+                    <div className="flex justify-between items-end">
+                      <p className="text-2xl font-black text-slate-900">{officialPlan.total_sheets}</p>
+                      <Layers className="h-8 w-8 text-lime-200" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="border-2 border-lime-200 bg-lime-50/30 shadow-none">
+                  <CardContent className="pt-6">
+                    <p className="text-[10px] font-black text-lime-600 uppercase tracking-widest mb-1">Aproveitamento</p>
+                    <div className="flex justify-between items-end">
+                      <p className="text-2xl font-black text-slate-900">{Number(officialPlan.utilization_percent).toFixed(1)}%</p>
+                      <Scissors className="h-8 w-8 text-lime-200" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="border-2 border-lime-200 bg-lime-50/30 shadow-none">
+                  <CardContent className="pt-6">
+                    <p className="text-[10px] font-black text-lime-600 uppercase tracking-widest mb-1">Total Cortes</p>
+                    <div className="flex justify-between items-end">
+                      <p className="text-2xl font-black text-slate-900">{officialPlan.total_cuts}</p>
+                      <Tool className="h-8 w-8 text-lime-200" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            ) : (
+              cutPlanGroups?.map(group => (
+                <Card key={group.groupKey} className="border-2 border-slate-100 shadow-none">
+                  <CardContent className="pt-6">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{group.color} {group.thicknessMm}mm</p>
+                    <div className="flex justify-between items-end">
+                      <div>
+                        <p className="text-2xl font-black text-slate-900">{group.stats.totalAreaPieces.toFixed(2)} <span className="text-xs text-slate-400">m²</span></p>
+                        <p className="text-[9px] font-bold text-slate-500 uppercase mt-1">{group.stats.sheetCount} CHAPAS</p>
+                      </div>
+                      <Box className="h-8 w-8 text-slate-100" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
           <div className="space-y-6">{cutPlanGroups?.map(group => renderCutGroup(group))}</div>
         </TabsContent>
