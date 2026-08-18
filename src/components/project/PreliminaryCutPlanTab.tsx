@@ -1,20 +1,27 @@
 import * as React from "react";
-import { useEffect, useState } from "react";
-import { Scissors, ShieldCheck, Layers, Package, Settings as Tool, AlertCircle, Ruler, Box, Printer } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState, useRef } from "react";
+import { Scissors, ShieldCheck, Layers, Package, Settings as Tool, AlertCircle, Ruler, Box, Printer, FileUp, ArrowRightLeft, Upload } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { IndustrialCutPlanEngine, type CutPlanGroup, type PhysicalPiece } from "@/lib/cut-plan/engine";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IndustrialLabelsTab } from "./labels/IndustrialLabelsTab";
+import { CutPlanComparisonCard } from "./CutPlanComparisonCard";
+import { CutProParser } from "@/lib/cut-plan/parsers";
+import { toast } from "sonner";
 
 export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
   const [integrityStatus, setIntegrityStatus] = useState<'validating' | 'pass' | 'fail'>('validating');
   const [integrityErrors, setIntegrityErrors] = useState<string[]>([]);
+  const [activePlanSource, setActivePlanSource] = useState<'estimativa' | 'cutpro_oficial'>('estimativa');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
 
   const { data: cutPlanGroups, isLoading } = useQuery({
     queryKey: ["industrial_cut_plan", projectId],
@@ -31,6 +38,107 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
       if (error) throw error;
       return data;
     },
+  });
+
+  const { data: cutPlans, isLoading: plansLoading } = useQuery({
+    queryKey: ["cut_plans", projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("cut_plans")
+        .select("*")
+        .eq("project_id", projectId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const officialPlan = cutPlans?.find(p => p.is_official);
+  const estimationPlan = cutPlans?.find(p => p.source === 'estimativa');
+
+  useEffect(() => {
+    if (officialPlan) {
+      setActivePlanSource('cutpro_oficial');
+    }
+  }, [officialPlan]);
+
+  const importCutPro = useMutation({
+    mutationFn: async (file: File) => {
+      const text = await file.text();
+      const result = await CutProParser.parseCSV(projectId, text);
+      
+      const user = (await supabase.auth.getUser()).data.user;
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single();
+        
+      if (!profile || !profile.company_id) throw new Error("Empresa não encontrada para o perfil");
+
+      const { data: planId, error } = await supabase.rpc('save_official_cut_plan', {
+        p_project_id: projectId,
+        p_company_id: profile.company_id,
+        p_source: 'cutpro_oficial',
+        p_total_pieces: result.total_pieces,
+        p_total_sheets: result.total_sheets,
+        p_total_cuts: result.total_cuts,
+        p_utilization_percent: result.utilization_percent,
+        p_metadata: {
+          ...result.metadata,
+          imported_at: new Date().toISOString(),
+          original_filename: file.name
+        }
+      });
+
+      if (error) throw error;
+
+      // Inserir as peças físicas oficiais baseadas no CSV
+      if (result.pieces && result.pieces.length > 0) {
+        const physicalPieces = result.pieces.map((p: any) => ({
+          project_id: projectId,
+          company_id: profile.company_id,
+          cut_plan_id: planId,
+          physical_id: p.physicalId,
+          name: p.name,
+          width_mm: p.width_mm,
+          length_mm: p.length_mm,
+          thickness_mm: p.thickness_mm,
+          material: p.material,
+          is_official: true,
+          metadata: { source: 'cutpro_csv' }
+        }));
+
+        const { error: piecesError } = await supabase
+          .from('cut_sheets') // Usamos cut_sheets para persistir as peças individuais do plano
+          .insert(physicalPieces.map((pp: any) => ({
+             project_id: pp.project_id,
+             cut_plan_id: pp.cut_plan_id,
+             physical_id: pp.physical_id,
+             metadata: {
+               name: pp.name,
+               width_mm: pp.width_mm,
+               length_mm: pp.length_mm,
+               thickness_mm: pp.thickness_mm,
+               material: pp.material
+             }
+          })));
+          
+        if (piecesError) console.error("Erro ao persistir peças oficiais:", piecesError);
+      }
+
+      return planId as string;
+    },
+    onSuccess: () => {
+      toast.success("Plano Cut Pro oficial importado com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["cut_plans", projectId] });
+      setActivePlanSource('cutpro_oficial');
+    },
+    onError: (err: any) => {
+      toast.error(`Erro na importação: ${err.message}`);
+    }
   });
 
   useEffect(() => {
@@ -196,32 +304,161 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
       </div>
 
       <Tabs defaultValue="plano" className="w-full no-print">
-        <TabsList className="grid w-full grid-cols-2 bg-slate-100 p-1 rounded-xl h-12">
-          <TabsTrigger value="plano" className="rounded-lg text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-slate-900">
-            <Layers className="h-4 w-4 mr-2" /> Plano de Corte
-          </TabsTrigger>
-          <TabsTrigger value="etiquetas" className="rounded-lg text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
-            <Printer className="h-4 w-4 mr-2" /> Etiquetas
-          </TabsTrigger>
-        </TabsList>
+        <div className="flex flex-col lg:flex-row gap-4 mb-6">
+          <TabsList className="grid w-full grid-cols-2 bg-slate-100 p-1 rounded-xl h-12 flex-1">
+            <TabsTrigger value="plano" className="rounded-lg text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-slate-900">
+              <Layers className="h-4 w-4 mr-2" /> Plano de Corte
+            </TabsTrigger>
+            <TabsTrigger value="etiquetas" className="rounded-lg text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
+              <Printer className="h-4 w-4 mr-2" /> Etiquetas
+            </TabsTrigger>
+          </TabsList>
+          
+          <div className="flex gap-2">
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              className="hidden" 
+              accept=".csv,.txt"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) importCutPro.mutate(file);
+              }}
+            />
+            <Button 
+              variant="outline" 
+              className="h-12 px-6 rounded-xl border-2 border-slate-200 text-[10px] font-black uppercase tracking-widest hover:bg-slate-50"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={importCutPro.isPending}
+            >
+              <FileUp className="h-4 w-4 mr-2" /> 
+              {importCutPro.isPending ? 'Importando...' : 'Importar Cut Pro'}
+            </Button>
+
+            {officialPlan && (
+              <Button 
+                variant={activePlanSource === 'cutpro_oficial' ? 'default' : 'outline'}
+                className={cn(
+                  "h-12 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                  activePlanSource === 'cutpro_oficial' ? "bg-lime-500 text-slate-900 hover:bg-lime-600 border-none" : "border-2 border-slate-200"
+                )}
+                onClick={() => setActivePlanSource(activePlanSource === 'cutpro_oficial' ? 'estimativa' : 'cutpro_oficial')}
+              >
+                <ArrowRightLeft className="h-4 w-4 mr-2" />
+                {activePlanSource === 'cutpro_oficial' ? 'Visualizando Oficial' : 'Comparar Oficial'}
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {officialPlan && activePlanSource === 'cutpro_oficial' && (
+          <div className="mb-8">
+            <CutPlanComparisonCard 
+              stats={{
+                pieces: { 
+                  estimated: estimationPlan?.total_pieces || allPieces.length, 
+                  official: officialPlan.total_pieces || 0 
+                },
+                sheets: { 
+                  estimated: cutPlanGroups?.reduce((acc, g) => acc + g.stats.sheetCount, 0) || 0, 
+                  official: officialPlan.total_sheets || 0 
+                },
+                utilization: { 
+                  estimated: cutPlanGroups ? (cutPlanGroups.reduce((acc, g) => acc + g.stats.utilizationPercent, 0) / cutPlanGroups.length) : 0, 
+                  official: Number(officialPlan.utilization_percent) || 0 
+                },
+                cuts: { 
+                  estimated: 0, 
+                  official: officialPlan.total_cuts || 0 
+                }
+              }}
+            />
+          </div>
+        )}
+
         <TabsContent value="plano" className="mt-6">
+          <div className="mb-4">
+             <Badge variant={activePlanSource === 'cutpro_oficial' ? 'default' : 'secondary'} className={cn(
+               "uppercase text-[9px] font-black tracking-widest py-1 px-3 rounded-full",
+               activePlanSource === 'cutpro_oficial' ? "bg-lime-500 text-slate-900" : "bg-slate-200 text-slate-600"
+             )}>
+               {activePlanSource === 'cutpro_oficial' ? 'MODO: CUT PRO OFICIAL' : 'MODO: ESTIMATIVA MONTA AI'}
+             </Badge>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-            {cutPlanGroups?.map(group => (
-              <Card key={group.groupKey} className="border-2 border-slate-100 shadow-none">
-                <CardContent className="pt-6">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{group.color} {group.thicknessMm}mm</p>
-                  <div className="flex justify-between items-end">
-                    <div>
-                      <p className="text-2xl font-black text-slate-900">{group.stats.totalAreaPieces.toFixed(2)} <span className="text-xs text-slate-400">m²</span></p>
-                      <p className="text-[9px] font-bold text-slate-500 uppercase mt-1">{group.stats.sheetCount} CHAPAS</p>
+            {activePlanSource === 'cutpro_oficial' && officialPlan ? (
+              <>
+                <Card className="border-2 border-lime-200 bg-lime-50/30 shadow-none">
+                  <CardContent className="pt-6">
+                    <p className="text-[10px] font-black text-lime-600 uppercase tracking-widest mb-1">Total Peças</p>
+                    <div className="flex justify-between items-end">
+                      <p className="text-2xl font-black text-slate-900">{officialPlan.total_pieces}</p>
+                      <Package className="h-8 w-8 text-lime-200" />
                     </div>
-                    <Box className="h-8 w-8 text-slate-100" />
+                  </CardContent>
+                </Card>
+                <Card className="border-2 border-lime-200 bg-lime-50/30 shadow-none">
+                  <CardContent className="pt-6">
+                    <p className="text-[10px] font-black text-lime-600 uppercase tracking-widest mb-1">Total Chapas</p>
+                    <div className="flex justify-between items-end">
+                      <p className="text-2xl font-black text-slate-900">{officialPlan.total_sheets}</p>
+                      <Layers className="h-8 w-8 text-lime-200" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="border-2 border-lime-200 bg-lime-50/30 shadow-none">
+                  <CardContent className="pt-6">
+                    <p className="text-[10px] font-black text-lime-600 uppercase tracking-widest mb-1">Aproveitamento</p>
+                    <div className="flex justify-between items-end">
+                      <p className="text-2xl font-black text-slate-900">{Number(officialPlan.utilization_percent).toFixed(1)}%</p>
+                      <Scissors className="h-8 w-8 text-lime-200" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="border-2 border-lime-200 bg-lime-50/30 shadow-none">
+                  <CardContent className="pt-6">
+                    <p className="text-[10px] font-black text-lime-600 uppercase tracking-widest mb-1">Total Cortes</p>
+                    <div className="flex justify-between items-end">
+                      <p className="text-2xl font-black text-slate-900">{officialPlan.total_cuts}</p>
+                      <Tool className="h-8 w-8 text-lime-200" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            ) : (
+              cutPlanGroups?.map(group => (
+                <Card key={group.groupKey} className="border-2 border-slate-100 shadow-none">
+                  <CardContent className="pt-6">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{group.color} {group.thicknessMm}mm</p>
+                    <div className="flex justify-between items-end">
+                      <div>
+                        <p className="text-2xl font-black text-slate-900">{group.stats.totalAreaPieces.toFixed(2)} <span className="text-xs text-slate-400">m²</span></p>
+                        <p className="text-[9px] font-bold text-slate-500 uppercase mt-1">{group.stats.sheetCount} CHAPAS</p>
+                      </div>
+                      <Box className="h-8 w-8 text-slate-100" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+          <div className="space-y-6">
+            {activePlanSource === 'cutpro_oficial' ? (
+              <Card className="border-2 border-slate-200 border-dashed bg-slate-50/50">
+                <CardContent className="py-12 flex flex-col items-center justify-center text-center">
+                  <div className="h-16 w-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+                    <ShieldCheck className="h-8 w-8 text-slate-400" />
                   </div>
+                  <h3 className="text-sm font-black uppercase tracking-widest text-slate-600 mb-2">Visualização SVG desativada para Plano Oficial</h3>
+                  <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
+                    O motor Monta AI exibe o nesting apenas para estimativas internas. Para planos oficiais, utilize o relatório técnico do Cut Pro impresso pela expedição. As etiquetas industriais permanecem ativas com base nos dados oficiais.
+                  </p>
                 </CardContent>
               </Card>
-            ))}
+            ) : (
+              cutPlanGroups?.map(group => renderCutGroup(group))
+            )}
           </div>
-          <div className="space-y-6">{cutPlanGroups?.map(group => renderCutGroup(group))}</div>
         </TabsContent>
         <TabsContent value="etiquetas" className="mt-6">
           <IndustrialLabelsTab pieces={allPieces} />
