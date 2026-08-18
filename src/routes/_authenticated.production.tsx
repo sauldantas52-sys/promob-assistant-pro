@@ -139,7 +139,7 @@ function ProductionContent() {
           validation_checks(id, check_type, is_completed)
         `,
         )
-        .in("status", ["pronto_para_producao", "corte", "borda", "usinagem", "separacao", "conferencia", "expedicao", "montagem"])
+        .in("status", ["pronto_para_producao", "corte", "borda", "usinagem", "separacao", "conferencia", "expedicao", "montagem", "concluido"])
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -265,7 +265,7 @@ function ProductionContent() {
       >
         {Object.entries(flow)
           .filter(([status]) =>
-            ["pronto_para_producao", "corte", "borda", "usinagem", "separacao", "conferencia", "expedicao", "montagem"].includes(
+            ["pronto_para_producao", "corte", "borda", "usinagem", "separacao", "conferencia", "expedicao", "montagem", "concluido"].includes(
               status,
             ),
           )
