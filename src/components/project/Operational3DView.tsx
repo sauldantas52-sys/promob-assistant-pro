@@ -423,13 +423,17 @@ export function Operational3DView({
                             >
                               Ver no Plano
                             </Button>
-                            <Link 
-                              to="/assembly/piece/$physicalId" 
-                              params={{ physicalId: piece.physicalId }}
-                              className="h-6 px-2 text-[7px] font-black uppercase tracking-widest text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-md flex items-center"
+                            <Button
+                              asChild
+                              className="h-6 px-2 text-[7px] font-black uppercase tracking-widest text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-md"
                             >
-                              Produção
-                            </Link>
+                              <Link 
+                                to="/assembly/piece/$physicalId" 
+                                params={{ physicalId: piece.physicalId }}
+                              >
+                                Produção
+                              </Link>
+                            </Button>
                           </div>
                         </div>
                       ))}
