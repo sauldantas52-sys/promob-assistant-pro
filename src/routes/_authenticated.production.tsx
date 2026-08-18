@@ -58,36 +58,57 @@ const flow: Record<string, { next: string; action: string; color: string; icon: 
     color: "bg-slate-200",
     icon: ClipboardList,
   },
-  orcamento: { next: "corte", action: "Liberar para corte", color: "bg-blue-200", icon: Scissors },
-  corte: { next: "borda", action: "Enviar para borda", color: "bg-red-200", icon: Square },
-  borda: { next: "usinagem", action: "Liberar usinagem", color: "bg-amber-200", icon: Drill },
+  orcamento: { 
+    next: "pronto_para_producao", 
+    action: "Aprovar Orçamento", 
+    color: "bg-blue-200", 
+    icon: ClipboardList 
+  },
+  pronto_para_producao: {
+    next: "corte",
+    action: "Liberar para Corte",
+    color: "bg-emerald-200",
+    icon: Scissors,
+  },
+  corte: { 
+    next: "borda", 
+    action: "Enviar para Borda", 
+    color: "bg-red-200", 
+    icon: Square 
+  },
+  borda: { 
+    next: "usinagem", 
+    action: "Liberar Usinagem", 
+    color: "bg-amber-200", 
+    icon: Drill 
+  },
   usinagem: {
     next: "separacao",
-    action: "Enviar para separação",
+    action: "Enviar para Separação",
     color: "bg-purple-200",
     icon: Boxes,
   },
   separacao: {
     next: "conferencia",
-    action: "Enviar para conferência",
+    action: "Enviar para Conferência",
     color: "bg-blue-200",
     icon: PackageCheck,
   },
   conferencia: {
     next: "expedicao",
-    action: "Liberar para expedição",
+    action: "Liberar para Expedição",
     color: "bg-indigo-200",
     icon: CheckCircle2,
   },
   expedicao: {
     next: "montagem",
-    action: "Enviar para montagem",
+    action: "Enviar para Montagem",
     color: "bg-slate-900",
     icon: Truck,
   },
   montagem: {
     next: "concluido",
-    action: "Concluir entrega",
+    action: "Concluir Entrega",
     color: "bg-emerald-200",
     icon: CheckCircle2,
   },
