@@ -1,8 +1,10 @@
 import * as React from 'react';
 import { useState } from 'react';
+import { renderToString } from 'react-dom/server';
 import { QRCodeSVG } from 'qrcode.react';
 import { PhysicalPiece } from '@/lib/cut-plan/engine';
 import { generateLabelData } from '@/lib/labels/engine';
+import { pieceLabelHtml } from '@/lib/labels/piece-label';
 import { getEdgeColor, getEdgeData } from '@/lib/cut-plan/edges';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -205,135 +207,51 @@ export function IndustrialLabelsTab({ pieces }: { pieces: PhysicalPiece[] }) {
 
 function IndustrialLabel({ piece, width, height, presetId }: { piece: PhysicalPiece, width: number, height: number, presetId?: string }) {
   const data = generateLabelData(piece);
-  const edgeData = getEdgeData(piece);
-  const qrSize = Math.max(10, Math.min(17, Math.min(height * 0.58, width * 0.22)));
-  const fontSize = height * 0.31;
+  
+  const pieceForHtml = {
+    modNum: piece.moduleSequence || 0,
+    code: `${piece.moduleSequence || 0}.${piece.pieceSequence || 0}`,
+    masterUid: data.masterUid,
+    uid: piece.physicalId,
+    modulePieceNumber: piece.pieceSequence || 0,
+    modName: piece.moduleName || 'Peça',
+    desc: piece.name,
+    lo: piece.lo,
+    sh: piece.sh,
+    thick: piece.thicknessMm,
+    model: piece.material,
+    fb: [piece.edgeTop, piece.edgeBottom, piece.edgeLeft, piece.edgeRight],
+    bandNames: [piece.edgeNameGeneral || '', piece.edgeNameFront || '', piece.edgeNameGeneral || '', piece.edgeNameGeneral || ''],
+    obs: piece.metadata?.observations || '',
+    group: piece.metadata?.group || `G${piece.moduleSequence || 0}`
+  };
 
-  // Lógica de "Balizador" para evitar que as etiquetas saiam da folha (Remac/Zebra)
-  // Aplica margens de segurança internas e garante que o conteúdo não transborde os limites físicos
-  const isFolha = presetId?.includes('remac') || presetId?.includes('folha');
-  const padding = isFolha ? '4mm' : '3mm';
+  const qrSizeMm = Math.max(10, Math.min(17, Math.min(height * 0.58, width * 0.22)));
+
+  const html = pieceLabelHtml(pieceForHtml, {
+    larguraMm: width,
+    alturaMm: height,
+    qrSvg: renderToString(
+      <QRCodeSVG 
+        value={data.qrPayload} 
+        size={qrSizeMm * 3.78} 
+        level="L"
+        includeMargin={false}
+      />
+    )
+  });
 
   return (
     <div 
-      className="bg-white border border-slate-200 relative overflow-hidden print:border-slate-300 print:shadow-none shadow-sm rounded-lg print:rounded-none flex flex-col justify-between print:m-0"
+      className="print:m-0 no-print-shadow"
       style={{ 
         width: `${width}mm`, 
         height: `${height}mm`,
-        maxWidth: `${width}mm`,
-        maxHeight: `${height}mm`,
-        minWidth: `${width}mm`,
-        minHeight: `${height}mm`,
-        padding: padding,
         pageBreakInside: 'avoid',
-        boxSizing: 'border-box',
-        display: 'flex',
-        flexDirection: 'column'
+        boxSizing: 'border-box'
       }}
-    >
-      {/* Top Header */}
-      <div className="flex justify-between items-start">
-        <div className="flex items-center gap-1.5">
-          <div className="bg-slate-900 text-white text-[10px] font-black px-1.5 py-0.5 rounded leading-none flex items-center justify-center min-w-[20px]">
-            {piece.metadata?.group || `G${piece.moduleSequence || 0}`}
-          </div>
-          <span className="text-[10px] font-black text-slate-900 leading-none">
-            #{piece.moduleSequence || 0}.{piece.pieceSequence || 0}
-          </span>
-          {/* Quadrado de Cor (Identificador Visual Econômico) */}
-          <div 
-            className="w-2.5 h-2.5 rounded-sm border border-slate-200" 
-            style={{ backgroundColor: getEdgeColor(piece.color || piece.material) }}
-            title={piece.color || piece.material || ''}
-          />
-        </div>
-        <div className="text-[7px] font-bold text-slate-400 uppercase tracking-tighter text-right">
-          {data.masterUid.substring(0, 10)}<br/>
-          {piece.metadata?.origem === 'promob' ? 'PROMOB REAL' : 'SISTEMA'}
-        </div>
-      </div>
-
-      {/* Main Content Area */}
-      <div className="flex justify-between items-center flex-1 py-1">
-        <div className="flex-1 space-y-0.5 pr-2">
-          <p className="text-[10px] font-black text-slate-900 leading-tight uppercase truncate">
-            {data.name}
-          </p>
-          <p className="text-[9px] font-black text-slate-700 leading-none">
-            {piece.lengthMm} × {piece.widthMm} × {piece.thicknessMm} mm
-          </p>
-          <p className="text-[8px] font-bold text-slate-500 uppercase leading-none">
-            {data.material} {piece.color}
-          </p>
-          
-          <div className="mt-1 flex items-center gap-2">
-             <EdgeSchema piece={piece} />
-             <span className={`text-[7px] font-black uppercase ${edgeData.hasEdges ? 'text-indigo-600' : 'text-slate-400'}`}>
-               {data.edgeLabel}
-             </span>
-          </div>
-
-          {piece.metadata?.observations && (
-            <p className="text-[7px] font-black uppercase text-red-600 leading-none bg-red-50 p-0.5 rounded mt-1">
-              LEGENDA: {piece.metadata.observations}
-            </p>
-          )}
-        </div>
-
-        <div className="flex-shrink-0">
-          <QRCodeSVG 
-            value={data.qrPayload} 
-            size={qrSize * 3.78} // mm to px approx
-            level="L"
-            includeMargin={false}
-          />
-        </div>
-      </div>
-
-      {/* Footer Info */}
-      <div className="flex justify-between items-end border-t border-slate-100 pt-1">
-        <span className="text-[6px] font-bold text-slate-400 uppercase">
-          PLANO #{piece.moduleSequence || 0}.{piece.pieceSequence || 0}
-        </span>
-        <span className="text-[6px] font-mono text-slate-300">
-          {data.physicalId}
-        </span>
-      </div>
-    </div>
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
   );
 }
 
-function EdgeSchema({ piece }: { piece: PhysicalPiece }) {
-  return (
-    <div className="relative w-6 h-4 border border-slate-200 bg-slate-50 rounded-[1px]">
-      {/* Top Edge */}
-      {piece.edgeTop > 0 && (
-        <div 
-          className="absolute top-0 left-0 right-0 h-[2px]" 
-          style={{ backgroundColor: getEdgeColor(piece.edgeNameGeneral) }} 
-        />
-      )}
-      {/* Bottom Edge */}
-      {piece.edgeBottom > 0 && (
-        <div 
-          className="absolute bottom-0 left-0 right-0 h-[2px]" 
-          style={{ backgroundColor: getEdgeColor(piece.edgeNameGeneral) }} 
-        />
-      )}
-      {/* Left Edge */}
-      {piece.edgeLeft > 0 && (
-        <div 
-          className="absolute top-0 bottom-0 left-0 w-[2px]" 
-          style={{ backgroundColor: getEdgeColor(piece.edgeNameGeneral) }} 
-        />
-      )}
-      {/* Right Edge */}
-      {piece.edgeRight > 0 && (
-        <div 
-          className="absolute top-0 bottom-0 right-0 w-[2.5px]" 
-          style={{ backgroundColor: getEdgeColor(piece.edgeNameGeneral) }} 
-        />
-      )}
-    </div>
-  );
-}

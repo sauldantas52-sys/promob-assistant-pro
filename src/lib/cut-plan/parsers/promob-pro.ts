@@ -64,11 +64,12 @@ export function edgeBandColor(name: string) {
   const colors: [RegExp, string][] = [
     [/preto|black/, '#111111'], [/branco|white/, '#cbd5e1'], [/carbon|grafite|chumbo/, '#374151'], [/cinza|silver|prata/, '#7c8798'],
     [/vermelh|red/, '#dc2626'], [/azul|blue/, '#2563eb'], [/verde|green/, '#15803d'], [/amarel|yellow/, '#eab308'], [/laranja|orange/, '#ea580c'],
-    [/fendi|bege|areia/, '#a68a64'], [/cumaru/, '#7c4828'], [/durban/, '#8b6648'], [/almeria/, '#b49a72'], [/carvalho|freijo/, '#a87543'], [/nogueira|imbuia/, '#5f3b25']
+    [/fendi|bege|areia/, '#a68a64'], [/cumaru/, '#7c4828'], [/durban/, '#8b6648'], [/almeria/, '#b49a72'], [/carvalho|freijo/, '#a87543'], [/nogueira|imbuia/, '#5f3b25'],
+    [/g1/, '#008080'], [/g2/, '#64748b'], [/g3/, '#4f46e5'], [/g4/, '#f59e0b'], [/g5/, '#10b981']
   ];
   for (const entry of colors) if (entry[0].test(key)) return entry[1];
   let hash = 0; for (let i = 0; i < key.length; i++) hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
-  return key ? 'hsl(' + (hash % 360) + ',55%,42%)' : '#e02424';
+  return key ? 'hsl(' + (hash % 360) + ',55%,42%)' : '#111111';
 }
 
 // Configuração de corte
