@@ -1,3 +1,5 @@
+import * as React from "react";
+import { useEffect, useState } from "react";
 import { Scissors, ShieldCheck, Layers, Package, Settings as Tool, AlertCircle, Ruler, Box, Printer } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,10 +8,9 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { IndustrialCutPlanEngine, CutPlanGroup, PhysicalPiece } from "@/lib/cut-plan/engine";
+import { IndustrialCutPlanEngine, type CutPlanGroup, type PhysicalPiece } from "@/lib/cut-plan/engine";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IndustrialLabelsTab } from "./labels/IndustrialLabelsTab";
-import { useEffect, useState } from "react";
 
 export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
   const [integrityStatus, setIntegrityStatus] = useState<'validating' | 'pass' | 'fail'>('validating');
@@ -147,7 +148,7 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
             <Table>
               <TableHeader className="bg-slate-100"><TableRow><TableHead className="text-[9px] font-black px-4">Peça</TableHead><TableHead className="text-center text-[9px] font-black">Dim</TableHead><TableHead className="text-right text-[9px] font-black px-4">Área</TableHead></TableRow></TableHeader>
               <TableBody>
-                {pieces.map((part: PhysicalPiece) => (
+                {pieces.map((part) => (
                   <TableRow key={part.physicalId} className="text-[10px]">
                     <TableCell className="px-4 py-2 font-black uppercase">{part.name}</TableCell>
                     <TableCell className="text-center font-mono">{part.widthMm}x{part.lengthMm}</TableCell>
