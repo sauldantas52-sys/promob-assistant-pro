@@ -67,22 +67,30 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
       const text = await file.text();
       const result = await CutProParser.parseCSV(projectId, text);
       
-      const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', (await supabase.auth.getUser()).data.user?.id).single();
-      if (!profile) throw new Error("Perfil não encontrado");
+      const user = (await supabase.auth.getUser()).data.user;
+      if (!user) throw new Error("Usuário não autenticado");
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single();
+        
+      if (!profile || !profile.company_id) throw new Error("Empresa não encontrada para o perfil");
 
       const { data: planId, error } = await supabase.rpc('save_official_cut_plan', {
         p_project_id: projectId,
         p_company_id: profile.company_id,
         p_source: 'cutpro_oficial',
         p_total_pieces: result.total_pieces,
-        p_total_sheets: 0, // Mock por enquanto
+        p_total_sheets: 0,
         p_total_cuts: 0,
         p_utilization_percent: 0,
         p_metadata: result.metadata
       });
 
       if (error) throw error;
-      return planId;
+      return planId as string;
     },
     onSuccess: () => {
       toast.success("Plano Cut Pro oficial importado com sucesso!");
