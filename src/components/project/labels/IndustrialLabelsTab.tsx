@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
+import { renderToString } from 'react-dom/server';
 import { QRCodeSVG } from 'qrcode.react';
 import { PhysicalPiece } from '@/lib/cut-plan/engine';
 import { generateLabelData } from '@/lib/labels/engine';
@@ -235,7 +236,14 @@ function IndustrialLabel({ piece, width, height, presetId }: { piece: PhysicalPi
   const html = pieceLabelHtml(pieceForHtml, {
     larguraMm: width,
     alturaMm: height,
-    qrSvg: qrSvgString
+    qrSvg: renderToString(
+      <QRCodeSVG 
+        value={data.qrPayload} 
+        size={qrSizeMm * 3.78} 
+        level="L"
+        includeMargin={false}
+      />
+    )
   });
 
   return (
