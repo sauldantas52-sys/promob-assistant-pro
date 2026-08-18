@@ -581,7 +581,8 @@ function ImportPage() {
             if (!projectExists) {
               console.warn("Limpando rastros de importação falha (pré-persistência)...");
               
-              if (preparedFiles.length > 0) {
+              // Only remove files if they were successfully prepared
+              if (preparedFiles && preparedFiles.length > 0) {
                 await supabase.storage
                   .from("project-files")
                   .remove(preparedFiles.map((item) => item.storagePath));
