@@ -437,8 +437,19 @@ export function Operational3DView({
                   </div>
                 </div>
                 <div className="bg-slate-950 p-4">
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-2xl h-11 font-black uppercase text-[10px] tracking-widest">
-                    Ver Plano de Corte
+                  <Button 
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-2xl h-11 font-black uppercase text-[10px] tracking-widest"
+                    onClick={() => {
+                      const ids = selectedModule.pieces.map(p => p.physicalId);
+                      ids.forEach(id => {
+                        window.dispatchEvent(new CustomEvent('highlight-piece', { 
+                          detail: { physicalId: id } 
+                        }));
+                      });
+                      toast.info(`Módulo ${selectedModule.name} destacado no Plano.`);
+                    }}
+                  >
+                    Destacar Módulo no Plano
                   </Button>
                 </div>
               </Card>
