@@ -99,9 +99,10 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId")({
   validateSearch: (search: Record<string, unknown>) => {
+    const s = search as any;
     return {
-      tab: (search.tab as string) || undefined,
-    } as any;
+      tab: s.tab || undefined,
+    };
   },
   head: () => ({
     meta: [
