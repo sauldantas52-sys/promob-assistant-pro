@@ -163,11 +163,10 @@ function ModuleGroup({
           modulePosition={module.position}
           index={idx}
           totalPieces={module.pieces.length}
-          isSelected={isSelected} // Simplificação: destaca todas as peças do módulo por enquanto
+          isSelected={isSelected && module.selectedPieceId === piece.physicalId}
           isIsolated={isIsolated}
           isXRay={isXRay}
           onSelect={() => {
-            onSelectModule(module.id);
             onSelectPiece(piece.physicalId);
           }}
         />
