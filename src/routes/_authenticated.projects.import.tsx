@@ -217,7 +217,7 @@ function ImportPage() {
           looseMdfPieces = result.loose_parts.filter(p => p.kind === 'peca').length;
           
           setParseReport({
-            totalItems: 0, // Simplified for preview
+            totalItems: result.modules.reduce((acc, m) => acc + m.parts.length, 0) + result.loose_parts.length,
             recognizedModules,
             mdfPiecesInModules,
             looseMdfPieces,
