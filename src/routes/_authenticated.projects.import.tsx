@@ -175,60 +175,80 @@ function ImportPage() {
   } | null>(null);
 
   function handleFolderSelection(event: ChangeEvent<HTMLInputElement>) {
-    const selectedFiles = Array.from(event.target.files ?? []);
-    const rootNames = new Set(
-      selectedFiles
-        .map((file) => file.webkitRelativePath.split("/")[0])
-        .filter((name): name is string => !!name),
-    );
-    const rootName = rootNames.size === 1 ? (Array.from(rootNames)[0] ?? "") : "";
-    const nextClassification = classifyFolder(selectedFiles);
-    const nextIdentity = parseFolderIdentity(rootName);
+    try {
+      const selectedFiles = Array.from(event.target.files ?? []);
+      console.log(`[Import] Iniciando processamento de ${selectedFiles.length} arquivos.`);
+      
+      if (selectedFiles.length === 0) {
+        toast.error("Nenhum arquivo foi selecionado.");
+        return;
+      }
 
-    setFolderName(rootName);
-    setFolderFileCount(selectedFiles.length);
-    setClassification(nextClassification);
-    setFiles({
-      xml: nextClassification.xml,
-      dxf: nextClassification.dxf,
-      pdf: nextClassification.cotas,
-    });
-    setData((current) => ({
-      ...current,
-      name: rootName,
-      client: nextIdentity.client,
-    }));
-    
-    // Auto-parse report for Rule 9
-    if (nextClassification.xml) {
-      nextClassification.xml.text().then(xmlContent => {
-        try {
-          const result = parsePromobXML(xmlContent);
-          
-          let mdfPiecesInModules = 0;
-          let looseMdfPieces = 0;
-          let hardwareItems = 0;
-          let unclassifiedItems = 0;
-          let recognizedModules = result.modules.length;
+      const rootNames = new Set(
+        selectedFiles
+          .map((file) => file.webkitRelativePath.split("/")[0])
+          .filter((name): name is string => !!name),
+      );
+      const rootName = rootNames.size === 1 ? (Array.from(rootNames)[0] ?? "") : "";
+      
+      console.log(`[Import] Pasta detectada: "${rootName}"`);
+      
+      const nextClassification = classifyFolder(selectedFiles);
+      const nextIdentity = parseFolderIdentity(rootName);
 
-          result.modules.forEach(m => {
-            mdfPiecesInModules += m.parts.filter(p => p.kind === 'peca').length;
-          });
-          looseMdfPieces = result.loose_parts.filter(p => p.kind === 'peca').length;
-          
-          setParseReport({
-            totalItems: result.modules.reduce((acc, m) => acc + m.parts.length, 0) + result.loose_parts.length,
-            recognizedModules,
-            mdfPiecesInModules,
-            looseMdfPieces,
-            hardwareItems: 0,
-            unclassifiedItems: 0,
-            unclassifiedList: []
-          });
-        } catch (e) {
-          console.error("Erro na pré-leitura do XML:", e);
-        }
+      setFolderName(rootName);
+      setFolderFileCount(selectedFiles.length);
+      setClassification(nextClassification);
+      setFiles({
+        xml: nextClassification.xml,
+        dxf: nextClassification.dxf,
+        pdf: nextClassification.cotas,
       });
+      setData((current) => ({
+        ...current,
+        name: rootName,
+        client: nextIdentity.client,
+      }));
+      
+      console.log(`[Import] Classificação: XML=${!!nextClassification.xml}, DXF=${!!nextClassification.dxf}, PDF=${!!nextClassification.cotas}`);
+
+      // Auto-parse report for Rule 9
+      if (nextClassification.xml) {
+        nextClassification.xml.text().then(xmlContent => {
+          try {
+            const result = parsePromobXML(xmlContent);
+            
+            let mdfPiecesInModules = 0;
+            let recognizedModules = result.modules.length;
+
+            result.modules.forEach(m => {
+              mdfPiecesInModules += m.parts.filter(p => p.kind === 'peca').length;
+            });
+            
+            setParseReport({
+              totalItems: result.modules.reduce((acc, m) => acc + m.parts.length, 0) + result.loose_parts.length,
+              recognizedModules,
+              mdfPiecesInModules,
+              looseMdfPieces: result.loose_parts.filter(p => p.kind === 'peca').length,
+              hardwareItems: 0,
+              unclassifiedItems: 0,
+              unclassifiedList: []
+            });
+            toast.success(`${selectedFiles.length} arquivos processados com sucesso.`);
+          } catch (e) {
+            console.error("Erro na pré-leitura do XML:", e);
+            toast.error(`Erro ao ler o XML: ${e instanceof Error ? e.message : 'Arquivo inválido'}`);
+          }
+        }).catch(err => {
+          console.error("Erro ao ler texto do XML:", err);
+          toast.error("Falha ao ler o conteúdo do arquivo XML.");
+        });
+      } else {
+        toast.warning("Pasta lida, mas o arquivo XML do Promob não foi encontrado.");
+      }
+    } catch (err) {
+      console.error("Erro crítico no handleFolderSelection:", err);
+      toast.error(`Falha ao ler pasta: ${err instanceof Error ? err.message : 'Erro desconhecido'}`);
     }
   }
 
