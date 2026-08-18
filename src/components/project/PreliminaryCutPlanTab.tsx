@@ -305,8 +305,8 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
                         {p.w > 40 && p.h > 20 && <span className="text-[6px] font-bold truncate w-full px-1">{p.piece.name}</span>}
                         {p.w > 30 && p.h > 15 && <span className="text-[7px] font-black">{p.w}x{p.h}</span>}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ))}
