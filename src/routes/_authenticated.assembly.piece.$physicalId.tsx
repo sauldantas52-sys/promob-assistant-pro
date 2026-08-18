@@ -27,6 +27,8 @@ function PieceDetailsPage() {
       if (!stepsRaw || stepsRaw.length === 0) throw new Error('Peça não encontrada no fluxo de produção.');
 
       const firstStep = stepsRaw[0];
+      if (!firstStep) throw new Error('Peça não encontrada no fluxo de produção.');
+      
       const partId = firstStep.part_id;
       const projectId = firstStep.project_id;
 
