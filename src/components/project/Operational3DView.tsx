@@ -436,9 +436,6 @@ export function Operational3DView({
                               >
                                 <Badge className="bg-slate-900 text-white text-[7px] h-5 hover:bg-slate-800">PRODUÇÃO</Badge>
                               </Link>
-                              >
-                                Produção
-                              </Link>
                             </Button>
                           </div>
                         </div>
