@@ -228,6 +228,9 @@ export function Operational3DView({
     setViewMode('standard');
     setIsXRay(false);
     setOffsetModuleId(null);
+    if (typeof window !== 'undefined') {
+      (window as any).isXRayActive = false;
+    }
   };
 
   return (
