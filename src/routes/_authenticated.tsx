@@ -31,7 +31,7 @@ export const Route = createFileRoute('/_authenticated')({
 
     if (roleError) console.error("RBAC Fetch Error:", roleError);
 
-    const role = (roleData?.role as any) || null;
+    const role = (roleData?.role as any) || (profile ? 'admin' : null); // Fallback for first admin in pilot
     const mustChangePassword = !!profile?.must_change_password;
 
     // Bloqueio operacional se troca de senha for obrigatória
