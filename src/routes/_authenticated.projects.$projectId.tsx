@@ -34,6 +34,7 @@ import {
   Building2,
   Ruler,
   Printer,
+  Calculator,
 } from "lucide-react";
 import { Parser } from "@json2csv/plainjs";
 import { EngineeringTab } from "@/components/EngineeringTab";
