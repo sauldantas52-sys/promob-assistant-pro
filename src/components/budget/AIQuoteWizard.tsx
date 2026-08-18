@@ -20,8 +20,10 @@ export function AIQuoteWizard({ companyId }: { companyId: string }) {
   const analyzeMutation = useMutation({
     mutationFn: async (payload: { documentId: string; fileUrl: string }) => {
       const { budgetId } = await analyzeBudgetDocument({
-        ...payload,
-        companyId,
+        data: {
+          ...payload,
+          companyId,
+        }
       });
       return budgetId;
     },
