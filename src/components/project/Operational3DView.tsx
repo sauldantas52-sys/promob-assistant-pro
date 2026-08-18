@@ -81,7 +81,7 @@ function ModuleMesh({
         <meshStandardMaterial 
           color={isSelected ? "#3b82f6" : "#cbd5e1"} 
           transparent 
-          opacity={opacity}
+          opacity={opacity * (isSelected && (window as any).isXRayActive ? 0.3 : 1)}
           metalness={0.1}
           roughness={0.5}
         />
