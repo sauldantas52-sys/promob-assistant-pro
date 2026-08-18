@@ -6,6 +6,7 @@ export const Route = createFileRoute('/_authenticated')({
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session) {
+      console.log("[AuthGuard] No session, redirecting to /login");
       throw redirect({
         to: '/login',
         search: {
@@ -32,6 +33,9 @@ export const Route = createFileRoute('/_authenticated')({
     if (roleError) console.error("RBAC Fetch Error:", roleError);
 
     const role = (roleData?.role as any) || null;
+    if (!role) {
+      console.warn("[AuthGuard] User has no role assigned");
+    }
     const mustChangePassword = !!profile?.must_change_password;
 
     // Bloqueio operacional se troca de senha for obrigatória
