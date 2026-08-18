@@ -250,7 +250,6 @@ export function Operational3DView({
               makeDefault 
               minPolarAngle={0} 
               maxPolarAngle={Math.PI / 1.75} 
-              makeDefault
             />
           </Canvas>
 
