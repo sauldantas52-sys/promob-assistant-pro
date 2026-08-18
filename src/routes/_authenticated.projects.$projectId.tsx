@@ -33,6 +33,7 @@ import {
   Eye,
   Building2,
   Ruler,
+  Printer,
 } from "lucide-react";
 import { Parser } from "@json2csv/plainjs";
 import { EngineeringTab } from "@/components/EngineeringTab";
@@ -46,6 +47,8 @@ import { PhysicalChecklistFlow } from "@/components/PhysicalChecklistFlow";
 import { Technical3DView } from "@/components/project/Technical3DView";
 import { Operational3DView } from "@/components/project/Operational3DView";
 import { VisualFeedingMode } from "@/components/project/VisualFeedingMode";
+import { IndustrialLabelsTab } from "@/components/project/labels/IndustrialLabelsTab";
+import { IndustrialCutPlanEngine } from "@/lib/cut-plan/engine";
 import { parseDXF } from "@/lib/dxf-parser";
 
 import { Button } from "@/components/ui/button";
@@ -245,6 +248,11 @@ function ProjectDetail() {
   const handleImport = async (file: File) => {
     navigate({ to: "/projects/import" });
   };
+  
+  const { data: cutPlanGroups } = useQuery({
+    queryKey: ["industrial_cut_plan", projectId],
+    queryFn: () => IndustrialCutPlanEngine.generateForProject(projectId),
+  });
 
   const allParts = parts.data ?? [];
   const panels = allParts.filter((p) => p.kind === "peca" || p.kind === "chapa");
@@ -336,1026 +344,208 @@ function ProjectDetail() {
   }
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-5 overflow-hidden px-3 py-4 sm:px-5 md:space-y-6 md:px-8 md:py-6">
-      <header className="flex flex-col gap-4">
-        <Link
-          to="/projects"
-          className="inline-flex w-fit items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 transition-colors hover:text-blue-600"
-        >
-          <ArrowLeft className="h-4 w-4" /> Projetos
-        </Link>
-
-        <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 lg:flex-row lg:items-end lg:justify-between">
-          <div className="min-w-0 space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-blue-600">
-                Projeto ativo · engenharia
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 rounded-md px-2.5 text-[9px] font-black uppercase tracking-wider"
-                  onClick={async () => {
-                    try {
-                      const { generateAuditReport } = await import("@/lib/audit-report.functions");
-                      const result = await generateAuditReport({ data: { projectId: projectId } });
-                      if (result.success) {
-                        toast.success("Dossiê consolidado com sucesso!");
-                      }
-                    } catch (err) {
-                      toast.error("Erro ao gerar dossiê.");
-                    }
-                  }}
-                >
-                  <Download className="mr-1.5 h-3 w-3" />
-                  Dossiê
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="h-7 rounded-md border-slate-900 bg-slate-900 px-2.5 text-[9px] font-black uppercase tracking-wider text-white hover:bg-slate-800"
-                  onClick={async () => {
-                    const loadingToast = toast.loading("Preparando Caderno Executivo...");
-                    try {
-                      const { getExecutiveBookData } = await import("@/lib/executive-book.functions");
-                      const { generateExecutivePDF } = await import("@/lib/executive-book-generator");
-                      
-                      const data = await getExecutiveBookData({ data: { projectId: projectId } });
-                      
-                      if (data.success) {
-                        await generateExecutivePDF(
-                          data.project as any, 
-                          data.modules, 
-                          data.parts, 
-                          data.files
-                        );
-                        toast.dismiss(loadingToast);
-                        toast.success("Caderno Executivo gerado!");
-                      }
-                    } catch (err) {
-                      console.error(err);
-                      toast.dismiss(loadingToast);
-                      toast.error("Erro ao gerar Caderno Executivo.");
-                    }
-                  }}
-                >
-                  <FileText className="mr-1.5 h-3 w-3" />
-                  Caderno Executivo
-                </Button>
-              </div>
-            </div>
-            <h1 className="break-words text-3xl font-black uppercase leading-none tracking-tight text-slate-950 sm:text-4xl md:text-5xl">
+    <div className="flex h-[calc(100vh-64px)] w-full overflow-hidden lg:h-screen">
+      <aside className="hidden w-64 shrink-0 flex-col border-r border-slate-200 bg-slate-50 lg:flex">
+        <div className="flex flex-col gap-4 p-6">
+          <Link
+            to="/projects"
+            className="inline-flex w-fit items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 transition-colors hover:text-blue-600"
+          >
+            <ArrowLeft className="h-4 w-4" /> Projetos
+          </Link>
+          <div className="space-y-1">
+            <h1 className="truncate text-lg font-black uppercase tracking-tight text-slate-950">
               {project.data?.name}
             </h1>
-            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-              <Badge
+            <p className="truncate text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              {project.data?.client_name || "Cliente Final"}
+            </p>
+          </div>
+        </div>
+
+        <nav className="flex-1 space-y-1 px-3 py-2">
+          {[
+            { value: "preliminary-cut-plan", icon: Scissors, label: "Plano de Corte Pro" },
+            { value: "modules", icon: LayoutGrid, label: "Módulos e Peças" },
+            { value: "labels", icon: Printer, label: "Etiquetas Industriais" },
+            { value: "operational3d", icon: Box, label: "Ambiente 3D" },
+            { value: "parts", icon: ClipboardList, label: "Lista Técnica" },
+            { value: "files", icon: FileUp, label: "Arquivos do Projeto" },
+            { value: "engineering", icon: Settings, label: "Usinagem CNC" },
+            { value: "sketchup", icon: ArrowRightLeft, label: "Ponte SketchUp" },
+            { value: "commercial", icon: FileText, label: "Comercial / Orçamentos" },
+            { value: "integration_audit", icon: History, label: "Relatórios de Auditoria" },
+            { value: "assistance", icon: MessageSquare, label: "Assistência Técnica" },
+          ].map((item) => {
+            const active = activeTab === item.value;
+            return (
+              <button
+                key={item.value}
+                onClick={() => {
+                  setActiveTab(item.value);
+                  navigate({ search: { tab: item.value } as any, replace: true });
+                }}
                 className={cn(
-                  "rounded-md border-none px-2.5 py-1 text-[9px] font-black uppercase tracking-wider",
-                  statusTone(project.data?.status || "novo"),
+                  "flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider transition-all",
+                  active
+                    ? "bg-slate-900 text-[var(--lime-industrial)] shadow-md"
+                    : "text-slate-600 hover:bg-slate-200 hover:text-slate-900"
                 )}
               >
-                {statusLabel(project.data?.status || "novo")}
-              </Badge>
-              <span className="font-semibold text-slate-700">
-                {project.data?.client_name || "Cliente não informado"}
-              </span>
-              <span aria-hidden="true">·</span>
-              <span>{project.data?.environment || "Ambiente não informado"}</span>
-            </div>
-          </div>
+                <item.icon className={cn("h-4 w-4", active ? "text-[var(--lime-industrial)]" : "text-slate-400")} />
+                {item.label}
+              </button>
+            );
+          })}
+        </nav>
 
-          <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 lg:w-auto">
-            <Select
-              value={project.data?.status ?? "novo"}
-              disabled={!hasPermission(role, "projects", "approve")}
-              onValueChange={async (v) => {
-                const currentStatus = (project.data?.status ??
-                  "novo") as (typeof projectStatuses)[number];
-                const targetStatus = v as (typeof projectStatuses)[number];
-                const currentIndex = projectStatuses.indexOf(currentStatus);
-                const targetIndex = projectStatuses.indexOf(targetStatus);
-                if (targetIndex !== currentIndex && targetIndex !== currentIndex + 1) {
-                  toast.error("Transição inválida: avance o projeto uma etapa por vez.");
-                  return;
-                }
-                /* Bloqueios temporariamente desativados conforme orientação do usuário para o Piloto */
-                if (["corte", "borda", "usinagem"].includes(v)) {
-                  const unconfirmedParts = allParts.filter(
-                    (p) =>
-                      (!p.width_mm || !p.length_mm || !p.thickness_mm || !p.material) &&
-                      p.kind !== "ferragem" &&
-                      p.kind !== "acessorio" &&
-                      !p.name.toLowerCase().includes("processo") &&
-                      p.visibility_type !== "oculta",
-                  );
-
-                  if (unconfirmedParts.length > 0) {
-                    toast.warning(
-                      `Aviso: ${unconfirmedParts.length} peça(s) possuem dados incompletos, mas a produção seguirá conforme modo Piloto.`,
-                    );
-                  }
-                }
-
-                const oldStatus = project.data?.status || "novo";
-                updateStatus.mutate(v, {
-                  onSuccess: async () => {
-                    const {
-                      data: { user },
-                    } = await supabase.auth.getUser();
-                    if (user) {
-                      await supabase.from("production_logs").insert({
-                        project_id: projectId,
-                        user_id: user.id,
-                        action: `Alteração de status do projeto: ${v}`,
-                        status_from: oldStatus,
-                        status_to: v,
-                        notes: "Alteração via seletor de status principal",
-                      });
-                    }
-                  },
-                });
-              }}
-            >
-              <SelectTrigger className="h-10 w-full rounded-md border-slate-800 bg-slate-900 text-[10px] font-black uppercase tracking-wider text-white sm:w-52">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {projectStatuses.map((status) => (
-                  <SelectItem
-                    key={status}
-                    value={status}
-                    className="text-[10px] font-black uppercase tracking-wider"
-                  >
-                    {statusLabel(status)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button
-              variant="outline"
-              className="h-10 rounded-md px-4 text-[10px] font-black uppercase tracking-wider"
-              onClick={exportCSV}
-            >
-              <Download className="mr-2 h-4 w-4 text-blue-600" /> Exportar lista CSV
-            </Button>
-          </div>
+        <div className="border-t border-slate-200 p-4">
+          <Badge
+            className={cn(
+              "w-full justify-center rounded-md border-none py-1.5 text-[9px] font-black uppercase tracking-widest",
+              statusTone(project.data?.status || "novo")
+            )}
+          >
+            {statusLabel(project.data?.status || "novo")}
+          </Badge>
         </div>
-      </header>
+      </aside>
 
-      <Card className="overflow-hidden rounded-xl border-slate-200 shadow-sm">
-        <CardHeader className="border-b border-slate-200 bg-slate-950 px-4 py-3 text-white sm:px-5">
-          <CardTitle className="flex flex-wrap items-center justify-between gap-2 text-[10px] font-black uppercase tracking-[0.18em]">
-            Autoridades e arquivos da revisão
-            <Badge className="rounded-sm border border-emerald-700 bg-emerald-900 text-[8px] uppercase text-emerald-300">
-              Modo Piloto: CNC Liberado
-            </Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 p-4 sm:p-5">
-          <div className="grid gap-px overflow-hidden rounded-lg border border-slate-200 bg-slate-200 sm:grid-cols-2 xl:grid-cols-4">
-            <SourceAuthority
-              label="Autoridade dimensional"
-              title="XML Promob"
-              detail={latestXml?.file_name || "XML Pendente (Ingestão em Modo Piloto)"}
-              ok={!!latestXml}
-            />
-            <SourceAuthority
-              label="Referência de revisão"
-              title={latestXml ? "Revisão não informada" : "Sem revisão identificável"}
-              detail={
-                latestXml
-                  ? `XML de ${new Date(latestXml.created_at).toLocaleDateString("pt-BR")} · ID ${latestXml.id.slice(0, 8)}`
-                  : "Importe o XML para estabelecer identidade e revisão"
-              }
-              ok={!!latestXml}
-            />
-            <SourceAuthority
-              label="Conferência geométrica"
-              title="DXF de conferência"
-              detail={
-                latestDxf
-                  ? latestDxfStored
-                    ? latestDxf.file_name
-                    : `${latestDxf.file_name} · metadado local, artefato não armazenado`
-                  : "DXF ausente: conferência pendente"
-              }
-              ok={latestDxfStored}
-            />
-            <SourceAuthority
-              label="Nesting oficial"
-              title="CutPlanning / Cut Pro"
-              detail={
-                officialCutEvidence
-                  ? officialCutStored
-                    ? officialCutEvidence.file_name
-                    : `${officialCutEvidence.file_name} · artefato não armazenado`
-                  : "Saída oficial pendente (Modo Piloto)"
-              }
-              ok={officialCutStored}
-            />
-          </div>
-          <div className="flex flex-col gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-950 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="font-black uppercase tracking-wide">
-                XML é a autoridade de peças e medidas
-              </p>
-              <p className="mt-0.5 text-amber-800">
-                DXF é conferência geométrica. Pré-plano local em Modo Piloto permite testes 
-                físicos na fábrica.
-              </p>
-            </div>
-            <Button
-              className="h-9 shrink-0 rounded-md bg-blue-600 px-4 text-[10px] font-black uppercase tracking-wider hover:bg-blue-700"
-              disabled={importing}
-              onClick={() => fileInput.current?.click()}
-            >
-              {importing ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <FileUp className="mr-2 h-4 w-4" />
-              )}
-              Nova importação
-            </Button>
-          </div>
-          <div className="grid gap-4">
-            <PilotValidationChecklist
-              projectId={projectId}
-              isMachiningBlocked={project.data?.machining_blocked ?? true}
-              projectFiles={files.data || []}
-            />
-
-            <div>
-              <input
-                ref={fileInput}
-                type="file"
-                accept=".xml,.pdf,.dxf"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) void handleImport(file);
-                }}
-              />
-            </div>
-          </div>
-
-          {warnings.length > 0 && (
-            <div className="space-y-3 rounded-lg border border-red-200 bg-red-50 p-4">
-              <div className="flex items-center gap-3 mb-2">
-                <AlertTriangle className="h-6 w-6 text-red-600" />
-                <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-red-900">
-                  Alertas de Integridade Técnica
-                </h4>
-              </div>
-              <div className="grid gap-3">
-                {warnings.map((warning) => (
-                  <p
-                    key={warning}
-                    className="text-xs font-bold text-red-700 uppercase tracking-widest leading-relaxed pl-9 border-l-2 border-red-200"
-                  >
-                    {warning}
-                  </p>
-                ))}
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Central Visual de Distribuição 4.0 */}
-      <ProjectDistributionFlow distribution={distribution.data || []} project={project.data} />
-
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
-        <ProjectMetric
-          icon={LayoutGrid}
-          label="Módulos"
-          value={String(modules.data?.length ?? 0)}
-          color="text-blue-600"
-        />
-        <ProjectMetric
-          icon={Layers}
-          label="Peças / Chapas"
-          value={String(panels.length)}
-          color="text-violet-600"
-        />
-        <ProjectMetric
-          icon={Wrench}
-          label="Ferragens"
-          value={String(hardware.length)}
-          color="text-emerald-600"
-        />
-        <ProjectMetric
-          icon={Building2}
-          label="Acessórios"
-          value={String(accessories.length)}
-          color="text-amber-600"
-        />
-        <ProjectMetric
-          icon={ShieldCheck}
-          label="Engenharia"
-          value={
-            allParts.some((p) => p.machining_blocked && (p.kind === "peca" || p.kind === "chapa"))
-              ? "BLOQUEADO"
-              : "LIBERADO"
-          }
-          color={
-            allParts.some((p) => p.machining_blocked && (p.kind === "peca" || p.kind === "chapa"))
-              ? "text-red-600"
-              : "text-emerald-600"
-          }
-        />
-        <ProjectMetric
-          icon={Scissors}
-          label="Área (m²)"
-          value={totalArea.toFixed(2)}
-          color="text-slate-600"
-        />
-      </div>
-
-      <Tabs 
-        value={activeTab} 
-        onValueChange={(v) => {
-          setActiveTab(v);
-          navigate({ search: { tab: v } as any, replace: true });
-        }}
-        className="min-w-0 space-y-4"
-      >
-        <div className="max-w-full overflow-x-auto overscroll-x-contain rounded-lg border border-slate-200 bg-slate-100 [scrollbar-width:thin]">
-          <TabsList className="flex h-12 w-max min-w-full justify-start rounded-none bg-transparent p-1">
-            <TabTrigger value="modules" icon={LayoutGrid} label="Módulos" />
-            <TabTrigger value="visual-intake" icon={Eye} label="Alimentação Visual" />
-            <TabTrigger value="operational3d" icon={Box} label="Ambiente 3D" />
-            <TabTrigger value="technical3d" icon={Box} label="Gêmeo DXF" />
-            <TabTrigger value="parts" icon={ClipboardList} label="Lista Técnica" />
-            <TabTrigger value="commercial" icon={FileText} label="Comercial" />
-            <TabTrigger value="budget" icon={Building2} label="Inventário XML" />
-            <TabTrigger value="cutplan" icon={Scissors} label="Plano de Corte" />
-            <TabTrigger value="engineering" icon={Settings} label="Usinagem" />
-            <TabTrigger value="sketchup" icon={ArrowRightLeft} label="Ponte SKP" />
-            <TabTrigger value="shipping" icon={Truck} label="Logística" />
-            <TabTrigger value="maintenance" icon={HardHat} label="Assistência" />
-            <TabTrigger value="audit" icon={History} label="Auditoria" />
-            <TabTrigger value="validation" icon={ShieldCheck} label="Checklist Piloto" />
-            <TabTrigger value="physical-pilot" icon={Boxes} label="Teste Físico (Fábrica)" />
-            <TabTrigger value="integration_audit" icon={CheckSquare} label="Motores IA" />
-            <TabTrigger value="files" icon={FileUp} label="Arquivos" />
-          </TabsList>
-        </div>
-
-
-        <TabsContent value="visual-intake" className="mt-6">
-          <VisualFeedingMode 
-            projectId={projectId} 
-            projectName={project.data?.name}
-          />
-        </TabsContent>
-
-        <TabsContent value="operational3d" className="mt-6">
-          <Operational3DView 
-            projectId={projectId}
-            modules={modules.data || []}
-            parts={allParts}
-          />
-        </TabsContent>
-
-        <TabsContent value="technical3d" className="mt-6">
-          <Technical3DView 
-            geometries={dxfContent.data ? parseDXF(dxfContent.data) : []} 
-            projectName={project.data?.name}
-          />
-        </TabsContent>
-
-        <TabsContent value="modules" className="mt-6">
-          <Card>
-            <CardContent className="p-0">
-              <Accordion type="multiple" className="w-full">
-                {(modules.data ?? []).map((m) => (
-                  <AccordionItem
-                    key={m.id}
-                    value={m.id}
-                    className="border-b px-4 py-1 last:border-0"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Checkbox
-                        checked={m.is_completed ?? false}
-                        onCheckedChange={async (checked) => {
-                          const { error } = await supabase
-                            .from("modules")
-                            .update({ is_completed: !!checked })
-                            .eq("id", m.id);
-                          if (error) toast.error(error.message);
-                          else
-                            void queryClient.invalidateQueries({
-                              queryKey: ["modules", projectId],
-                            });
-                        }}
-                      />
-                      <AccordionTrigger className="flex-1 py-3 hover:no-underline">
-                        <div className="flex flex-1 items-center justify-between pr-4 text-left">
-                          <div>
-                            <p
-                              className={`font-medium ${m.is_completed ? "text-muted-foreground line-through" : ""}`}
-                            >
-                              {m.name}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {m.environment || "Ambiente não informado"} · {m.width_mm ?? "?"} ×{" "}
-                              {m.height_mm ?? "?"} × {m.depth_mm ?? "?"} mm
-                            </p>
-                          </div>
-                          <Badge variant="outline" className="ml-auto">
-                            {m.quantity} un
-                          </Badge>
-                        </div>
-                      </AccordionTrigger>
-                    </div>
-                    <AccordionContent className="pb-4 pt-0">
-                      <div className="max-w-full overflow-x-auto rounded-lg border bg-muted/30 [scrollbar-width:thin]">
-                        <Table className="min-w-[520px]">
-                          <TableHeader>
-                            <TableRow className="hover:bg-transparent">
-                              <TableHead className="h-9 text-xs">Peça</TableHead>
-                              <TableHead className="h-9 text-xs text-right">Dimensões</TableHead>
-                              <TableHead className="h-9 text-xs text-right">Qtd</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {allParts
-                              .filter((p) => p.module_id === m.id)
-                              .map((p) => (
-                                <TableRow key={p.id} className="hover:bg-transparent">
-                                  <TableCell className="py-2 text-xs font-medium">
-                                    <div className="flex items-center gap-2">
-                                      <Checkbox
-                                        checked={p.is_completed ?? false}
-                                        className="h-3.5 w-3.5"
-                                        onCheckedChange={async (checked) => {
-                                          const { error } = await supabase
-                                            .from("parts")
-                                            .update({ is_completed: !!checked })
-                                            .eq("id", p.id);
-                                          if (error) toast.error(error.message);
-                                          else
-                                            void queryClient.invalidateQueries({
-                                              queryKey: ["parts", projectId],
-                                            });
-                                        }}
-                                      />
-                                      <span
-                                        className={
-                                          p.is_completed ? "text-muted-foreground line-through" : ""
-                                        }
-                                      >
-                                        {p.name}
-                                      </span>
-                                    </div>
-                                  </TableCell>
-                                  <TableCell className="py-2 text-right text-xs text-muted-foreground">
-                                    {p.width_mm ?? "?"} × {p.length_mm ?? "?"}
-                                  </TableCell>
-                                  <TableCell className="py-2 text-right text-xs">
-                                    {p.quantity} {p.unit}
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            {allParts.filter((p) => p.module_id === m.id).length === 0 && (
-                              <TableRow>
-                                <TableCell
-                                  colSpan={3}
-                                  className="py-4 text-center text-xs text-muted-foreground"
-                                >
-                                  Nenhuma peça vinculada.
-                                </TableCell>
-                              </TableRow>
-                            )}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-                {(modules.data?.length ?? 0) === 0 && (
-                  <div className="py-12 text-center text-sm text-muted-foreground">
-                    Nada por aqui ainda. Importe um arquivo do Promob.
-                  </div>
-                )}
-              </Accordion>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="parts" className="mt-6">
-          <Card>
-            <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <CardTitle className="text-base">Listagem Completa de Itens</CardTitle>
-              <div className="flex flex-wrap items-center gap-2">
-                <Input
-                  placeholder="Buscar peça..."
-                  className="h-9 w-full sm:w-48"
-                  value={searchPart}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setSearchPart(e.target.value)
-                  }
-                />
-                <Select value={filterType} onValueChange={setFilterType}>
-                  <SelectTrigger className="h-9 w-full sm:w-36">
-                    <SelectValue placeholder="Tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    <SelectItem value="peca">Peças</SelectItem>
-                    <SelectItem value="ferragem">Ferragens</SelectItem>
-                    <SelectItem value="acessorio">Acessórios</SelectItem>
-                    <SelectItem value="chapa">Chapas</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardHeader>
-            <CardContent className="max-w-full overflow-x-auto p-0 [scrollbar-width:thin]">
-              <Table className="min-w-[900px]">
-                <TableHeader>
-                  <TableRow className="bg-muted/50">
-                    <TableHead>Item</TableHead>
-                    <TableHead>Módulo</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Material</TableHead>
-                    <TableHead>Esp.</TableHead>
-                    <TableHead>Larg. × Comp. (mm)</TableHead>
-                    <TableHead>Fita</TableHead>
-                    <TableHead className="text-right">Qtd</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {allParts
-                    .filter((p) => {
-                      const matchesType = filterType === "all" || p.kind === filterType;
-                      const matchesSearch = p.name.toLowerCase().includes(searchPart.toLowerCase());
-                      return matchesType && matchesSearch;
-                    })
-                    .map((p) => (
-                      <TableRow key={p.id} className={p.is_completed ? "bg-muted/20" : ""}>
-                        <TableCell className="font-medium">
-                          <span
-                            className={p.is_completed ? "text-muted-foreground line-through" : ""}
-                          >
-                            {p.name}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {p.module_id
-                            ? modules.data?.find((m) => m.id === p.module_id)?.name
-                            : "—"}
-                        </TableCell>
-                        <TableCell className="capitalize">
-                          <Badge
-                            variant="outline"
-                            className="text-[10px] font-normal uppercase tracking-wider"
-                          >
-                            {p.kind}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-xs">{p.material || "—"}</TableCell>
-                        <TableCell className="text-xs">
-                          {p.thickness_mm ?? "Não confirmado"}
-                        </TableCell>
-                        <TableCell className="text-xs">
-                          {p.width_mm ?? "Não confirmado"} × {p.length_mm ?? "Não confirmado"}
-                        </TableCell>
-                        <TableCell className="text-xs">{p.edge_banding || "—"}</TableCell>
-                        <TableCell className="text-right font-medium">
-                          {p.quantity} {p.unit}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  {allParts.length === 0 && <EmptyRow colSpan={8} />}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="loose" className="mt-6">
-          <Card className="border-amber-200/50 dark:border-amber-900/30">
-            <CardHeader className="bg-amber-50/50 dark:bg-amber-950/20">
-              <CardTitle className="text-base flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-amber-500" />
-                Acessórios Avulsos / Itens sem Módulo
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="max-w-full overflow-x-auto p-0 [scrollbar-width:thin]">
-              <Table className="min-w-[520px]">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Item</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Material</TableHead>
-                    <TableHead className="text-right">Qtd</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {allParts
-                    .filter((p) => !p.module_id)
-                    .map((p) => (
-                      <TableRow key={p.id}>
-                        <TableCell className="font-medium">{p.name}</TableCell>
-                        <TableCell className="capitalize">{p.kind}</TableCell>
-                        <TableCell className="text-xs">{p.material || "—"}</TableCell>
-                        <TableCell className="text-right font-medium">
-                          {p.quantity} {p.unit}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  {allParts.filter((p) => !p.module_id).length === 0 && (
-                    <TableRow>
-                      <TableCell
-                        colSpan={4}
-                        className="py-8 text-center text-sm text-muted-foreground"
-                      >
-                        Nenhum item avulso identificado neste projeto.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="audit" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Auditoria de Dados</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="rounded-lg border p-4">
-                  <p className="text-xs font-medium text-muted-foreground uppercase">
-                    Módulos no XML
-                  </p>
-                  <p className="mt-1 text-2xl font-bold">{modules.data?.length ?? 0}</p>
+      <main className="flex min-w-0 flex-1 flex-col bg-white">
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
+          <div className="mx-auto max-w-[1400px]">
+            {activeTab === "preliminary-cut-plan" && <PreliminaryCutPlanTab projectId={projectId} />}
+            {activeTab === "modules" && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-black uppercase tracking-tight">Módulos do Projeto</h3>
+                  <Badge variant="outline" className="font-bold">{modules.data?.length ?? 0} Módulos</Badge>
                 </div>
-                <div className="rounded-lg border p-4">
-                  <p className="text-xs font-medium text-muted-foreground uppercase">
-                    Peças/Ferragens Totais
-                  </p>
-                  <p className="mt-1 text-2xl font-bold">{allParts.length}</p>
-                </div>
-                <div className="rounded-lg border p-4">
-                  <p className="text-xs font-medium text-muted-foreground uppercase">
-                    Itens sem Módulo
-                  </p>
-                  <p className="mt-1 text-2xl font-bold text-amber-600">
-                    {allParts.filter((p) => !p.module_id).length}
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <h3 className="font-semibold text-sm">Integridade de Medidas</h3>
-                <div className="max-w-full overflow-x-auto rounded-lg border [scrollbar-width:thin]">
-                  <Table className="min-w-[420px]">
-                    <TableBody>
-                      <TableRow>
-                        <TableCell className="font-medium">Peças sem medida confirmada</TableCell>
-                        <TableCell className="text-right text-destructive font-bold">
-                          {allParts.filter((p) => !p.width_mm || !p.length_mm).length}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="font-medium">Ferragens sem dimensões</TableCell>
-                        <TableCell className="text-right text-muted-foreground">
-                          {hardware.filter((p) => !p.width_mm).length}
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
-                <p className="text-[10px] text-muted-foreground italic">
-                  * Peças sem medida são marcadas como "Não confirmado" e não devem ser enviadas
-                  para fabricação sem conferência manual.
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <h3 className="font-semibold text-sm">Classificação de Itens</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                  <div className="bg-muted/50 p-2 rounded text-center">
-                    <p className="text-[10px] uppercase text-muted-foreground">Peças</p>
-                    <p className="font-bold">{allParts.filter((p) => p.kind === "peca").length}</p>
-                  </div>
-                  <div className="bg-muted/50 p-2 rounded text-center">
-                    <p className="text-[10px] uppercase text-muted-foreground">Chapas</p>
-                    <p className="font-bold">{allParts.filter((p) => p.kind === "chapa").length}</p>
-                  </div>
-                  <div className="bg-muted/50 p-2 rounded text-center">
-                    <p className="text-[10px] uppercase text-muted-foreground">Ferragens</p>
-                    <p className="font-bold">
-                      {allParts.filter((p) => p.kind === "ferragem").length}
-                    </p>
-                  </div>
-                  <div className="bg-muted/50 p-2 rounded text-center">
-                    <p className="text-[10px] uppercase text-muted-foreground">Acessórios</p>
-                    <p className="font-bold">
-                      {allParts.filter((p) => p.kind === "acessorio").length}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="commercial" className="mt-6">
-          <BudgetTab projectId={projectId} />
-        </TabsContent>
-
-        <TabsContent value="cutplan" className="mt-6">
-          <PreliminaryCutPlanTab projectId={projectId} />
-        </TabsContent>
-
-        <TabsContent value="engineering" className="mt-6">
-          <EngineeringTab
-            projectId={projectId}
-            parts={allParts as Tables<"parts">[]}
-            isValidated={project.data?.is_validated}
-          />
-        </TabsContent>
-
-        <TabsContent value="sketchup" className="mt-6">
-          <SketchUpBridgeTab projectId={projectId} />
-        </TabsContent>
-
-        <TabsContent value="validation" className="mt-6">
-          <PilotValidationChecklist
-            projectId={projectId}
-            isMachiningBlocked={!!allParts.some((p) => p.machining_blocked)}
-            projectFiles={files.data || []}
-          />
-        </TabsContent>
-
-        <TabsContent value="physical-pilot" className="mt-6">
-          <PhysicalChecklistFlow projectId={projectId} />
-        </TabsContent>
-
-        <TabsContent value="integration_audit" className="mt-6">
-          <AuditIntegrationTab projectId={projectId} />
-        </TabsContent>
-
-        <TabsContent value="production" className="mt-6">
-          <div className="grid gap-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle className="text-lg">Ordem de Produção</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Detalhamento para a fábrica e montagem
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs font-medium text-muted-foreground uppercase">Versão XML</p>
-                  <p className="text-sm font-bold">{files.data?.[0]?.file_name || "v1.0"}</p>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="rounded-lg border bg-muted/30 p-4">
-                    <h3 className="mb-3 font-semibold text-sm flex items-center gap-2">
-                      <Factory className="h-4 w-4" /> Caderno de Fábrica
-                    </h3>
-                    <ul className="space-y-2 text-xs">
-                      <li className="flex justify-between border-b pb-1">
-                        <span>Peças Fabricáveis:</span>
-                        <span className="font-bold">
-                          {
-                            allParts.filter(
-                              (p) =>
-                                p.width_mm &&
-                                p.length_mm &&
-                                !p.name.toLowerCase().includes("processo"),
-                            ).length
-                          }{" "}
-                          un
-                        </span>
-                      </li>
-                      <li className="flex justify-between border-b pb-1">
-                        <span>Corte por Material:</span>
-                        <span className="font-bold">
-                          {
-                            Array.from(new Set(allParts.map((p) => p.material))).filter(Boolean)
-                              .length
-                          }{" "}
-                          tipos
-                        </span>
-                      </li>
-                      <li className="flex justify-between border-b pb-1">
-                        <span>Ferragens Totais:</span>
-                        <span className="font-bold">{hardware.length} un</span>
-                      </li>
-                    </ul>
-                    <Button
-                      variant="outline"
-                      className="mt-4 w-full h-9 text-xs"
-                      onClick={exportCSV}
-                    >
-                      Gerar Lista de Corte (CSV)
-                    </Button>
-                  </div>
-
-                  <div className="rounded-lg border bg-primary/5 p-4">
-                    <h3 className="mb-3 font-semibold text-sm flex items-center gap-2 text-primary">
-                      <Wrench className="h-4 w-4" /> Guia do Montador
-                    </h3>
-                    <ul className="space-y-2 text-xs">
-                      <li className="flex justify-between border-b pb-1">
-                        <span>Módulos no Ambiente:</span>
-                        <span className="font-bold">{modules.data?.length ?? 0} un</span>
-                      </li>
-                      <li className="flex justify-between border-b pb-1">
-                        <span>Itens Avulsos/Acessórios:</span>
-                        <span className="font-bold">
-                          {allParts.filter((p) => !p.module_id).length} un
-                        </span>
-                      </li>
-                    </ul>
-                    <Button asChild className="mt-4 w-full h-9 text-xs">
-                      <Link to="/assembly">Abrir Visualização Mobile</Link>
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-                  <h4 className="text-xs font-bold text-amber-800 uppercase flex items-center gap-2">
-                    <AlertTriangle className="h-3.5 w-3.5" /> Controle de Liberação Parcial
-                    (Rastreabilidade 4.0)
-                  </h4>
-                  <div className="mt-4 grid gap-4 md:grid-cols-2">
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-xs font-bold">1. CORTE E BORDA</Label>
-                        <Badge
-                          className={
-                            project.data?.is_cutting_edge_released ? "bg-green-500" : "bg-amber-500"
-                          }
+                <Card>
+                  <CardContent className="p-0">
+                    <Accordion type="multiple" className="w-full">
+                      {(modules.data ?? []).map((m) => (
+                        <AccordionItem
+                          key={m.id}
+                          value={m.id}
+                          className="border-b px-4 py-1 last:border-0"
                         >
-                          {project.data?.is_cutting_edge_released ? "LIBERADO" : "PENDENTE"}
-                        </Badge>
-                      </div>
-                      <p className="text-[10px] text-amber-700 leading-tight">
-                        “Corte e borda aprovados com base no XML, ListaCorte, PreviewCorte e DXF de
-                        nesting.”
-                      </p>
-                      <Button
-                        size="sm"
-                        variant={project.data?.is_cutting_edge_released ? "outline" : "default"}
-                        className="w-full h-8 text-[10px]"
-                        disabled={!!project.data?.is_cutting_edge_released}
-                        onClick={async () => {
-                          const { error } = await supabase
-                            .from("projects")
-                            .update({
-                              is_cutting_edge_released: true,
-                              cutting_status: "liberado",
-                              updated_at: new Date().toISOString(),
-                            })
-                            .eq("id", projectId);
-
-                          if (error) toast.error(error.message);
-                          else {
-                            toast.success("Corte e Borda liberados com sucesso.");
-                            const {
-                              data: { user },
-                            } = await supabase.auth.getUser();
-                            if (user) {
-                              await supabase.from("production_logs").insert({
-                                project_id: projectId,
-                                user_id: user.id,
-                                action: "LIBERAÇÃO PARCIAL: Corte e Borda",
-                                notes:
-                                  "Aprovado via painel de OP com base em XML/ListaCorte/DXF Nesting",
-                              });
-                            }
-                            void queryClient.invalidateQueries({
-                              queryKey: ["project", projectId],
-                            });
-                          }
-                        }}
-                      >
-                        {project.data?.is_cutting_edge_released
-                          ? "Corte/Borda já Liberados"
-                          : "Liberar Corte e Borda"}
-                      </Button>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-xs font-bold">2. USINAGEM E MONTAGEM</Label>
-                        <Badge variant="destructive" className="animate-pulse">
-                          BLOQUEADO
-                        </Badge>
-                      </div>
-                      <p className="text-[10px] text-destructive leading-tight font-medium">
-                        “Furação e usinagem não confirmadas — DXF técnico individual ou arquivo CNC
-                        necessário.”
-                      </p>
-                      <div className="rounded border border-destructive/20 bg-destructive/5 p-2 text-[9px] text-destructive italic">
-                        Usinagem automatizada suspensa. Não deduzir posições de furos. Liberação
-                        final de montagem bloqueada até validação técnica.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-[10px] text-muted-foreground pt-2 border-t flex flex-col gap-1">
-                  <div className="flex justify-between">
-                    <span>Aprovado em: {new Date().toLocaleDateString("pt-BR")}</span>
-                    <span>Responsável: Sistema Monta AI</span>
-                  </div>
-                  <div className="flex justify-between items-center bg-muted/50 p-1 rounded px-2">
-                    <span className="font-medium">Rastreabilidade 4.0:</span>
-                    <div className="flex gap-2">
-                      <Badge variant="outline" className="text-[8px] h-4">
-                        ID Único Ativo
-                      </Badge>
-                      <Badge variant="outline" className="text-[8px] h-4">
-                        Logs em Tempo Real
-                      </Badge>
-                      <Badge variant="outline" className="text-[8px] h-4">
-                        Integridade XML
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="sketchup" className="mt-6">
-          <SketchUpBridgeTab projectId={projectId} />
-        </TabsContent>
-
-        <TabsContent value="shipping" className="mt-6">
-          <ProjectShippingTab projectId={projectId} />
-        </TabsContent>
-
-        <TabsContent value="maintenance" className="mt-6">
-          <MaintenanceTab
-            projectId={projectId}
-            companyId={project.data?.company_id}
-            allModules={modules.data || []}
-            allParts={allParts}
-            canCreate={role === "admin" || role === "escritorio" || role === "montador"}
-            canTreat={role === "admin" || role === "escritorio"}
-          />
-        </TabsContent>
-
-        <TabsContent value="files">
-          <Card>
-            <CardContent className="divide-y p-0">
-              {(files.data ?? []).map((f) => (
-                <div key={f.id} className="flex items-center justify-between gap-3 p-4">
-                  <div>
-                    <p className="text-sm font-medium">{f.file_name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {f.file_type?.toUpperCase()} · {Math.round(Number(f.size_bytes ?? 0) / 1024)}{" "}
-                      KB
-                    </p>
-                  </div>
-                  {f.storage_status === "stored" && f.storage_path ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={async () => {
-                        const { data: signedFile, error } = await supabase.storage
-                          .from("project-files")
-                          .createSignedUrl(f.storage_path!, 60);
-                        if (error) toast.error(error.message);
-                        else window.open(signedFile.signedUrl, "_blank", "noopener,noreferrer");
-                      }}
-                    >
-                      Abrir arquivo
+                          <div className="flex items-center gap-3">
+                            <Checkbox
+                              checked={m.is_completed ?? false}
+                              onCheckedChange={async (checked) => {
+                                const { error } = await supabase
+                                  .from("modules")
+                                  .update({ is_completed: !!checked })
+                                  .eq("id", m.id);
+                                if (error) toast.error(error.message);
+                                else
+                                  void queryClient.invalidateQueries({
+                                    queryKey: ["modules", projectId],
+                                  });
+                              }}
+                            />
+                            <AccordionTrigger className="flex-1 py-3 hover:no-underline">
+                              <div className="flex flex-1 items-center justify-between pr-4 text-left">
+                                <div>
+                                  <p className={`font-medium ${m.is_completed ? "text-muted-foreground line-through" : ""}`}>
+                                    {m.name}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {m.environment || "Ambiente"} · {m.width_mm ?? "?"}x{m.height_mm ?? "?"}x{m.depth_mm ?? "?"} mm
+                                  </p>
+                                </div>
+                                <Badge variant="outline" className="ml-auto">{m.quantity} un</Badge>
+                              </div>
+                            </AccordionTrigger>
+                          </div>
+                          <AccordionContent className="pb-4 pt-0">
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead className="text-xs">Peça</TableHead>
+                                  <TableHead className="text-right text-xs">Dimensões</TableHead>
+                                  <TableHead className="text-right text-xs">Qtd</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {allParts.filter(p => p.module_id === m.id).map(p => (
+                                  <TableRow key={p.id}>
+                                    <TableCell className="text-xs font-medium">{p.name}</TableCell>
+                                    <TableCell className="text-right text-xs text-muted-foreground">{p.width_mm}x{p.length_mm}</TableCell>
+                                    <TableCell className="text-right text-xs">{p.quantity} {p.unit}</TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+            {activeTab === "operational3d" && (
+              <Operational3DView projectId={projectId} modules={modules.data || []} parts={allParts} />
+            )}
+            {activeTab === "parts" && (
+               <div className="space-y-6">
+                 <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-black uppercase tracking-tight">Lista Técnica Consolidada</h3>
+                    <Button variant="outline" size="sm" onClick={exportCSV} className="text-[10px] font-black uppercase tracking-widest">
+                       <Download className="mr-2 h-3.5 w-3.5" /> Exportar CSV
                     </Button>
-                  ) : (
-                    <Badge variant="secondary">Metadado legado</Badge>
-                  )}
+                 </div>
+                 <Table>
+                    <TableHeader className="bg-slate-50">
+                       <TableRow>
+                          <TableHead className="text-[10px] font-black uppercase">Item</TableHead>
+                          <TableHead className="text-[10px] font-black uppercase">Material</TableHead>
+                          <TableHead className="text-right text-[10px] font-black uppercase">Dimensões</TableHead>
+                          <TableHead className="text-right text-[10px] font-black uppercase">Qtd</TableHead>
+                       </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                       {allParts.map(p => (
+                          <TableRow key={p.id}>
+                             <TableCell className="text-xs font-bold uppercase">{p.name}</TableCell>
+                             <TableCell className="text-xs uppercase text-muted-foreground">{p.material}</TableCell>
+                             <TableCell className="text-right font-mono text-xs">{p.width_mm}x{p.length_mm}x{p.thickness_mm}</TableCell>
+                             <TableCell className="text-right text-xs font-bold">{p.quantity} {p.unit}</TableCell>
+                          </TableRow>
+                       ))}
+                    </TableBody>
+                 </Table>
+               </div>
+            )}
+            {activeTab === "labels" && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-black uppercase tracking-tight">Etiquetas Industriais</h3>
                 </div>
-              ))}
-              {(files.data?.length ?? 0) === 0 && (
-                <p className="p-6 text-sm text-muted-foreground">Nenhum arquivo importado ainda.</p>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="budget" className="mt-6">
-          <BudgetTab projectId={projectId} />
-        </TabsContent>
-
-        <TabsContent value="cutting_beta" className="mt-6">
-          <PreliminaryCutPlanTab projectId={projectId} />
-        </TabsContent>
-
-      </Tabs>
+                {cutPlanGroups && (
+                  <IndustrialLabelsTab pieces={cutPlanGroups.flatMap((g: any) => g.pieces)} />
+                )}
+              </div>
+            )}
+            {activeTab === "engineering" && <EngineeringTab projectId={projectId} parts={allParts as any} isValidated={project.data?.is_validated} />}
+            {activeTab === "sketchup" && <SketchUpBridgeTab projectId={projectId} />}
+            {activeTab === "commercial" && <BudgetTab projectId={projectId} />}
+            {activeTab === "integration_audit" && <AuditIntegrationTab projectId={projectId} />}
+            {activeTab === "assistance" && (
+              <MaintenanceTab 
+                projectId={projectId} 
+                companyId={project.data?.company_id} 
+                allModules={modules.data || []}
+                allParts={allParts}
+                canCreate={true}
+                canTreat={role === 'admin' || role === 'escritorio'}
+              />
+            )}
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
