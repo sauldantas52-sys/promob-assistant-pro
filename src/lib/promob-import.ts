@@ -154,10 +154,10 @@ function parsePartNode(node: Element, moduleSequence: number, pieceSequence: num
   const color = refOf(node, 'MODEL') || refOf(node, 'MODEL_DESCRIPTION') || null;
   const supplier = refOf(node, 'SUPPLIER') || refOf(node, 'SUPPLIER_EXT');
   
-  const edgeTop = parseInt(refOf(node, 'FITA_BORDA_1') || '0');
-  const edgeBottom = parseInt(refOf(node, 'FITA_BORDA_2') || '0');
-  const edgeLeft = parseInt(refOf(node, 'FITA_BORDA_3') || '0');
-  const edgeRight = parseInt(refOf(node, 'FITA_BORDA_4') || '0');
+  const edgeTop = parseFloat(refOf(node, 'FITA_BORDA_1') || '0');
+  const edgeBottom = parseFloat(refOf(node, 'FITA_BORDA_2') || '0');
+  const edgeLeft = parseFloat(refOf(node, 'FITA_BORDA_3') || '0');
+  const edgeRight = parseFloat(refOf(node, 'FITA_BORDA_4') || '0');
   
   const edgeNameGeneral = refOf(node, 'MODEL_DESCRIPTION_FITA') || refOf(node, 'MODEL_DESCRIPTION') || 'Fita';
   const edgeNameFront = refOf(node, 'MODEL_DESCRIPTION_FITA_FRO') || edgeNameGeneral;
@@ -256,8 +256,11 @@ export function parsePromobXML(xmlContent: string): PromobProject {
   const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(xmlContent, 'text/xml');
   
-  const projectNode = xmlDoc.querySelector('PROJECT, PROMOB');
-  const projectName = projectNode?.getAttribute('NAME') || 'Projeto Importado';
+  const projectNode = xmlDoc.querySelector('PROJECT, PROMOB, LISTING');
+  const projectName =
+    projectNode?.getAttribute('NAME') || projectNode?.getAttribute('DESCRIPTION') || 'Projeto Importado';
+  const clientName = projectNode?.getAttribute('CLIENT') || null;
+  const environment = projectNode?.getAttribute('ENVIRONMENT') || projectNode?.getAttribute('AMBIENT') || null;
   
   const modules: PromobModule[] = [];
   const looseParts: PromobPart[] = [];
@@ -301,9 +304,17 @@ export function parsePromobXML(xmlContent: string): PromobProject {
         const parentId = parentNode.getAttribute('UNIQUEID') || parentNode.getAttribute('ID') || 'unknown';
         if (!moduleMap.has(parentId)) {
           recognizedModules++;
+          const ambientEl = (() => {
+            let p = parentNode.parentElement;
+            while (p) {
+              if (p.tagName === 'AMBIENT') return p;
+              p = p.parentElement;
+            }
+            return null;
+          })();
           const newModule: PromobModule = {
             name: parentNode.getAttribute('DESCRIPTION') || parentNode.getAttribute('NAME') || 'Módulo',
-            environment: parentNode.getAttribute('ENVIRONMENT') || null,
+            environment: ambientEl?.getAttribute('NAME') || ambientEl?.getAttribute('DESCRIPTION') || parentNode.getAttribute('ENVIRONMENT') || null,
             width_mm: getNumericAttr(parentNode, 'WIDTH') || null,
             height_mm: getNumericAttr(parentNode, 'HEIGHT') || null,
             depth_mm: getNumericAttr(parentNode, 'DEPTH') || null,
@@ -378,8 +389,8 @@ export function parsePromobXML(xmlContent: string): PromobProject {
 
   return {
     name: projectName,
-    client_name: projectNode?.getAttribute('CLIENT') || null,
-    environment: projectNode?.getAttribute('ENVIRONMENT') || null,
+    client_name: clientName,
+    environment,
     modules,
     loose_parts: looseParts
   };

@@ -520,8 +520,7 @@ function ImportPage() {
           {
             _project_id: projectId,
             _modules: modulesPayload,
-            _loose_parts: loosePartsPayload,
-            _is_test: true
+            _loose_parts: loosePartsPayload
           }
         );
         if (distributionError) throw distributionError;
