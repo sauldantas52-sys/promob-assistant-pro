@@ -159,7 +159,11 @@ export const IndustrialCutPlanEngine = {
 
     // 4. Algorithm Implementation (Rule 11-13)
     for (const [key, pieces] of Object.entries(groups)) {
-      const [supplier, material, color, thickness] = key.split('|');
+      const segments = key.split('|');
+      const supplier = segments[0] || "GENERIC";
+      const material = segments[1] || "MDF";
+      const color = segments[2] || "WHITE";
+      const thickness = segments[3] || "0";
       
       // Sort pieces: sh descending, then lo descending
       const sortedPieces = [...pieces].sort((a, b) => {
