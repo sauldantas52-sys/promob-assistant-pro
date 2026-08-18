@@ -636,7 +636,8 @@ function ProjectDetail() {
           <TabsList className="flex h-12 w-max min-w-full justify-start rounded-none bg-transparent p-1">
             <TabTrigger value="modules" icon={LayoutGrid} label="Módulos" />
             <TabTrigger value="visual-intake" icon={Eye} label="Alimentação Visual" />
-            <TabTrigger value="technical3d" icon={Box} label="Gêmeo DXF" />
+            <TabTrigger value="operational3d" icon={Box} label="Ambiente 3D" />
+            <TabTrigger value="technical3d" icon={Maximize2} label="Gêmeo DXF" />
             <TabTrigger value="parts" icon={ClipboardList} label="Lista Técnica" />
             <TabTrigger value="commercial" icon={FileText} label="Comercial" />
             <TabTrigger value="budget" icon={Building2} label="Inventário XML" />
