@@ -354,8 +354,8 @@ function ImportPage() {
               is_test: true, 
             },
             _files: storedFiles,
-            _modules: [], 
-            _loose_parts: [],
+            _modules: modulesPayload, 
+            _loose_parts: loosePartsPayload,
           },
         );
         if (importError) throw importError;
