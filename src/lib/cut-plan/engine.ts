@@ -116,8 +116,15 @@ export const IndustrialCutPlanEngine = {
       const metadata = (part.metadata as any) || {};
 
       for (let i = 0; i < repetition; i++) {
-        const lo = Math.max(part.length_mm, part.width_mm);
-        const sh = Math.min(part.length_mm, part.width_mm);
+        // Ordenação Industrial: maior x mediana (lo x sh)
+        const dims = [
+          Number(part.length_mm || 0),
+          Number(part.width_mm || 0),
+          Number(part.thickness_mm || 0)
+        ].sort((a, b) => b - a);
+        
+        const lo = dims[0];
+        const sh = dims[1];
 
         physicalPieces.push({
           physicalId: `${part.id_xml || part.id}_rep${i}`,
