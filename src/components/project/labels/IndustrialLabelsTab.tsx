@@ -1,17 +1,19 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { renderToString } from 'react-dom/server';
 import { QRCodeSVG } from 'qrcode.react';
 import { PhysicalPiece } from '@/lib/cut-plan/engine';
 import { generateLabelData } from '@/lib/labels/engine';
 import { pieceLabelHtml } from '@/lib/labels/piece-label';
-import { getEdgeColor, getEdgeData } from '@/lib/cut-plan/edges';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Printer, Settings, Eye, Check } from 'lucide-react';
+import { Printer, Settings, FileDown, Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
+import { toast } from 'sonner';
 
 interface LabelPreset {
   id: string;
@@ -41,6 +43,8 @@ export function IndustrialLabelsTab({ pieces }: { pieces: PhysicalPiece[] }) {
   const [selectedPreset, setSelectedPreset] = useState<string>(PRESETS[0]!.id);
   const [customConfig, setCustomConfig] = useState(PRESETS[0]!);
   const [showSettings, setShowSettings] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const labelContainerRef = useRef<HTMLDivElement>(null);
 
   // Ordenação Industrial: Módulo > Código da Peça
   const sortedPieces = [...pieces].sort((a, b) => {
@@ -66,6 +70,50 @@ export function IndustrialLabelsTab({ pieces }: { pieces: PhysicalPiece[] }) {
     window.print();
   };
 
+  const handleExportPDF = async () => {
+    if (!labelContainerRef.current) return;
+    
+    setIsExporting(true);
+    const toastId = toast.loading('Gerando PDF industrial (Zebra/Remac)...');
+
+    try {
+      const { width, height } = customConfig;
+      
+      const pdf = new jsPDF({
+        orientation: width > height ? 'landscape' : 'portrait',
+        unit: 'mm',
+        format: [width, height]
+      });
+
+      const labelElements = labelContainerRef.current.querySelectorAll('.etq-wrapper');
+      
+      for (let i = 0; i < labelElements.length; i++) {
+        const element = labelElements[i] as HTMLElement;
+        
+        const canvas = await html2canvas(element, {
+          scale: 3, 
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#ffffff'
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        if (i > 0) pdf.addPage([width, height]);
+        pdf.addImage(imgData, 'PNG', 0, 0, width, height, undefined, 'FAST');
+      }
+
+      const filename = `etiquetas-zebra-remac-${new Date().getTime()}.pdf`;
+      pdf.save(filename);
+      toast.success('PDF exportado com sucesso!', { id: toastId });
+    } catch (error) {
+      console.error('Erro ao exportar PDF:', error);
+      toast.error('Erro ao gerar PDF.', { id: toastId });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-4 rounded-xl border-2 border-slate-100 shadow-sm no-print">
@@ -89,12 +137,27 @@ export function IndustrialLabelsTab({ pieces }: { pieces: PhysicalPiece[] }) {
             <Settings className="h-3.5 w-3.5" /> Ajustes
           </Button>
           <Button 
+            variant="outline"
+            size="sm" 
+            className="border-indigo-200 text-indigo-700 hover:bg-indigo-50 text-[10px] font-black uppercase tracking-widest gap-2"
+            onClick={handleExportPDF}
+            disabled={isExporting}
+          >
+            {isExporting ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <FileDown className="h-3.5 w-3.5" />
+            )}
+            Exportar PDF
+          </Button>
+          <Button 
             size="sm" 
             className="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase tracking-widest gap-2"
             onClick={handlePrint}
           >
-            <Printer className="h-3.5 w-3.5" /> Imprimir Tudo
+            <Printer className="h-3.5 w-3.5" /> Imprimir
           </Button>
+
         </div>
       </div>
 
@@ -150,6 +213,7 @@ export function IndustrialLabelsTab({ pieces }: { pieces: PhysicalPiece[] }) {
 
       {/* Grid de Etiquetas */}
       <div 
+        ref={labelContainerRef}
         className="grid gap-4 print:gap-0 print:grid-cols-[repeat(var(--cols),1fr)] print:w-full no-print-margin print:block" 
         style={{ 
           '--cols': customConfig.cols,
@@ -158,15 +222,17 @@ export function IndustrialLabelsTab({ pieces }: { pieces: PhysicalPiece[] }) {
         } as React.CSSProperties}
       >
         {sortedPieces.map((piece) => (
-          <IndustrialLabel 
-            key={piece.physicalId} 
-            piece={piece} 
-            width={customConfig.width}
-            height={customConfig.height}
-            presetId={selectedPreset}
-          />
+          <div key={piece.physicalId} className="etq-wrapper">
+            <IndustrialLabel 
+              piece={piece} 
+              width={customConfig.width}
+              height={customConfig.height}
+              presetId={selectedPreset}
+            />
+          </div>
         ))}
       </div>
+
 
       <style>{`
         @media print {
