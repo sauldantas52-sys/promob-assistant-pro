@@ -66,6 +66,11 @@ export const Route = createFileRoute('/_authenticated')({
         throw redirect({ to: '/dashboard' });
       }
     }
+    
+    // Check if redirecting to /dashboard but trying to access project detail
+    if (location.pathname.startsWith('/projects/') && location.pathname !== '/projects/' && location.pathname !== '/projects/import') {
+      console.log("Auth Guard: Allowing project detail access for authenticated user:", session.user.id);
+    }
 
     return authContext;
   },
