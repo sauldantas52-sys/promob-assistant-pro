@@ -578,7 +578,7 @@ function ImportPage() {
     onSuccess: (projectId) => {
       toast.success("Projeto importado com sucesso!");
       queryClient.invalidateQueries({ queryKey: ["projects"] });
-      navigate({ to: "/projects/$projectId", params: { projectId: projectId as string } });
+      navigate({ to: "/projects/$projectId", params: { projectId: projectId as string }, search: { tab: 'modules' } });
     },
     onError: (err: Error) => {
       toast.error(err.message || "Erro na importação.");
