@@ -42,13 +42,15 @@ export const Route = createFileRoute('/_authenticated')({
     }
 
     // Redirecionamento de segurança (RBAC)
+    // O redirecionamento só deve ocorrer se a role for explicitamente INVÁLIDA para o path.
     const isImportPath = location.pathname.startsWith('/projects/import') || location.pathname.startsWith('/projects/test-import');
-    if (isImportPath && role) {
+    if (isImportPath) {
       const allowedRoles = ['admin', 'escritorio', 'projetista'];
-      if (!allowedRoles.includes(role)) {
+      if (role && !allowedRoles.includes(role)) {
         console.warn(`[Security] Usuário com role ${role} tentou acessar importação.`);
         throw redirect({ to: '/dashboard' });
       }
+      // Se role for null (ainda carregando), permitimos a continuação para que o componente trate o loading
     }
 
     return {
