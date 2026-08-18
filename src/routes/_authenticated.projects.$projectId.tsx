@@ -36,6 +36,7 @@ import {
   Printer,
   Calculator,
   Activity,
+  BookOpen,
 } from "lucide-react";
 import { Parser } from "@json2csv/plainjs";
 import { EngineeringTab } from "@/components/EngineeringTab";
@@ -43,6 +44,8 @@ import { SketchUpBridgeTab } from "@/components/SketchUpBridgeTab";
 import { PilotValidationChecklist } from "@/components/PilotValidationChecklist";
 import { BudgetTab } from "@/components/project/BudgetTab";
 import { PreliminaryCutPlanTab } from "@/components/project/PreliminaryCutPlanTab";
+import { AssemblyBookTab } from "@/components/project/AssemblyBookTab";
+
 import { VisualEstimateTab } from "@/components/project/VisualEstimateTab";
 import { AuditIntegrationTab } from "@/components/project/AuditIntegrationTab";
 import { PhysicalChecklistFlow } from "@/components/PhysicalChecklistFlow";
@@ -371,6 +374,7 @@ function ProjectDetail() {
           {[
             { value: "preliminary-cut-plan", icon: Scissors, label: "Plano de Corte Pro" },
             { value: "modules", icon: LayoutGrid, label: "Módulos e Peças Real" },
+            { value: "assembly-book", icon: BookOpen, label: "Caderno de Montagem" },
             { value: "operational3d", icon: Box, label: "Ambiente 3D Operacional" },
             { value: "labels", icon: Printer, label: "Etiquetas Industriais" },
             { value: "shipping", icon: Truck, label: "Expedição e Volumes" },
@@ -383,6 +387,7 @@ function ProjectDetail() {
             { value: "production-status", icon: Activity, label: "Status de Produção" },
             { value: "assistance", icon: MessageSquare, label: "Assistência Técnica" },
           ].map((item) => {
+
             const active = activeTab === item.value;
             return (
               <button
@@ -424,8 +429,18 @@ function ProjectDetail() {
             {activeTab === "costs" && <IndustrialCostsTab projectId={projectId} />}
             {activeTab === "shipping" && <ProjectShippingTab projectId={projectId} />}
             {activeTab === "physical-pilot" && <PhysicalChecklistFlow projectId={projectId} />}
+            {activeTab === "assembly-book" && (
+              <AssemblyBookTab 
+                projectId={projectId} 
+                onView3D={(moduleId) => {
+                  setActiveTab("operational3d");
+                  navigate({ search: { tab: "operational3d" } as any, replace: true });
+                }} 
+              />
+            )}
             {activeTab === "operational3d" && <Operational3DView projectId={projectId} modules={modules.data || []} parts={parts.data || []} />}
             {activeTab === "production-status" && <ProductionStatusTab projectId={projectId} />}
+
             {activeTab === "modules" && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">

@@ -2,7 +2,8 @@ import React, { Suspense, useMemo, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Environment, Float, Html, PerspectiveCamera, Bounds, useBounds } from '@react-three/drei';
 import * as THREE from 'three';
-import { Box, Maximize2, RotateCw, ZoomIn, ZoomOut, Layers, Eye, EyeOff, Info, AlertTriangle } from 'lucide-react';
+import { Box, Maximize2, RotateCw, ZoomIn, ZoomOut, Layers, Eye, EyeOff, Info, AlertTriangle, ClipboardList } from 'lucide-react';
+
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -390,10 +391,21 @@ export function Operational3DView({
               variant="secondary" 
               size="sm" 
               className="rounded-xl h-10 px-4 font-black text-[10px] uppercase tracking-widest bg-white/90 backdrop-blur shadow-sm hover:bg-white"
+              onClick={() => {
+                window.location.search = '?tab=assembly-book';
+              }}
+            >
+              <ClipboardList className="mr-2 h-4 w-4 text-blue-600" /> Caderno
+            </Button>
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              className="rounded-xl h-10 px-4 font-black text-[10px] uppercase tracking-widest bg-white/90 backdrop-blur shadow-sm hover:bg-white"
               onClick={restoreScene}
             >
               <RotateCw className="mr-2 h-4 w-4 text-blue-600" /> Restaurar
             </Button>
+
             <Button 
               variant={isIsolated ? "default" : "secondary"}
               size="sm" 
