@@ -279,7 +279,7 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
                 <div className="flex justify-between items-center">
                   <span className="text-[10px] font-black uppercase text-slate-400">Chapa {idx + 1}</span>
                   <div className="flex gap-2">
-                    <Badge variant="outline" className="text-[8px] font-bold text-slate-400 border-slate-200">REFILO 5mm</Badge>
+                    <Badge variant="outline" className="text-[8px] font-bold text-slate-400 border-slate-200">REFILO 10mm</Badge>
                   </div>
                 </div>
                 <div 
