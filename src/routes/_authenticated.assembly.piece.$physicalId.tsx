@@ -27,6 +27,9 @@ function PieceDetailsPage() {
 
       const partId = steps[0].part_id;
       const projectId = steps[0].project_id;
+      
+      if (!partId) throw new Error('Part ID não encontrado para esta peça física.');
+
 
       // 2. Fetch technical part data
       const { data: part, error: partError } = await supabase
