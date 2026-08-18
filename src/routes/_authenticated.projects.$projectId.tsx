@@ -100,8 +100,8 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_authenticated/projects/$projectId")({
   validateSearch: (search: Record<string, unknown>) => {
     return {
-      tab: (search.tab as string) || undefined,
-    } as { tab?: string };
+      tab: (search.tab as string) || "",
+    };
   },
   head: () => ({
     meta: [
