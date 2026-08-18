@@ -525,7 +525,7 @@ function ProjectDetail() {
                   <h3 className="text-xl font-black uppercase tracking-tight">Etiquetas Industriais</h3>
                 </div>
                 {cutPlanGroups && (
-                  <IndustrialLabelsTab pieces={cutPlanGroups.flatMap(g => g.pieces)} />
+                  <IndustrialLabelsTab pieces={cutPlanGroups.flatMap((g: any) => g.pieces)} />
                 )}
               </div>
             )}
