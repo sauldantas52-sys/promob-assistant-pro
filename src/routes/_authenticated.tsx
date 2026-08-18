@@ -17,7 +17,7 @@ export const Route = createFileRoute('/_authenticated')({
     // Obter dados do perfil e função
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('full_name, must_change_password, company_id, companies(id, name)')
+      .select('full_name, must_change_password, company_id, companies!inner(id, name)')
       .eq('id', session.user.id)
       .maybeSingle();
 
