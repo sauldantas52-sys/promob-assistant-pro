@@ -2,7 +2,8 @@ import React, { Suspense, useMemo, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, ContactShadows, Environment, Float, Html, PerspectiveCamera, Bounds, useBounds } from '@react-three/drei';
 import * as THREE from 'three';
-import { Box, Maximize2, RotateCw, ZoomIn, ZoomOut, Layers, Eye, EyeOff, Info, AlertTriangle } from 'lucide-react';
+import { Box, Maximize2, RotateCw, ZoomIn, ZoomOut, Layers, Eye, EyeOff, Info, AlertTriangle, ClipboardList } from 'lucide-react';
+
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
