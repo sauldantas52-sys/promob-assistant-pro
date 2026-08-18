@@ -1,16 +1,20 @@
 import * as React from "react";
-import { useEffect, useState } from "react";
-import { Scissors, ShieldCheck, Layers, Package, Settings as Tool, AlertCircle, Ruler, Box, Printer } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState, useRef } from "react";
+import { Scissors, ShieldCheck, Layers, Package, Settings as Tool, AlertCircle, Ruler, Box, Printer, FileUp, ArrowRightLeft, Upload } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { IndustrialCutPlanEngine, type CutPlanGroup, type PhysicalPiece } from "@/lib/cut-plan/engine";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IndustrialLabelsTab } from "./labels/IndustrialLabelsTab";
+import { CutPlanComparisonCard } from "./CutPlanComparisonCard";
+import { CutProParser } from "@/lib/cut-plan/parsers";
+import { toast } from "sonner";
 
 export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
   const [integrityStatus, setIntegrityStatus] = useState<'validating' | 'pass' | 'fail'>('validating');
