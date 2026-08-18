@@ -7,7 +7,7 @@ import { generateLabelData } from '@/lib/labels/engine';
 import { pieceLabelHtml } from '@/lib/labels/piece-label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Printer, Settings, FileDown, Loader2 } from 'lucide-react';
+import { Printer, Settings, FileDown, Loader2, UserCheck } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -44,6 +44,7 @@ export function IndustrialLabelsTab({ pieces, project }: { pieces: PhysicalPiece
   const [customConfig, setCustomConfig] = useState(PRESETS[0]!);
   const [showSettings, setShowSettings] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [showClientTag, setShowClientTag] = useState(true);
   const labelContainerRef = useRef<HTMLDivElement>(null);
 
   // Ordenação Industrial: Módulo > Código da Peça
@@ -128,6 +129,17 @@ export function IndustrialLabelsTab({ pieces, project }: { pieces: PhysicalPiece
         </div>
         
         <div className="flex items-center gap-2">
+          <Button 
+            variant={showClientTag ? "default" : "outline"}
+            size="sm" 
+            className={cn(
+              "text-[10px] font-black uppercase tracking-widest gap-2",
+              showClientTag ? "bg-slate-900 text-white" : ""
+            )}
+            onClick={() => setShowClientTag(!showClientTag)}
+          >
+            <UserCheck className="h-3.5 w-3.5" /> Etq. Cliente
+          </Button>
           <Button 
             variant="outline" 
             size="sm" 
@@ -221,6 +233,23 @@ export function IndustrialLabelsTab({ pieces, project }: { pieces: PhysicalPiece
           gridTemplateColumns: `repeat(${customConfig.cols}, 1fr)`
         } as React.CSSProperties}
       >
+        {showClientTag && (
+          <div className="etq-wrapper">
+             <IndustrialLabel 
+              piece={{
+                physicalId: 'CLIENT_TAG',
+                isClientTag: true,
+                moduleSequence: 0,
+                pieceSequence: 0,
+                name: 'ETIQUETA FINAL CLIENTE',
+              } as any}
+              width={customConfig.width}
+              height={customConfig.height}
+              presetId={selectedPreset}
+              project={project}
+            />
+          </div>
+        )}
         {sortedPieces.map((piece) => (
           <div key={piece.physicalId} className="etq-wrapper">
             <IndustrialLabel 
@@ -228,6 +257,7 @@ export function IndustrialLabelsTab({ pieces, project }: { pieces: PhysicalPiece
               width={customConfig.width}
               height={customConfig.height}
               presetId={selectedPreset}
+              project={project}
             />
           </div>
         ))}
@@ -276,7 +306,7 @@ export function IndustrialLabelsTab({ pieces, project }: { pieces: PhysicalPiece
   );
 }
 
-function IndustrialLabel({ piece, width, height, presetId }: { piece: PhysicalPiece, width: number, height: number, presetId?: string }) {
+function IndustrialLabel({ piece, width, height, presetId, project }: { piece: PhysicalPiece & { isClientTag?: boolean }, width: number, height: number, presetId?: string, project?: any }) {
   const data = generateLabelData(piece);
   
   const pieceForHtml = {
@@ -309,7 +339,12 @@ function IndustrialLabel({ piece, width, height, presetId }: { piece: PhysicalPi
         level="L"
         includeMargin={false}
       />
-    )
+    ),
+    projectInfo: {
+      clientName: project?.client_name,
+      contact: project?.notes?.match(/Contato:\s*(.*)/)?.[1] || '(Não informado)',
+      dueDate: project?.created_at ? new Date(new Date(project.created_at).getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString() : '-'
+    }
   });
 
   return (
