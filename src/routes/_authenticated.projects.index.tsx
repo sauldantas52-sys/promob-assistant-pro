@@ -358,6 +358,7 @@ function CuttingCard({ project }: { project: ProjectSummary }) {
     <Link
       to="/projects/$projectId"
       params={{ projectId: project.id }}
+      search={{ tab: 'modules' }}
       className="group border-b border-slate-800 p-4 last:border-b-0 hover:bg-slate-900 md:border-r xl:border-b-0 sm:p-5"
     >
       <div className="flex items-start justify-between gap-3">
