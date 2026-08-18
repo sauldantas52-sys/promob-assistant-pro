@@ -83,9 +83,9 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
         p_company_id: profile.company_id,
         p_source: 'cutpro_oficial',
         p_total_pieces: result.total_pieces,
-        p_total_sheets: 0,
-        p_total_cuts: 0,
-        p_utilization_percent: 0,
+        p_total_sheets: result.total_sheets,
+        p_total_cuts: result.total_cuts,
+        p_utilization_percent: result.utilization_percent,
         p_metadata: result.metadata
       });
 
