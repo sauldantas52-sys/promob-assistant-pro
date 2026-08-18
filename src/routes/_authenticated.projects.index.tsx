@@ -393,7 +393,7 @@ function ProjectCard({ project }: { project: ProjectSummary }) {
     ? Math.round((project.completedSteps / project.totalSteps) * 100)
     : 0;
   return (
-    <Link to="/projects/$projectId" params={{ projectId: project.id }} className="min-w-0">
+    <Link to="/projects/$projectId" params={{ projectId: project.id }} search={{ tab: 'modules' }} className="min-w-0">
       <Card className={cn(
         "group h-full overflow-hidden border-slate-200 bg-white shadow-none transition-colors hover:border-slate-950",
         project.isTest && "border-blue-200 bg-blue-50/30"
