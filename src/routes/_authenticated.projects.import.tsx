@@ -131,7 +131,10 @@ export const Route = createFileRoute("/_authenticated/projects/import")({
 
 function ImportPage() {
   const navigate = useNavigate();
-  const { companyId, role, loading } = useAuth();
+  const { companyId, role, loading, user } = useAuth();
+  
+  // Log para debug
+  console.log("[ImportPage] State:", { companyId, role, loading, hasUser: !!user });
   const queryClient = useQueryClient();
   const [isProcessing, setIsProcessing] = useState(false);
   const [data, setData] = useState({ name: "", client: "", env: "", notes: "" });
