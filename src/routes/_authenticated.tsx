@@ -32,10 +32,13 @@ export const Route = createFileRoute('/_authenticated')({
     if (roleError) console.error("RBAC Fetch Error:", roleError);
 
     const role = (roleData?.role as any) || null;
+    const mustChangePassword = !!profile?.must_change_password;
+
+    console.log(`[Auth:Guard] Path: ${location.pathname}, Role: ${role}, MustChange: ${mustChangePassword}`);
 
     // Bloqueio operacional se troca de senha for obrigatória
-    if (profile?.must_change_password && location.pathname !== '/force-password-change') {
-      console.log("[Auth] Senha precisa ser trocada. Redirecionando.");
+    if (mustChangePassword && location.pathname !== '/force-password-change') {
+      console.log("[Auth:Guard] Redirecionando para troca de senha obrigatória.");
       throw redirect({
         to: '/force-password-change',
       });
