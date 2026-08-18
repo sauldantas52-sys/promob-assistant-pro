@@ -320,10 +320,10 @@ export function Operational3DView({
       <div className="flex items-center justify-between px-2">
         <div>
           <h2 className="text-lg font-black uppercase tracking-tighter text-slate-900 flex items-center gap-2">
-            <Box className="h-5 w-5 text-blue-600" /> Visualização 3D Operacional
+            <Box className="h-5 w-5 text-blue-600" /> Módulos do Projeto (3D Real)
           </h2>
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-            Gêmeo Digital Industrial • Fidelidade 5.1
+            Gêmeo Digital Industrial • Fidelidade 5.9
           </p>
         </div>
         <div className="flex gap-2">

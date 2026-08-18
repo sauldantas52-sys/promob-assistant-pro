@@ -88,10 +88,10 @@ export function VisualFeedingMode({ projectId, projectName }: VisualFeedingModeP
       <div className="flex items-center justify-between px-2">
         <div>
           <h2 className="text-lg font-black uppercase tracking-tighter text-slate-900 flex items-center gap-2">
-            <Eye className="h-5 w-5 text-lime-600" /> Alimentação Visual Industrial
+            <Eye className="h-5 w-5 text-lime-600" /> Módulos do Projeto (Fidelidade Visual)
           </h2>
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-            Conferência de Fidelidade: DXF ↔ Módulos ↔ Peças
+            Conferência de Fidelidade: DXF ↔ Módulos Reais ↔ Peças Fisicas
           </p>
         </div>
         <Badge variant="outline" className="rounded-full bg-slate-50 border-slate-200 text-slate-500 font-black text-[9px] uppercase tracking-widest px-3 py-1">

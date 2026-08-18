@@ -388,7 +388,7 @@ export function PreliminaryCutPlanTab({ projectId, project }: { projectId: strin
                 <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Motor de Corte Ativo</span>
               </div>
               <h2 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tighter leading-none">
-                Plano de Corte <span className="text-[var(--lime-industrial)]">Pro</span>
+                Plano de Corte <span className="text-[var(--lime-industrial)]">Pro</span> (Módulos Reais)
               </h2>
               <p className="text-slate-400 text-xs font-bold uppercase tracking-wider max-w-md mx-auto md:mx-0">
                 Cálculo de Nesting Industrial com Refilo de 10mm e Kerf de 4mm. Alimentação automática via Pasta do Cliente.

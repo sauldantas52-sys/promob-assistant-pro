@@ -370,7 +370,7 @@ function ProjectDetail() {
         <nav className="flex-1 space-y-1 px-3 py-6 overflow-y-auto custom-scrollbar">
           {[
             { value: "preliminary-cut-plan", icon: Scissors, label: "Plano de Corte Pro" },
-            { value: "modules", icon: LayoutGrid, label: "Módulos e Peças" },
+            { value: "modules", icon: LayoutGrid, label: "Módulos e Peças Real" },
             { value: "operational3d", icon: Box, label: "Ambiente 3D Operacional" },
             { value: "labels", icon: Printer, label: "Etiquetas Industriais" },
             { value: "shipping", icon: Truck, label: "Expedição e Volumes" },
@@ -429,7 +429,7 @@ function ProjectDetail() {
             {activeTab === "modules" && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-black uppercase tracking-tight">Módulos do Projeto</h3>
+                  <h3 className="text-xl font-black uppercase tracking-tight">Módulos Reais do Projeto (XML)</h3>
                   <Badge variant="outline" className="font-bold">{modules.data?.length ?? 0} Módulos</Badge>
                 </div>
                 <Card>

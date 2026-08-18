@@ -191,7 +191,7 @@ export function AuditIntegrationTab({ projectId }: { projectId: string }) {
         <Card className="overflow-hidden rounded-xl border-slate-200 bg-white shadow-sm">
           <CardHeader className="bg-slate-50 border-b border-slate-100 py-4 px-6">
             <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-emerald-500" /> Módulos Conectados
+              <ShieldCheck className="h-4 w-4 text-emerald-500" /> Módulos Reais Conectados
             </CardTitle>
           </CardHeader>
           <CardContent className="max-w-full overflow-x-auto p-0 [scrollbar-width:thin]">

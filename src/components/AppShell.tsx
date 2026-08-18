@@ -45,7 +45,7 @@ const navItems = [
   },
   {
     to: "/projects/import",
-    label: "Abrir Minha Pasta Real",
+    label: "Abrir Minha Pasta Real (Módulos)",
     icon: Upload,
     roles: ["admin", "projetista", "escritorio"],
   },

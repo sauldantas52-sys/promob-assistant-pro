@@ -802,7 +802,8 @@ function ImportPage() {
                 <span className="h-px w-8 bg-lime-300" /> Entrada técnica / 01
               </p>
               <h1 className="text-3xl font-black uppercase leading-none tracking-[-0.05em] sm:text-4xl lg:text-5xl">
-                Abrir Minha Pasta Real
+                Abrir Minha Pasta Real (Módulos)
+
               </h1>
               <p className="mt-3 max-w-2xl text-xs leading-relaxed text-slate-400 sm:text-sm">
                 Selecione a pasta raiz completa. O pacote só avança quando identidade e documentos

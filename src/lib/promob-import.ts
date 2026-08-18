@@ -312,6 +312,8 @@ export function parsePromobXML(xmlContent: string): PromobProject {
             }
             return null;
           })();
+
+          // Auditoria: Módulos identificados por UNIQUEID (Promob)
           const newModule: PromobModule = {
             name: parentNode.getAttribute('DESCRIPTION') || parentNode.getAttribute('NAME') || 'Módulo',
             environment: ambientEl?.getAttribute('NAME') || ambientEl?.getAttribute('DESCRIPTION') || parentNode.getAttribute('ENVIRONMENT') || null,
@@ -323,7 +325,8 @@ export function parsePromobXML(xmlContent: string): PromobProject {
             parts: [],
             metadata: {
               unique_id: parentId,
-              reference: parentNode.getAttribute('REFERENCE')
+              reference: parentNode.getAttribute('REFERENCE'),
+              is_industrial_module: true
             }
           };
           moduleMap.set(parentId, newModule);
@@ -332,6 +335,7 @@ export function parsePromobXML(xmlContent: string): PromobProject {
         moduleMap.get(parentId)!.parts.push(part);
         mdfPiecesInModules++;
       } else {
+        // Peça avulsa (Pode ser parte de uma estrutura sem ITEM pai)
         looseParts.push(part);
         looseMdfPieces++;
       }
