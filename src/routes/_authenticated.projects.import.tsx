@@ -583,10 +583,15 @@ function ImportPage() {
           // Avança status para 'corte' automaticamente para entrar no Pipeline
           await supabase
             .from("projects")
-            .update({ status: "corte", operational_status: "pronto_para_producao" })
+            .update({ 
+              status: "corte", 
+              operational_status: "liberado_corte",
+              machining_blocked: false,
+              is_validated: true 
+            })
             .eq("id", projectId);
 
-          console.log(`[Liberação 5.6] Projeto ${projectId} liberado automaticamente.`);
+          console.log(`[Liberação 5.8] Projeto ${projectId} alimentado e liberado para corte.`);
         } catch (releaseErr) {
           console.error("Erro na liberação automática:", releaseErr);
         }
