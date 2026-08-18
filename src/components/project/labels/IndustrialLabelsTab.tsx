@@ -70,6 +70,50 @@ export function IndustrialLabelsTab({ pieces }: { pieces: PhysicalPiece[] }) {
     window.print();
   };
 
+  const handleExportPDF = async () => {
+    if (!labelContainerRef.current) return;
+    
+    setIsExporting(true);
+    const toastId = toast.loading('Gerando PDF industrial (Zebra/Remac)...');
+
+    try {
+      const { width, height } = customConfig;
+      
+      const pdf = new jsPDF({
+        orientation: width > height ? 'landscape' : 'portrait',
+        unit: 'mm',
+        format: [width, height]
+      });
+
+      const labelElements = labelContainerRef.current.querySelectorAll('.etq-wrapper');
+      
+      for (let i = 0; i < labelElements.length; i++) {
+        const element = labelElements[i] as HTMLElement;
+        
+        const canvas = await html2canvas(element, {
+          scale: 3, 
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#ffffff'
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        if (i > 0) pdf.addPage([width, height]);
+        pdf.addImage(imgData, 'PNG', 0, 0, width, height, undefined, 'FAST');
+      }
+
+      const filename = `etiquetas-zebra-remac-${new Date().getTime()}.pdf`;
+      pdf.save(filename);
+      toast.success('PDF exportado com sucesso!', { id: toastId });
+    } catch (error) {
+      console.error('Erro ao exportar PDF:', error);
+      toast.error('Erro ao gerar PDF.', { id: toastId });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-4 rounded-xl border-2 border-slate-100 shadow-sm no-print">
