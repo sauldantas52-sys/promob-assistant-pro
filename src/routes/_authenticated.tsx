@@ -51,6 +51,16 @@ export const Route = createFileRoute('/_authenticated')({
       companyId: profile?.company_id 
     });
 
+    if (!role || !profile?.company_id) {
+      const allowedPaths = ['/dashboard', '/projects/import', '/force-password-change'];
+      const isProjectDetail = location.pathname.startsWith('/projects/') && location.pathname.split('/').length === 3;
+      
+      if (!allowedPaths.includes(location.pathname) && !isProjectDetail) {
+         console.log("Auth Guard: Incomplete profile, redirecting to dashboard");
+         throw redirect({ to: '/dashboard' });
+      }
+    }
+
     return authContext;
   },
 });
