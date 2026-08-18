@@ -266,11 +266,11 @@ export function Operational3DView({
       const visualPosition: [number, number, number] = offsetModuleId === m.id 
         ? [basePos[0], basePos[1] + 0.5, basePos[2] + 0.5] // Deslocamento visual
         : basePos;
-
-      const moduleParts = rawParts?.filter(p => p.module_id === m.id) || [];
-      const pieces: PhysicalPiece3D[] = moduleParts.map(p => ({
-        physicalId: p.id,
-        partId: p.id,
+  
+        const moduleParts = rawParts?.filter(p => p.module_id === m.id || p.metadata?.id_xml === m.id_xml) || [];
+        const pieces: PhysicalPiece3D[] = moduleParts.map(p => ({
+          physicalId: p.id,
+          partId: p.id,
         idXml: p.metadata?.id_xml || '',
         moduleSequence: index + 1,
         pieceCode: p.metadata?.piece_code || '',
