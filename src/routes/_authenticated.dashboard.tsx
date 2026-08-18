@@ -79,11 +79,9 @@ function DashboardContent() {
           </p>
         </div>
         
-        {hasPermission(role, "projects", "import") && (
-          <Button asChild className="h-10 w-full sm:w-auto px-6 rounded-md bg-[var(--lime-industrial)] hover:bg-lime-600 text-slate-900 font-bold uppercase tracking-wider text-[11px] shadow-sm transition-all active:scale-95">
-            <Link to="/projects/import">Novo Projeto</Link>
-          </Button>
-        )}
+        <Button asChild className="h-10 w-full sm:w-auto px-6 rounded-md bg-[var(--lime-industrial)] hover:bg-lime-600 text-slate-900 font-bold uppercase tracking-wider text-[11px] shadow-sm transition-all active:scale-95">
+          <Link to="/projects/import">Novo Projeto</Link>
+        </Button>
       </div>
 
       <div className="p-4 sm:p-6 space-y-6 max-w-[1600px] mx-auto w-full">
