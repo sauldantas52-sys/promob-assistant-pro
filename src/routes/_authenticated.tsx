@@ -6,7 +6,7 @@ export const Route = createFileRoute('/_authenticated')({
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     
     if (sessionError || !session) {
-      console.log("[AuthGuard] No session found, redirecting to login:", sessionError?.message, "Path:", location.pathname);
+      console.log("[AuthGuard] No session found, redirecting to login. Path:", location.pathname);
       throw redirect({
         to: '/login',
         search: {
@@ -16,29 +16,21 @@ export const Route = createFileRoute('/_authenticated')({
     }
     
     // Obter dados do perfil e função
-    const { data: profile, error: profileError } = await supabase
+    const { data: profile } = await supabase
       .from('profiles')
       .select('full_name, must_change_password, company_id, companies(id, name)')
       .eq('id', session.user.id)
       .maybeSingle();
 
-    if (profileError) console.error("Profile Fetch Error:", profileError);
-
-    const { data: roleData, error: roleError } = await supabase
+    const { data: roleData } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', session.user.id)
       .maybeSingle();
 
-    if (roleError) console.error("RBAC Fetch Error:", roleError);
-
     const role = (roleData?.role as any) || null;
-    if (!role) {
-      console.warn("[AuthGuard] User has no role assigned");
-    }
     const mustChangePassword = !!profile?.must_change_password;
 
-    // Bloqueio operacional se troca de senha for obrigatória
     if (mustChangePassword && location.pathname !== '/force-password-change') {
       throw redirect({
         to: '/force-password-change',
@@ -60,16 +52,16 @@ export const Route = createFileRoute('/_authenticated')({
       companyId: profile?.company_id 
     });
 
+    // Se estiver no dashboard e tiver tudo, ok. 
+    // Se não tiver role ou company, só permite dashboard ou import para tentar resolver.
     if (!role || !profile?.company_id) {
-      if (location.pathname !== '/dashboard' && location.pathname !== '/projects/import' && !location.pathname.startsWith('/projects/')) {
-        console.log("Auth Guard: Missing role or company, redirecting to dashboard");
-        throw redirect({ to: '/dashboard' });
+      const allowedPaths = ['/dashboard', '/projects/import', '/force-password-change'];
+      const isProjectDetail = location.pathname.startsWith('/projects/') && location.pathname.length > 10;
+      
+      if (!allowedPaths.includes(location.pathname) && !isProjectDetail) {
+         console.log("Auth Guard: Incomplete profile, redirecting to dashboard");
+         throw redirect({ to: '/dashboard' });
       }
-    }
-    
-    // Check if redirecting to /dashboard but trying to access project detail
-    if (location.pathname.startsWith('/projects/') && location.pathname !== '/projects/' && location.pathname !== '/projects/import') {
-      console.log("Auth Guard: Allowing project detail access for authenticated user:", session.user.id);
     }
 
     return authContext;
