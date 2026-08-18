@@ -117,6 +117,14 @@ function parseFolderIdentity(folderName: string) {
 }
 
 export const Route = createFileRoute("/_authenticated/projects/import")({
+  beforeLoad: async ({ context }) => {
+    console.log("[Route:Import] beforeLoad running. Context role:", context.role);
+    const allowedRoles = ['admin', 'escritorio', 'projetista'];
+    if (!context.role || !allowedRoles.includes(context.role)) {
+      console.warn(`[Route:Import] Acesso negado para role: ${context.role}`);
+      throw redirect({ to: '/dashboard' });
+    }
+  },
   head: () => ({
     meta: [
       { title: "Nova Importação | Monta AI — Industrial 4.0" },
