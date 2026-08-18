@@ -415,9 +415,10 @@ export function Operational3DView({
                               className="h-6 px-2 text-[7px] font-black uppercase tracking-widest text-blue-600 bg-blue-50/50 hover:bg-blue-100 rounded-md"
                               onClick={() => {
                                 // Navegação 3D -> Plano de Corte (Fidelity 5.1 Regra 7)
-                                // O PreliminaryCutPlanTab já deve ter mecanismos de destaque por physicalId
-                                toast.info(`Localizando peça ${piece.physicalId} no plano...`);
-                                // Em uma implementação completa, isso dispararia um evento ou trocaria a aba com foco
+                                window.dispatchEvent(new CustomEvent('highlight-piece', { 
+                                  detail: { physicalId: piece.physicalId } 
+                                }));
+                                toast.info(`Peça destacada no Plano de Corte.`);
                               }}
                             >
                               Ver no Plano
