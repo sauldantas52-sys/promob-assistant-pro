@@ -775,7 +775,7 @@ function ImportPage() {
                 <span className="h-px w-8 bg-lime-300" /> Entrada técnica / 01
               </p>
               <h1 className="text-3xl font-black uppercase leading-none tracking-[-0.05em] sm:text-4xl lg:text-5xl">
-                Pasta do Cliente
+                Abrir Minha Pasta Real
               </h1>
               <p className="mt-3 max-w-2xl text-xs leading-relaxed text-slate-400 sm:text-sm">
                 Selecione a pasta raiz completa. O pacote só avança quando identidade e documentos
@@ -848,12 +848,12 @@ function ImportPage() {
                     <FolderOpen className="h-8 w-8 text-slate-950 group-hover:text-lime-700" />
                     <div className="min-w-0">
                       <p className="truncate text-sm font-black uppercase text-slate-950">
-                        {folderName || "Abrir Minha Pasta Real"}
+                        {folderName || "Clique para Abrir Minha Pasta Real"}
                       </p>
                       <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
                         {folderFileCount
                           ? `${folderFileCount} arquivos lidos`
-                          : "Escolher arquivos da minha empresa"}
+                          : "Selecione a pasta do projeto"}
                       </p>
                     </div>
                   </label>
