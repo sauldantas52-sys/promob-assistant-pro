@@ -227,7 +227,8 @@ export function CommercialDashboard({
               <Tab value="comparison" icon={Scale} label="Comparativo" />
               <Tab value="suppliers" icon={Building2} label="Fornecedores" />
               <Tab value="outsourcing" icon={Truck} label="Terceirização" />
-              <Tab value="boards" icon={PanelsTopLeft} label="Pranchas BETA" />
+              <Tab value="boards" icon={PanelsTopLeft} label="Pranchas" />
+              <Tab value="ai_quotes" icon={BadgeDollarSign} label="Orçamentos IA" />
             </TabsList>
           </div>
 
