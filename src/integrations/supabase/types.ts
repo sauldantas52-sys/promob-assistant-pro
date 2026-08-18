@@ -871,6 +871,7 @@ export type Database = {
       }
       modules: {
         Row: {
+          company_id: string | null
           created_at: string
           data_source: string | null
           depth_mm: number | null
@@ -887,6 +888,7 @@ export type Database = {
           width_mm: number | null
         }
         Insert: {
+          company_id?: string | null
           created_at?: string
           data_source?: string | null
           depth_mm?: number | null
@@ -903,6 +905,7 @@ export type Database = {
           width_mm?: number | null
         }
         Update: {
+          company_id?: string | null
           created_at?: string
           data_source?: string | null
           depth_mm?: number | null
@@ -919,6 +922,13 @@ export type Database = {
           width_mm?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "modules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "modules_project_id_fkey"
             columns: ["project_id"]
@@ -1194,6 +1204,7 @@ export type Database = {
         Row: {
           assembly_group_id: string | null
           color: string | null
+          company_id: string | null
           created_at: string
           cutting_edge_released: boolean | null
           data_source: string | null
@@ -1232,6 +1243,7 @@ export type Database = {
         Insert: {
           assembly_group_id?: string | null
           color?: string | null
+          company_id?: string | null
           created_at?: string
           cutting_edge_released?: boolean | null
           data_source?: string | null
@@ -1270,6 +1282,7 @@ export type Database = {
         Update: {
           assembly_group_id?: string | null
           color?: string | null
+          company_id?: string | null
           created_at?: string
           cutting_edge_released?: boolean | null
           data_source?: string | null
@@ -1311,6 +1324,13 @@ export type Database = {
             columns: ["assembly_group_id"]
             isOneToOne: false
             referencedRelation: "assembly_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
           {
@@ -2199,6 +2219,7 @@ export type Database = {
           commercial_approved: boolean | null
           company_id: string
           created_at: string | null
+          created_by: string | null
           cutting_status: string | null
           distribution_completed_at: string | null
           environment: string | null
@@ -2229,6 +2250,7 @@ export type Database = {
           commercial_approved?: boolean | null
           company_id: string
           created_at?: string | null
+          created_by?: string | null
           cutting_status?: string | null
           distribution_completed_at?: string | null
           environment?: string | null
@@ -2259,6 +2281,7 @@ export type Database = {
           commercial_approved?: boolean | null
           company_id?: string
           created_at?: string | null
+          created_by?: string | null
           cutting_status?: string | null
           distribution_completed_at?: string | null
           environment?: string | null
@@ -2991,12 +3014,66 @@ export type Database = {
         }
         Returns: string
       }
+      import_client_project_v2: {
+        Args: { _files: Json[]; _project: Json; _project_id: string }
+        Returns: string
+      }
       import_legacy_store_credits: { Args: { _payload: Json }; Returns: Json }
+      industrial_bypass_persist_closet: {
+        Args: {
+          _company_id: string
+          _name: string
+          _project_id: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      industrial_bypass_persist_closet_v11: {
+        Args: {
+          _company_id: string
+          _name: string
+          _project_id: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
       ingest_and_distribute_project: {
-        Args: { _loose_parts: Json; _modules: Json; _project_id: string }
+        Args: { _loose_parts: Json[]; _modules: Json[]; _project_id: string }
         Returns: undefined
       }
       is_admin: { Args: never; Returns: boolean }
+      persist_industrial_project_bypass: {
+        Args: {
+          _client_name: string
+          _company_id: string
+          _name: string
+          _project_id: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      persist_industrial_project_bypass_v2: {
+        Args: {
+          _client_name: string
+          _company_id: string
+          _name: string
+          _project_id: string
+          _storage_path: string
+          _user_id: string
+          _xml_size: number
+        }
+        Returns: undefined
+      }
+      persist_industrial_project_bypass_v3: {
+        Args: {
+          _client_name: string
+          _company_id: string
+          _name: string
+          _project_id: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
       prepare_store_credit_purchase: {
         Args: {
           _account_id: string

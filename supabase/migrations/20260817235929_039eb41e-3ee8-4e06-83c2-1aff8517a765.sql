@@ -1,0 +1,90 @@
+-- Identificação e Correção de Estrutura Industrial 4.0
+-- 1. Garantir que modules e parts tenham company_id (necessário para RLS e isolamento)
+ALTER TABLE public.modules ADD COLUMN IF NOT EXISTS company_id UUID REFERENCES public.companies(id);
+ALTER TABLE public.parts ADD COLUMN IF NOT EXISTS company_id UUID REFERENCES public.companies(id);
+
+-- 2. Atualizar RPC de ingestão para lidar com o esquema corrigido
+CREATE OR REPLACE FUNCTION public.ingest_and_distribute_project(
+    _project_id UUID,
+    _modules JSONB[],
+    _loose_parts JSONB[]
+)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    _company_id UUID;
+    _module_id UUID;
+    _mod JSONB;
+    _part JSONB;
+BEGIN
+    SELECT company_id INTO _company_id FROM public.projects WHERE id = _project_id;
+    
+    -- Limpar dados anteriores se houver (para idempotência)
+    DELETE FROM public.parts WHERE project_id = _project_id;
+    DELETE FROM public.modules WHERE project_id = _project_id;
+
+    -- Inserir Módulos e suas Peças
+    IF _modules IS NOT NULL THEN
+        FOR _mod IN SELECT * FROM jsonb_array_elements(_modules)
+        LOOP
+            INSERT INTO public.modules (
+                project_id, company_id, name, environment, 
+                width_mm, height_mm, depth_mm, quantity, id_xml
+            )
+            VALUES (
+                _project_id, _company_id, _mod->>'name', _mod->>'environment',
+                (_mod->>'width_mm')::NUMERIC, (_mod->>'height_mm')::NUMERIC, 
+                (_mod->>'depth_mm')::NUMERIC, (_mod->>'quantity')::INTEGER, _mod->>'id_xml'
+            )
+            RETURNING id INTO _module_id;
+
+            IF _mod->'parts' IS NOT NULL THEN
+                FOR _part IN SELECT * FROM jsonb_array_elements(_mod->'parts')
+                LOOP
+                    INSERT INTO public.parts (
+                        project_id, module_id, company_id, name, kind, 
+                        material, thickness_mm, width_mm, length_mm, 
+                        quantity, repetition, id_xml, color
+                    )
+                    VALUES (
+                        _project_id, _module_id, _company_id, _part->>'name', _part->>'kind',
+                        _part->>'material', (_part->>'thickness_mm')::NUMERIC, 
+                        (_part->>'width_mm')::NUMERIC, (_part->>'length_mm')::NUMERIC,
+                        (_part->>'quantity')::INTEGER, (_part->>'repetition')::INTEGER, 
+                        _part->>'id_xml', _part->>'color'
+                    );
+                END LOOP;
+            END IF;
+        END LOOP;
+    END IF;
+
+    -- Inserir Peças Avulsas
+    IF _loose_parts IS NOT NULL THEN
+        FOR _part IN SELECT * FROM jsonb_array_elements(_loose_parts)
+        LOOP
+            INSERT INTO public.parts (
+                project_id, company_id, name, kind, 
+                material, thickness_mm, width_mm, length_mm, 
+                quantity, repetition, id_xml, color
+            )
+            VALUES (
+                _project_id, _company_id, _part->>'name', _part->>'kind',
+                _part->>'material', (_part->>'thickness_mm')::NUMERIC, 
+                (_part->>'width_mm')::NUMERIC, (_part->>'length_mm')::NUMERIC,
+                (_part->>'quantity')::INTEGER, (_part->>'repetition')::INTEGER, 
+                _part->>'id_xml', _part->>'color'
+            );
+        END LOOP;
+    END IF;
+
+    -- Atualizar timestamp do projeto
+    UPDATE public.projects 
+    SET ingestion_completed_at = now(), updated_at = now() 
+    WHERE id = _project_id;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.ingest_and_distribute_project(UUID, JSONB[], JSONB[]) TO authenticated;
