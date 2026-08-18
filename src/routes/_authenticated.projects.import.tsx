@@ -565,27 +565,28 @@ function ImportPage() {
           );
         }
 
-        let cleanupFailed = false;
-        if (preparedFiles.length > 0) {
-          const { error: cleanupError } = await supabase.storage
-            .from("project-files")
-            .remove(preparedFiles.map((item) => item.storagePath));
-          cleanupFailed = !!cleanupError;
-        }
+        try {
+          const { data: projectExists } = await supabase
+            .from("projects")
+            .select("id")
+            .eq("id", projectId)
+            .maybeSingle();
 
-        // Only discard the session metadata if cleanup of physical files succeeded
-        // otherwise we keep it for audit.
-        if (!cleanupFailed) {
-          const { error: discardError } = await supabase.rpc("discard_import_session" as any, {
-            _session_id: projectId,
-          });
-          if (discardError) {
-             console.error("Erro ao descartar sessão residual:", discardError);
+          if (!projectExists) {
+            console.warn("Limpando rastros de importação falha...");
+            
+            if (preparedFiles.length > 0) {
+              await supabase.storage
+                .from("project-files")
+                .remove(preparedFiles.map((item) => item.storagePath));
+            }
+
+            await supabase.rpc("discard_import_session", {
+              _session_id: projectId,
+            });
           }
-        } else {
-          await supabase.rpc("mark_import_cleanup_required" as any, {
-            _session_id: projectId,
-          });
+        } catch (cleanupError) {
+          console.error("Erro na limpeza pós-falha:", cleanupError);
         }
         
         throw error;
