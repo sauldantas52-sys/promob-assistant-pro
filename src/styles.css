@@ -110,3 +110,12 @@ iframe[src*="lovable.dev"] {
   position: absolute !important;
   z-index: -9999 !important;
 }
+
+@utility animate-progress-indefinite {
+  animation: progress-indefinite 1.5s infinite linear;
+}
+
+@keyframes progress-indefinite {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}

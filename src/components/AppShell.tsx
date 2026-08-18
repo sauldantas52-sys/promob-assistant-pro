@@ -189,12 +189,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="flex flex-col h-full pt-4">
           {/* Logo Monta AI */}
           <div className="px-6 py-6 border-b border-white/5">
-            <div className="flex items-center gap-3">
+            <Link to="/dashboard" className="flex items-center gap-3 transition-opacity hover:opacity-80">
               <div className="bg-[var(--lime-industrial)] p-2 rounded-lg">
                 <Boxes className="h-5 w-5 text-slate-900" />
               </div>
               <span className="text-xl font-black tracking-tight uppercase">Monta AI</span>
-            </div>
+            </Link>
           </div>
 
           {/* Navigation */}

@@ -345,16 +345,16 @@ function ProjectDetail() {
 
   return (
     <div className="flex h-[calc(100vh-64px)] w-full overflow-hidden lg:h-screen">
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-slate-200 bg-slate-50 lg:flex">
-        <div className="flex flex-col gap-4 p-6">
+      <aside className="hidden w-64 shrink-0 flex-col border-r border-slate-200 bg-slate-900 lg:flex">
+        <div className="flex flex-col gap-4 p-6 border-b border-white/5">
           <Link
             to="/projects"
-            className="inline-flex w-fit items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 transition-colors hover:text-blue-600"
+            className="inline-flex w-fit items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400 transition-colors hover:text-[var(--lime-industrial)]"
           >
             <ArrowLeft className="h-4 w-4" /> Projetos
           </Link>
           <div className="space-y-1">
-            <h1 className="truncate text-lg font-black uppercase tracking-tight text-slate-950">
+            <h1 className="truncate text-lg font-black uppercase tracking-tight text-white">
               {project.data?.name}
             </h1>
             <p className="truncate text-[10px] font-bold uppercase tracking-wider text-slate-500">
@@ -363,7 +363,7 @@ function ProjectDetail() {
           </div>
         </div>
 
-        <nav className="flex-1 space-y-1 px-3 py-2">
+        <nav className="flex-1 space-y-1 px-3 py-6 overflow-y-auto custom-scrollbar">
           {[
             { value: "preliminary-cut-plan", icon: Scissors, label: "Plano de Corte Pro" },
             { value: "modules", icon: LayoutGrid, label: "Módulos e Peças" },
@@ -388,18 +388,18 @@ function ProjectDetail() {
                 className={cn(
                   "flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider transition-all",
                   active
-                    ? "bg-slate-900 text-[var(--lime-industrial)] shadow-md"
-                    : "text-slate-600 hover:bg-slate-200 hover:text-slate-900"
+                    ? "bg-white/10 text-[var(--lime-industrial)] shadow-sm"
+                    : "text-slate-400 hover:bg-white/5 hover:text-white"
                 )}
               >
-                <item.icon className={cn("h-4 w-4", active ? "text-[var(--lime-industrial)]" : "text-slate-400")} />
+                <item.icon className={cn("h-4 w-4", active ? "text-[var(--lime-industrial)]" : "text-slate-500")} />
                 {item.label}
               </button>
             );
           })}
         </nav>
 
-        <div className="border-t border-slate-200 p-4">
+        <div className="border-t border-white/5 p-4 bg-black/20">
           <Badge
             className={cn(
               "w-full justify-center rounded-md border-none py-1.5 text-[9px] font-black uppercase tracking-widest",
@@ -411,7 +411,7 @@ function ProjectDetail() {
         </div>
       </aside>
 
-      <main className="flex min-w-0 flex-1 flex-col bg-white">
+      <main className="flex min-w-0 flex-1 flex-col bg-slate-50">
         <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
           <div className="mx-auto max-w-[1400px]">
             {activeTab === "preliminary-cut-plan" && <PreliminaryCutPlanTab projectId={projectId} />}
