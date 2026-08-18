@@ -31,6 +31,7 @@ import type { AppRole } from "@/lib/auth";
 import { commercialSupabase } from "@/lib/commercial/client";
 import { importLegacyStoreCredits } from "@/lib/commercial/legacy-credit.functions";
 import { sendOutsourcingOrderWhatsApp } from "@/lib/commercial/whatsapp.functions";
+import { AIQuoteWizard } from "@/components/budget/AIQuoteWizard";
 import {
   extractDocumentText,
   parseCommercialDocument,
@@ -189,7 +190,7 @@ export function CommercialDashboard({
         <div className="mx-auto flex max-w-[1600px] flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <div className="mb-3 flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.24em] text-lime-400">
-              <span className="h-1.5 w-8 bg-lime-400" /> Central de compras e crédito
+              <span className="h-1.5 w-8 bg-lime-400" /> Comando Comercial Avançado
             </div>
             <h1 className="text-3xl font-black uppercase tracking-[-0.05em] sm:text-5xl">
               Comercial <span className="text-slate-500">360</span>
@@ -227,7 +228,8 @@ export function CommercialDashboard({
               <Tab value="comparison" icon={Scale} label="Comparativo" />
               <Tab value="suppliers" icon={Building2} label="Fornecedores" />
               <Tab value="outsourcing" icon={Truck} label="Terceirização" />
-              <Tab value="boards" icon={PanelsTopLeft} label="Pranchas BETA" />
+              <Tab value="boards" icon={PanelsTopLeft} label="Pranchas" />
+              <Tab value="ai_quotes" icon={BadgeDollarSign} label="Orçamentos IA" />
             </TabsList>
           </div>
 
@@ -351,6 +353,11 @@ export function CommercialDashboard({
               error={sessions.error}
               canCreate={canCreateOperational}
             />
+          </TabsContent>
+          <TabsContent value="ai_quotes" className="mt-4">
+            <div className="mx-auto max-w-5xl">
+              <AIQuoteWizard companyId={companyId} />
+            </div>
           </TabsContent>
         </Tabs>
       </div>

@@ -18,6 +18,7 @@ import {
   CheckCircle2,
   Info,
   Briefcase,
+  BadgeDollarSign,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -46,6 +47,12 @@ const navItems = [
     to: "/business",
     label: "Comercial 360",
     icon: Briefcase,
+    roles: ["admin", "projetista", "comercial", "escritorio", "auditor"],
+  },
+  {
+    to: "/budgets",
+    label: "Orçamentos IA",
+    icon: BadgeDollarSign,
     roles: ["admin", "projetista", "comercial", "escritorio", "auditor"],
   },
   {
