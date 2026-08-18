@@ -11,13 +11,16 @@ import {
   Truck,
   CheckCircle2,
   AlertCircle,
-  Maximize2
+  Maximize2,
+  Boxes as BoxIcon,
+  LayoutDashboard
 } from 'lucide-react';
 import { ProductionStep, ProductionStatus, updateStepStatus } from '@/lib/production';
 import { getEdgeData } from '@/lib/cut-plan/edges';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
+import { Link } from '@tanstack/react-router';
 
 interface PieceDetailsProps {
   piece: any;
@@ -71,7 +74,7 @@ export function PieceDetails({ piece, steps, physicalId, cutPlan }: PieceDetails
   return (
     <div className="space-y-6">
       {/* Header Industrial */}
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b-4 border-slate-900 pb-6">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between border-b-4 border-slate-900 pb-6">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <Badge className="bg-slate-900 text-blue-400 font-black uppercase text-[10px] tracking-widest px-3">
@@ -87,6 +90,37 @@ export function PieceDetails({ piece, steps, physicalId, cutPlan }: PieceDetails
           <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-1">
             Código: {piece.piece_code || 'N/A'}
           </p>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Button
+            asChild
+            variant="outline"
+            className="h-10 rounded-xl border-slate-200 text-[9px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50"
+          >
+            <Link 
+              to="/projects/$projectId" 
+              params={{ projectId: piece.project_id }} 
+              search={{ tab: 'operational3d' }}
+            >
+              <LayoutDashboard className="mr-2 h-4 w-4 text-blue-500" />
+              Ver no 3D
+            </Link>
+          </Button>
+          <Button
+            asChild
+            variant="outline"
+            className="h-10 rounded-xl border-slate-200 text-[9px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50"
+          >
+            <Link 
+              to="/projects/$projectId" 
+              params={{ projectId: piece.project_id }} 
+              search={{ tab: 'preliminary-cut-plan' }}
+            >
+              <BoxIcon className="mr-2 h-4 w-4 text-emerald-500" />
+              Ver no Plano
+            </Link>
+          </Button>
         </div>
       </header>
 
