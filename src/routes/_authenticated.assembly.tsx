@@ -180,36 +180,50 @@ function AssemblyContent() {
   const list = projects.data ?? [];
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-5 p-3 sm:p-5 md:p-6 lg:p-8">
-      <header className="border-b-2 border-slate-900 pb-4">
-        <Button
-          variant="ghost"
-          onClick={() => navigate({ to: "/dashboard" })}
-          className="mb-3 h-8 px-2 text-[10px] font-bold uppercase tracking-widest text-slate-500"
-        >
-          <LayoutDashboard className="mr-2 h-3.5 w-3.5" /> Central
-        </Button>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <div className="mb-1 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">
-              <span className="h-2 w-2 bg-emerald-500" /> Operacao de campo
+    <div className="mx-auto max-w-[1600px] space-y-6 p-4 sm:p-6 lg:p-8 animate-in fade-in duration-500">
+      <header className="border-b-4 border-slate-900 pb-6">
+        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div className="space-y-4">
+            <Button
+              variant="ghost"
+              onClick={() => navigate({ to: "/dashboard" })}
+              className="h-8 rounded-md px-2 text-slate-400 hover:text-blue-600 gap-2 transition-colors"
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              <span className="text-[10px] font-black uppercase tracking-widest">Dashboard</span>
+            </Button>
+            
+            <div className="flex items-center gap-3">
+              <span className="h-1.5 w-8 bg-emerald-600 rounded-full" />
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-emerald-600">
+                Operação Chão de Fábrica
+              </p>
             </div>
-            <h1 className="text-3xl font-black uppercase tracking-[-0.05em] text-slate-950 sm:text-4xl">
+
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tighter text-slate-900 uppercase leading-none">
               Montagem
             </h1>
-            <p className="mt-1 text-xs font-medium text-slate-500">
+            
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-[0.16em]">
               Kits recebidos, checklist técnico e liberação por evidência.
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-px overflow-hidden rounded-md border border-slate-300 bg-slate-300 sm:w-64">
-            <Metric label="Obras em campo" value={list.length} />
-            <Metric
-              label="Chamados"
-              value={list.reduce((sum, p) => sum + (p.maintenance_requests?.length ?? 0), 0)}
-            />
+
+          <div className="flex flex-wrap gap-2">
+            <Badge className="bg-slate-900 text-blue-400 border-none font-black uppercase tracking-[0.2em] text-[9px] px-4 py-2.5 rounded-lg flex items-center gap-2">
+              <ScanLine className="h-4 w-4" /> LER QR PIEZA
+            </Badge>
+            <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-slate-200 bg-slate-200 sm:w-64 shadow-sm">
+              <Metric label="Obras ativas" value={list.length} />
+              <Metric
+                label="Chamados"
+                value={list.reduce((sum, p) => sum + (p.maintenance_requests?.length ?? 0), 0)}
+              />
+            </div>
           </div>
         </div>
       </header>
+
 
       {list.length === 0 ? (
         <Card className="rounded-md border-dashed shadow-none">
@@ -337,9 +351,9 @@ function AssemblyContent() {
                       </TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="kits" className="mt-0 space-y-3">
+                    <TabsContent value="kits" className="mt-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {kitRows.map(({ module, group }) => {
-                        const parts = (project.parts ?? []).filter(
+                        const partsInGroup = (project.parts ?? []).filter(
                           (part) => part.assembly_group_id === group?.id,
                         );
                         return (
@@ -348,13 +362,18 @@ function AssemblyContent() {
                             project={project}
                             module={module}
                             group={group}
-                            parts={parts}
+                            parts={partsInGroup}
                             canEdit={canEdit}
                           />
                         );
                       })}
-                      {kitRows.length === 0 && <EmptyRow text="Nenhum modulo importado." />}
+                      {kitRows.length === 0 && (
+                        <div className="md:col-span-3">
+                          <EmptyRow text="Nenhum modulo importado." />
+                        </div>
+                      )}
                     </TabsContent>
+
 
                     <TabsContent value="modules" className="mt-0 space-y-2">
                       <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-[11px] text-amber-950">
@@ -522,87 +541,85 @@ function KitCard({
   canEdit: boolean;
 }) {
   const [conferenceOpen, setConferenceOpen] = useState(false);
-  const completed = parts.filter((part) => part.is_completed).length;
-  const progress = parts.length ? (completed / parts.length) * 100 : 0;
+  // Calculate progress using physical repetitions (Rule 11)
+  const totalPhysicalParts = parts.reduce((sum, p) => sum + (Number((p as any).repetition) || 1), 0);
+  const completedParts = parts.filter((part) => part.is_completed).length; 
+  // Note: parts already expanded in some flows, but here we check is_completed on the line
+  const progress = totalPhysicalParts > 0 ? (completedParts / totalPhysicalParts) * 100 : 0;
   const sealed = !!group?.sealed_at;
+
 
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-md border",
-        group?.is_locked ? "border-red-300" : sealed ? "border-emerald-300" : "border-slate-300",
+        "overflow-hidden rounded-xl border-2 transition-all active:scale-[0.99]",
+        group?.is_locked ? "border-red-200 bg-red-50/30" : sealed ? "border-emerald-200 bg-emerald-50/30" : "border-slate-200 bg-white hover:border-blue-400 shadow-sm",
       )}
     >
-      <div className="grid gap-3 p-3 sm:grid-cols-[1fr_auto] sm:items-center sm:p-4">
-        <div className="flex min-w-0 gap-3">
-          <div
-            className={cn(
-              "flex h-10 w-10 shrink-0 items-center justify-center rounded-sm",
+      <div className="p-4 sm:p-5">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-start justify-between">
+            <div className={cn(
+              "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl",
               group?.is_locked
                 ? "bg-red-100 text-red-700"
                 : sealed
                   ? "bg-emerald-100 text-emerald-700"
                   : "bg-slate-100 text-slate-600",
-            )}
-          >
-            {group?.is_locked ? (
-              <Lock className="h-5 w-5" />
-            ) : sealed ? (
-              <PackageCheck className="h-5 w-5" />
-            ) : (
-              <Unlock className="h-5 w-5" />
-            )}
+            )}>
+              {group?.is_locked ? (
+                <Lock className="h-6 w-6" />
+              ) : sealed ? (
+                <PackageCheck className="h-6 w-6" />
+              ) : (
+                <Unlock className="h-6 w-6" />
+              )}
+            </div>
+            <Badge variant="outline" className="font-mono text-[10px] font-black bg-slate-900 text-white border-none px-2">
+              {group?.code ?? "S/G"}
+            </Badge>
           </div>
+
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-sm bg-slate-900 px-1.5 py-0.5 font-mono text-[9px] font-black text-white">
-                {group?.code ?? "S/G"}
-              </span>
-              <p className="truncate text-sm font-black uppercase text-slate-900">{module.name}</p>
-            </div>
-            <p className="mt-1 text-[10px] text-slate-500">
-              {group?.is_locked
-                ? group.lock_reason || "Kit bloqueado para montagem"
-                : group?.sealed_at
-                  ? `Recebido e selado em ${new Date(group.sealed_at).toLocaleDateString("pt-BR")}`
-                  : "Aguardando conferencia e selo de recebimento"}
+            <h3 className="truncate text-lg font-black uppercase tracking-tight text-slate-950">
+              {module.name}
+            </h3>
+            <p className="mt-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              {completedParts} / {totalPhysicalParts} PEÇAS CONCLUÍDAS
             </p>
-            <div className="mt-2 flex flex-wrap gap-2 text-[9px] font-bold uppercase tracking-wider">
-              <span className="flex items-center gap-1 rounded-sm border border-slate-200 px-1.5 py-0.5 text-slate-600">
-                <span
-                  className="h-2.5 w-2.5 rounded-full border border-slate-300"
-                  style={{ backgroundColor: group?.color || "transparent" }}
+            
+            <div className="mt-4 flex items-center gap-2">
+              <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div 
+                  className={cn("h-full transition-all duration-500", sealed ? "bg-emerald-500" : "bg-blue-500")}
+                  style={{ width: `${progress}%` }}
                 />
-                Cor logística: {group?.color || "não informada"}
-              </span>
-              <span className="rounded-sm border border-slate-200 px-1.5 py-0.5 text-slate-600">
-                Material/acabamento: {formatMaterials(parts)}
-              </span>
+              </div>
+              <span className="text-[10px] font-black text-slate-400 w-8 text-right">{Math.round(progress)}%</span>
             </div>
           </div>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            className="h-9 flex-1 rounded-sm text-[9px] font-black uppercase sm:flex-none"
-            onClick={() => setConferenceOpen(true)}
-            disabled={
-              !canEdit || !["conferencia", "expedicao", "montagem"].includes(project.status ?? "")
-            }
-          >
-            <ScanLine className="mr-2 h-3.5 w-3.5" /> Conferir
-          </Button>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-9 w-9 rounded-sm"
-                aria-label="Ver etiquetas"
-              >
-                <Info className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
+
+          <div className="grid grid-cols-2 gap-2 mt-2">
+            <Button
+              variant="outline"
+              className="h-12 rounded-xl text-[10px] font-black uppercase tracking-widest border-2"
+              onClick={() => setConferenceOpen(true)}
+              disabled={
+                !canEdit || !["conferencia", "expedicao", "montagem"].includes(project.status ?? "")
+              }
+            >
+              <ScanLine className="mr-2 h-4 w-4" /> Conferir
+            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="h-12 rounded-xl text-[10px] font-black uppercase tracking-widest border-2"
+                >
+                  <Info className="mr-2 h-4 w-4" /> Detalhes
+                </Button>
+              </DialogTrigger>
+
             <DialogContent className="max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Etiquetas do grupo {group?.code}</DialogTitle>
