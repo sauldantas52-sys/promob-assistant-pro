@@ -265,14 +265,87 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
 
       <Tabs defaultValue="plano" className="w-full no-print">
         <TabsList className="grid w-full grid-cols-2 bg-slate-100 p-1 rounded-xl h-12">
-          <TabsTrigger value="plano" className="rounded-lg text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-slate-900">
-            <Layers className="h-4 w-4 mr-2" /> Plano de Corte
-          </TabsTrigger>
-          <TabsTrigger value="etiquetas" className="rounded-lg text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
-            <Printer className="h-4 w-4 mr-2" /> Etiquetas
-          </TabsTrigger>
-        </TabsList>
+        <div className="flex flex-col lg:flex-row gap-4 mb-6">
+          <TabsList className="grid w-full grid-cols-2 bg-slate-100 p-1 rounded-xl h-12 flex-1">
+            <TabsTrigger value="plano" className="rounded-lg text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-slate-900">
+              <Layers className="h-4 w-4 mr-2" /> Plano de Corte
+            </TabsTrigger>
+            <TabsTrigger value="etiquetas" className="rounded-lg text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
+              <Printer className="h-4 w-4 mr-2" /> Etiquetas
+            </TabsTrigger>
+          </TabsList>
+          
+          <div className="flex gap-2">
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              className="hidden" 
+              accept=".csv,.txt"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) importCutPro.mutate(file);
+              }}
+            />
+            <Button 
+              variant="outline" 
+              className="h-12 px-6 rounded-xl border-2 border-slate-200 text-[10px] font-black uppercase tracking-widest hover:bg-slate-50"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={importCutPro.isPending}
+            >
+              <FileUp className="h-4 w-4 mr-2" /> 
+              {importCutPro.isPending ? 'Importando...' : 'Importar Cut Pro'}
+            </Button>
+
+            {officialPlan && (
+              <Button 
+                variant={activePlanSource === 'cutpro_oficial' ? 'default' : 'outline'}
+                className={cn(
+                  "h-12 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                  activePlanSource === 'cutpro_oficial' ? "bg-lime-500 text-slate-900 hover:bg-lime-600 border-none" : "border-2 border-slate-200"
+                )}
+                onClick={() => setActivePlanSource(activePlanSource === 'cutpro_oficial' ? 'estimativa' : 'cutpro_oficial')}
+              >
+                <ArrowRightLeft className="h-4 w-4 mr-2" />
+                {activePlanSource === 'cutpro_oficial' ? 'Visualizando Oficial' : 'Comparar Oficial'}
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {officialPlan && activePlanSource === 'cutpro_oficial' && (
+          <div className="mb-8">
+            <CutPlanComparisonCard 
+              stats={{
+                pieces: { 
+                  estimated: estimationPlan?.total_pieces || allPieces.length, 
+                  official: officialPlan.total_pieces || 0 
+                },
+                sheets: { 
+                  estimated: cutPlanGroups?.reduce((acc, g) => acc + g.stats.sheetCount, 0) || 0, 
+                  official: officialPlan.total_sheets || 0 
+                },
+                utilization: { 
+                  estimated: cutPlanGroups ? (cutPlanGroups.reduce((acc, g) => acc + g.stats.utilizationPercent, 0) / cutPlanGroups.length) : 0, 
+                  official: Number(officialPlan.utilization_percent) || 0 
+                },
+                cuts: { 
+                  estimated: 0, 
+                  official: officialPlan.total_cuts || 0 
+                }
+              }}
+            />
+          </div>
+        )}
+
         <TabsContent value="plano" className="mt-6">
+          <div className="mb-4">
+             <Badge variant={activePlanSource === 'cutpro_oficial' ? 'default' : 'secondary'} className={cn(
+               "uppercase text-[9px] font-black tracking-widest py-1 px-3 rounded-full",
+               activePlanSource === 'cutpro_oficial' ? "bg-lime-500 text-slate-900" : "bg-slate-200 text-slate-600"
+             )}>
+               {activePlanSource === 'cutpro_oficial' ? 'MODO: CUT PRO OFICIAL' : 'MODO: ESTIMATIVA MONTA AI'}
+             </Badge>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
             {cutPlanGroups?.map(group => (
               <Card key={group.groupKey} className="border-2 border-slate-100 shadow-none">
