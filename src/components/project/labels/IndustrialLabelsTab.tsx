@@ -43,6 +43,8 @@ export function IndustrialLabelsTab({ pieces }: { pieces: PhysicalPiece[] }) {
   const [selectedPreset, setSelectedPreset] = useState<string>(PRESETS[0]!.id);
   const [customConfig, setCustomConfig] = useState(PRESETS[0]!);
   const [showSettings, setShowSettings] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const labelContainerRef = useRef<HTMLDivElement>(null);
 
   // Ordenação Industrial: Módulo > Código da Peça
   const sortedPieces = [...pieces].sort((a, b) => {
