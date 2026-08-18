@@ -1,5 +1,5 @@
 import { PhysicalPiece } from "@/lib/cut-plan/engine";
-import { getEdgeData } from "./edges";
+import { getEdgeData } from "../cut-plan/edges";
 
 export interface LabelData {
   physicalId: string;
