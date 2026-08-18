@@ -74,10 +74,10 @@ export const confirmBudgetItem = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin
       .from('budget_items')
       .update({
-        name: data.data.name,
-        quantity: data.data.quantity,
-        unit_price: data.data.unit_price,
-        category: data.data.category,
+        name: data.data.name ?? null,
+        quantity: data.data.quantity ?? null,
+        unit_price: data.data.unit_price ?? null,
+        category: data.data.category ?? null,
         is_confirmed: data.data.is_confirmed
       })
       .eq('id', data.itemId);
