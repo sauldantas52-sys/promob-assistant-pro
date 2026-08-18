@@ -1,7 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { aiGateway } from "@lovable/ai-gateway"; // Hypothetical/Conceptual for Lovable AI Gateway usage
 
 /**
  * THRESHOLDS DE CONFIANÇA (Rule 6)
