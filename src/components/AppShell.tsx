@@ -18,6 +18,7 @@ import {
   CheckCircle2,
   Info,
   Briefcase,
+  BadgeDollarSign,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
