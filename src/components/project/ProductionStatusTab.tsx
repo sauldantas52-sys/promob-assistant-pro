@@ -152,7 +152,7 @@ export function ProductionStatusTab({ projectId }: { projectId: string }) {
       <Card className="rounded-[2rem] border-none shadow-sm overflow-hidden">
         <CardHeader className="bg-slate-950 py-4 px-8 border-b border-white/5">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-[10px] font-black uppercase tracking-[0.3em] text-white/80">Listagem Detalhada de Peças</CardTitle>
+            <CardTitle className="text-[10px] font-black uppercase tracking-[0.3em] text-white/80">Listagem Real de Módulos e Peças</CardTitle>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/10">
                 <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
