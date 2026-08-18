@@ -5,6 +5,7 @@ import { AppShell } from '@/components/AppShell';
 import { PieceDetails } from '@/components/factory/PieceDetails';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { ProductionStep, ProductionStepType, ProductionStatus } from '@/lib/production';
 
 export const Route = createFileRoute('/_authenticated/assembly/piece/$physicalId')({
   component: PieceDetailsPage,
@@ -17,19 +18,34 @@ function PieceDetailsPage() {
     queryKey: ['piece-detail', physicalId],
     queryFn: async () => {
       // 1. First find the production steps to get part_id and project_id
-      const { data: steps, error: stepsError } = await supabase
+      const { data: stepsRaw, error: stepsError } = await supabase
         .from('production_steps')
         .select('*')
         .eq('physical_id', physicalId);
 
       if (stepsError) throw stepsError;
-      if (!steps || steps.length === 0) throw new Error('Peça não encontrada no fluxo de produção.');
+      if (!stepsRaw || stepsRaw.length === 0) throw new Error('Peça não encontrada no fluxo de produção.');
 
-      const partId = steps[0].part_id;
-      const projectId = steps[0].project_id;
-      
+      const firstStep = stepsRaw[0];
+      const partId = firstStep.part_id;
+      const projectId = firstStep.project_id;
+
       if (!partId) throw new Error('Part ID não encontrado para esta peça física.');
+      if (!projectId) throw new Error('Project ID não encontrado para esta peça física.');
 
+      // Map raw steps to ProductionStep interface
+      const steps: ProductionStep[] = stepsRaw.map(s => ({
+        id: s.id,
+        project_id: s.project_id,
+        module_id: s.module_id,
+        part_id: s.part_id,
+        physical_id: s.physical_id,
+        step_type: s.step_type as ProductionStepType,
+        status: s.status as ProductionStatus,
+        notes: s.notes,
+        started_at: s.started_at,
+        completed_at: s.completed_at
+      }));
 
       // 2. Fetch technical part data
       const { data: part, error: partError } = await supabase
