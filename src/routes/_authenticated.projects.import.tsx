@@ -307,6 +307,7 @@ function ImportPage() {
         created_by: authData.user.id,
         planned_paths: preparedFiles.map((item) => item.storagePath),
         status: "uploading",
+        step: "discovery",
       });
       if (sessionError) throw sessionError;
 
