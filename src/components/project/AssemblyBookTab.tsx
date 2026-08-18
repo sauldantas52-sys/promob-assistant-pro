@@ -75,12 +75,26 @@ export function AssemblyBookTab({ projectId, onView3D }: AssemblyBookTabProps) {
     return <div className="p-8 text-center text-slate-500 font-bold uppercase tracking-widest text-[10px]">Carregando Caderno...</div>;
   }
 
-  const modulesWithParts = (modules || []).map(m => ({
-    ...m,
-    parts: (parts || []).filter(p => p.module_id === m.id || (p.metadata as any)?.id_xml === (m as any).id_xml)
-  }));
+  const modulesWithParts = (modules || []).map(m => {
+    const moduleParts = (parts || []).filter(p => 
+      p.module_id === m.id || 
+      (p.metadata as any)?.id_xml === (m as any).id_xml ||
+      p.id_xml === (m as any).id_xml
+    );
+    
+    console.log(`[AssemblyBook] Módulo: ${m.name} (${m.id_xml}), Peças vinculadas: ${moduleParts.length}`);
+    
+    return {
+      ...m,
+      parts: moduleParts
+    };
+  });
 
-  const looseParts = (parts || []).filter(p => !p.module_id && p.kind === 'peca');
+  const looseParts = (parts || []).filter(p => 
+    !p.module_id && 
+    !modulesWithParts.some(m => (p.metadata as any)?.id_xml === (m as any).id_xml || p.id_xml === (m as any).id_xml) &&
+    p.kind === 'peca'
+  );
 
   const totalModules = modulesWithParts.length;
   const completedModules = modulesWithParts.filter(m => m.is_completed).length;

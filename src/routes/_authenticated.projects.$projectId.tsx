@@ -189,7 +189,7 @@ function ProjectDetail() {
         throw error;
       }
       
-      console.log(`[ProjectDetail] ${data?.length || 0} módulos encontrados.`);
+      console.log(`[ProjectDetail] ${data?.length || 0} módulos encontrados:`, data?.map(m => ({ id: m.id, id_xml: m.id_xml, name: m.name })));
       return data;
     },
     // Forçar refetch se o estado de importação mudar
@@ -206,6 +206,13 @@ function ProjectDetail() {
         )
         .eq("project_id", projectId)
         .order("created_at");
+      
+      console.log(`[ProjectDetail] ${data?.length || 0} peças encontradas:`, data?.slice(0, 5).map(p => ({ 
+        id: p.id, 
+        module_id: p.module_id, 
+        id_xml: (p.metadata as any)?.id_xml, 
+        name: p.name 
+      })));
       if (error) throw error;
       return data;
     },
