@@ -148,7 +148,7 @@ export function IndustrialLabelsTab({ pieces }: { pieces: PhysicalPiece[] }) {
 
       {/* Grid de Etiquetas */}
       <div 
-        className="grid gap-4 print:gap-0 print:grid-cols-[repeat(var(--cols),1fr)] print:w-full no-print-margin" 
+        className="grid gap-4 print:gap-0 print:grid-cols-[repeat(var(--cols),1fr)] print:w-full no-print-margin print:block" 
         style={{ 
           '--cols': customConfig.cols,
           display: 'grid',
@@ -161,6 +161,7 @@ export function IndustrialLabelsTab({ pieces }: { pieces: PhysicalPiece[] }) {
             piece={piece} 
             width={customConfig.width}
             height={customConfig.height}
+            presetId={selectedPreset}
           />
         ))}
       </div>
