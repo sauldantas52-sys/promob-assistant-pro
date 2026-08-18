@@ -85,7 +85,7 @@ type AssemblyPart = Pick<
   | "assembly_group_id"
   | "module_id"
 >;
-type AssemblyProject = { id: string; status: string | null; parts: AssemblyPart[] | null };
+type AssemblyProject = { id: string; status: string | null; parts: AssemblyPart[] | null; production_steps: any[] | null };
 
 export const Route = createFileRoute("/_authenticated/assembly")({
   head: () => ({
@@ -120,7 +120,9 @@ function AssemblyContent() {
           parts(id, name, kind, quantity, unit, is_completed, material, thickness_mm, width_mm, length_mm, edge_banding, storage_location, assembly_group_id, module_id, visibility_type, data_source),
           assembly_groups(id, module_id, code, name, color, is_locked, lock_reason, conference_status, sealed_at, sealed_by),
           project_versions(thumbnail_url, is_active, status),
-          maintenance_requests(*)
+          maintenance_requests(*),
+          production_steps(*)
+
         `,
         )
         .in("status", ["separacao", "conferencia", "expedicao", "montagem", "assistencia"])
@@ -210,8 +212,8 @@ function AssemblyContent() {
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <Badge className="bg-slate-900 text-blue-400 border-none font-black uppercase tracking-[0.2em] text-[9px] px-4 py-2.5 rounded-lg flex items-center gap-2">
-              <ScanLine className="h-4 w-4" /> LER QR PIEZA
+            <Badge className="bg-slate-900 text-blue-400 border-none font-black uppercase tracking-[0.2em] text-[9px] px-4 py-2.5 rounded-lg flex items-center gap-2 cursor-pointer hover:bg-slate-800 transition-colors">
+              <ScanLine className="h-4 w-4" /> LER QR PEÇA
             </Badge>
             <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-slate-200 bg-slate-200 sm:w-64 shadow-sm">
               <Metric label="Obras ativas" value={list.length} />
@@ -304,9 +306,10 @@ function AssemblyContent() {
                       </div>
                     </div>
                     <div className="grid grid-cols-3 gap-px overflow-hidden rounded border border-slate-700 bg-slate-700 md:w-[360px]">
-                      <DarkMetric label="Modulos" value={`${modulesDone}/${modules.length}`} />
+                      <DarkMetric label="Peças" value={`${project.production_steps?.filter(s => s.status === 'concluido' || s.status === 'nao_necessaria').length}/${project.production_steps?.length || 0}`} />
                       <DarkMetric label="Kits selados" value={`${sealedKits}/${groups.length}`} />
                       <DarkMetric label="Bloqueios" value={lockedKits} alert={lockedKits > 0} />
+
                     </div>
                   </div>
                   <div className="mt-4">

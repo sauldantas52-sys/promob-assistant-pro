@@ -48,12 +48,9 @@ function factoryProjectsQuery() {
       is_cutting_edge_released,
       machining_blocked,
       is_test,
-      production_steps(*),
-      shipping_volumes(*),
-      project_distribution(*)
+      production_steps(*)
     `,
     )
-    .eq("is_test", false)
     .in("status", [
       "corte",
       "borda",
@@ -65,6 +62,7 @@ function factoryProjectsQuery() {
     ])
     .order("updated_at", { ascending: false });
 }
+
 
 type FactoryProject = QueryData<ReturnType<typeof factoryProjectsQuery>>[number];
 
@@ -171,10 +169,12 @@ function ProjectCard({ project }: { project: FactoryProject }) {
   const getStats = (type: string) => {
     const steps = project.production_steps || [];
     const typeSteps = steps.filter((step) => step.step_type === type);
+    const totalPhysical = Array.from(new Set(typeSteps.map(s => s.physical_id))).length;
     const done = typeSteps.filter((step) => step.status === "concluido").length;
     const blocked = typeSteps.some((step) => step.status === "bloqueado");
-    return { total: typeSteps.length, done, blocked };
+    return { total: totalPhysical, done, blocked };
   };
+
 
   const statusMap: Record<string, { label: string; color: string }> = {
     corte: { label: "CORTE", color: "bg-red-600 shadow-red-600/40" },
@@ -191,10 +191,17 @@ function ProjectCard({ project }: { project: FactoryProject }) {
     color: "bg-slate-700 shadow-slate-700/40",
   };
 
-  const totalSteps = project.production_steps?.length || 1;
-  const completedSteps =
-    project.production_steps?.filter((step) => step.status === "concluido").length || 0;
-  const progressPercent = Math.round((completedSteps / totalSteps) * 100);
+  const physicalPiecesIds = Array.from(new Set(project.production_steps?.map(s => s.physical_id) || []));
+  const totalPhysical = physicalPiecesIds.length || 1;
+  
+  // A piece is "concluded" if all its mandatory steps are completed
+  const completedPhysical = physicalPiecesIds.filter(pid => {
+    const pieceSteps = project.production_steps?.filter(s => s.physical_id === pid) || [];
+    return pieceSteps.length > 0 && pieceSteps.every(s => s.status === 'concluido' || s.status === 'nao_necessaria');
+  }).length;
+
+  const progressPercent = Math.round((completedPhysical / totalPhysical) * 100);
+
 
   return (
     <Card className="overflow-hidden rounded-2xl border-none bg-[#0f172a] shadow-xl ring-1 ring-slate-800">

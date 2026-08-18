@@ -366,7 +366,8 @@ function ImportPage() {
             const trackingPayload = allPhysicalPieces.map(p => ({
               physicalId: p.physicalId,
               partId: p.partId,
-              moduleId: p.moduleId || null
+              moduleId: p.moduleId || null,
+              needsEdge: (p.edgeTop > 0 || p.edgeBottom > 0 || p.edgeLeft > 0 || p.edgeRight > 0)
             }));
 
             await initializeProjectProduction({
@@ -376,6 +377,7 @@ function ImportPage() {
                 steps: trackingPayload
               }
             });
+
             console.log(`[Fidelity 5.0] Estimated production tracking initialized for ${allPhysicalPieces.length} pieces.`);
           }
         } catch (estimErr) {
