@@ -235,16 +235,21 @@ function IndustrialLabel({ piece, width, height, presetId }: { piece: PhysicalPi
       <div className="flex justify-between items-start">
         <div className="flex items-center gap-1.5">
           <div className="bg-slate-900 text-white text-[10px] font-black px-1.5 py-0.5 rounded leading-none flex items-center justify-center min-w-[20px]">
-            G{piece.moduleSequence || 0}
+            {piece.metadata?.group || `G${piece.moduleSequence || 0}`}
           </div>
           <span className="text-[10px] font-black text-slate-900 leading-none">
             #{piece.moduleSequence || 0}.{piece.pieceSequence || 0}
-            {piece.metadata?.group ? `.${piece.metadata.group}` : ''}
           </span>
+          {/* Quadrado de Cor (Identificador Visual Econômico) */}
+          <div 
+            className="w-2.5 h-2.5 rounded-sm border border-slate-200" 
+            style={{ backgroundColor: getEdgeColor(piece.color || piece.material) }}
+            title={piece.color || piece.material || ''}
+          />
         </div>
         <div className="text-[7px] font-bold text-slate-400 uppercase tracking-tighter text-right">
-          MESTRE {data.masterUid.substring(0, 8)}<br/>
-          {data.physicalId.split('_rep')[0]}
+          {data.masterUid.substring(0, 10)}<br/>
+          {piece.metadata?.origem === 'promob' ? 'PROMOB REAL' : 'SISTEMA'}
         </div>
       </div>
 
