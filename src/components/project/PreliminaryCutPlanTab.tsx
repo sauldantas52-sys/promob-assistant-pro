@@ -113,7 +113,7 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
 
         const { error: piecesError } = await supabase
           .from('cut_sheets') // Usamos cut_sheets para persistir as peças individuais do plano
-          .insert(physicalPieces.map(pp => ({
+          .insert(physicalPieces.map((pp: any) => ({
              project_id: pp.project_id,
              cut_plan_id: pp.cut_plan_id,
              physical_id: pp.physical_id,
