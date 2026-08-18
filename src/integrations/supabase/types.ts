@@ -2806,6 +2806,7 @@ export type Database = {
           completed_at: string | null
           completed_by: string | null
           created_at: string
+          evidence_file_id: string | null
           id: string
           is_completed: boolean
           notes: string | null
@@ -2817,6 +2818,7 @@ export type Database = {
           completed_at?: string | null
           completed_by?: string | null
           created_at?: string
+          evidence_file_id?: string | null
           id?: string
           is_completed?: boolean
           notes?: string | null
@@ -2828,6 +2830,7 @@ export type Database = {
           completed_at?: string | null
           completed_by?: string | null
           created_at?: string
+          evidence_file_id?: string | null
           id?: string
           is_completed?: boolean
           notes?: string | null
