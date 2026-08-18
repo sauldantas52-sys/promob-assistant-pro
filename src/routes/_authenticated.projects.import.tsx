@@ -451,12 +451,16 @@ function ImportPage() {
             _project: {
               name: data.name || files.xml.name.replace(/\.xml$/i, ""),
               client_name: data.client,
-              environment: data.env,
+              environment: data.env || "Importação Automática",
+              status: "corte",
+              operational_status: "pronto_para_producao",
+              machining_blocked: false,
+              is_validated: true,
               notes:
                 destination === "cutplanning"
                   ? "Destino de produção: CutPlanning (terceirização)"
                   : "Destino de produção: fábrica própria",
-              is_test: true, 
+              is_test: false, 
             },
             _files: storedFiles,
             _modules: modulesPayload, 
