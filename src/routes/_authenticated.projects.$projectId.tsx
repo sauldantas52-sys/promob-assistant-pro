@@ -206,6 +206,8 @@ function ProjectDetail() {
         )
         .eq("project_id", projectId)
         .order("created_at");
+      
+      console.log(`[ProjectDetail] ${data?.length || 0} peças encontradas:`, data?.slice(0, 5).map(p => ({ id: p.id, module_id: p.module_id, id_xml: p.metadata?.id_xml, name: p.name })));
       if (error) throw error;
       return data;
     },
