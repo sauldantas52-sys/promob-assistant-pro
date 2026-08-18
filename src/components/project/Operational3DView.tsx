@@ -387,30 +387,49 @@ export function Operational3DView({
                   <div className="pt-4 border-t border-slate-100">
                     <p className="text-[9px] font-black text-slate-400 uppercase mb-3 tracking-widest">Composição ({selectedModule.pieces.length} peças)</p>
                     <div className="space-y-2">
-                      {selectedModule.pieces.slice(0, 5).map((piece) => (
-                        <div key={piece.physicalId} className="flex items-center justify-between py-2 border-b border-slate-50 last:border-0 group cursor-pointer">
-                          <div className="flex items-center gap-3">
-                            <div className="h-8 w-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
-                              <Layers className="h-4 w-4" />
+                      {selectedModule.pieces.map((piece) => (
+                        <div key={piece.physicalId} className="space-y-2 py-2 border-b border-slate-50 last:border-0 group">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="h-8 w-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                                <Layers className="h-4 w-4" />
+                              </div>
+                              <div>
+                                <p className="text-[10px] font-black text-slate-900 uppercase truncate max-w-[120px]">{piece.name}</p>
+                                <p className="text-[8px] text-slate-400 uppercase font-bold tracking-tighter">
+                                  {piece.dimensions.l} × {piece.dimensions.w} × {piece.thickness} mm
+                                </p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="text-[10px] font-black text-slate-900 uppercase truncate max-w-[120px]">{piece.name}</p>
-                              <p className="text-[8px] text-slate-400 uppercase font-bold tracking-tighter">
-                                {piece.dimensions.l} × {piece.dimensions.w} × {piece.thickness} mm
-                              </p>
-                            </div>
+                            <div className={cn(
+                              "h-1.5 w-1.5 rounded-full",
+                              piece.status === 'concluido' ? "bg-green-500" : "bg-slate-200"
+                            )} />
                           </div>
-                          <div className={cn(
-                            "h-1.5 w-1.5 rounded-full",
-                            piece.status === 'concluido' ? "bg-green-500" : "bg-slate-200"
-                          )} />
+                          
+                          <div className="flex gap-1 pl-11">
+                            <Button 
+                              variant="ghost" 
+                              className="h-6 px-2 text-[7px] font-black uppercase tracking-widest text-blue-600 bg-blue-50/50 hover:bg-blue-100 rounded-md"
+                              onClick={() => {
+                                // Navegação 3D -> Plano de Corte (Fidelity 5.1 Regra 7)
+                                // O PreliminaryCutPlanTab já deve ter mecanismos de destaque por physicalId
+                                toast.info(`Localizando peça ${piece.physicalId} no plano...`);
+                                // Em uma implementação completa, isso dispararia um evento ou trocaria a aba com foco
+                              }}
+                            >
+                              Ver no Plano
+                            </Button>
+                            <Link 
+                              to="/assembly/piece/$physicalId" 
+                              params={{ physicalId: piece.physicalId }}
+                              className="h-6 px-2 text-[7px] font-black uppercase tracking-widest text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-md flex items-center"
+                            >
+                              Produção
+                            </Link>
+                          </div>
                         </div>
                       ))}
-                      {selectedModule.pieces.length > 5 && (
-                        <p className="text-[8px] text-center text-slate-400 font-bold uppercase mt-2">
-                          + {selectedModule.pieces.length - 5} peças não listadas
-                        </p>
-                      )}
                     </div>
                   </div>
                 </div>
