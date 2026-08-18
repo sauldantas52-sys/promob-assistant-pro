@@ -401,7 +401,7 @@ export function Operational3DView({
                 "rounded-xl h-10 px-4 font-black text-[10px] uppercase tracking-widest shadow-sm",
                 isIsolated ? "bg-blue-600 text-white" : "bg-white/90 backdrop-blur text-slate-900"
               )}
-              disabled={!selectedModuleId}
+              disabled={!selectedModuleId && !selectedPieceId}
               onClick={() => setIsIsolated(!isIsolated)}
             >
               {isIsolated ? <Eye className="mr-2 h-4 w-4" /> : <EyeOff className="mr-2 h-4 w-4" />}
