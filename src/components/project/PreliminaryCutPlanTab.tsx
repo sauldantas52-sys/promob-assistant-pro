@@ -6,7 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { IndustrialCutPlanEngine, CutPlanGroup, Sheet, Placement } from "@/lib/cut-plan/engine";
+import { IndustrialCutPlanEngine, CutPlanGroup, PhysicalPiece } from "@/lib/cut-plan/engine";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IndustrialLabelsTab } from "./labels/IndustrialLabelsTab";
 import { useEffect, useState } from "react";
@@ -34,11 +34,11 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
 
   useEffect(() => {
     if (cutPlanGroups && allParts) {
-      validateIntegrity(cutPlanGroups, projectId);
+      validateIntegrity(cutPlanGroups);
     }
   }, [cutPlanGroups, allParts]);
 
-  const validateIntegrity = (groups: CutPlanGroup[], targetProjectId: string) => {
+  const validateIntegrity = (groups: CutPlanGroup[]) => {
     const errors: string[] = [];
     let totalPhysicalPieces = 0;
     let totalAllocated = 0;
@@ -57,7 +57,7 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
       });
     });
 
-    if (totalPhysicalPieces !== totalAllocated) {
+    if (totalPhysicalPieces !== totalAllocated && totalPhysicalPieces > 0) {
       errors.push(`Divergência de peças: Esperado ${totalPhysicalPieces}, Alocado ${totalAllocated}`);
     }
 
@@ -73,19 +73,9 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
 
   // Filtros de Auditoria
   const cutParts = allParts?.filter(p => (p.kind === 'peca' || p.kind === 'chapa') && p.thickness_mm) || [];
-  const hardware = allParts?.filter(p => p.kind === 'ferragem') || [];
-  const accessories = allParts?.filter(p => p.kind === 'acessorio') || [];
-  const noMaterial = allParts?.filter(p => (p.kind === 'peca' || p.kind === 'chapa') && !p.material) || [];
-  const noThickness = allParts?.filter(p => (p.kind === 'peca' || p.kind === 'chapa') && !p.thickness_mm) || [];
-
-  const excluded = allParts?.filter(p => 
-    !cutParts.find(cp => cp.id === p.id) && 
-    !hardware.find(h => h.id === p.id) && 
-    !accessories.find(a => a.id === p.id)
-  ) || [];
-
+  
   const renderCutGroup = (group: CutPlanGroup) => {
-    const { supplier, material, color, thicknessMm, sheets, stats, pieces } = group;
+    const { color, thicknessMm, sheets, stats, pieces } = group;
     const label = `${color} ${thicknessMm}mm`;
     const totalItems = pieces.length;
     const totalRepetitions = stats.totalPieces;
@@ -157,7 +147,7 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
             <Table>
               <TableHeader className="bg-slate-100"><TableRow><TableHead className="text-[9px] font-black px-4">Peça</TableHead><TableHead className="text-center text-[9px] font-black">Dim</TableHead><TableHead className="text-right text-[9px] font-black px-4">Área</TableHead></TableRow></TableHeader>
               <TableBody>
-                {pieces.map((part) => (
+                {pieces.map((part: PhysicalPiece) => (
                   <TableRow key={part.physicalId} className="text-[10px]">
                     <TableCell className="px-4 py-2 font-black uppercase">{part.name}</TableCell>
                     <TableCell className="text-center font-mono">{part.widthMm}x{part.lengthMm}</TableCell>
