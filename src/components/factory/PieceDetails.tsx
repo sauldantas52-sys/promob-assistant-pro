@@ -44,6 +44,9 @@ const STEP_LABELS = {
   expedicao: 'Expedição'
 };
 
+const STEP_ORDER = ['corte', 'borda', 'usinagem', 'separacao', 'montagem', 'expedicao'];
+
+
 export function PieceDetails({ piece, steps, physicalId, cutPlan }: PieceDetailsProps) {
   const queryClient = useQueryClient();
   const edgeData = getEdgeData({
@@ -149,12 +152,15 @@ export function PieceDetails({ piece, steps, physicalId, cutPlan }: PieceDetails
             <h3 className="text-xs font-black uppercase tracking-widest text-slate-950 px-1">Fluxo Operacional</h3>
             <div className="grid grid-cols-1 gap-2">
               {steps.sort((a, b) => {
-                const order = ['corte', 'borda', 'usinagem', 'separacao', 'montagem', 'expedicao'];
-                return order.indexOf(a.step_type) - order.indexOf(b.step_type);
+                return STEP_ORDER.indexOf(a.step_type) - STEP_ORDER.indexOf(b.step_type);
               }).map((step) => {
                 const Icon = STEP_ICONS[step.step_type as keyof typeof STEP_ICONS] || AlertCircle;
                 const isDone = step.status === 'concluido';
+                const isNotRequired = step.status === 'nao_necessaria';
+                const isBlocked = step.status === 'bloqueado';
                 
+                if (isNotRequired) return null;
+
                 return (
                   <Button
                     key={step.id}
@@ -163,25 +169,34 @@ export function PieceDetails({ piece, steps, physicalId, cutPlan }: PieceDetails
                       "h-16 justify-between px-6 rounded-xl border-2 transition-all active:scale-[0.98]",
                       isDone 
                         ? "bg-emerald-600 border-emerald-700 hover:bg-emerald-700 text-white" 
-                        : "border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-slate-700"
+                        : isBlocked
+                          ? "border-red-200 bg-red-50 text-red-700 cursor-not-allowed opacity-80"
+                          : "border-slate-200 hover:border-blue-500 hover:bg-blue-50 text-slate-700"
                     )}
-                    onClick={() => handleUpdateStatus(step.id, step.status)}
+                    onClick={() => !isBlocked && handleUpdateStatus(step.id, step.status)}
+                    disabled={isBlocked}
                   >
                     <div className="flex items-center gap-4">
                       <div className={cn(
                         "h-10 w-10 rounded-lg flex items-center justify-center",
-                        isDone ? "bg-emerald-500/20" : "bg-slate-100"
+                        isDone ? "bg-emerald-500/20" : isBlocked ? "bg-red-100" : "bg-slate-100"
                       )}>
-                        <Icon className={cn("h-6 w-6", isDone ? "text-white" : "text-slate-500")} />
+                        <Icon className={cn("h-6 w-6", isDone ? "text-white" : isBlocked ? "text-red-500" : "text-slate-500")} />
                       </div>
-                      <span className="text-sm font-black uppercase tracking-widest">
-                        {STEP_LABELS[step.step_type as keyof typeof STEP_LABELS]}
-                      </span>
+                      <div className="flex flex-col items-start">
+                        <span className="text-sm font-black uppercase tracking-widest">
+                          {STEP_LABELS[step.step_type as keyof typeof STEP_LABELS]}
+                        </span>
+                        {isBlocked && (
+                          <span className="text-[9px] font-bold uppercase text-red-500">Bloqueado pela Engenharia</span>
+                        )}
+                      </div>
                     </div>
                     {isDone && <CheckCircle2 className="h-6 w-6" />}
                   </Button>
                 );
               })}
+
             </div>
           </div>
         </div>

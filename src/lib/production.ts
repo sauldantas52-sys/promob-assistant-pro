@@ -3,7 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 export type ProductionStepType = 'corte' | 'usinagem' | 'borda' | 'separacao' | 'montagem' | 'expedicao';
-export type ProductionStatus = 'pendente' | 'em_andamento' | 'concluido' | 'bloqueado';
+export type ProductionStatus = 'pendente' | 'em_andamento' | 'concluido' | 'bloqueado' | 'nao_necessaria';
 
 export interface ProductionStep {
   id: string;
@@ -19,13 +19,14 @@ export interface ProductionStep {
 }
 
 export const initializeProjectProduction = createServerFn({ method: "POST" })
-  .inputValidator((data) => z.object({
+  .validator((data) => z.object({
     projectId: z.string(),
     companyId: z.string(),
     steps: z.array(z.object({
       physicalId: z.string(),
       partId: z.string(),
       moduleId: z.string().nullable(),
+      needsEdge: z.boolean().optional(),
     }))
   }).parse(data))
   .handler(async ({ data }) => {
@@ -39,13 +40,24 @@ export const initializeProjectProduction = createServerFn({ method: "POST" })
     return { success: true };
   });
 
-export async function logProductionAction(projectId: string, action: string, metadata: any = {}) {
+export async function logProductionAction(
+  projectId: string, 
+  action: string, 
+  metadata: { physical_id: string; [key: string]: any }
+) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
-  await (supabase.from('production_logs') as any).insert({
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('company_id')
+    .eq('id', user.id)
+    .single();
+
+  await supabase.from('production_logs').insert({
     project_id: projectId,
     user_id: user.id,
+    company_id: profile?.company_id,
     action,
     metadata
   });
@@ -59,9 +71,15 @@ export async function updateStepStatus(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Usuário não autenticado");
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('company_id')
+    .eq('id', user.id)
+    .single();
+
   const { data: step, error: stepError } = await supabase
     .from('production_steps')
-    .select('project_id, status')
+    .select('project_id, physical_id, step_type, status')
     .eq('id', stepId)
     .single();
   
@@ -87,13 +105,18 @@ export async function updateStepStatus(
 
   if (error) throw error;
 
-  await (supabase.from('production_logs') as any).insert({
+  await supabase.from('production_logs').insert({
     project_id: step.project_id,
     user_id: user.id,
-    action: `Alteração de status da etapa: ${status}`,
+    company_id: profile?.company_id,
+    action: `update_status:${step.step_type}`,
     status_from: step.status,
     status_to: status,
-    notes: notes || null
+    notes: notes || null,
+    metadata: {
+      physical_id: step.physical_id,
+      step_type: step.step_type,
+      step_id: stepId
+    }
   });
 }
-
