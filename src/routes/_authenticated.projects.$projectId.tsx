@@ -429,7 +429,7 @@ function ProjectDetail() {
             {activeTab === "modules" && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-black uppercase tracking-tight">Módulos do Projeto</h3>
+                  <h3 className="text-xl font-black uppercase tracking-tight">Módulos Reais do Projeto (XML)</h3>
                   <Badge variant="outline" className="font-bold">{modules.data?.length ?? 0} Módulos</Badge>
                 </div>
                 <Card>
