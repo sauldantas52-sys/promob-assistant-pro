@@ -418,6 +418,7 @@ function ProjectDetail() {
         <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
           <div className="mx-auto max-w-[1400px]">
             {activeTab === "preliminary-cut-plan" && <PreliminaryCutPlanTab projectId={projectId} />}
+            {activeTab === "costs" && <IndustrialCostsTab projectId={projectId} />}
             {activeTab === "shipping" && <ProjectShippingTab projectId={projectId} />}
             {activeTab === "physical-pilot" && <PhysicalChecklistFlow projectId={projectId} />}
             {activeTab === "operational3d" && <Operational3DView projectId={projectId} modules={modules.data || []} parts={parts.data || []} />}
