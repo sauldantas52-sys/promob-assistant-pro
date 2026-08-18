@@ -34,6 +34,7 @@ import {
   Building2,
   Ruler,
   Printer,
+  Calculator,
 } from "lucide-react";
 import { Parser } from "@json2csv/plainjs";
 import { EngineeringTab } from "@/components/EngineeringTab";
@@ -50,6 +51,7 @@ import { VisualFeedingMode } from "@/components/project/VisualFeedingMode";
 import { IndustrialLabelsTab } from "@/components/project/labels/IndustrialLabelsTab";
 import { IndustrialCutPlanEngine } from "@/lib/cut-plan/engine";
 import { parseDXF } from "@/lib/dxf-parser";
+import { IndustrialCostsTab } from "@/components/project/IndustrialCostsTab";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -373,7 +375,8 @@ function ProjectDetail() {
             { value: "physical-pilot", icon: ShieldCheck, label: "Teste Físico (Piloto)" },
             { value: "files", icon: FileUp, label: "Pasta do Cliente" },
             { value: "engineering", icon: Settings, label: "Usinagem CNC" },
-            { value: "commercial", icon: FileText, label: "Caderno Executivo / Orçamentos" },
+            { value: "commercial", icon: FileText, label: "Caderno Executivo" },
+            { value: "costs", icon: Calculator, label: "Relatório Geral de Custos" },
             { value: "integration_audit", icon: History, label: "Histórico de Auditoria" },
             { value: "assistance", icon: MessageSquare, label: "Assistência Técnica" },
           ].map((item) => {
@@ -415,6 +418,7 @@ function ProjectDetail() {
         <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
           <div className="mx-auto max-w-[1400px]">
             {activeTab === "preliminary-cut-plan" && <PreliminaryCutPlanTab projectId={projectId} />}
+            {activeTab === "costs" && <IndustrialCostsTab projectId={projectId} />}
             {activeTab === "shipping" && <ProjectShippingTab projectId={projectId} />}
             {activeTab === "physical-pilot" && <PhysicalChecklistFlow projectId={projectId} />}
             {activeTab === "operational3d" && <Operational3DView projectId={projectId} modules={modules.data || []} parts={parts.data || []} />}
