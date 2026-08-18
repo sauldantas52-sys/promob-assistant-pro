@@ -391,7 +391,7 @@ function ProductionContent() {
                       variant="outline"
                       className="h-11 w-full rounded-lg border-slate-200 font-black uppercase tracking-wider text-[9px] hover:bg-slate-50"
                     >
-                      <Link to="/projects/$projectId" params={{ projectId: project.id }}>
+                      <Link to="/projects/$projectId" params={{ projectId: project.id }} search={{ tab: 'modules' }}>
                         Ver listas técnicas
                       </Link>
                     </Button>

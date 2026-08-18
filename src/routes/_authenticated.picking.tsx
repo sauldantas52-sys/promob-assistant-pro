@@ -383,7 +383,7 @@ function PickingPage() {
                       asChild
                       className="h-11 rounded-lg bg-slate-900 px-4 text-[9px] font-black uppercase tracking-wider text-white hover:bg-black gap-2"
                     >
-                      <Link to="/projects/$projectId" params={{ projectId: project.id }}>
+                      <Link to="/projects/$projectId" params={{ projectId: project.id }} search={{ tab: 'modules' }}>
                         <ClipboardList className="h-4 w-4 text-blue-400" />
                         Acessar dossiê
                       </Link>

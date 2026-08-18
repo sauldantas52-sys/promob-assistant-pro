@@ -20,8 +20,28 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
   const [integrityStatus, setIntegrityStatus] = useState<'validating' | 'pass' | 'fail'>('validating');
   const [integrityErrors, setIntegrityErrors] = useState<string[]>([]);
   const [activePlanSource, setActivePlanSource] = useState<'estimativa' | 'cutpro_oficial'>('estimativa');
+  const [highlightedPieceId, setHighlightedPieceId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
+
+  // Escutar eventos de destaque (Fidelity 5.1)
+  useEffect(() => {
+    const handleHighlight = (e: any) => {
+      if (e.detail?.physicalId) {
+        setHighlightedPieceId(e.detail.physicalId);
+        // Scroll to the highlighted piece
+        setTimeout(() => {
+          const element = document.getElementById(`piece-${e.detail.physicalId}`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
+        toast.info(`Peça destacada: ${e.detail.physicalId}`);
+      }
+    };
+    window.addEventListener('highlight-piece', handleHighlight);
+    return () => window.removeEventListener('highlight-piece', handleHighlight);
+  }, []);
 
   const { data: cutPlanGroups, isLoading } = useQuery({
     queryKey: ["industrial_cut_plan", projectId],
@@ -269,16 +289,25 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
                   <div className="absolute border border-dashed border-slate-300 pointer-events-none z-10"
                     style={{ left: '0.18%', top: '0.27%', right: '0.18%', bottom: '0.27%' }}
                   />
-                  {sheet.shelves.flatMap(s => s.placements).map((p, pIdx) => (
-                    <div key={pIdx} className="absolute border border-slate-900 flex flex-col items-center justify-center overflow-hidden hover:opacity-80 transition-opacity cursor-help p-0.5"
-                      title={`${p.piece.name} (${p.w}x${p.h})`}
+                  {sheet.shelves.flatMap(s => s.placements).map((p, pIdx) => {
+                    const isHighlighted = highlightedPieceId === p.physicalId;
+                    return (
+                      <div 
+                        key={pIdx} 
+                        id={`piece-${p.physicalId}`}
+                        className={cn(
+                          "absolute border border-slate-900 flex flex-col items-center justify-center overflow-hidden hover:opacity-80 transition-all cursor-help p-0.5",
+                          isHighlighted ? "ring-4 ring-blue-500 z-50 scale-105" : "z-0"
+                        )}
+                        title={`${p.piece.name} [${p.physicalId}] (${p.w}x${p.h})`}
                       style={{
                         left: `${(p.x / 2750) * 100}%`,
                         top: `${(p.y / 1830) * 100}%`,
                         width: `${(p.w / 2750) * 100}%`,
                         height: `${(p.h / 1830) * 100}%`,
-                        backgroundColor: `hsla(${(pIdx * 57) % 360}, 70%, 90%, 0.8)`,
-                        borderColor: `hsl(${(pIdx * 57) % 360}, 70%, 40%)`
+                        backgroundColor: isHighlighted ? "#3b82f6" : `hsla(${(pIdx * 57) % 360}, 70%, 90%, 0.8)`,
+                        borderColor: isHighlighted ? "#1e3a8a" : `hsl(${(pIdx * 57) % 360}, 70%, 40%)`,
+                        color: isHighlighted ? "#fff" : "inherit"
                       }}
                     >
                       <div className="w-full h-full flex flex-col relative pointer-events-none items-center justify-center text-center">
@@ -287,7 +316,8 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
                         {p.w > 30 && p.h > 15 && <span className="text-[7px] font-black">{p.w}x{p.h}</span>}
                       </div>
                     </div>
-                  ))}
+                  );
+                })}
                 </div>
               </div>
             ))}
@@ -297,8 +327,19 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
               <TableHeader className="bg-slate-100"><TableRow><TableHead className="text-[9px] font-black px-4">Peça</TableHead><TableHead className="text-center text-[9px] font-black">Dim</TableHead><TableHead className="text-right text-[9px] font-black px-4">Área</TableHead></TableRow></TableHeader>
               <TableBody>
                 {pieces.map((part) => (
-                  <TableRow key={part.physicalId} className="text-[10px]">
-                    <TableCell className="px-4 py-2 font-black uppercase">{part.name}</TableCell>
+                  <TableRow 
+                    key={part.physicalId} 
+                    className={cn(
+                      "text-[10px] transition-colors",
+                      highlightedPieceId === part.physicalId ? "bg-blue-50 border-l-4 border-l-blue-500" : ""
+                    )}
+                  >
+                    <TableCell className="px-4 py-2 font-black uppercase flex items-center gap-2">
+                      {part.name}
+                      {highlightedPieceId === part.physicalId && (
+                        <Badge className="bg-blue-500 text-white text-[7px] h-4 px-1">SELECIONADA</Badge>
+                      )}
+                    </TableCell>
                     <TableCell className="text-center font-mono">{part.widthMm}x{part.lengthMm}</TableCell>
                     <TableCell className="text-right px-4 font-bold">{((part.widthMm * part.lengthMm) / 1000000).toFixed(3)} m²</TableCell>
                   </TableRow>

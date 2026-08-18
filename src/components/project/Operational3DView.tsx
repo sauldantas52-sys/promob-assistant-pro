@@ -7,6 +7,8 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Link } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 // --- Convenção de Unidades ---
@@ -62,7 +64,11 @@ function ModuleMesh({
   const depth = mmToSceneUnits(module.depth);
 
   // Se estiver isolado e não for o selecionado, fica invisível ou muito translúcido
-  const opacity = isIsolated ? (isSelected ? 1 : 0.05) : (isSelected ? 1 : 0.4);
+  // Se estiver em modo X-Ray e selecionado, fica translúcido
+  const opacity = isIsolated 
+    ? (isSelected ? 1 : 0.05) 
+    : (isSelected ? 1 : 0.4);
+    
   const visible = isIsolated ? isSelected : true;
 
   if (!visible) return null;
@@ -77,7 +83,7 @@ function ModuleMesh({
         <meshStandardMaterial 
           color={isSelected ? "#3b82f6" : "#cbd5e1"} 
           transparent 
-          opacity={opacity}
+          opacity={opacity * ((window as any).isXRayActive ? 0.3 : 1)}
           metalness={0.1}
           roughness={0.5}
         />
@@ -108,14 +114,20 @@ function SceneContent({
   modules, 
   selectedId, 
   isIsolated, 
+  isXRay,
   onSelect 
 }: { 
   modules: Module3D[]; 
   selectedId: string | null;
   isIsolated: boolean;
+  isXRay: boolean;
   onSelect: (id: string) => void;
 }) {
   const bounds = useBounds();
+
+  if (typeof window !== 'undefined') {
+    (window as any).isXRayActive = isXRay;
+  }
 
   return (
     <Bounds fit clip observe margin={1.2}>
@@ -154,6 +166,8 @@ export function Operational3DView({
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
   const [isIsolated, setIsIsolated] = useState(false);
   const [viewMode, setViewMode] = useState<'standard' | 'xray'>('standard');
+  const [isXRay, setIsXRay] = useState(false);
+  const [offsetModuleId, setOffsetModuleId] = useState<string | null>(null);
 
   // Processamento dos dados para o 3D
   const processedModules = useMemo(() => {
@@ -161,9 +175,16 @@ export function Operational3DView({
 
     return rawModules.map((m, index) => {
       // Mock de posicionamento ilustrativo se não houver coordenadas
-      // Em produção, isso viria do metadata do Promob se existisse
-      const x = (index % 5) * 1.5 - 3;
-      const z = Math.floor(index / 5) * 1.5;
+      const basePos: [number, number, number] = [
+        (index % 5) * 1.5 - 3, 
+        0, 
+        Math.floor(index / 5) * 1.5
+      ];
+      
+      // Aplicar AFASTAR visualmente (Apenas visual, Fidelity 5.1 Regra 11)
+      const visualPosition: [number, number, number] = offsetModuleId === m.id 
+        ? [basePos[0], basePos[1] + 0.5, basePos[2] + 0.5] // Deslocamento visual
+        : basePos;
 
       const moduleParts = rawParts?.filter(p => p.module_id === m.id) || [];
       const pieces: PhysicalPiece3D[] = moduleParts.map(p => ({
@@ -190,7 +211,7 @@ export function Operational3DView({
         height: m.height_mm || 700,
         depth: m.depth_mm || 550,
         positionConfirmed: false,
-        position: [x, 0, z] as [number, number, number],
+        position: visualPosition,
         pieces
       };
     });
@@ -205,6 +226,11 @@ export function Operational3DView({
     setSelectedModuleId(null);
     setIsIsolated(false);
     setViewMode('standard');
+    setIsXRay(false);
+    setOffsetModuleId(null);
+    if (typeof window !== 'undefined') {
+      (window as any).isXRayActive = false;
+    }
   };
 
   return (
@@ -241,6 +267,7 @@ export function Operational3DView({
                 modules={processedModules} 
                 selectedId={selectedModuleId}
                 isIsolated={isIsolated}
+                isXRay={isXRay}
                 onSelect={setSelectedModuleId}
               />
               <Environment preset="city" />
@@ -287,7 +314,34 @@ export function Operational3DView({
               onClick={() => setIsIsolated(!isIsolated)}
             >
               {isIsolated ? <Eye className="mr-2 h-4 w-4" /> : <EyeOff className="mr-2 h-4 w-4" />}
-              {isIsolated ? "Mostrar Tudo" : "Isolar Módulo"}
+              {isIsolated ? "Mostrar Tudo" : "Isolar"}
+            </Button>
+
+            <Button 
+              variant={isXRay ? "default" : "secondary"}
+              size="sm" 
+              className={cn(
+                "rounded-xl h-10 px-4 font-black text-[10px] uppercase tracking-widest shadow-sm",
+                isXRay ? "bg-blue-600 text-white" : "bg-white/90 backdrop-blur text-slate-900"
+              )}
+              onClick={() => setIsXRay(!isXRay)}
+            >
+              <Layers className="mr-2 h-4 w-4" />
+              {isXRay ? "Raio-X Ativo" : "Raio-X"}
+            </Button>
+
+            <Button 
+              variant={offsetModuleId ? "default" : "secondary"}
+              size="sm" 
+              className={cn(
+                "rounded-xl h-10 px-4 font-black text-[10px] uppercase tracking-widest shadow-sm",
+                offsetModuleId ? "bg-blue-600 text-white" : "bg-white/90 backdrop-blur text-slate-900"
+              )}
+              disabled={!selectedModuleId}
+              onClick={() => setOffsetModuleId(offsetModuleId ? null : selectedModuleId)}
+            >
+              <Maximize2 className="mr-2 h-4 w-4" />
+              {offsetModuleId ? "Reagrupar" : "Afastar"}
             </Button>
           </div>
 
@@ -336,37 +390,72 @@ export function Operational3DView({
 
                   <div className="pt-4 border-t border-slate-100">
                     <p className="text-[9px] font-black text-slate-400 uppercase mb-3 tracking-widest">Composição ({selectedModule.pieces.length} peças)</p>
-                    <div className="space-y-2">
-                      {selectedModule.pieces.slice(0, 5).map((piece) => (
-                        <div key={piece.physicalId} className="flex items-center justify-between py-2 border-b border-slate-50 last:border-0 group cursor-pointer">
-                          <div className="flex items-center gap-3">
-                            <div className="h-8 w-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
-                              <Layers className="h-4 w-4" />
+                    <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                      {selectedModule.pieces.map((piece) => (
+                        <div key={piece.physicalId} className="space-y-2 py-2 border-b border-slate-50 last:border-0 group">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="h-8 w-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                                <Layers className="h-4 w-4" />
+                              </div>
+                              <div>
+                                <p className="text-[10px] font-black text-slate-900 uppercase truncate max-w-[120px]">{piece.name}</p>
+                                <p className="text-[8px] text-slate-400 uppercase font-bold tracking-tighter">
+                                  {piece.dimensions.l} × {piece.dimensions.w} × {piece.thickness} mm
+                                </p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="text-[10px] font-black text-slate-900 uppercase truncate max-w-[120px]">{piece.name}</p>
-                              <p className="text-[8px] text-slate-400 uppercase font-bold tracking-tighter">
-                                {piece.dimensions.l} × {piece.dimensions.w} × {piece.thickness} mm
-                              </p>
-                            </div>
+                            <div className={cn(
+                              "h-1.5 w-1.5 rounded-full",
+                              piece.status === 'concluido' ? "bg-green-500" : "bg-slate-200"
+                            )} />
                           </div>
-                          <div className={cn(
-                            "h-1.5 w-1.5 rounded-full",
-                            piece.status === 'concluido' ? "bg-green-500" : "bg-slate-200"
-                          )} />
+                          
+                          <div className="flex gap-1 pl-11">
+                            <Button 
+                              variant="ghost" 
+                              className="h-6 px-2 text-[7px] font-black uppercase tracking-widest text-blue-600 bg-blue-50/50 hover:bg-blue-100 rounded-md"
+                              onClick={() => {
+                                // Navegação 3D -> Plano de Corte (Fidelity 5.1 Regra 7)
+                                window.dispatchEvent(new CustomEvent('highlight-piece', { 
+                                  detail: { physicalId: piece.physicalId } 
+                                }));
+                                toast.info(`Peça destacada no Plano de Corte.`);
+                              }}
+                            >
+                              Ver no Plano
+                            </Button>
+                            <Button
+                              asChild
+                              className="h-6 px-2 text-[7px] font-black uppercase tracking-widest text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-md"
+                            >
+                              <Link 
+                                to="/assembly/piece/$physicalId" 
+                                params={{ physicalId: piece.physicalId }}
+                              >
+                                Produção
+                              </Link>
+                            </Button>
+                          </div>
                         </div>
                       ))}
-                      {selectedModule.pieces.length > 5 && (
-                        <p className="text-[8px] text-center text-slate-400 font-bold uppercase mt-2">
-                          + {selectedModule.pieces.length - 5} peças não listadas
-                        </p>
-                      )}
                     </div>
                   </div>
                 </div>
                 <div className="bg-slate-950 p-4">
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-2xl h-11 font-black uppercase text-[10px] tracking-widest">
-                    Ver Plano de Corte
+                  <Button 
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-2xl h-11 font-black uppercase text-[10px] tracking-widest"
+                    onClick={() => {
+                      const ids = selectedModule.pieces.map(p => p.physicalId);
+                      ids.forEach(id => {
+                        window.dispatchEvent(new CustomEvent('highlight-piece', { 
+                          detail: { physicalId: id } 
+                        }));
+                      });
+                      toast.info(`Módulo ${selectedModule.name} destacado no Plano.`);
+                    }}
+                  >
+                    Destacar Módulo no Plano
                   </Button>
                 </div>
               </Card>

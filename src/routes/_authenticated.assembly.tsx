@@ -212,7 +212,15 @@ function AssemblyContent() {
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <Badge className="bg-slate-900 text-blue-400 border-none font-black uppercase tracking-[0.2em] text-[9px] px-4 py-2.5 rounded-lg flex items-center gap-2 cursor-pointer hover:bg-slate-800 transition-colors">
+            <Badge 
+              className="bg-slate-900 text-blue-400 border-none font-black uppercase tracking-[0.2em] text-[9px] px-4 py-2.5 rounded-lg flex items-center gap-2 cursor-pointer hover:bg-slate-800 transition-colors"
+              onClick={() => {
+                const physicalId = prompt("Informe o physicalId da peça:");
+                if (physicalId) {
+                  navigate({ to: "/assembly/piece/$physicalId", params: { physicalId } });
+                }
+              }}
+            >
               <ScanLine className="h-4 w-4" /> LER QR PEÇA
             </Badge>
             <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-slate-200 bg-slate-200 sm:w-64 shadow-sm">
@@ -480,6 +488,19 @@ function AssemblyContent() {
                     >
                       <Link to="/projects/$projectId" params={{ projectId: project.id }}>
                         <ClipboardList className="mr-2 h-4 w-4" /> Dossie tecnico
+                      </Link>
+                    </Button>
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="h-11 rounded-md text-[10px] font-black uppercase tracking-wider border-blue-200 text-blue-700 hover:bg-blue-50"
+                    >
+                      <Link 
+                        to="/projects/$projectId" 
+                        params={{ projectId: project.id }}
+                        search={{ tab: 'operational3d' }}
+                      >
+                        <Boxes className="mr-2 h-4 w-4" /> Ver no 3D
                       </Link>
                     </Button>
                     <Button

@@ -100,7 +100,7 @@ function ProjectsContent() {
       setCreationKey((value) => value + 1);
       void queryClient.invalidateQueries({ queryKey: ["projects-dashboard", companyId] });
       void queryClient.invalidateQueries({ queryKey: ["project-clients", companyId] });
-      void navigate({ to: "/projects/$projectId", params: { projectId } });
+      void navigate({ to: "/projects/$projectId", params: { projectId }, search: { tab: 'modules' } });
     },
     onError: (error: Error) => toast.error(error.message, { duration: 9000 }),
   });
@@ -358,6 +358,7 @@ function CuttingCard({ project }: { project: ProjectSummary }) {
     <Link
       to="/projects/$projectId"
       params={{ projectId: project.id }}
+      search={{ tab: 'modules' }}
       className="group border-b border-slate-800 p-4 last:border-b-0 hover:bg-slate-900 md:border-r xl:border-b-0 sm:p-5"
     >
       <div className="flex items-start justify-between gap-3">
@@ -392,7 +393,7 @@ function ProjectCard({ project }: { project: ProjectSummary }) {
     ? Math.round((project.completedSteps / project.totalSteps) * 100)
     : 0;
   return (
-    <Link to="/projects/$projectId" params={{ projectId: project.id }} className="min-w-0">
+    <Link to="/projects/$projectId" params={{ projectId: project.id }} search={{ tab: 'modules' }} className="min-w-0">
       <Card className={cn(
         "group h-full overflow-hidden border-slate-200 bg-white shadow-none transition-colors hover:border-slate-950",
         project.isTest && "border-blue-200 bg-blue-50/30"

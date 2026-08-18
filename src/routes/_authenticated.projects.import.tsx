@@ -512,7 +512,7 @@ function ImportPage() {
         }
         
         // Redireciona para o detalhe do projeto que agora contém a aba de Plano de Corte
-        navigate({ to: "/projects/$projectId", params: { projectId: projectId } });
+        navigate({ to: "/projects/$projectId", params: { projectId: projectId }, search: { tab: 'modules' } });
         return projectId;
       } catch (error) {
         if (rpcAttempted) {
@@ -536,7 +536,7 @@ function ImportPage() {
             .eq("id", projectId)
             .maybeSingle();
           if (reconciledProject) {
-            navigate({ to: "/projects/$projectId", params: { projectId: projectId } });
+            navigate({ to: "/projects/$projectId", params: { projectId: projectId }, search: { tab: 'modules' } });
             return reconciledProject.id;
           }
           throw new Error(
@@ -578,7 +578,7 @@ function ImportPage() {
     onSuccess: (projectId) => {
       toast.success("Projeto importado com sucesso!");
       queryClient.invalidateQueries({ queryKey: ["projects"] });
-      navigate({ to: "/projects/$projectId", params: { projectId: projectId as string } });
+      navigate({ to: "/projects/$projectId", params: { projectId: projectId as string }, search: { tab: 'modules' } });
     },
     onError: (err: Error) => {
       toast.error(err.message || "Erro na importação.");
@@ -639,7 +639,7 @@ function ImportPage() {
 
               <div className="flex gap-3 mt-6">
                 <Button 
-                  onClick={() => navigate({ to: "/projects/$projectId", params: { projectId: createProjectMutation.data } })}
+                  onClick={() => navigate({ to: "/projects/$projectId", params: { projectId: createProjectMutation.data }, search: { tab: 'modules' } })}
                   className="bg-slate-950 text-white font-black uppercase text-[10px] tracking-widest px-8"
                 >
                   Abrir Engenharia

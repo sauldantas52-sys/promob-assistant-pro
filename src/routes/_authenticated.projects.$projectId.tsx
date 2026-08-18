@@ -98,6 +98,11 @@ import { hasPermission } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/projects/$projectId")({
+  validateSearch: (search: Record<string, unknown>) => {
+    return {
+      tab: (search as any).tab || undefined,
+    } as { tab?: string };
+  },
   head: () => ({
     meta: [
       { title: "Detalhes do projeto | Monta AI — Piloto Controlado" },
@@ -120,6 +125,8 @@ function ProjectDetailPage() {
 function ProjectDetail() {
   const { projectId } = Route.useParams();
   const navigate = useNavigate();
+  const search = Route.useSearch() as { tab?: string };
+  const [activeTab, setActiveTab] = useState(search.tab || "modules");
   const { role } = useAuth();
   const queryClient = useQueryClient();
   const fileInput = useRef<HTMLInputElement>(null);
@@ -631,7 +638,14 @@ function ProjectDetail() {
         />
       </div>
 
-      <Tabs defaultValue="modules" className="min-w-0 space-y-4">
+      <Tabs 
+        value={activeTab} 
+        onValueChange={(v) => {
+          setActiveTab(v);
+          navigate({ search: { tab: v } as any, replace: true });
+        }}
+        className="min-w-0 space-y-4"
+      >
         <div className="max-w-full overflow-x-auto overscroll-x-contain rounded-lg border border-slate-200 bg-slate-100 [scrollbar-width:thin]">
           <TabsList className="flex h-12 w-max min-w-full justify-start rounded-none bg-transparent p-1">
             <TabTrigger value="modules" icon={LayoutGrid} label="Módulos" />
