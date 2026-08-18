@@ -412,7 +412,6 @@ function ImportPage() {
             },
           })),
           metadata: module.metadata || {},
-          id_xml: module.id_xml || null,
         }));
         
         const loosePartsPayload = result.loose_parts.map((part: PromobPart) => ({
