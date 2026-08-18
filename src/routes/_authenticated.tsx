@@ -37,6 +37,7 @@ export const Route = createFileRoute('/_authenticated')({
 
     // Bloqueio operacional se troca de senha for obrigatória
     if (mustChangePassword && location.pathname !== '/force-password-change') {
+      console.log(`[Auth:Guard] Force password change required for ${session.user.email}`);
       throw redirect({
         to: '/force-password-change',
       });
