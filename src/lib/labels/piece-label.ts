@@ -19,8 +19,8 @@ function fitaInfo(p: any) {
   const fb = p.fb || [0, 0, 0, 0];
   const nLo = (fb[0] > 0 ? 1 : 0) + (fb[1] > 0 ? 1 : 0);
   const nSh = (fb[2] > 0 ? 1 : 0) + (fb[3] > 0 ? 1 : 0);
-  const names = [...new Set(((p.bandNames || []) as string[]).filter((name, index) => fb[index] > 0 && name))];
-  const refs = fb.map((value, index) => value > 0 ? 'F' + (index + 1) : '').filter(Boolean);
+  const names = [...new Set(((p.bandNames || []) as string[]).filter((name: string, index: number) => fb[index] > 0 && name))];
+  const refs = fb.map((value: number, index: number) => value > 0 ? 'F' + (index + 1) : '').filter(Boolean);
 
   if (nLo + nSh === 0) return { txt: 'SEM FITA', has: false };
   if (nLo + nSh === 4) return { txt: refs.join('/') + ' · 4 LADOS' + (names.length ? ' · ' + names.join(' / ') : ''), has: true };
@@ -51,10 +51,10 @@ function fitaBox(p: any, scale?: number) {
 
   let s = '<svg width="' + W + '" height="' + H + '" style="flex:none">';
   s += '<rect x="' + x0 + '" y="' + y0 + '" width="' + (x1 - x0) + '" height="' + (y1 - y0) + '" fill="#fff" stroke="#999" stroke-width="1.2"/>';
-  if (fb[0] > 0) { s += rl(x0, y0, x1, y0, names[0]); s += tag((x0 + x1) / 2, y0 + fs * .65, 'F1', 0); }
-  if (fb[1] > 0) { s += rl(x0, y1, x1, y1, names[1]); s += tag((x0 + x1) / 2, y1 - fs * .65, 'F2', 0); }
-  if (fb[2] > 0) { s += rl(x0, y0, x0, y1, names[2]); s += tag(x0 + fs * .65, (y0 + y1) / 2, 'F3', -90); }
-  if (fb[3] > 0) { s += rl(x1, y0, x1, y1, names[3]); s += tag(x1 - fs * .65, (y0 + y1) / 2, 'F4', 90); }
+  if (fb[0] > 0) { s += rl(x0, y0, x1, y0, names[0] || ''); s += tag((x0 + x1) / 2, y0 + fs * .65, 'F1', 0); }
+  if (fb[1] > 0) { s += rl(x0, y1, x1, y1, names[1] || ''); s += tag((x0 + x1) / 2, y1 - fs * .65, 'F2', 0); }
+  if (fb[2] > 0) { s += rl(x0, y0, x0, y1, names[2] || ''); s += tag(x0 + fs * .65, (y0 + y1) / 2, 'F3', -90); }
+  if (fb[3] > 0) { s += rl(x1, y0, x1, y1, names[3] || ''); s += tag(x1 - fs * .65, (y0 + y1) / 2, 'F4', 90); }
   return s + '</svg>';
 }
 
