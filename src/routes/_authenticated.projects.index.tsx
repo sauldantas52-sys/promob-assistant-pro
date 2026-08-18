@@ -100,7 +100,7 @@ function ProjectsContent() {
       setCreationKey((value) => value + 1);
       void queryClient.invalidateQueries({ queryKey: ["projects-dashboard", companyId] });
       void queryClient.invalidateQueries({ queryKey: ["project-clients", companyId] });
-      void navigate({ to: "/projects/$projectId", params: { projectId } });
+      void navigate({ to: "/projects/$projectId", params: { projectId }, search: { tab: 'modules' } });
     },
     onError: (error: Error) => toast.error(error.message, { duration: 9000 }),
   });
