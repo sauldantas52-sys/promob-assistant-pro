@@ -402,7 +402,23 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
               ))
             )}
           </div>
-          <div className="space-y-6">{cutPlanGroups?.map(group => renderCutGroup(group))}</div>
+          <div className="space-y-6">
+            {activePlanSource === 'cutpro_oficial' ? (
+              <Card className="border-2 border-slate-200 border-dashed bg-slate-50/50">
+                <CardContent className="py-12 flex flex-col items-center justify-center text-center">
+                  <div className="h-16 w-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+                    <ShieldCheck className="h-8 w-8 text-slate-400" />
+                  </div>
+                  <h3 className="text-sm font-black uppercase tracking-widest text-slate-600 mb-2">Visualização SVG desativada para Plano Oficial</h3>
+                  <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
+                    O motor Monta AI exibe o nesting apenas para estimativas internas. Para planos oficiais, utilize o relatório técnico do Cut Pro impresso pela expedição. As etiquetas industriais permanecem ativas com base nos dados oficiais.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              cutPlanGroups?.map(group => renderCutGroup(group))
+            )}
+          </div>
         </TabsContent>
         <TabsContent value="etiquetas" className="mt-6">
           <IndustrialLabelsTab pieces={allPieces} />
