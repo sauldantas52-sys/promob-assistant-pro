@@ -80,11 +80,43 @@ export function ProductionStatusTab({ projectId }: { projectId: string }) {
       <div className="flex items-center justify-between px-2">
         <div>
           <h2 className="text-xl font-black uppercase tracking-tighter text-slate-900 flex items-center gap-2">
-            <Layers className="h-6 w-6 text-indigo-600" /> Status de Produção Real
+            <Layers className="h-6 w-6 text-indigo-600" /> Fluxo de Produção Industrial 4.0
           </h2>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-            Monitoramento de Peças em Tempo Real • Chão de Fábrica
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 flex items-center gap-2">
+            <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" /> Monitoramento em Tempo Real • Chão de Fábrica
           </p>
+        </div>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="h-10 rounded-2xl border-slate-200 text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all shadow-sm group"
+            onClick={async () => {
+              const pendingSteps = steps.filter(s => s.status !== 'concluido');
+              if (pendingSteps.length === 0) {
+                toast.info("Toda a produção já está concluída.");
+                return;
+              }
+              
+              if (!confirm(`Deseja finalizar TODAS as ${pendingSteps.length} etapas pendentes deste projeto?`)) return;
+
+              try {
+                toast.promise(
+                  Promise.all(pendingSteps.map(s => updateStepStatus(s.id, 'concluido', 'Finalização global via painel industrial'))),
+                  {
+                    loading: 'Finalizando projeto completo...',
+                    success: 'Projeto finalizado com sucesso!',
+                    error: 'Erro na finalização global.'
+                  }
+                );
+              } catch (err) {
+                console.error(err);
+              }
+            }}
+          >
+            <Zap className="h-3.5 w-3.5 mr-2 text-amber-500 group-hover:text-amber-400" />
+            Finalizar Lote Completo
+          </Button>
         </div>
       </div>
 
