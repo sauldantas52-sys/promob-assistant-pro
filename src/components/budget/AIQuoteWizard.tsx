@@ -9,7 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { analyzeBudgetDocument } from "@/lib/budget/budget.functions";
-import { sha256File, safeStorageName } from "@/lib/commercial/documents";
+import { sha256File } from "@/lib/commercial/documents";
+import { sanitizeStoragePath } from "@/lib/utils";
+
 
 export function AIQuoteWizard({ companyId }: { companyId: string }) {
   const queryClient = useQueryClient();
@@ -49,8 +51,9 @@ export function AIQuoteWizard({ companyId }: { companyId: string }) {
       setUploadProgress(10);
 
       const hash = await sha256File(file);
-      const fileName = `${Date.now()}-${safeStorageName(file.name)}`;
+      const fileName = `${Date.now()}-${sanitizeStoragePath(file.name)}`;
       const filePath = `budgets/${companyId}/${fileName}`;
+
 
       setUploadProgress(30);
       const { error: uploadError } = await supabase.storage
