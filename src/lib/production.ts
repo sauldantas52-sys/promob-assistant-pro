@@ -1,6 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
 
 export type ProductionStepType = 'corte' | 'usinagem' | 'borda' | 'separacao' | 'montagem' | 'expedicao';
 export type ProductionStatus = 'pendente' | 'em_andamento' | 'concluido' | 'bloqueado' | 'nao_necessaria';
@@ -18,28 +16,37 @@ export interface ProductionStep {
   completed_at?: string | null;
 }
 
-export const initializeProjectProduction = createServerFn({ method: "POST" })
-  .validator((data) => z.object({
-    projectId: z.string(),
-    companyId: z.string(),
-    steps: z.array(z.object({
-      physicalId: z.string(),
-      partId: z.string(),
-      moduleId: z.string().nullable(),
-      needsEdge: z.boolean().optional(),
-    }))
-  }) as any)
+export interface InitializeProductionInput {
+  projectId: string;
+  companyId: string;
+  steps: Array<{
+    physicalId: string;
+    partId: string;
+    moduleId: string | null;
+    needsEdge?: boolean;
+  }>;
+}
 
-  .handler(async ({ data }) => {
-    const { error } = await supabase.rpc('initialize_production_tracking', {
-      p_project_id: data.projectId,
-      p_company_id: data.companyId,
-      p_steps: data.steps
-    });
-    
-    if (error) throw error;
-    return { success: true };
+// Runs with the authenticated browser client (RLS as the operator).
+export async function initializeProjectProduction({ data }: { data: InitializeProductionInput }) {
+  if (!data?.projectId || !data?.companyId || !data.steps?.length) {
+    throw new Error("initialize_production_tracking: payload inválido");
+  }
+
+  const { error } = await supabase.rpc('initialize_production_tracking', {
+    p_project_id: data.projectId,
+    p_company_id: data.companyId,
+    p_steps: data.steps.map((s) => ({
+      physicalId: s.physicalId,
+      partId: s.partId,
+      moduleId: s.moduleId,
+    })) as any,
   });
+
+  if (error) throw error;
+  return { success: true };
+}
+
 
 export async function logProductionAction(
   projectId: string, 
