@@ -388,7 +388,7 @@ export function Operational3DView({
 
                   <div className="pt-4 border-t border-slate-100">
                     <p className="text-[9px] font-black text-slate-400 uppercase mb-3 tracking-widest">Composição ({selectedModule.pieces.length} peças)</p>
-                    <div className="space-y-2">
+                    <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                       {selectedModule.pieces.map((piece) => (
                         <div key={piece.physicalId} className="space-y-2 py-2 border-b border-slate-50 last:border-0 group">
                           <div className="flex items-center justify-between">
