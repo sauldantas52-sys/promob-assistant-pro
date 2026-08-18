@@ -290,11 +290,14 @@ export function PreliminaryCutPlanTab({ projectId }: { projectId: string }) {
                   {sheet.shelves.flatMap(s => s.placements).map((p, pIdx) => {
                     const isHighlighted = highlightedPieceId === p.physicalId;
                     return (
-                      <div key={pIdx} className={cn(
-                        "absolute border border-slate-900 flex flex-col items-center justify-center overflow-hidden hover:opacity-80 transition-all cursor-help p-0.5",
-                        isHighlighted ? "ring-4 ring-blue-500 z-50 scale-105" : "z-0"
-                      )}
-                      title={`${p.piece.name} (${p.w}x${p.h})`}
+                      <div 
+                        key={pIdx} 
+                        id={`piece-${p.physicalId}`}
+                        className={cn(
+                          "absolute border border-slate-900 flex flex-col items-center justify-center overflow-hidden hover:opacity-80 transition-all cursor-help p-0.5",
+                          isHighlighted ? "ring-4 ring-blue-500 z-50 scale-105" : "z-0"
+                        )}
+                        title={`${p.piece.name} [${p.physicalId}] (${p.w}x${p.h})`}
                       style={{
                         left: `${(p.x / 2750) * 100}%`,
                         top: `${(p.y / 1830) * 100}%`,
