@@ -309,7 +309,35 @@ export function Operational3DView({
               onClick={() => setIsIsolated(!isIsolated)}
             >
               {isIsolated ? <Eye className="mr-2 h-4 w-4" /> : <EyeOff className="mr-2 h-4 w-4" />}
-              {isIsolated ? "Mostrar Tudo" : "Isolar Módulo"}
+              {isIsolated ? "Mostrar Tudo" : "Isolar"}
+            </Button>
+
+            <Button 
+              variant={isXRay ? "default" : "secondary"}
+              size="sm" 
+              className={cn(
+                "rounded-xl h-10 px-4 font-black text-[10px] uppercase tracking-widest shadow-sm",
+                isXRay ? "bg-blue-600 text-white" : "bg-white/90 backdrop-blur text-slate-900"
+              )}
+              disabled={!selectedModuleId}
+              onClick={() => setIsXRay(!isXRay)}
+            >
+              <Layers className="mr-2 h-4 w-4" />
+              {isXRay ? "Raio-X Ativo" : "Raio-X"}
+            </Button>
+
+            <Button 
+              variant={offsetModuleId ? "default" : "secondary"}
+              size="sm" 
+              className={cn(
+                "rounded-xl h-10 px-4 font-black text-[10px] uppercase tracking-widest shadow-sm",
+                offsetModuleId ? "bg-blue-600 text-white" : "bg-white/90 backdrop-blur text-slate-900"
+              )}
+              disabled={!selectedModuleId}
+              onClick={() => setOffsetModuleId(offsetModuleId ? null : selectedModuleId)}
+            >
+              <Maximize2 className="mr-2 h-4 w-4" />
+              {offsetModuleId ? "Reagrupar" : "Afastar"}
             </Button>
           </div>
 
