@@ -633,7 +633,14 @@ function ProjectDetail() {
         />
       </div>
 
-      <Tabs defaultValue="modules" className="min-w-0 space-y-4">
+      <Tabs 
+        value={activeTab} 
+        onValueChange={(v) => {
+          setActiveTab(v);
+          navigate({ search: { tab: v }, replace: true });
+        }}
+        className="min-w-0 space-y-4"
+      >
         <div className="max-w-full overflow-x-auto overscroll-x-contain rounded-lg border border-slate-200 bg-slate-100 [scrollbar-width:thin]">
           <TabsList className="flex h-12 w-max min-w-full justify-start rounded-none bg-transparent p-1">
             <TabTrigger value="modules" icon={LayoutGrid} label="Módulos" />
