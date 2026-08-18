@@ -330,7 +330,7 @@ function EdgeSchema({ piece }: { piece: PhysicalPiece }) {
       {/* Right Edge */}
       {piece.edgeRight > 0 && (
         <div 
-          className="absolute top-0 bottom-0 right-0 w-[2px]" 
+          className="absolute top-0 bottom-0 right-0 w-[2.5px]" 
           style={{ backgroundColor: getEdgeColor(piece.edgeNameGeneral) }} 
         />
       )}
