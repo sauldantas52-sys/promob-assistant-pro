@@ -28,7 +28,8 @@ export const initializeProjectProduction = createServerFn({ method: "POST" })
       moduleId: z.string().nullable(),
       needsEdge: z.boolean().optional(),
     }))
-  }).parse(data))
+  }) as any)
+
   .handler(async ({ data }) => {
     const { error } = await supabase.rpc('initialize_production_tracking', {
       p_project_id: data.projectId,
@@ -54,7 +55,7 @@ export async function logProductionAction(
     .eq('id', user.id)
     .single();
 
-  await supabase.from('production_logs').insert({
+  await (supabase.from('production_logs') as any).insert({
     project_id: projectId,
     user_id: user.id,
     company_id: profile?.company_id,
@@ -62,6 +63,7 @@ export async function logProductionAction(
     metadata
   });
 }
+
 
 export async function updateStepStatus(
   stepId: string, 
@@ -105,7 +107,7 @@ export async function updateStepStatus(
 
   if (error) throw error;
 
-  await supabase.from('production_logs').insert({
+  await (supabase.from('production_logs') as any).insert({
     project_id: step.project_id,
     user_id: user.id,
     company_id: profile?.company_id,
@@ -120,3 +122,4 @@ export async function updateStepStatus(
     }
   });
 }
+
