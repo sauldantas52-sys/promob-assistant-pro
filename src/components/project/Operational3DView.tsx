@@ -305,6 +305,7 @@ export function Operational3DView({
 
   const restoreScene = () => {
     setSelectedModuleId(null);
+    setSelectedPieceId(null);
     setIsIsolated(false);
     setViewMode('standard');
     setIsXRay(false);
