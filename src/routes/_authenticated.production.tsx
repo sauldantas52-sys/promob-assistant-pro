@@ -58,36 +58,57 @@ const flow: Record<string, { next: string; action: string; color: string; icon: 
     color: "bg-slate-200",
     icon: ClipboardList,
   },
-  orcamento: { next: "corte", action: "Liberar para corte", color: "bg-blue-200", icon: Scissors },
-  corte: { next: "borda", action: "Enviar para borda", color: "bg-red-200", icon: Square },
-  borda: { next: "usinagem", action: "Liberar usinagem", color: "bg-amber-200", icon: Drill },
+  orcamento: { 
+    next: "pronto_para_producao", 
+    action: "Aprovar Orçamento", 
+    color: "bg-blue-200", 
+    icon: ClipboardList 
+  },
+  pronto_para_producao: {
+    next: "corte",
+    action: "Liberar para Corte",
+    color: "bg-emerald-200",
+    icon: Scissors,
+  },
+  corte: { 
+    next: "borda", 
+    action: "Enviar para Borda", 
+    color: "bg-red-200", 
+    icon: Square 
+  },
+  borda: { 
+    next: "usinagem", 
+    action: "Liberar Usinagem", 
+    color: "bg-amber-200", 
+    icon: Drill 
+  },
   usinagem: {
     next: "separacao",
-    action: "Enviar para separação",
+    action: "Enviar para Separação",
     color: "bg-purple-200",
     icon: Boxes,
   },
   separacao: {
     next: "conferencia",
-    action: "Enviar para conferência",
+    action: "Enviar para Conferência",
     color: "bg-blue-200",
     icon: PackageCheck,
   },
   conferencia: {
     next: "expedicao",
-    action: "Liberar para expedição",
+    action: "Liberar para Expedição",
     color: "bg-indigo-200",
     icon: CheckCircle2,
   },
   expedicao: {
     next: "montagem",
-    action: "Enviar para montagem",
+    action: "Enviar para Montagem",
     color: "bg-slate-900",
     icon: Truck,
   },
   montagem: {
     next: "concluido",
-    action: "Concluir entrega",
+    action: "Concluir Entrega",
     color: "bg-emerald-200",
     icon: CheckCircle2,
   },
@@ -118,7 +139,7 @@ function ProductionContent() {
           validation_checks(id, check_type, is_completed)
         `,
         )
-        .in("status", ["corte", "borda", "usinagem", "separacao", "conferencia", "expedicao"])
+        .in("status", ["pronto_para_producao", "corte", "borda", "usinagem", "separacao", "conferencia", "expedicao"])
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -239,12 +260,12 @@ function ProductionContent() {
       </header>
 
       <section
-        className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6"
+        className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7"
         aria-label="Estações operacionais"
       >
         {Object.entries(flow)
           .filter(([status]) =>
-            ["corte", "borda", "usinagem", "separacao", "conferencia", "expedicao"].includes(
+            ["pronto_para_producao", "corte", "borda", "usinagem", "separacao", "conferencia", "expedicao"].includes(
               status,
             ),
           )
@@ -319,7 +340,7 @@ function ProductionContent() {
                     className="grid grid-cols-5 gap-1 sm:grid-cols-9"
                     aria-label="Fluxo de produção"
                   >
-                    {Object.entries(flow).map(([key, value]) => {
+                    {Object.entries(flow).filter(([key]) => key !== 'novo' && key !== 'orcamento' && key !== 'concluido').map(([key, value]) => {
                       const isActive = project.status === key;
                       const Icon = value.icon;
                       return (
